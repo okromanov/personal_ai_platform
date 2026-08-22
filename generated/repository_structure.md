@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `153` |
+| Всего файлов | `166` |
 
 ```text
 personal_ai_platform/
@@ -161,6 +161,19 @@ personal_ai_platform/
 - work/m01/semantic_review.json
 - work/m01/semantic_review.md
 - work/tasks/.gitkeep
+- work/tasks/task_0001_arc_001.md
+- work/tasks/task_0002_arc_002.md
+- work/tasks/task_0003_arc_003.md
+- work/tasks/task_0004_arc_004.md
+- work/tasks/task_0005_arc_005.md
+- work/tasks/task_0006_arc_007.md
+- work/tasks/task_0007_arc_009.md
+- work/tasks/task_0008_inf_001.md
+- work/tasks/task_0009_inf_002.md
+- work/tasks/task_0010_inf_003.md
+- work/tasks/task_0011_inf_005.md
+- work/tasks/task_0012_inf_007.md
+- work/tasks/task_0013_inf_008.md
 - work/tests/test_0001.md
 - work/tests/test_0002.md
 - work/tests/test_0003.md

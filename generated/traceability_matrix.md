@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Отслеживаемых элементов | `178` |
+| Отслеживаемых элементов | `191` |
 
 > Производное представление канонических исходящих связей. Входящие связи однозначно выводятся из тех же рёбер и здесь не дублируются.
 
@@ -181,6 +181,19 @@ version: 1.0
 | `ADR_007` | `ADR` | `traces_to`: `m02`, `m04`, `m06`, `BR_005`, `SYS_024`, `SYS_025`, `SYS_027`, `INF_REQ_001`, `INF_REQ_008`, `INF_REQ_009`, `INF_REQ_011`, `INF_REQ_013`, `INF_REQ_014` | — |
 | `ADR_008` | `ADR` | `traces_to`: `m04`, `BR_022`, `BR_023`, `BR_024`, `SYS_011`, `SYS_012`, `SYS_029`, `INF_REQ_008`, `INF_REQ_009`, `SEC_CTL_006`, `SEC_CTL_019` | — |
 | `ADR_009` | `ADR` | `traces_to`: `m02`, `BR_033`, `SYS_027`, `SEC_CTL_005`, `INF_REQ_006` | — |
+| `TASK_0001` | `TASK` | `implements`: `ARC_CMP_001`<br>`traces_to`: `m02` | — |
+| `TASK_0002` | `TASK` | `depends_on`: `TASK_0001`<br>`implements`: `ARC_CMP_002`<br>`traces_to`: `m02` | — |
+| `TASK_0003` | `TASK` | `depends_on`: `TASK_0002`<br>`implements`: `ARC_CMP_003`<br>`traces_to`: `m02` | — |
+| `TASK_0004` | `TASK` | `depends_on`: `TASK_0003`<br>`implements`: `ARC_CMP_004`<br>`traces_to`: `m02` | — |
+| `TASK_0005` | `TASK` | `depends_on`: `TASK_0004`<br>`implements`: `ARC_CMP_005`<br>`traces_to`: `m02` | — |
+| `TASK_0006` | `TASK` | `depends_on`: `TASK_0005`<br>`implements`: `ARC_CMP_007`<br>`traces_to`: `m02` | — |
+| `TASK_0007` | `TASK` | `depends_on`: `TASK_0006`<br>`implements`: `ARC_CMP_009`<br>`traces_to`: `m02` | — |
+| `TASK_0008` | `TASK` | `depends_on`: `TASK_0007`<br>`implements`: `INF_CMP_001`<br>`traces_to`: `m02` | — |
+| `TASK_0009` | `TASK` | `depends_on`: `TASK_0008`<br>`implements`: `INF_CMP_002`<br>`traces_to`: `m02` | — |
+| `TASK_0010` | `TASK` | `depends_on`: `TASK_0009`<br>`implements`: `INF_CMP_003`<br>`traces_to`: `m02` | — |
+| `TASK_0011` | `TASK` | `depends_on`: `TASK_0010`<br>`implements`: `INF_CMP_005`<br>`traces_to`: `m02` | — |
+| `TASK_0012` | `TASK` | `depends_on`: `TASK_0011`<br>`implements`: `INF_CMP_007`<br>`traces_to`: `m02` | — |
+| `TASK_0013` | `TASK` | `depends_on`: `TASK_0012`<br>`implements`: `INF_CMP_008`<br>`traces_to`: `m02` | — |
 | `TEST_0001` | `TEST` | `accepts`: `m01` | `project_checks` |
 | `TEST_0002` | `TEST` | `accepts`: `m01`<br>`verifies`: `SEC_CTL_018` | `unit_tests` |
 | `TEST_0003` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_003`, `SYS_004`, `SYS_027` | `m02_contract_tests` |

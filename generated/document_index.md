@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `46` |
+| Всего документов | `59` |
 
 > В список входят первичные Markdown-документы. Производные и периодические представления исключены.
 
@@ -56,6 +56,19 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
+| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `planned` | `1.0` | TASK_0001 — Реализация ARC_CMP_001 |
+| [`work/tasks/task_0002_arc_002.md`](../work/tasks/task_0002_arc_002.md) | `TASK_0002` | `task` | `work_state` | `planned` | `1.0` | TASK_0002 — Реализация ARC_CMP_002 |
+| [`work/tasks/task_0003_arc_003.md`](../work/tasks/task_0003_arc_003.md) | `TASK_0003` | `task` | `work_state` | `planned` | `1.0` | TASK_0003 — Реализация ARC_CMP_003 |
+| [`work/tasks/task_0004_arc_004.md`](../work/tasks/task_0004_arc_004.md) | `TASK_0004` | `task` | `work_state` | `planned` | `1.0` | TASK_0004 — Реализация ARC_CMP_004 |
+| [`work/tasks/task_0005_arc_005.md`](../work/tasks/task_0005_arc_005.md) | `TASK_0005` | `task` | `work_state` | `planned` | `1.0` | TASK_0005 — Реализация ARC_CMP_005 |
+| [`work/tasks/task_0006_arc_007.md`](../work/tasks/task_0006_arc_007.md) | `TASK_0006` | `task` | `work_state` | `planned` | `1.0` | TASK_0006 — Реализация ARC_CMP_007 |
+| [`work/tasks/task_0007_arc_009.md`](../work/tasks/task_0007_arc_009.md) | `TASK_0007` | `task` | `work_state` | `planned` | `1.0` | TASK_0007 — Реализация ARC_CMP_009 |
+| [`work/tasks/task_0008_inf_001.md`](../work/tasks/task_0008_inf_001.md) | `TASK_0008` | `task` | `work_state` | `planned` | `1.0` | TASK_0008 — Реализация INF_CMP_001 |
+| [`work/tasks/task_0009_inf_002.md`](../work/tasks/task_0009_inf_002.md) | `TASK_0009` | `task` | `work_state` | `planned` | `1.0` | TASK_0009 — Реализация INF_CMP_002 |
+| [`work/tasks/task_0010_inf_003.md`](../work/tasks/task_0010_inf_003.md) | `TASK_0010` | `task` | `work_state` | `planned` | `1.0` | TASK_0010 — Реализация INF_CMP_003 |
+| [`work/tasks/task_0011_inf_005.md`](../work/tasks/task_0011_inf_005.md) | `TASK_0011` | `task` | `work_state` | `planned` | `1.0` | TASK_0011 — Реализация INF_CMP_005 |
+| [`work/tasks/task_0012_inf_007.md`](../work/tasks/task_0012_inf_007.md) | `TASK_0012` | `task` | `work_state` | `planned` | `1.0` | TASK_0012 — Реализация INF_CMP_007 |
+| [`work/tasks/task_0013_inf_008.md`](../work/tasks/task_0013_inf_008.md) | `TASK_0013` | `task` | `work_state` | `planned` | `1.0` | TASK_0013 — Реализация INF_CMP_008 |
 | [`work/tests/test_0001.md`](../work/tests/test_0001.md) | `TEST_0001` | `test` | `spec_state` | `current` | `1.0` | TEST_0001 — Проверка модели документов и трассировки |
 | [`work/tests/test_0002.md`](../work/tests/test_0002.md) | `TEST_0002` | `test` | `spec_state` | `current` | `1.0` | TEST_0002 — Проверка качества, доказательств и автоматизации принятия |
 | [`work/tests/test_0003.md`](../work/tests/test_0003.md) | `TEST_0003` | `test` | `spec_state` | `current` | `1.0` | TEST_0003 — Контракты среды агента и поставщика модели |
