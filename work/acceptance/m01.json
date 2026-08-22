@@ -1,0 +1,67 @@
+{
+  "id": "m01_acceptance",
+  "milestone": "m01",
+  "work_state_change": "in-progress → completed",
+  "decision": "ПРИНИМАЮ m01",
+  "decision_timestamp": "2026-08-22T14:31:00Z",
+  "decision_sha": "5dc98ef27c7180f44e18319068e4fa4c8deaf8d1",
+  "owner_confirmed": true,
+  "owner_confirmed_scope": "V1 состав (18 core BR из business_requirements.md)",
+  "semantic_review": {
+    "result": "pass",
+    "reviewed_sha": "5dc98ef27c7180f44e18319068e4fa4c8deaf8d1",
+    "score": 9,
+    "critical_issues": 0,
+    "high_issues": 0,
+    "record": "work/m01/semantic_review.json"
+  },
+  "technical_evidence": {
+    "ci_run_id": 32578801392,
+    "ci_run_url": "https://github.com/okromanov/personal_ai_platform/actions/runs/32578801392",
+    "ci_status": "success",
+    "checks_total": 21,
+    "checks_passed": 21,
+    "unit_tests_total": 148,
+    "unit_tests_passed": 148,
+    "repository": "okromanov/personal_ai_platform"
+  },
+  "adr_transitions": [
+    {
+      "adr_id": "ADR_001",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_002",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_003",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_004",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_005",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_006",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_007",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_008",
+      "state_change": "proposed → accepted"
+    },
+    {
+      "adr_id": "ADR_009",
+      "state_change": "proposed → accepted"
+    }
+  ],
+  "next_milestone": "m02 — Выбор ключевых технологий и первый живой помощник"
+}
