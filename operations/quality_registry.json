@@ -61,6 +61,38 @@
         "unit_tests",
         "quality_suite"
       ]
+    },
+    "m02": {
+      "milestones": [
+        "m02"
+      ],
+      "paths": [
+        "*.md",
+        ".gitignore",
+        "pyproject.toml",
+        "operations/**",
+        ".github/workflows/**",
+        ".claude/**",
+        "adr/**",
+        "specifications/**",
+        "work/**",
+        "src/**",
+        "tests/**"
+      ],
+      "scope_coverage": "requirement_based",
+      "scope_evidence": [
+        "project_checks",
+        "unit_tests"
+      ],
+      "required_evidence": [
+        "project_checks",
+        "unit_tests",
+        "quality_suite",
+        "m02_contract_tests",
+        "m02_security_tests",
+        "m02_e2e_tests",
+        "m02_infrastructure_tests"
+      ]
     }
   }
 }
