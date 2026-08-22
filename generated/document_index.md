@@ -56,7 +56,7 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
-| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `planned` | `1.0` | TASK_0001 — Реализация ARC_CMP_001 |
+| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `in-progress` | `1.0` | TASK_0001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_0002_arc_002.md`](../work/tasks/task_0002_arc_002.md) | `TASK_0002` | `task` | `work_state` | `planned` | `1.0` | TASK_0002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_0003_arc_003.md`](../work/tasks/task_0003_arc_003.md) | `TASK_0003` | `task` | `work_state` | `planned` | `1.0` | TASK_0003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_0004_arc_004.md`](../work/tasks/task_0004_arc_004.md) | `TASK_0004` | `task` | `work_state` | `planned` | `1.0` | TASK_0004 — Реализация ARC_CMP_004 |
