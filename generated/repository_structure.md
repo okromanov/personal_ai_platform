@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `151` |
+| Всего файлов | `153` |
 
 ```text
 personal_ai_platform/
@@ -155,8 +155,10 @@ personal_ai_platform/
 - specifications/threat_model.md
 - tasks.md
 - work/acceptance/.gitkeep
+- work/acceptance/m01.json
 - work/m01/final_report.md
 - work/m01/owner_checklist.md
+- work/m01/semantic_review.json
 - work/m01/semantic_review.md
 - work/tasks/.gitkeep
 - work/tests/test_0001.md
