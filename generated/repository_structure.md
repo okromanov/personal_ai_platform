@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `166` |
+| Всего файлов | `172` |
 
 ```text
 personal_ai_platform/
@@ -143,6 +143,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_semantic_consistency.py
 - operations/tests/tooling/test_task_registry.py
 - operations/tests/tooling/test_traceability.py
+- operations/tests_implementation/verify_channels.py
 - operations/threat_review_triggers.md
 - owner_dashboard.md
 - project_rules.md
@@ -153,6 +154,10 @@ personal_ai_platform/
 - specifications/infrastructure_baseline.md
 - specifications/system_specification.md
 - specifications/threat_model.md
+- src/__init__.py
+- src/channels/__init__.py
+- src/channels/base.py
+- src/channels/telegram.py
 - tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
@@ -180,4 +185,5 @@ personal_ai_platform/
 - work/tests/test_0004.md
 - work/tests/test_0005.md
 - work/tests/test_0006.md
+- work/tests/test_0007.md
 ```

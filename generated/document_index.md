@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `59` |
+| Всего документов | `60` |
 
 > В список входят первичные Markdown-документы. Производные и периодические представления исключены.
 
@@ -75,3 +75,4 @@ version: 1.0
 | [`work/tests/test_0004.md`](../work/tests/test_0004.md) | `TEST_0004` | `test` | `spec_state` | `current` | `1.0` | TEST_0004 — Контроль владельца и аварийное отключение |
 | [`work/tests/test_0005.md`](../work/tests/test_0005.md) | `TEST_0005` | `test` | `spec_state` | `current` | `1.0` | TEST_0005 — Сквозной сценарий Telegram и перезапуск |
 | [`work/tests/test_0006.md`](../work/tests/test_0006.md) | `TEST_0006` | `test` | `spec_state` | `current` | `1.0` | TEST_0006 — Инфраструктурный контур первого живого помощника |
+| [`work/tests/test_0007.md`](../work/tests/test_0007.md) | `TEST_0007` | `test` | `spec_state` | `current` | `1.0` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |

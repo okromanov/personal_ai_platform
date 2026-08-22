@@ -79,7 +79,7 @@
         "src/**",
         "tests/**"
       ],
-      "scope_coverage": "requirement_based",
+      "scope_coverage": "task_test",
       "scope_evidence": [
         "project_checks",
         "unit_tests"
