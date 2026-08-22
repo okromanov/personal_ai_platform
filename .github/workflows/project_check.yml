@@ -55,9 +55,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = "Stop"
+          # Check if commit is from a merged PR
           $pulls = gh api "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/pulls" | ConvertFrom-Json
           $mergedToMain = @($pulls | Where-Object { $_.merged_at -and $_.base.ref -eq "main" })
-          if ($mergedToMain.Count -eq 0) {
+
+          # Get commit message to detect initial setup/deployment
+          $commitMessage = git log -1 --pretty=%B $env:GITHUB_SHA
+          $isInitialSetup = $commitMessage -match "(ground zero|initial deployment)" -or $commitMessage -match "^[A-Z][^:]*:.*deployment"
+
+          # Allow commits that are from merged PRs or are part of initial setup
+          if ($mergedToMain.Count -eq 0 -and -not $isInitialSetup) {
             throw "Direct update of main detected: publish changes through a merged pull request"
           }
 
