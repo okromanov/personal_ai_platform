@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `172` |
+| Всего файлов | `184` |
 
 ```text
 personal_ai_platform/
@@ -186,4 +186,16 @@ personal_ai_platform/
 - work/tests/test_0005.md
 - work/tests/test_0006.md
 - work/tests/test_0007.md
+- work/tests/test_0008.md
+- work/tests/test_0009.md
+- work/tests/test_0010.md
+- work/tests/test_0011.md
+- work/tests/test_0012.md
+- work/tests/test_0013.md
+- work/tests/test_0014.md
+- work/tests/test_0015.md
+- work/tests/test_0016.md
+- work/tests/test_0017.md
+- work/tests/test_0018.md
+- work/tests/test_0019.md
 ```

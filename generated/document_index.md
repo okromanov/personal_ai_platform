@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `60` |
+| Всего документов | `72` |
 
 > В список входят первичные Markdown-документы. Производные и периодические представления исключены.
 
@@ -76,3 +76,15 @@ version: 1.0
 | [`work/tests/test_0005.md`](../work/tests/test_0005.md) | `TEST_0005` | `test` | `spec_state` | `current` | `1.0` | TEST_0005 — Сквозной сценарий Telegram и перезапуск |
 | [`work/tests/test_0006.md`](../work/tests/test_0006.md) | `TEST_0006` | `test` | `spec_state` | `current` | `1.0` | TEST_0006 — Инфраструктурный контур первого живого помощника |
 | [`work/tests/test_0007.md`](../work/tests/test_0007.md) | `TEST_0007` | `test` | `spec_state` | `current` | `1.0` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |
+| [`work/tests/test_0008.md`](../work/tests/test_0008.md) | `TEST_0008` | `test` | `spec_state` | `planned` | `1.0` | TEST_0008 — Контроль владельца платформой |
+| [`work/tests/test_0009.md`](../work/tests/test_0009.md) | `TEST_0009` | `test` | `spec_state` | `planned` | `1.0` | TEST_0009 — Оркестрация и RuntimePort |
+| [`work/tests/test_0010.md`](../work/tests/test_0010.md) | `TEST_0010` | `test` | `spec_state` | `planned` | `1.0` | TEST_0010 — Шлюз моделей |
+| [`work/tests/test_0011.md`](../work/tests/test_0011.md) | `TEST_0011` | `test` | `spec_state` | `planned` | `1.0` | TEST_0011 — Управление памятью и контекстом |
+| [`work/tests/test_0012.md`](../work/tests/test_0012.md) | `TEST_0012` | `test` | `spec_state` | `planned` | `1.0` | TEST_0012 — Мониторинг и логирование |
+| [`work/tests/test_0013.md`](../work/tests/test_0013.md) | `TEST_0013` | `test` | `spec_state` | `planned` | `1.0` | TEST_0013 — Инфраструктура: вычисления |
+| [`work/tests/test_0014.md`](../work/tests/test_0014.md) | `TEST_0014` | `test` | `spec_state` | `planned` | `1.0` | TEST_0014 — Инфраструктура: сеть |
+| [`work/tests/test_0015.md`](../work/tests/test_0015.md) | `TEST_0015` | `test` | `spec_state` | `planned` | `1.0` | TEST_0015 — Инфраструктура: хранилище |
+| [`work/tests/test_0016.md`](../work/tests/test_0016.md) | `TEST_0016` | `test` | `spec_state` | `planned` | `1.0` | TEST_0016 — Инфраструктура: безопасность |
+| [`work/tests/test_0017.md`](../work/tests/test_0017.md) | `TEST_0017` | `test` | `spec_state` | `planned` | `1.0` | TEST_0017 — Инфраструктура: мониторинг |
+| [`work/tests/test_0018.md`](../work/tests/test_0018.md) | `TEST_0018` | `test` | `spec_state` | `planned` | `1.0` | TEST_0018 — Точка входа сценария |
+| [`work/tests/test_0019.md`](../work/tests/test_0019.md) | `TEST_0019` | `test` | `spec_state` | `planned` | `1.0` | TEST_0019 — Инфраструктура: управление жизненным циклом |

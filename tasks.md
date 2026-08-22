@@ -48,15 +48,15 @@ version: 1.0
 | Задача | Предыдущая задача | Этап | Реализует | Проверки |
 |---|---|---|---|---|
 | `TASK_0001` | — | `m02` | `ARC_CMP_001` | [`TEST_0007`](work/tests/test_0007.md) |
-| `TASK_0002` | `TASK_0001` | `m02` | `ARC_CMP_002` | — |
-| `TASK_0003` | `TASK_0002` | `m02` | `ARC_CMP_003` | — |
-| `TASK_0004` | `TASK_0003` | `m02` | `ARC_CMP_004` | — |
-| `TASK_0005` | `TASK_0004` | `m02` | `ARC_CMP_005` | — |
-| `TASK_0006` | `TASK_0005` | `m02` | `ARC_CMP_007` | — |
-| `TASK_0007` | `TASK_0006` | `m02` | `ARC_CMP_009` | — |
-| `TASK_0008` | `TASK_0007` | `m02` | `INF_CMP_001` | — |
-| `TASK_0009` | `TASK_0008` | `m02` | `INF_CMP_002` | — |
-| `TASK_0010` | `TASK_0009` | `m02` | `INF_CMP_003` | — |
-| `TASK_0011` | `TASK_0010` | `m02` | `INF_CMP_005` | — |
-| `TASK_0012` | `TASK_0011` | `m02` | `INF_CMP_007` | — |
-| `TASK_0013` | `TASK_0012` | `m02` | `INF_CMP_008` | — |
+| `TASK_0002` | `TASK_0001` | `m02` | `ARC_CMP_002` | [`TEST_0008`](work/tests/test_0008.md) |
+| `TASK_0003` | `TASK_0002` | `m02` | `ARC_CMP_003` | [`TEST_0009`](work/tests/test_0009.md) |
+| `TASK_0004` | `TASK_0003` | `m02` | `ARC_CMP_004` | [`TEST_0010`](work/tests/test_0010.md) |
+| `TASK_0005` | `TASK_0004` | `m02` | `ARC_CMP_005` | [`TEST_0011`](work/tests/test_0011.md) |
+| `TASK_0006` | `TASK_0005` | `m02` | `ARC_CMP_007` | [`TEST_0012`](work/tests/test_0012.md) |
+| `TASK_0007` | `TASK_0006` | `m02` | `ARC_CMP_009` | [`TEST_0018`](work/tests/test_0018.md) |
+| `TASK_0008` | `TASK_0007` | `m02` | `INF_CMP_001` | [`TEST_0013`](work/tests/test_0013.md) |
+| `TASK_0009` | `TASK_0008` | `m02` | `INF_CMP_002` | [`TEST_0014`](work/tests/test_0014.md) |
+| `TASK_0010` | `TASK_0009` | `m02` | `INF_CMP_003` | [`TEST_0015`](work/tests/test_0015.md) |
+| `TASK_0011` | `TASK_0010` | `m02` | `INF_CMP_005` | [`TEST_0016`](work/tests/test_0016.md) |
+| `TASK_0012` | `TASK_0011` | `m02` | `INF_CMP_007` | [`TEST_0017`](work/tests/test_0017.md) |
+| `TASK_0013` | `TASK_0012` | `m02` | `INF_CMP_008` | [`TEST_0019`](work/tests/test_0019.md) |
