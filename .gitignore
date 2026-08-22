@@ -1,0 +1,64 @@
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# virtual environments
+.venv/
+venv/
+env/
+
+# secrets and credentials
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# local/runtime data
+runtime/
+data/private/
+data/local/
+data/runtime/
+data/cache/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.pid
+
+# ide/editor state
+.vscode/
+.idea/
+*.swp
+*~
+
+# operating systems
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# local backups and exports
+backups/local/
+archives/local/
+exports/local/
+
+# generated cache only; versioned generated markdown stays in git
+generated/cache/
+generated/tmp/
+generated/temp/
+generated/reports/daily/*.md
+!generated/reports/daily/.gitkeep
+
+# dependencies
+node_modules/

@@ -1,0 +1,66 @@
+{
+  "version": 5,
+  "evidence_catalog": {
+    "project_checks": {
+      "class": "hard",
+      "source": "checker"
+    },
+    "unit_tests": {
+      "class": "hard",
+      "source": "unit_tests"
+    },
+    "quality_suite": {
+      "class": "hard",
+      "source": "record:runtime/evidence/quality_suite.json",
+      "record_type": "quality_suite"
+    },
+    "m02_contract_tests": {
+      "class": "hard",
+      "source": "record:runtime/evidence/m02_contract_tests.json",
+      "record_type": "test_evidence"
+    },
+    "m02_security_tests": {
+      "class": "hard",
+      "source": "record:runtime/evidence/m02_security_tests.json",
+      "record_type": "test_evidence"
+    },
+    "m02_e2e_tests": {
+      "class": "hard",
+      "source": "record:runtime/evidence/m02_e2e_tests.json",
+      "record_type": "test_evidence"
+    },
+    "m02_infrastructure_tests": {
+      "class": "hard",
+      "source": "record:runtime/evidence/m02_infrastructure_tests.json",
+      "record_type": "test_evidence"
+    }
+  },
+  "profiles": {
+    "foundation": {
+      "milestones": [
+        "m01"
+      ],
+      "paths": [
+        "*.md",
+        ".gitignore",
+        "pyproject.toml",
+        "operations/quality/requirements_dev.txt",
+        ".github/workflows/**",
+        ".claude/**",
+        "adr/**",
+        "specifications/**",
+        "operations/**",
+        "work/**"
+      ],
+      "scope_coverage": "global_evidence",
+      "scope_evidence": [
+        "project_checks"
+      ],
+      "required_evidence": [
+        "project_checks",
+        "unit_tests",
+        "quality_suite"
+      ]
+    }
+  }
+}

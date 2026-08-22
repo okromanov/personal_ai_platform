@@ -1,0 +1,147 @@
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from pathlib import Path
+from typing import Any, cast
+from unittest.mock import patch
+
+from operations.scripts.evidence.record import (
+    _evidence_targets,
+    build_evidence_bundle,
+    write_evidence_bundle,
+)
+
+
+class EvidenceRecordTests(unittest.TestCase):
+    def test_targets_merge_tests_profiles_and_fallback_paths(self) -> None:
+        snapshot: dict[str, Any] = {
+            "current": {"id": "m02"},
+            "acceptance": {
+                "coverage": {"scope": ["BR_001"], "tracked_targets": []},
+                "tests": [
+                    "invalid",
+                    {"id": "manual"},
+                    {
+                        "id": "TEST_0001",
+                        "automated_evidence": "e2e",
+                        "verifies": ["SYS_001", "SYS_001"],
+                        "accepts": ["m02"],
+                    },
+                ],
+            },
+        }
+        registry: dict[str, Any] = {
+            "profiles": {
+                "m02": {
+                    "milestones": ["m02"],
+                    "paths": ["src/**"],
+                    "scope_coverage": "global_evidence",
+                    "scope_evidence": ["project_checks"],
+                    "required_evidence": ["project_checks", "unit_tests"],
+                }
+            }
+        }
+        with patch(
+            "operations.scripts.evidence.record.load_quality_registry", return_value=registry
+        ):
+            targets = _evidence_targets(Path("."), snapshot)
+
+        self.assertEqual(targets["e2e"], ["SYS_001", "milestone:m02"])
+        self.assertEqual(targets["project_checks"], ["BR_001"])
+        self.assertEqual(targets["unit_tests"], ["BR_001"])
+
+        snapshot["acceptance"]["coverage"] = {"scope": [], "tracked_targets": []}
+        registry["profiles"]["m02"]["scope_coverage"] = "task_test"
+        with patch(
+            "operations.scripts.evidence.record.load_quality_registry", return_value=registry
+        ):
+            fallback = _evidence_targets(Path("."), snapshot)
+        self.assertEqual(fallback["project_checks"], ["path:src/**"])
+
+    def test_build_bundle_normalizes_evidence_and_tests(self) -> None:
+        snapshot: dict[str, Any] = {
+            "current": {"id": "m02"},
+            "acceptance": {
+                "state": "ready-for-semantic-review",
+                "blockers": [],
+                "pending_gates": ["semantic_review"],
+                "evidence_context": {
+                    "git_sha": "a" * 40,
+                    "timestamp": "2026-08-20T12:00:00Z",
+                    "environment": {"os": "linux"},
+                },
+                "quality": {
+                    "profiles": ["m02"],
+                    "evidence": [
+                        "invalid",
+                        {"id": "project_checks", "result": "passed", "class": "hard"},
+                    ],
+                },
+                "impacted_profiles": ["m02"],
+                "coverage_base": {"mode": "git", "git_sha": "b" * 40},
+                "changed_paths": ["src/app.py"],
+                "uncovered_paths": [],
+                "coverage": {"scope": ["SYS_001"]},
+                "tests": [
+                    "invalid",
+                    {
+                        "id": "TEST_0001",
+                        "effective_result": "passed",
+                        "verifies": ["SYS_001"],
+                        "accepts": ["m02"],
+                        "traces_to": ["ARC_001"],
+                        "automated_evidence": "project_checks",
+                    },
+                ],
+            },
+        }
+        with (
+            patch(
+                "operations.scripts.evidence.record.build_progress_snapshot",
+                return_value=snapshot,
+            ),
+            patch(
+                "operations.scripts.evidence.record._evidence_targets",
+                return_value={"project_checks": ["SYS_001"]},
+            ),
+        ):
+            bundle = build_evidence_bundle(
+                Path("."),
+                check_summary={},
+                test_returncode=0,
+                test_output="OK",
+                git={"commit": "fallback"},
+                server_source={
+                    "repository": "owner/repo",
+                    "workflow": "Project check",
+                    "run_id": "1",
+                    "run_url": "https://github.com/owner/repo/actions/runs/1",
+                    "event_sha": "a" * 40,
+                },
+            )
+
+        evidence = cast(list[dict[str, object]], bundle["evidence"])
+        tests = cast(list[dict[str, object]], bundle["tests"])
+        self.assertEqual(bundle["git_sha"], "a" * 40)
+        self.assertEqual(bundle["schema_version"], 2)
+        self.assertEqual(evidence[0]["targets"], ["SYS_001"])
+        self.assertEqual(tests[0]["test_id"], "TEST_0001")
+
+    def test_write_bundle_uses_sha_name_and_atomic_latest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle: dict[str, object] = {"git_sha": "A" * 40, "result": "passed"}
+            path = write_evidence_bundle(root, bundle)
+            self.assertEqual(path.name, f"evidence_{'a' * 40}.json")
+            self.assertEqual(
+                json.loads((root / "runtime/evidence/latest.json").read_text("utf-8")), bundle
+            )
+
+            unknown = write_evidence_bundle(root, {"git_sha": "invalid"})
+            self.assertEqual(unknown.name, "evidence_unknown.json")
+
+
+if __name__ == "__main__":
+    unittest.main()

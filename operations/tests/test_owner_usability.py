@@ -1,0 +1,240 @@
+from __future__ import annotations
+
+import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
+
+from operations.scripts.documents.check import check_structure
+from operations.scripts.documents.metadata import load_document
+from operations.scripts.status.generate_project_status import (
+    build_owner_next_action,
+    collect_milestones,
+    render_progress_sections,
+)
+from operations.scripts.status.human_status import render_repository_project_status
+from operations.scripts.tasks.generate import collect_tasks, select_current_task
+
+
+class OwnerUsabilityTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = Path(__file__).resolve().parents[2]
+
+    def test_repository_maintenance_does_not_remain_in_project_task_queue(self) -> None:
+        raw_tasks = collect_tasks(self.root)["tasks"]
+        self.assertIsInstance(raw_tasks, list)
+        tasks = (
+            [task for task in raw_tasks if isinstance(task, dict)]
+            if isinstance(raw_tasks, list)
+            else []
+        )
+        rendered = (self.root / "tasks.md").read_text(encoding="utf-8-sig")
+        current = collect_milestones(self.root)["current"]
+        self.assertIsInstance(current, dict)
+        current_id = str(current["id"]) if isinstance(current, dict) else ""
+        if current_id == "m01":
+            self.assertEqual(tasks, [])
+            self.assertIn("Сейчас проектных TASK нет", rendered)
+        for maintenance_title in [
+            "Перестроить систему источников истины",
+            "Закрепить проверяемые границы изменений",
+            "Упорядочить очередь задач",
+            "Включить и проверить защиту main",
+        ]:
+            self.assertNotIn(maintenance_title, rendered)
+            self.assertTrue(all(maintenance_title not in str(task["title"]) for task in tasks))
+
+    def test_project_status_is_detailed_without_artificial_percentages(self) -> None:
+        rendered = render_repository_project_status(self.root)
+        tracked = (self.root / "project_status.md").read_text(encoding="utf-8-sig")
+        current_id = str(collect_milestones(self.root)["current"]["id"])
+        current_task = select_current_task(collect_tasks(self.root)["tasks"], current_id)
+        resume_target = str(current_task["id"]) if current_task else current_id
+        self.assertEqual(tracked.strip(), rendered.strip())
+        for text in [
+            "Ваше действие сейчас",
+            f"ПРОДОЛЖАЙ {resume_target}",
+            "Что произойдёт после вашей команды",
+            "Когда потребуется ваше участие",
+            "Следующий исполнитель",
+            "Общая картина V1",
+            "Этапы V1",
+            "Проектные задачи текущего этапа",
+            "Шаги текущей работы",
+            "выполнено",
+            "осталось",
+            "[x]",
+            "[ ]",
+        ]:
+            self.assertIn(text, rendered)
+        self.assertLess(
+            rendered.index(f"ПРОДОЛЖАЙ {resume_target}"), rendered.index("Текущее состояние")
+        )
+        self.assertIn("Вам не нужно запускать проверки", rendered)
+        if current_id == "m01" and current_task is None:
+            self.assertIn("откройте новый сеанс агента", rendered)
+            self.assertIn("Проектных TASK нет", rendered)
+        self.assertNotIn("Сейчас от вас ничего не требуется", rendered)
+        self.assertNotIn("%", rendered)
+        for internal in [
+            "in-review",
+            "in-progress",
+            "owner_action",
+            "PowerShell",
+            "Git SHA",
+            "evidence bundle",
+        ]:
+            self.assertNotIn(internal, rendered)
+
+    def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
+        tasks = [
+            {
+                "id": "TASK_0001",
+                "work_state": "planned",
+                "traces_to": ["m01"],
+                "owner_action": "none",
+            },
+            {
+                "id": "TASK_0002",
+                "work_state": "blocked",
+                "traces_to": ["m01"],
+                "owner_action": "none",
+            },
+        ]
+        self.assertEqual(select_current_task(tasks, "m01")["id"], "TASK_0001")
+
+    def test_technical_status_has_one_russian_owner_action_and_real_foundation_count(self) -> None:
+        action = build_owner_next_action(
+            "m01",
+            resume_target="m01",
+            requires_fresh_session=True,
+        )
+        rendered = render_progress_sections(
+            {
+                "overall": "healthy",
+                "current": {"id": "m01", "title": "Основа", "work_state": "in-progress"},
+                "next_milestone": {"id": "m02", "title": "Следующий этап"},
+                "checks_passed": 16,
+                "checks_total": 16,
+                "unit": {"ok": True, "passed": 40, "total": 40, "failed": 0, "duration": 0.3},
+                "deviations": [],
+                "next_action": action,
+                "acceptance": {
+                    "remaining": [],
+                    "pending_gates": ["semantic_review"],
+                    "tasks_verified": 3,
+                    "tasks_total": 3,
+                    "tests_passed": 3,
+                    "tests_total": 3,
+                    "coverage": {
+                        "scope_covered": 0,
+                        "scope_total": 0,
+                        "tracked_kind": "foundation_paths",
+                        "tracked_covered": 7,
+                        "tracked_total": 7,
+                    },
+                    "impacted_profiles": ["foundation"],
+                    "quality": {"evidence": []},
+                    "state": "ready-for-semantic-review",
+                    "documents_current": 12,
+                    "decisions_proposed": 4,
+                },
+            }
+        )
+
+        self.assertIn("| Области основы | `7/7` |", rendered)
+        self.assertIn("Откройте новый сеанс агента", rendered)
+        self.assertIn("`ПРОДОЛЖАЙ m01`", rendered)
+        for stale_label in [
+            "Scope coverage",
+            "Overall",
+            "Project checks",
+            "Unit tests",
+            "- AUTO:",
+            "- OWNER:",
+            "in-progress",
+            "ready-for-semantic-review",
+            "semantic_review",
+            "`foundation`",
+        ]:
+            self.assertNotIn(stale_label, rendered)
+
+    def test_project_status_is_the_only_owner_entrypoint(self) -> None:
+        root_entry_names = {path.name.lower() for path in self.root.iterdir()}
+        self.assertNotIn("readme.md", root_entry_names)
+        self.assertIn("agents.md", root_entry_names)
+        self.assertIn("project_status.md", root_entry_names)
+
+        project_status = (self.root / "project_status.md").read_text(encoding="utf-8-sig")
+        self.assertIn("Это основной экран владельца", project_status)
+
+        with TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            (temporary_root / "README.md").write_text("лишний файл", encoding="utf-8")
+            errors = check_structure(temporary_root).errors
+            self.assertTrue(any("README запрещён решением владельца" in error for error in errors))
+
+        for forbidden_name, expected_error in [
+            ("README", "README запрещён решением владельца"),
+        ]:
+            with TemporaryDirectory() as temporary_directory:
+                temporary_root = Path(temporary_directory)
+                (temporary_root / forbidden_name).write_text("лишний файл", encoding="utf-8")
+                errors = check_structure(temporary_root).errors
+                self.assertTrue(any(expected_error in error for error in errors))
+
+    def test_project_status_shows_exact_decision_when_owner_is_next(self) -> None:
+        milestone = {"id": "m01", "title": "Основа", "work_state": "in-progress"}
+        task = {
+            "id": "TASK_0003",
+            "title": "Подготовить решение",
+            "path": "work/tasks/task_0003_finish_m01.md",
+            "traces_to": ["m01"],
+            "work_state": "in-progress",
+            "next_actor": "owner",
+            "owner_action": "ПРИНИМАЮ m01",
+            "body": "## Что делать сейчас\n\n### Владельцу\n\nПРИНИМАЮ m01",
+            "checklist": [{"done": True, "text": "Проверки завершены"}],
+            "steps_done": 1,
+            "steps_remaining": 0,
+        }
+        with (
+            patch(
+                "operations.scripts.status.human_status.collect_milestones",
+                return_value={"items": [milestone], "current": milestone},
+            ),
+            patch(
+                "operations.scripts.status.human_status.collect_tasks",
+                return_value={"tasks": [task]},
+            ),
+            patch(
+                "operations.scripts.status.human_status._task_context",
+                return_value=task,
+            ),
+        ):
+            rendered = render_repository_project_status(self.root)
+
+        self.assertIn("Сейчас требуется ваше решение", rendered)
+        self.assertIn("ПРИНИМАЮ m01", rendered)
+        self.assertIn("ВОЗВРАЩАЮ m01: <что исправить>", rendered)
+        self.assertNotIn("Сейчас от вас ничего не требуется", rendered)
+
+    def test_test_specs_keep_owner_steps_safe_and_only_when_manual(self) -> None:
+        for path in sorted((self.root / "work/tests").glob("test_*.md")):
+            doc = load_document(path)
+            self.assertNotIn("Пошаговая инструкция", doc.body)
+            if doc.metadata.get("execution") == "automated":
+                self.assertIn("Автоматический запуск", doc.body)
+                self.assertIn("Действия владельца не требуются", doc.body)
+                self.assertNotIn("## 3. Действия владельца", doc.body)
+            else:
+                self.assertEqual(doc.metadata.get("execution"), "manual")
+                self.assertTrue(doc.metadata.get("manual_evidence"))
+                self.assertIn("## 3. Действия владельца", doc.body)
+                owner_steps = doc.body.split("## 3. Действия владельца", 1)[1].split("## 4.", 1)[0]
+                for forbidden in [" git ", "powershell", "pwsh", "operations/scripts", ".ps1"]:
+                    self.assertNotIn(forbidden, owner_steps.lower())
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,41 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+show_error_codes = true
+pretty = false
+
+[tool.coverage.run]
+source = ["operations/scripts"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 75
+skip_covered = true
+show_missing = true
+exclude_also = [
+  "if __name__ == .__main__.:",
+]
+
+[tool.personal_ai_platform.coverage]
+overall = 75
+diff = 90
+
+[tool.personal_ai_platform.coverage.modules]
+"operations/scripts/acceptance/apply.py" = 85
+"operations/scripts/evidence/generate_bundle.py" = 85
+"operations/scripts/evidence/record.py" = 85
+"operations/scripts/quality/record_quality_suite.py" = 85
+"operations/scripts/quality/registry.py" = 85

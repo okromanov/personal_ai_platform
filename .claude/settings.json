@@ -1,0 +1,47 @@
+{
+  "skills": {
+    "documentation_audit": {
+      "description": "Documentation audit on repository change events and weekly",
+      "type": "periodic_quality_check",
+      "frequency": "on_push_pull_request_merge_group_weekly",
+      "command": "python3.12 operations/scripts/documents/check.py --all",
+      "framework": "llm_agnostic"
+    },
+    "code_quality_check": {
+      "description": "Weekly audit of all Python scripts",
+      "type": "periodic_quality_check",
+      "frequency": "on_substantial_change_and_weekly_manual",
+      "framework": "llm_agnostic",
+      "requires_manual_inspection": true
+    },
+    "pre_commit_validation": {
+      "description": "Fast blocking checks before every commit",
+      "type": "blocking_quality_check",
+      "frequency": "on_every_commit",
+      "command": "bash .claude/skills/pre_commit_hook.sh",
+      "framework": "llm_agnostic",
+      "expected_duration_seconds": 2
+    },
+    "python_lint_check": {
+      "description": "Static code analysis and style checking",
+      "type": "periodic_quality_check",
+      "frequency": "on_push_pull_request_merge_group_weekly",
+      "command": "python3.12 -m ruff check operations/scripts operations/tests",
+      "framework": "llm_agnostic"
+    },
+    "python_type_check": {
+      "description": "Incremental type-safety regression gate with mypy",
+      "type": "periodic_quality_check",
+      "frequency": "on_push_pull_request_merge_group_weekly",
+      "command": "python3.12 operations/scripts/quality/run_mypy_baseline.py",
+      "framework": "llm_agnostic"
+    },
+    "unit_tests": {
+      "description": "Run all unit tests",
+      "type": "periodic_quality_check",
+      "frequency": "on_push_pull_request_merge_group_weekly",
+      "command": "python3.12 operations/scripts/quality/run_suite.py full",
+      "framework": "llm_agnostic"
+    }
+  }
+}

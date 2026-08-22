@@ -1,0 +1,291 @@
+name: Project check
+
+on:
+  workflow_dispatch:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+      - "**"
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: project-check-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
+
+jobs:
+  check:
+    name: Windows validation
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: "1"
+      PY_PYTHON: "3.12"
+    steps:
+      - name: Checkout exact event revision
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          git init --initial-branch=ci .
+          git remote add origin "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY.git"
+          $credentials = "x-access-token:$env:GH_TOKEN"
+          $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($credentials))
+          git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=2 origin $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git checkout --detach FETCH_HEAD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ((git rev-parse HEAD).Trim() -ne $env:GITHUB_SHA) { throw "Checkout SHA mismatch" }
+
+      - name: Show Python version
+        shell: pwsh
+        run: py --version
+
+      - name: Reject a direct update of main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $pulls = gh api "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/pulls" | ConvertFrom-Json
+          $mergedToMain = @($pulls | Where-Object { $_.merged_at -and $_.base.ref -eq "main" })
+          if ($mergedToMain.Count -eq 0) {
+            throw "Direct update of main detected: publish changes through a merged pull request"
+          }
+
+      - name: Regenerate derived documents
+        shell: pwsh
+        run: py operations\scripts\documents\generate.py --all
+
+      - name: Deepen history for document metadata comparison
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $credentials = "x-access-token:$env:GH_TOKEN"
+          $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($credentials))
+          git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags origin main:refs/remotes/origin/main
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ("${{ github.event_name }}" -eq "pull_request") {
+            git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=100 origin $env:GITHUB_SHA $env:BASE_SHA
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Check changed paths against TASK
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: py operations\scripts\tasks\check_change_scope.py --base $env:BASE_SHA --head $env:GITHUB_SHA
+
+      - name: Run document checker
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path runtime -Force | Out-Null
+          py operations\scripts\documents\check.py --all --json | Tee-Object -FilePath runtime\check_summary.json
+          exit $LASTEXITCODE
+
+      - name: Run unit tests
+        if: always()
+        shell: pwsh
+        run: |
+          py operations\scripts\quality\run_unittests.py *> runtime\test_output.txt
+          $testResult = $LASTEXITCODE
+          $testResult | Out-File -FilePath runtime\test_result.txt
+          Get-Content runtime\test_output.txt
+          exit $testResult
+
+      - name: Check generated drift
+        if: always()
+        shell: pwsh
+        run: git diff --exit-code -- project_status.md tasks.md generated
+
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: validation-${{ github.sha }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            runtime/check_summary.json
+            runtime/test_output.txt
+            tasks.md
+            generated/document_index.md
+            generated/repository_structure.md
+            generated/traceability_matrix.md
+
+  quality-skills:
+    name: Quality skills
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - name: Checkout exact event revision
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git init --initial-branch=ci .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w 0)"
+          git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=2 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Install pinned development tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 -m pip install --disable-pip-version-check \
+            -r operations/quality/requirements_dev.txt
+
+      - name: Fetch default branch for metadata comparison
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w 0)"
+          git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags origin main:refs/remotes/origin/main
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=100 origin "$GITHUB_SHA" "$BASE_SHA"
+          fi
+
+      - name: Install pinned external quality tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p runtime
+          curl --fail --silent --show-error --location \
+            --output /tmp/actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  /tmp/actionlint.tar.gz" | sha256sum --check
+          tar --no-same-owner -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          curl --fail --silent --show-error --location \
+            --output /tmp/gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  /tmp/gitleaks.tar.gz" | sha256sum --check
+          tar --no-same-owner -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+
+      - name: Validate workflows and shell scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/actionlint -shellcheck=shellcheck 2>&1 | tee runtime/actionlint.txt
+          echo "actionlint passed" >> runtime/actionlint.txt
+          shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh 2>&1 | tee runtime/shellcheck.txt
+          echo "shellcheck passed" >> runtime/shellcheck.txt
+
+      - name: Scan dependencies and secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip_audit \
+            --cache-dir "$RUNNER_TEMP/pip-audit-cache" \
+            --no-deps \
+            --requirement operations/quality/requirements_dev.txt \
+            --format json \
+            --output runtime/pip_audit.json
+          /tmp/gitleaks dir . --redact --no-banner 2>&1 | tee runtime/gitleaks.txt
+          echo "gitleaks passed" >> runtime/gitleaks.txt
+
+      - name: Run canonical full quality suite
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          coverage_base="$BASE_SHA"
+          if [ -z "$coverage_base" ]; then
+            coverage_base="$(git rev-parse HEAD^)"
+          fi
+          python3 operations/scripts/quality/run_suite.py full --coverage-base "$coverage_base"
+
+      - name: Build canonical quality evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 operations/scripts/quality/record_quality_suite.py \
+            --git-sha "$GITHUB_SHA" \
+            --repository "$GITHUB_REPOSITORY" \
+            --workflow "$GITHUB_WORKFLOW" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --event-sha "$GITHUB_SHA" \
+            --output runtime/evidence/quality_suite.json \
+            --artifact runtime/check_summary.json \
+            --artifact runtime/test_output.txt \
+            --artifact runtime/ruff_check.txt \
+            --artifact runtime/ruff_format.txt \
+            --artifact runtime/mypy_baseline.txt \
+            --artifact runtime/coverage.txt \
+            --artifact runtime/coverage_policy.txt \
+            --artifact runtime/actionlint.txt \
+            --artifact runtime/shellcheck.txt \
+            --artifact runtime/pip_audit.json \
+            --artifact runtime/gitleaks.txt
+          python3 operations/scripts/evidence/generate_bundle.py \
+            --check-summary runtime/check_summary.json \
+            --test-returncode 0 \
+            --test-output "$(cat runtime/test_output.txt)" \
+            --repository "$GITHUB_REPOSITORY" \
+            --workflow "$GITHUB_WORKFLOW" \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --event-sha "$GITHUB_SHA"
+
+      - name: Upload quality diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: quality-${{ github.sha }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            runtime/check_summary.json
+            runtime/test_output.txt
+            runtime/ruff_check.txt
+            runtime/ruff_format.txt
+            runtime/mypy_baseline.txt
+            runtime/coverage.txt
+            runtime/coverage.json
+            runtime/coverage_policy.txt
+            runtime/actionlint.txt
+            runtime/shellcheck.txt
+            runtime/pip_audit.json
+            runtime/gitleaks.txt
+            runtime/evidence/quality_suite.json
+            runtime/evidence/latest.json
+
+  gate:
+    name: Project check
+    if: always()
+    needs:
+      - check
+      - quality-skills
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every validation job
+        shell: bash
+        env:
+          WINDOWS_RESULT: ${{ needs.check.result }}
+          QUALITY_RESULT: ${{ needs.quality-skills.result }}
+        run: |
+          set -euo pipefail
+          test "$WINDOWS_RESULT" = "success"
+          test "$QUALITY_RESULT" = "success"
