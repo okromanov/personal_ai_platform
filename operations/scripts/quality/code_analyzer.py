@@ -37,42 +37,50 @@ class StubDetector(ast.NodeVisitor):
         # Check docstring for TODO/FIXME
         docstring = ast.get_docstring(node)
         if docstring and any(marker in docstring for marker in ["TODO", "FIXME", "XXX"]):
-            self.todos.append({
-                "type": "docstring_todo",
-                "function": node.name,
-                "line": node.lineno,
-                "docstring_excerpt": docstring[:100],
-            })
+            self.todos.append(
+                {
+                    "type": "docstring_todo",
+                    "function": node.name,
+                    "line": node.lineno,
+                    "docstring_excerpt": docstring[:100],
+                }
+            )
 
         # Check if function body is just pass or raise NotImplementedError
         if len(node.body) == 1:
             stmt = node.body[0]
             if isinstance(stmt, ast.Pass):
-                self.stubs.append({
-                    "type": "pass_only",
-                    "function": node.name,
-                    "line": node.lineno,
-                    "severity": "high",
-                })
+                self.stubs.append(
+                    {
+                        "type": "pass_only",
+                        "function": node.name,
+                        "line": node.lineno,
+                        "severity": "high",
+                    }
+                )
             elif isinstance(stmt, ast.Raise):
                 if isinstance(stmt.exc, ast.Call):
                     if isinstance(stmt.exc.func, ast.Name):
                         if stmt.exc.func.id == "NotImplementedError":
-                            self.stubs.append({
-                                "type": "not_implemented",
-                                "function": node.name,
-                                "line": node.lineno,
-                                "severity": "high",
-                            })
+                            self.stubs.append(
+                                {
+                                    "type": "not_implemented",
+                                    "function": node.name,
+                                    "line": node.lineno,
+                                    "severity": "high",
+                                }
+                            )
 
     def visit_With(self, node: ast.With) -> None:
         """Check for context managers that just have pass."""
         if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
-            self.stubs.append({
-                "type": "empty_with_block",
-                "line": node.lineno,
-                "severity": "medium",
-            })
+            self.stubs.append(
+                {
+                    "type": "empty_with_block",
+                    "line": node.lineno,
+                    "severity": "medium",
+                }
+            )
         self.generic_visit(node)
 
 
@@ -112,12 +120,14 @@ class UnusedDetector(ast.NodeVisitor):
         """Check which imports are unused."""
         for import_name, lineno in self.imports.items():
             if import_name not in self.used_names and not import_name.startswith("_"):
-                self.unused.append({
-                    "type": "unused_import",
-                    "name": import_name,
-                    "line": lineno,
-                    "severity": "medium",
-                })
+                self.unused.append(
+                    {
+                        "type": "unused_import",
+                        "name": import_name,
+                        "line": lineno,
+                        "severity": "medium",
+                    }
+                )
 
 
 class ComplexityAnalyzer(ast.NodeVisitor):

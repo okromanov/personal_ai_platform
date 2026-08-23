@@ -182,7 +182,17 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     run_step(
         root,
         "Security audit (Bandit)",
-        [python, "-m", "bandit", "-r", "operations/scripts", "--severity-level", "medium", "-f", "json"],
+        [
+            python,
+            "-m",
+            "bandit",
+            "-r",
+            "operations/scripts",
+            "--severity-level",
+            "medium",
+            "-f",
+            "json",
+        ],
         artifact="runtime/security_audit.json",
     )
     run_step(
@@ -194,7 +204,15 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     run_step(
         root,
         "Dead code detection (Vulture)",
-        [python, "-m", "vulture", "operations/scripts", "operations/tests", "--min-confidence", "80"],
+        [
+            python,
+            "-m",
+            "vulture",
+            "operations/scripts",
+            "operations/tests",
+            "--min-confidence",
+            "80",
+        ],
         artifact="runtime/dead_code.txt",
     )
     run_step(
