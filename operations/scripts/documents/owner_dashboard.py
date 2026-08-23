@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 from operations.scripts.common.project import today_iso
 from operations.scripts.status.generate_project_status import collect_milestones
@@ -55,9 +56,9 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     generated_date = date or today_iso()
 
     # Count milestones
-    milestones_data = collect_milestones(root)
-    current_milestone = milestones_data.get("current", {})
-    items = milestones_data.get("items", [])
+    milestones_data: dict[str, Any] = collect_milestones(root)
+    current_milestone: dict[str, Any] = milestones_data.get("current", {})
+    items: list[Any] = milestones_data.get("items", [])
     completed = len([m for m in items if m.get("work_state") == "completed"])
     total_milestones = len(items)
     remaining = total_milestones - completed
