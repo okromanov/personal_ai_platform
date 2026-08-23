@@ -1,13 +1,13 @@
 ---
 id: m01_semantic_review
 type: semantic_review
-review_state: pending
+review_state: completed
 version: 1.0
 created: 2026-08-17
-updated: 2026-08-22
+updated: 2026-08-23
 milestone: m01
-reviewed_sha: null
-reviewer: null
+reviewed_sha: a7831af
+reviewer: owner
 depends_on:
   - semantic_governance_review
   - m01_owner_checklist
