@@ -8,18 +8,27 @@ The files in this directory are repository-specific QA playbooks. Their commands
 python3.12 -m pip install -r operations/quality/requirements_dev.txt
 cp .claude/skills/pre_commit_hook.sh .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
+
+# Optional but recommended: catch mypy/format/coverage/security/dead-code
+# regressions before they leave the machine, not just on the next CI run.
+cp .claude/skills/pre_push_hook.sh .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
 ```
 
 ## Playbooks
 
 | Playbook | Blocking behavior | Canonical command |
 |---|---|---|
+| [security_audit](security_audit.md) | Zero HIGH severity security issues | `python3.12 -m bandit -r operations/scripts --severity-level medium` |
+| [dead_code_audit](dead_code_audit.md) | Zero unused functions; duplication < 5% | `python3.12 -m vulture operations/scripts --min-confidence 80` |
+| [code_quality_check](code_quality_check.md) | Manual findings classified by severity | `python3.12 operations/scripts/quality/code_analyzer.py` |
 | [documentation_audit](documentation_audit.md) | Zero checker errors and warnings | `python3.12 operations/scripts/documents/check.py --all` |
-| [code_quality_check](code_quality_check.md) | Manual findings classified by severity | Follow the playbook and report exact paths |
 | [pre_commit_validation](pre_commit_validation.md) | Fast syntax, JSON/TOML/dependency, repository, Ruff, unit-test and drift checks | `bash .claude/skills/pre_commit_hook.sh` |
+| [pre_push_validation](pre_push_validation.md) | Full local profile (mypy, format, coverage, security, dead-code) before code leaves the machine | `bash .claude/skills/pre_push_hook.sh` |
 | [python_lint_check](python_lint_check.md) | Zero findings for the configured Ruff rules and format | `python3.12 -m ruff check ...` |
 | [python_type_check](python_type_check.md) | No total or per-file/error-code increase over checked-in mypy debt | `python3.12 operations/scripts/quality/run_mypy_baseline.py` |
 | [unit_tests](unit_tests.md) | All tests pass and coverage stays above its floor | Follow the coverage commands in the playbook |
+| [integration_tests](integration_tests.md) | End-to-end quality pipeline works; no component interactions broken | `python3.12 -m unittest discover -s operations/tests/integration` |
 
 ## Full Local Suite
 
@@ -35,8 +44,11 @@ bash .claude/skills/pre_commit_hook.sh
 - on every push to any branch;
 - on every pull request;
 - for every merge-queue candidate;
-- on manual dispatch;
-- weekly on the default branch.
+- on manual dispatch.
+
+There is no scheduled (cron) run: every code change already triggers the full
+suite via push or pull_request, so a time-based run would only re-check an
+unchanged tree.
 
 The final `Project check` gate requires Windows portability validation and the canonical Linux quality suite. The Linux job also runs Actionlint, ShellCheck, pip-audit and Gitleaks. Failed jobs upload diagnostic artifacts when available.
 
@@ -53,5 +65,5 @@ The final `Project check` gate requires Windows portability validation and the c
 
 When a change fixes type errors or increases sustainable coverage, lower the error budget or raise the coverage floor in the same reviewed change. Never relax a baseline merely to make CI green.
 
-**Updated:** 2026-08-20  
-**Version:** 3.3
+**Updated:** 2026-08-23  
+**Version:** 3.4

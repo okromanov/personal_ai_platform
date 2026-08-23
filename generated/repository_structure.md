@@ -10,18 +10,25 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `186` |
+<<<<<<< HEAD
+| Всего файлов | `208` |
 
 ```text
 personal_ai_platform/
 - .claude/settings.json
 - .claude/skills/code_quality_check.md
+- .claude/skills/dead_code_audit.md
 - .claude/skills/documentation_audit.md
+- .claude/skills/documentation_rules_detailed.md
+- .claude/skills/integration_tests.md
 - .claude/skills/pre_commit_hook.sh
 - .claude/skills/pre_commit_validation.md
+- .claude/skills/pre_push_hook.sh
+- .claude/skills/pre_push_validation.md
 - .claude/skills/python_lint_check.md
 - .claude/skills/python_type_check.md
 - .claude/skills/readme.md
+- .claude/skills/security_audit.md
 - .claude/skills/unit_tests.md
 - .github/workflows/project_check.yml
 - .gitignore
@@ -49,6 +56,7 @@ personal_ai_platform/
 - operations/hooks/__init__.py
 - operations/hooks/pre_commit_hook.sh
 - operations/hooks/pre_commit_regenerate_dashboards.sh
+- operations/hooks/pre_push_hook.sh
 - operations/local_development_windows.md
 - operations/procedure_map.md
 - operations/procedures/file_update_dependencies.md
@@ -84,6 +92,7 @@ personal_ai_platform/
 - operations/scripts/quality/__init__.py
 - operations/scripts/quality/action_practicality.py
 - operations/scripts/quality/check_coverage.py
+- operations/scripts/quality/code_analyzer.py
 - operations/scripts/quality/paths_validation.py
 - operations/scripts/quality/record_quality_suite.py
 - operations/scripts/quality/registry.py
@@ -125,18 +134,28 @@ personal_ai_platform/
 - operations/templates/test_template.md
 - operations/templates/threat_template.md
 - operations/tests/__init__.py
+- operations/tests/integration/__init__.py
+- operations/tests/integration/test_quality_pipeline.py
+- operations/tests/performance/__init__.py
+- operations/tests/performance/test_critical_paths.py
 - operations/tests/product/__init__.py
 - operations/tests/product/test_channels.py
+- operations/tests/stress/__init__.py
+- operations/tests/stress/test_scalability.py
 - operations/tests/test_acceptance.py
 - operations/tests/test_acceptance_cli_edges.py
 - operations/tests/test_acceptance_transition.py
+- operations/tests/test_boundary_cases.py
 - operations/tests/test_checker_negative_paths.py
+- operations/tests/test_concurrency.py
+- operations/tests/test_durability.py
 - operations/tests/test_generation_safety.py
 - operations/tests/test_governance_hardening.py
 - operations/tests/test_lifecycle_matrix.py
 - operations/tests/test_owner_usability.py
 - operations/tests/test_quality_integration.py
 - operations/tests/test_scope_coverage.py
+- operations/tests/test_security_extended.py
 - operations/tests/tooling/__init__.py
 - operations/tests/tooling/test_auxiliary_quality_tools.py
 - operations/tests/tooling/test_change_scope.py

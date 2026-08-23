@@ -8,8 +8,6 @@ on:
     branches:
       - main
       - "**"
-  schedule:
-    - cron: "0 3 * * 1"
 
 permissions:
   contents: read
@@ -127,6 +125,9 @@ jobs:
           path: |
             runtime/check_summary.json
             runtime/test_output.txt
+            runtime/security_audit.json
+            runtime/code_analysis.json
+            runtime/dead_code.txt
             tasks.md
             generated/document_index.md
             generated/repository_structure.md
@@ -200,7 +201,7 @@ jobs:
           set -euo pipefail
           /tmp/actionlint -shellcheck=shellcheck 2>&1 | tee runtime/actionlint.txt
           echo "actionlint passed" >> runtime/actionlint.txt
-          shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh 2>&1 | tee runtime/shellcheck.txt
+          shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh .claude/skills/pre_push_hook.sh operations/hooks/pre_push_hook.sh 2>&1 | tee runtime/shellcheck.txt
           echo "shellcheck passed" >> runtime/shellcheck.txt
 
       - name: Scan dependencies and secrets
@@ -242,6 +243,9 @@ jobs:
             --output runtime/evidence/quality_suite.json \
             --artifact runtime/check_summary.json \
             --artifact runtime/test_output.txt \
+            --artifact runtime/security_audit.json \
+            --artifact runtime/code_analysis.json \
+            --artifact runtime/dead_code.txt \
             --artifact runtime/ruff_check.txt \
             --artifact runtime/ruff_format.txt \
             --artifact runtime/mypy_baseline.txt \
@@ -271,6 +275,9 @@ jobs:
           path: |
             runtime/check_summary.json
             runtime/test_output.txt
+            runtime/security_audit.json
+            runtime/code_analysis.json
+            runtime/dead_code.txt
             runtime/ruff_check.txt
             runtime/ruff_format.txt
             runtime/mypy_baseline.txt

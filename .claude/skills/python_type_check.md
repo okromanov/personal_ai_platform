@@ -2,7 +2,7 @@
 
 **ID:** python_type_check  
 **Type:** Incremental Quality Gate  
-**Frequency:** Every push, every pull request, weekly, or on-demand  
+**Frequency:** Every push, every pull request, or on-demand  
 **Framework:** LLM-agnostic
 
 ## Purpose
