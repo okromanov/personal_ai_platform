@@ -1,11 +1,11 @@
 ---
-id: TEST_0006
+id: TEST_006
 type: test
 title: Инфраструктурный контур первого живого помощника
 spec_state: current
 execution: automated
 automated_evidence: m02_infrastructure_tests
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 accepts:
   - m02
@@ -21,8 +21,8 @@ verifies:
   - INF_REQ_016
 ---
 
-<a id="test_0006"></a>
-# TEST_0006 — Инфраструктурный контур первого живого помощника
+<a id="test_006"></a>
+# TEST_006 — Инфраструктурный контур первого живого помощника
 
 Автоматическая инфраструктурная проверка. Действия владельца не требуются.
 

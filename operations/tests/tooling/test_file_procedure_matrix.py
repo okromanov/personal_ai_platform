@@ -14,9 +14,9 @@ from operations.scripts.traceability.generate_file_procedure_matrix import (
 
 class ParseYamlFrontmatterTests(unittest.TestCase):
     def test_extracts_simple_fields(self) -> None:
-        content = "---\nid: TASK_0001\nwork_state: in-progress\n---\n\nBody\n"
+        content = "---\nid: TASK_001\nwork_state: in-progress\n---\n\nBody\n"
         fields = parse_yaml_frontmatter(content)
-        self.assertEqual(fields["id"], "TASK_0001")
+        self.assertEqual(fields["id"], "TASK_001")
         self.assertEqual(fields["work_state"], "in-progress")
 
     def test_returns_empty_dict_without_frontmatter(self) -> None:
@@ -42,15 +42,15 @@ class CollectFilesTests(unittest.TestCase):
     def test_collects_tasks_and_tests(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self._write_task(root, "TASK_0001", tests="TEST_0001")
-            self._write_test(root, "TEST_0001")
+            self._write_task(root, "TASK_001", tests="TEST_001")
+            self._write_test(root, "TEST_001")
 
             files = collect_files(root)
 
-            self.assertIn("TASK_0001", files["tasks"])
-            self.assertEqual(files["tasks"]["TASK_0001"]["tests"], ["TEST_0001"])
-            self.assertIn("TEST_0001", files["tests"])
-            self.assertEqual(files["tests"]["TEST_0001"]["execution"], "automated")
+            self.assertIn("TASK_001", files["tasks"])
+            self.assertEqual(files["tasks"]["TASK_001"]["tests"], ["TEST_001"])
+            self.assertIn("TEST_001", files["tests"])
+            self.assertEqual(files["tests"]["TEST_001"]["execution"], "automated")
 
     def test_ignores_malformed_task_file_without_raising(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -85,19 +85,19 @@ class GenerateMatrixTests(unittest.TestCase):
     def test_includes_task_test_linkage_row(self) -> None:
         files = {
             "tasks": {
-                "TASK_0001": {"work_state": "in-progress", "tests": ["TEST_0001"]},
+                "TASK_001": {"work_state": "in-progress", "tests": ["TEST_001"]},
             },
             "tests": {
-                "TEST_0001": {"execution": "automated"},
+                "TEST_001": {"execution": "automated"},
             },
         }
         matrix = generate_matrix(files)
-        self.assertIn("| TASK_0001 | in-progress | TEST_0001 | automated | — |", matrix)
+        self.assertIn("| TASK_001 | in-progress | TEST_001 | automated | — |", matrix)
 
     def test_handles_task_without_tests(self) -> None:
-        files = {"tasks": {"TASK_0002": {"work_state": "planned", "tests": []}}, "tests": {}}
+        files = {"tasks": {"TASK_002": {"work_state": "planned", "tests": []}}, "tests": {}}
         matrix = generate_matrix(files)
-        self.assertNotIn("TASK_0002 |", matrix.split("## State Transition Timeline")[0])
+        self.assertNotIn("TASK_002 |", matrix.split("## State Transition Timeline")[0])
 
 
 class GenerateFileProcedureMatrixTests(unittest.TestCase):

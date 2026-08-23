@@ -2,7 +2,7 @@
 id: state_machines
 type: guide
 document_state: current
-version: 1.0
+version: 1.2
 updated: 2026-08-22
 depends_on:
   - project_rules
@@ -247,7 +247,7 @@ completed
 ### Сценарий 1: Нормальное завершение задачи
 
 ```
-TASK_0001: planned 
+TASK_001: planned 
     → in-progress (агент начал работу)
     → completed (агент завершил работу, владелец принял)
 ```
@@ -255,7 +255,7 @@ TASK_0001: planned
 ### Сценарий 2: Задача была заблокирована
 
 ```
-TASK_0001: planned 
+TASK_001: planned 
     → in-progress (агент начал работу)
     → blocked (обнаружена зависимость)
     → in-progress (зависимость разрешена)
@@ -272,6 +272,6 @@ ADR_100: accepted (решение было принято)
 ### Сценарий 4: Тест был заменён
 
 ```
-TEST_0001: current (исходный тест)
-    → superseded (новый тест - TEST_0001_v2 - лучше и полнее)
+TEST_001: current (исходный тест)
+    → superseded (новый тест - TEST_001_v2 - лучше и полнее)
 ```

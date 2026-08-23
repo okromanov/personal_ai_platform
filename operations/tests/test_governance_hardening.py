@@ -42,7 +42,7 @@ def _minimal_snapshot(
         "scope": [],
     }
     test: EffectiveTestItem = {
-        "id": "TEST_0001",
+        "id": "TEST_001",
         "spec_state": "current",
         "execution": "automated",
         "automated_evidence": evidence_id,

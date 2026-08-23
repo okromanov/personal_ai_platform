@@ -31,17 +31,17 @@ class FullTraceabilityTests(unittest.TestCase):
             },
             "SYS_001": {"family": "SYS", "relations": {"traces_to": ["BR_001"]}},
             "INF_REQ_001": {"family": "INF_REQ", "relations": {}},
-            "TEST_0001": {
+            "TEST_001": {
                 "family": "TEST",
                 "relations": {"accepts": ["m02"], "verifies": ["SYS_001"]},
                 "evidence": ["missing_evidence"],
             },
-            "TEST_0002": {
+            "TEST_002": {
                 "family": "TEST",
                 "relations": {"accepts": ["m02"], "verifies": ["SYS_001"]},
                 "evidence": [],
             },
-            "TEST_0003": {
+            "TEST_003": {
                 "family": "TEST",
                 "relations": {"accepts": ["m02"], "verifies": ["SYS_001"]},
                 "evidence": ["evidence_without_source"],

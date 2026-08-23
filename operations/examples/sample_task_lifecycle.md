@@ -2,14 +2,14 @@
 id: operations_sample_task_lifecycle
 type: guide
 document_state: current
-version: 1.0
+version: 1.2
 updated: 2026-08-22
 depends_on:
   - operations_change_process
   - operations_procedure_map
 ---
 
-# SAMPLE_TASK_0001 — Пример полного цикла задачи
+# SAMPLE_TASK_001 — Пример полного цикла задачи
 
 Эта карточка показывает, как выглядит полный путь задачи от создания к доказательству. Используется только для обучения и демонстрации процесса.
 
@@ -36,7 +36,7 @@ depends_on:
 ## 3. Связанные документы
 
 - Спецификация требования: [`specifications/system_specification.md`](../../specifications/system_specification.md)
-- Примеры тестов: [`work/tests/test_0001.md`](../../work/tests/test_0001.md)
+- Примеры тестов: [`work/tests/test_001.md`](../../work/tests/test_001.md)
 - Инструкция агенту: [`AGENTS.md`](../../AGENTS.md) раздел 3 (цикл разработки)
 - Процедура проверки: [`operations/procedure_map.md`](../procedure_map.md)
 
@@ -55,7 +55,7 @@ TASK переводится в `completed` только когда:
 Если бы это была реальная задача, цикл выглядел бы так:
 
 ```
-Агент получает: ПРОДОЛЖАЙ SAMPLE_TASK_0001
+Агент получает: ПРОДОЛЖАЙ SAMPLE_TASK_001
        ↓
 1. Прочитать TASK и понять allowed_paths
    └─ Пути: operations/examples/**, specifications/system_specification.md, ...

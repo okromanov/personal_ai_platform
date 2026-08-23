@@ -1,11 +1,11 @@
 ---
-id: TEST_0002
+id: TEST_002
 type: test
 title: Проверка качества, доказательств и автоматизации принятия
 spec_state: current
 execution: automated
 automated_evidence: unit_tests
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 accepts:
   - m01
@@ -13,8 +13,8 @@ verifies:
   - SEC_CTL_018
 ---
 
-<a id="test_0002"></a>
-# TEST_0002 — Проверка качества, доказательств и автоматизации принятия
+<a id="test_002"></a>
+# TEST_002 — Проверка качества, доказательств и автоматизации принятия
 
 Автоматическая проверка. Действия владельца не требуются.
 

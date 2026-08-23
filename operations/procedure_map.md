@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.0
+version: 1.2
 updated: 2026-08-22
 depends_on:
   - operations_change_process
@@ -120,7 +120,7 @@ depends_on:
 ```
 Точка входа: project_status.md (действие владельца)
        ↓
-ПРОДОЛЖАЙ m01 / ПРОДОЛЖАЙ TASK_XXXX
+ПРОДОЛЖАЙ m01 / ПРОДОЛЖАЙ TASK_XXX
        ↓
 AGENTS.md раздел 2 (с чего начинать)
        ↓

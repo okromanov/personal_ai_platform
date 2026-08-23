@@ -132,7 +132,7 @@ def _snapshot(milestone_id: str, acceptance: AcceptanceResult) -> ProgressSnapsh
 class EvidenceRecordTests(unittest.TestCase):
     def test_targets_merge_tests_profiles_and_fallback_paths(self) -> None:
         test_item = _test_item(
-            "TEST_0001",
+            "TEST_001",
             automated_evidence="e2e",
             # Duplicate SYS_001 on purpose: targets must be de-duplicated.
             verifies=["SYS_001", "SYS_001"],
@@ -173,7 +173,7 @@ class EvidenceRecordTests(unittest.TestCase):
 
     def test_build_bundle_normalizes_evidence_and_tests(self) -> None:
         test_item = _test_item(
-            "TEST_0001",
+            "TEST_001",
             automated_evidence="project_checks",
             verifies=["SYS_001"],
             accepts=["m02"],
@@ -221,7 +221,7 @@ class EvidenceRecordTests(unittest.TestCase):
         self.assertEqual(bundle["git_sha"], "a" * 40)
         self.assertEqual(bundle["schema_version"], 2)
         self.assertEqual(evidence[0]["targets"], ["SYS_001"])
-        self.assertEqual(tests[0]["test_id"], "TEST_0001")
+        self.assertEqual(tests[0]["test_id"], "TEST_001")
 
     def test_write_bundle_uses_sha_name_and_atomic_latest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

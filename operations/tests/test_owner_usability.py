@@ -118,12 +118,12 @@ class OwnerUsabilityTests(unittest.TestCase):
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
-            _task_item("TASK_0001", "planned", traces_to=["m01"], owner_action="none"),
-            _task_item("TASK_0002", "blocked", traces_to=["m01"], owner_action="none"),
+            _task_item("TASK_001", "planned", traces_to=["m01"], owner_action="none"),
+            _task_item("TASK_002", "blocked", traces_to=["m01"], owner_action="none"),
         ]
         current = select_current_task(tasks, "m01")
         assert current is not None
-        self.assertEqual(current["id"], "TASK_0001")
+        self.assertEqual(current["id"], "TASK_001")
 
     def test_technical_status_has_one_russian_owner_action_and_real_foundation_count(self) -> None:
         action = build_owner_next_action(
@@ -261,9 +261,9 @@ class OwnerUsabilityTests(unittest.TestCase):
     def test_project_status_shows_exact_decision_when_owner_is_next(self) -> None:
         milestone = {"id": "m01", "title": "Основа", "work_state": "in-progress"}
         task = {
-            "id": "TASK_0003",
+            "id": "TASK_003",
             "title": "Подготовить решение",
-            "path": "work/tasks/task_0003_finish_m01.md",
+            "path": "work/tasks/task_003_finish_m01.md",
             "traces_to": ["m01"],
             "work_state": "in-progress",
             "next_actor": "owner",

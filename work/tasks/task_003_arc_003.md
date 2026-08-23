@@ -1,24 +1,24 @@
 ---
-id: TASK_0003
+id: TASK_003
 type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: planned
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 next_actor: agent
 owner_action: none
 depends_on:
-  - TASK_0002
+  - TASK_002
 allowed_paths:
-  - work/tasks/task_0003_arc_003.md
+  - work/tasks/task_003_arc_003.md
 traces_to:
   - m02
 implements:
   - ARC_CMP_003
 ---
 
-# TASK_0003 — Реализация ARC_CMP_003
+# TASK_003 — Реализация ARC_CMP_003
 
 ## 1. Зачем это делаем
 

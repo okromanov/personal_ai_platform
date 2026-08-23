@@ -181,26 +181,26 @@ version: 1.0
 | `ADR_007` | `ADR` | `traces_to`: `m02`, `m04`, `m06`, `BR_005`, `SYS_024`, `SYS_025`, `SYS_027`, `INF_REQ_001`, `INF_REQ_008`, `INF_REQ_009`, `INF_REQ_011`, `INF_REQ_013`, `INF_REQ_014` | — |
 | `ADR_008` | `ADR` | `traces_to`: `m04`, `BR_022`, `BR_023`, `BR_024`, `SYS_011`, `SYS_012`, `SYS_029`, `INF_REQ_008`, `INF_REQ_009`, `SEC_CTL_006`, `SEC_CTL_019` | — |
 | `ADR_009` | `ADR` | `traces_to`: `m02`, `BR_033`, `SYS_027`, `SEC_CTL_005`, `INF_REQ_006` | — |
-| `TASK_0001` | `TASK` | `implements`: `ARC_CMP_001`<br>`traces_to`: `m02` | — |
-| `TASK_0002` | `TASK` | `depends_on`: `TASK_0001`<br>`implements`: `ARC_CMP_002`<br>`traces_to`: `m02` | — |
-| `TASK_0003` | `TASK` | `depends_on`: `TASK_0002`<br>`implements`: `ARC_CMP_003`<br>`traces_to`: `m02` | — |
-| `TASK_0004` | `TASK` | `depends_on`: `TASK_0003`<br>`implements`: `ARC_CMP_004`<br>`traces_to`: `m02` | — |
-| `TASK_0005` | `TASK` | `depends_on`: `TASK_0004`<br>`implements`: `ARC_CMP_005`<br>`traces_to`: `m02` | — |
-| `TASK_0006` | `TASK` | `depends_on`: `TASK_0005`<br>`implements`: `ARC_CMP_007`<br>`traces_to`: `m02` | — |
-| `TASK_0007` | `TASK` | `depends_on`: `TASK_0006`<br>`implements`: `ARC_CMP_009`<br>`traces_to`: `m02` | — |
-| `TASK_0008` | `TASK` | `depends_on`: `TASK_0007`<br>`implements`: `INF_CMP_001`<br>`traces_to`: `m02` | — |
-| `TASK_0009` | `TASK` | `depends_on`: `TASK_0008`<br>`implements`: `INF_CMP_002`<br>`traces_to`: `m02` | — |
-| `TASK_0010` | `TASK` | `depends_on`: `TASK_0009`<br>`implements`: `INF_CMP_003`<br>`traces_to`: `m02` | — |
-| `TASK_0011` | `TASK` | `depends_on`: `TASK_0010`<br>`implements`: `INF_CMP_005`<br>`traces_to`: `m02` | — |
-| `TASK_0012` | `TASK` | `depends_on`: `TASK_0011`<br>`implements`: `INF_CMP_007`<br>`traces_to`: `m02` | — |
-| `TASK_0013` | `TASK` | `depends_on`: `TASK_0012`<br>`implements`: `INF_CMP_008`<br>`traces_to`: `m02` | — |
-| `TEST_0001` | `TEST` | `accepts`: `m01` | `project_checks` |
-| `TEST_0002` | `TEST` | `accepts`: `m01`<br>`verifies`: `SEC_CTL_018` | `unit_tests` |
-| `TEST_0003` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_003`, `SYS_004`, `SYS_027` | `m02_contract_tests` |
-| `TEST_0004` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_002`, `SYS_006`, `SYS_020`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_003`, `SEC_CTL_005`, `SEC_CTL_008`, `SEC_CTL_020` | `m02_security_tests` |
-| `TEST_0005` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_001`, `SYS_024`, `SYS_027` | `m02_e2e_tests` |
-| `TEST_0006` | `TEST` | `accepts`: `m02`<br>`verifies`: `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_003`, `INF_REQ_006`, `INF_REQ_010`, `INF_REQ_012`, `INF_REQ_013`, `INF_REQ_015`, `INF_REQ_016` | `m02_infrastructure_tests` |
-| `TEST_0007` | `TEST` | `accepts`: `m02`<br>`traces_to`: `TASK_0001`, `SYS_001`, `SYS_005`, `SYS_006`, `SYS_007` | `quality_suite` |
+| `TASK_001` | `TASK` | `implements`: `ARC_CMP_001`<br>`traces_to`: `m02` | — |
+| `TASK_002` | `TASK` | `depends_on`: `TASK_001`<br>`implements`: `ARC_CMP_002`<br>`traces_to`: `m02` | — |
+| `TASK_003` | `TASK` | `depends_on`: `TASK_002`<br>`implements`: `ARC_CMP_003`<br>`traces_to`: `m02` | — |
+| `TASK_004` | `TASK` | `depends_on`: `TASK_003`<br>`implements`: `ARC_CMP_004`<br>`traces_to`: `m02` | — |
+| `TASK_005` | `TASK` | `depends_on`: `TASK_004`<br>`implements`: `ARC_CMP_005`<br>`traces_to`: `m02` | — |
+| `TASK_006` | `TASK` | `depends_on`: `TASK_005`<br>`implements`: `ARC_CMP_007`<br>`traces_to`: `m02` | — |
+| `TASK_007` | `TASK` | `depends_on`: `TASK_006`<br>`implements`: `ARC_CMP_009`<br>`traces_to`: `m02` | — |
+| `TASK_008` | `TASK` | `depends_on`: `TASK_007`<br>`implements`: `INF_CMP_001`<br>`traces_to`: `m02` | — |
+| `TASK_009` | `TASK` | `depends_on`: `TASK_008`<br>`implements`: `INF_CMP_002`<br>`traces_to`: `m02` | — |
+| `TASK_010` | `TASK` | `depends_on`: `TASK_009`<br>`implements`: `INF_CMP_003`<br>`traces_to`: `m02` | — |
+| `TASK_011` | `TASK` | `depends_on`: `TASK_010`<br>`implements`: `INF_CMP_005`<br>`traces_to`: `m02` | — |
+| `TASK_012` | `TASK` | `depends_on`: `TASK_011`<br>`implements`: `INF_CMP_007`<br>`traces_to`: `m02` | — |
+| `TASK_013` | `TASK` | `depends_on`: `TASK_012`<br>`implements`: `INF_CMP_008`<br>`traces_to`: `m02` | — |
+| `TEST_001` | `TEST` | `accepts`: `m01` | `project_checks` |
+| `TEST_002` | `TEST` | `accepts`: `m01`<br>`verifies`: `SEC_CTL_018` | `unit_tests` |
+| `TEST_003` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_003`, `SYS_004`, `SYS_027` | `m02_contract_tests` |
+| `TEST_004` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_002`, `SYS_006`, `SYS_020`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_003`, `SEC_CTL_005`, `SEC_CTL_008`, `SEC_CTL_020` | `m02_security_tests` |
+| `TEST_005` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_001`, `SYS_024`, `SYS_027` | `m02_e2e_tests` |
+| `TEST_006` | `TEST` | `accepts`: `m02`<br>`verifies`: `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_003`, `INF_REQ_006`, `INF_REQ_010`, `INF_REQ_012`, `INF_REQ_013`, `INF_REQ_015`, `INF_REQ_016` | `m02_infrastructure_tests` |
+| `TEST_007` | `TEST` | `accepts`: `m02`<br>`traces_to`: `TASK_001`, `SYS_001`, `SYS_005`, `SYS_006`, `SYS_007` | `quality_suite` |
 | `m01` | `MILESTONE` | — | — |
 | `m02` | `MILESTONE` | `scope`: `BR_001`, `BR_004`, `BR_005`, `BR_006`, `BR_033`, `BR_036`, `SYS_001`, `SYS_002`, `SYS_003`, `SYS_004`, `SYS_006`, `SYS_020`, `SYS_024`, `SYS_027`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_003`, `SEC_CTL_005`, `SEC_CTL_008`, `SEC_CTL_020`, `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_003`, `INF_REQ_006`, `INF_REQ_010`, `INF_REQ_012`, `INF_REQ_013`, `INF_REQ_015`, `INF_REQ_016` | — |
 | `m03` | `MILESTONE` | `scope`: `BR_003`, `BR_011`, `BR_012`, `BR_026`, `BR_027`, `BR_028`, `SYS_008`, `SYS_009`, `SYS_010`, `SYS_022`, `SYS_023`, `SEC_CTL_004`, `SEC_CTL_007`, `SEC_CTL_009`, `SEC_CTL_010`, `SEC_CTL_012`, `INF_REQ_004`, `INF_REQ_005`, `INF_REQ_007` | — |

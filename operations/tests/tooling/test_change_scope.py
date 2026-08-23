@@ -41,10 +41,10 @@ class ChangeScopeTests(unittest.TestCase):
             root = Path(tmp)
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
-            path = "work/tasks/task_0001.md"
+            path = "work/tasks/task_001.md"
             (root / path).write_text(
                 _task(
-                    task_id="TASK_0001",
+                    task_id="TASK_001",
                     state="in-progress",
                     path=path,
                     allowed=[path, "specifications/**"],
@@ -63,10 +63,10 @@ class ChangeScopeTests(unittest.TestCase):
             root = Path(tmp)
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
-            path = "work/tasks/task_0001.md"
+            path = "work/tasks/task_001.md"
             (root / path).write_text(
                 _task(
-                    task_id="TASK_0001",
+                    task_id="TASK_001",
                     state="completed",
                     path=path,
                     allowed=[path, "specifications/system_specification.md"],

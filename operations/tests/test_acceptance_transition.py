@@ -93,7 +93,7 @@ class AcceptanceTransitionTests(unittest.TestCase):
     def test_m01_reaches_semantic_review_without_repository_maintenance_tasks(self) -> None:
         root = Path(__file__).resolve().parents[2]
         project_tasks = _empty_tasks()
-        passing_tests = _tests_report(_passing_test("TEST_0001", "m01"))
+        passing_tests = _tests_report(_passing_test("TEST_001", "m01"))
         passing_evidence = {
             evidence_id: {"result": "passed", "class": "hard", "source": "test"}
             for evidence_id in ["project_checks", "unit_tests", "quality_suite"]
@@ -172,7 +172,7 @@ class AcceptanceTransitionTests(unittest.TestCase):
         """
         root = Path(__file__).resolve().parents[2]
         project_tasks = _empty_tasks()
-        passing_tests = _tests_report(_passing_test("TEST_9001", "m02"))
+        passing_tests = _tests_report(_passing_test("TEST_901", "m02"))
         passing_evidence = {
             evidence_id: {"result": "passed", "class": "hard", "source": "test"}
             for evidence_id in ["project_checks", "unit_tests"]
@@ -323,10 +323,10 @@ class AcceptanceTransitionTests(unittest.TestCase):
                 "- work_state: `in-progress`\n- состав: —\n",
                 encoding="utf-8",
             )
-            task_path = root / "work/tasks/task_0001.md"
+            task_path = root / "work/tasks/task_001.md"
             task_path.write_text(
-                "---\nid: TASK_0001\ntype: task\nwork_state: completed\nversion: 1.0\n"
-                "traces_to:\n  - m01\n---\n# TASK_0001\n",
+                "---\nid: TASK_001\ntype: task\nwork_state: completed\nversion: 1.0\n"
+                "traces_to:\n  - m01\n---\n# TASK_001\n",
                 encoding="utf-8",
             )
             adr_path = root / "adr/adr_001_sample.md"
@@ -399,9 +399,9 @@ class AcceptanceTransitionTests(unittest.TestCase):
             (root / "work/acceptance").mkdir(parents=True)
             original = "## m01 — Foundation\n\n- work_state: `in-progress`\n"
             (root / "milestones.md").write_text(original, encoding="utf-8")
-            (root / "work/tasks/task_0001.md").write_text(
-                "---\nid: TASK_0001\ntype: task\nwork_state: in-progress\nversion: 1.0\n"
-                "traces_to:\n  - m01\n---\n# TASK_0001\n",
+            (root / "work/tasks/task_001.md").write_text(
+                "---\nid: TASK_001\ntype: task\nwork_state: in-progress\nversion: 1.0\n"
+                "traces_to:\n  - m01\n---\n# TASK_001\n",
                 encoding="utf-8",
             )
             with self.assertRaisesRegex(ValueError, "не завершены TASK"):

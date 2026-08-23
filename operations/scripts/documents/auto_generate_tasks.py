@@ -52,7 +52,7 @@ def _extract_infrastructure_components(root: Path) -> dict[str, set[str]]:
 
 
 def _find_next_task_number(root: Path) -> int:
-    """Find next available TASK_XXXX number."""
+    """Find next available TASK_XXX number."""
     numbers = []
     for task_file in (root / "work" / "tasks").glob("task_*.md"):
         match = re.search(r"^id:\s*TASK_(\d+)", task_file.read_text(encoding="utf-8"), re.MULTILINE)
@@ -116,7 +116,7 @@ def _generate_task_document(
     depends_lines = f"  - {depends_on}\n" if depends_on else ""
 
     return f"""---
-id: TASK_{task_number:04d}
+id: TASK_{task_number:03d}
 type: task
 title: Реализация {component_id}
 component: {component_id}
@@ -134,7 +134,7 @@ implements:
   - {component_id}
 ---
 
-# TASK_{task_number:04d} — Реализация {component_id}
+# TASK_{task_number:03d} — Реализация {component_id}
 
 ## 1. Зачем это делаем
 
@@ -240,13 +240,13 @@ def auto_generate_tasks(root: Path) -> list[str]:
         task_num = next_task_num
         prefix = "arc" if component_id.startswith("ARC_") else "inf"
         suffix = component_id.rsplit("_", 1)[-1].lower()
-        task_path = f"work/tasks/task_{task_num:04d}_{prefix}_{suffix}.md"
+        task_path = f"work/tasks/task_{task_num:03d}_{prefix}_{suffix}.md"
         content = _generate_task_document(task_num, component_id, current_id, depends_on, task_path)
         task_file = root / task_path
 
         task_file.write_text(content, encoding="utf-8")
         created.append(task_file.relative_to(root).as_posix())
-        depends_on = f"TASK_{task_num:04d}"
+        depends_on = f"TASK_{task_num:03d}"
         next_task_num += 1
 
     return created

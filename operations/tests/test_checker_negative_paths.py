@@ -47,7 +47,7 @@ class CheckerNegativePathTests(unittest.TestCase):
             "BR_001": {"family": "BR", "relations": {}},
             "BR_003": {"family": "BR", "relations": {"traces_to": ["UNKNOWN"]}},
             "SEC_CTL_001": {"family": "SEC_CTL", "relations": {}},
-            "TEST_0001": {
+            "TEST_001": {
                 "family": "TEST",
                 "relations": {"accepts": [], "verifies": []},
             },
@@ -96,8 +96,8 @@ class CheckerNegativePathTests(unittest.TestCase):
 
     def test_task_policy_reports_conflicting_lifecycle_fields(self) -> None:
         task: dict[str, Any] = {
-            "id": "TASK_0001",
-            "path": "work/tasks/task_0001.md",
+            "id": "TASK_001",
+            "path": "work/tasks/task_001.md",
             "body": "### Владельцу\n50%",
             "next_actor": "agent",
             "owner_action": "approve",
@@ -107,7 +107,7 @@ class CheckerNegativePathTests(unittest.TestCase):
             "allowed_paths": [],
             "blocker": "stale",
         }
-        planned = dict(task, id="TASK_0002", next_actor="none", owner_action="none")
+        planned = dict(task, id="TASK_002", next_actor="none", owner_action="none")
         planned["work_state"] = "planned"
         with (
             patch(
@@ -130,9 +130,61 @@ class CheckerNegativePathTests(unittest.TestCase):
         ):
             self.assertIn(fragment, joined)
 
+    def test_completed_task_rejects_unfilled_auto_generated_result_placeholder(self) -> None:
+        def _task(body: str) -> dict[str, Any]:
+            return {
+                "id": "TASK_001",
+                "path": "work/tasks/task_001.md",
+                "body": body,
+                "next_actor": "none",
+                "owner_action": "none",
+                "work_state": "completed",
+                "component": "ARC_CMP_001",
+                "checklist": [],
+                "steps_remaining": 0,
+                "allowed_paths": [],
+                "blocker": "",
+            }
+
+        placeholder_body = (
+            "## 2. Результат\n\n"
+            "Компонент `ARC_CMP_001` полностью реализован, протестирован и интегрирован.\n\n"
+            "## 3. Где мы сейчас\n"
+        )
+        filled_body = (
+            "## 2. Результат\n\n"
+            "Стабильный контракт Channel и симулированная реализация TelegramChannel "
+            "(очередь вместо реального Bot API).\n\n"
+            "## 3. Где мы сейчас\n"
+        )
+
+        with (
+            patch(
+                "operations.scripts.documents.check.collect_tasks",
+                return_value={"tasks": [_task(placeholder_body)]},
+            ),
+            patch("operations.scripts.documents.check.render_task_index", return_value="index"),
+            patch("operations.scripts.documents.check.read_text", return_value="index"),
+            patch.object(Path, "exists", return_value=True),
+        ):
+            placeholder_result = check_tasks(Path("."))
+        self.assertIn("шаблонной заглушкой", "\n".join(placeholder_result.errors))
+
+        with (
+            patch(
+                "operations.scripts.documents.check.collect_tasks",
+                return_value={"tasks": [_task(filled_body)]},
+            ),
+            patch("operations.scripts.documents.check.render_task_index", return_value="index"),
+            patch("operations.scripts.documents.check.read_text", return_value="index"),
+            patch.object(Path, "exists", return_value=True),
+        ):
+            filled_result = check_tasks(Path("."))
+        self.assertNotIn("шаблонной заглушкой", "\n".join(filled_result.errors))
+
     def test_test_spec_policy_rejects_unsafe_and_unlinked_tests(self) -> None:
         automated: dict[str, Any] = {
-            "id": "TEST_0001",
+            "id": "TEST_001",
             "spec_state": "current",
             "traces_to": [],
             "verifies": ["UNKNOWN"],
@@ -141,14 +193,14 @@ class CheckerNegativePathTests(unittest.TestCase):
             "automated_evidence": "unknown",
             "manual_evidence": "manual",
         }
-        manual = dict(automated, id="TEST_0002", execution="manual")
+        manual = dict(automated, id="TEST_002", execution="manual")
         manual["automated_evidence"] = "automated"
         manual["manual_evidence"] = "unknown"
         documents = {
-            "test_0001.md": MarkdownDocument(
-                Path("test_0001.md"), automated, "## Действия владельца\nRun git status", "A"
+            "test_001.md": MarkdownDocument(
+                Path("test_001.md"), automated, "## Действия владельца\nRun git status", "A"
             ),
-            "test_0002.md": MarkdownDocument(Path("test_0002.md"), manual, "", "B"),
+            "test_002.md": MarkdownDocument(Path("test_002.md"), manual, "", "B"),
         }
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -260,7 +312,7 @@ class CheckerNegativePathTests(unittest.TestCase):
         tasks = {
             "tasks": [
                 {
-                    "id": "TASK_0001",
+                    "id": "TASK_001",
                     "traces_to": ["m02"],
                     "implements": ["SYS_001"],
                 }
@@ -281,7 +333,7 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "operations.scripts.documents.check.validate_task_semantics",
                 return_value=[
                     "m02: scope не покрыт TASK→component→TEST: SYS_001",
-                    "TASK_0001: component не связан ни с одним TEST",
+                    "TASK_001: component не связан ни с одним TEST",
                 ],
             ),
         ):

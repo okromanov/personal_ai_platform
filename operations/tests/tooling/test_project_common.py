@@ -42,7 +42,7 @@ class ReadTextTests(unittest.TestCase):
     def test_invalid_utf8_raises_with_path_in_message(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "broken.md"
-            path.write_bytes(b"---\nid: TEST_0001\n---\n\xff\xfe invalid\n")
+            path.write_bytes(b"---\nid: TEST_001\n---\n\xff\xfe invalid\n")
             with self.assertRaises(ValueError) as ctx:
                 read_text(path)
             self.assertIn(str(path), str(ctx.exception))

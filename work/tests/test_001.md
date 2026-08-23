@@ -1,18 +1,18 @@
 ---
-id: TEST_0001
+id: TEST_001
 type: test
 title: Проверка модели документов и трассировки
 spec_state: current
 execution: automated
 automated_evidence: project_checks
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 accepts:
   - m01
 ---
 
-<a id="test_0001"></a>
-# TEST_0001 — Проверка модели документов и трассировки
+<a id="test_001"></a>
+# TEST_001 — Проверка модели документов и трассировки
 
 Автоматическая проверка. Действия владельца не требуются.
 

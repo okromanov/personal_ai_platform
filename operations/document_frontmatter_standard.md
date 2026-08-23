@@ -2,7 +2,7 @@
 id: document_frontmatter_standard
 type: guide
 document_state: current
-version: 1.0
+version: 1.2
 updated: 2026-08-22
 depends_on:
   - project_rules
@@ -285,7 +285,7 @@ depends_on:
 ### Пример 3: Задача
 ```yaml
 ---
-id: TASK_0001
+id: TASK_001
 type: task
 title: Реализация основного цикла
 work_state: in-progress
@@ -297,14 +297,14 @@ allowed_paths:
   - src/**
   - operations/scripts/**
 depends_on:
-  - TASK_0000
+  - TASK_000
 ---
 ```
 
 ### Пример 4: Автоматический тест
 ```yaml
 ---
-id: TEST_0001
+id: TEST_001
 type: test
 title: Проверка модели документов
 spec_state: current

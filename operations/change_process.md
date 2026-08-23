@@ -2,8 +2,8 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.0
-updated: 2026-08-22
+version: 1.3
+updated: 2026-08-23
 depends_on:
   - project_rules
 ---
@@ -179,14 +179,14 @@ traces_to:
 **Проектные задачи (TASK)**:
 
 Обязательные поля:
-- `id` — формат `TASK_XXXX` где `XXXX` — четырёхзначный номер (стартует с `TASK_0001`)
+- `id` — формат `TASK_XXX` где `XXX` — трёхзначный номер (стартует с `TASK_001`)
 - `type` — значение `task`
 - `title` — короткое название задачи
 - `component` — ровно один `ARC_CMP_*`, `ARC_FLOW_*`, `INF_CMP_*` или `INF_FLOW_*`, поставляемый задачей
 - `work_state` — допустимые значения: `planned`, `in-progress`, `blocked`, `completed`, `cancelled`
 - `version` — номер версии
 - `updated` — дата последнего изменения
-- `depends_on` — список предыдущих TASK, для `TASK_0001` может быть пустым `[]`
+- `depends_on` — список предыдущих TASK, для `TASK_001` может быть пустым `[]`
 - `next_actor` — кто выполнит следующий шаг, допустимые значения: `agent`, `owner`, `automation`
 - `owner_action` — если `next_actor: owner`, то здесь одно конкретное действие или `none`
 - `allowed_paths` — список путей, которые может менять эта задача
@@ -199,7 +199,7 @@ traces_to:
 Пример:
 ```yaml
 ---
-id: TASK_0001
+id: TASK_001
 type: task
 title: Инициализировать репозиторий и структуру проекта
 component: ARC_CMP_001
@@ -226,7 +226,7 @@ implements:
 **Спецификации тестов (TEST)**:
 
 Обязательные поля:
-- `id` — формат `TEST_XXXX` где `XXXX` — четырёхзначный номер
+- `id` — формат `TEST_XXX` где `XXX` — трёхзначный номер
 - `type` — значение `test`
 - `spec_state` — допустимые значения: `current`, `superseded`
 - `version` — номер версии
@@ -245,7 +245,7 @@ implements:
 Пример:
 ```yaml
 ---
-id: TEST_0001
+id: TEST_001
 type: test
 title: Проверка модели документов и трассировки
 spec_state: current
@@ -256,7 +256,7 @@ updated: 2026-08-18
 accepts:
   - m01
 traces_to:
-  - TASK_0001
+  - TASK_001
 verifies:
   - SYS_001
 ---
@@ -334,7 +334,7 @@ version: 1.0
 
 4. **Изменение дат**: поле `updated` проверяется при слиянии запроса — дата должна соответствовать фактическому коммиту, изменившему этот файл.
 
-5. **Уникальные ID**: все ID должны быть уникальны в репозитории и соответствовать своему типу (TASK_XXXX, TEST_XXXX, ADR_XXX и т.п.).
+5. **Уникальные ID**: все ID должны быть уникальны в репозитории и соответствовать своему типу (TASK_XXX, TEST_XXX, ADR_XXX и т.п.).
 
 6. **Состояния**: используются только значения, перечисленные выше. Универсальное `status` запрещено.
 

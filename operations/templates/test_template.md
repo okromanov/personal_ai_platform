@@ -2,7 +2,7 @@
 id: template_test
 type: document_template
 document_state: current
-version: 1.0
+version: 1.2
 updated: 2026-08-22
 depends_on: []
 ---
@@ -13,14 +13,14 @@ depends_on: []
 
 ```markdown
 ---
-id: TEST_XXXX
+id: TEST_XXX
 type: test
 spec_state: current
 execution: automated
 version: 1.0
 updated: <yyyy-mm-dd>
 traces_to:
-  - TASK_XXXX
+  - TASK_XXX
 # Для продуктового TEST:
 verifies:
   - <SYS/SEC/ARC/INF/document ID>
@@ -32,7 +32,7 @@ automated_evidence: <evidence_id, если execution=automated>
 manual_evidence: <evidence_id структурированной записи результата>
 ---
 
-# TEST_XXXX — <Название доказательства>
+# TEST_XXX — <Название доказательства>
 
 ## 1. Назначение
 ## 2. Что проверяется

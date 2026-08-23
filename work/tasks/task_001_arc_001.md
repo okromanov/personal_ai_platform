@@ -1,16 +1,16 @@
 ---
-id: TASK_0001
+id: TASK_001
 type: task
 title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
-version: 1.4
+version: 1.6
 updated: 2026-08-23
 next_actor: none
 owner_action: none
 depends_on:
 allowed_paths:
-  - work/tasks/task_0001_arc_001.md
+  - work/tasks/task_001_arc_001.md
   - src/channels/
   - src/channels/__init__.py
   - src/channels/base.py
@@ -18,16 +18,16 @@ allowed_paths:
   - src/__init__.py
   - operations/tests/product/__init__.py
   - operations/tests/product/test_channels.py
-  - work/tests/test_0007.md
+  - work/tests/test_007.md
 traces_to:
   - m02
 implements:
   - ARC_CMP_001
 tests:
-  - TEST_0007
+  - TEST_007
 ---
 
-# TASK_0001 — Реализация ARC_CMP_001
+# TASK_001 — Реализация ARC_CMP_001
 
 ## 1. Зачем это делаем
 
@@ -35,7 +35,16 @@ tests:
 
 ## 2. Результат
 
-Компонент `ARC_CMP_001` полностью реализован, протестирован и интегрирован.
+Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация,
+`TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage`
+с отслеживаемым состоянием (pending → running → completed/failed/cancelled).
+
+`TelegramChannel` — упрощённая реализация для m02: приём/отправка сообщений эмулируются
+через внутреннюю `asyncio.Queue`, реального подключения к Telegram Bot API (webhook или
+polling) нет. Живой бот не настроен и не запущен. Контракт `Channel` рассчитан на замену
+этой реализации на реальный Bot API без изменений выше уровня канала — это работа
+следующей TASK, использующей канал, а не этой. Подробности и границы см. в `TEST_007`,
+§6 и §12.
 
 ## 3. Где мы сейчас
 
@@ -77,8 +86,8 @@ tests:
 - ✅ Все шаги плана выполнены
 - ✅ Локальные проверки успешны (operations/tests/product/test_channels.py: 16/16 тестов прошли, часть CI gate)
 - ✅ Pre-commit валидация успешна
-- ⏳ CI успешен (ожидается после push)
-- ⏳ Код review (следующий этап)
+- ✅ CI успешен
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 

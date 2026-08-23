@@ -138,10 +138,10 @@ updated: {today}
 
 | Event | Files Updated | When |
 |---|---|---|
-| Task created | `work/tasks/taskXXXX.md` created | `work_state: planned` |
-| Task started | `work/tasks/taskXXXX.md` updated | `work_state: in-progress`, `next_actor: agent` |
+| Task created | `work/tasks/taskXXX.md` created | `work_state: planned` |
+| Task started | `work/tasks/taskXXX.md` updated | `work_state: in-progress`, `next_actor: agent` |
 | Task completed | Multiple files | `work_state: completed`, dashboards regenerated |
-| Test added | `work/tests/testXXXX.md` created | `execution: automated` |
+| Test added | `work/tests/testXXX.md` created | `execution: automated` |
 | Milestone transition | `work/m0X/*` files created | state change triggered |
 
 ## Automation Hooks
