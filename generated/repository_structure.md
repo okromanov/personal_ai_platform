@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `193` |
+| Всего файлов | `195` |
 
 ```text
 personal_ai_platform/
@@ -51,6 +51,7 @@ personal_ai_platform/
 - operations/hooks/pre_commit_regenerate_dashboards.sh
 - operations/local_development_windows.md
 - operations/procedure_map.md
+- operations/procedures/file_update_dependencies.md
 - operations/project_config.json
 - operations/quality/requirements_dev.txt
 - operations/quality_baseline.json
@@ -79,6 +80,7 @@ personal_ai_platform/
 - operations/scripts/milestones/__init__.py
 - operations/scripts/milestones/init_milestone.py
 - operations/scripts/milestones/start.py
+- operations/scripts/milestones/update_completion_report.py
 - operations/scripts/quality/__init__.py
 - operations/scripts/quality/action_practicality.py
 - operations/scripts/quality/check_coverage.py
