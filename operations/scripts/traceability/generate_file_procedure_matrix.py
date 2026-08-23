@@ -32,7 +32,7 @@ def parse_yaml_frontmatter(content: str) -> dict:
     return fields
 
 
-def collect_files(root_path=None) -> dict:
+def collect_files(root_path: str | Path | None = None) -> dict:
     """Collect all tracked files and their metadata"""
     files = defaultdict(dict)
     root = Path(root_path) if root_path else Path(".")

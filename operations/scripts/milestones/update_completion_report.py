@@ -14,7 +14,7 @@ from datetime import date
 from pathlib import Path
 
 
-def update_completion_report(milestone_id: str, root: Path = None) -> bool:
+def update_completion_report(milestone_id: str, root: Path | None = None) -> bool:
     """Update final_report.md for completed milestone."""
     if root is None:
         root = Path.cwd()
