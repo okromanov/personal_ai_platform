@@ -59,4 +59,7 @@ fi
 echo "  [3/3] Canonical fast quality suite"
 "$PYTHON" operations/scripts/quality/run_suite.py fast
 
+echo "  [4/4] Auto-regenerate dashboards and increment versions"
+bash operations/hooks/pre_commit_regenerate_dashboards.sh || true
+
 echo "Pre-commit validation passed."

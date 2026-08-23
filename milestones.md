@@ -2,8 +2,8 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 1.0
-updated: 2026-08-22
+version: 1.1
+updated: 2026-08-23
 depends_on:
   - business_requirements
   - architecture_baseline
@@ -75,7 +75,7 @@ V1 — первый регулярно используемый персонал
 <a id="m02"></a>
 ## m02 — Выбор ключевых технологий и первый живой помощник
 
-- work_state: `planned`
+- work_state: `in-progress`
 - результат: владелец отправляет сообщение через Telegram и получает реальный ответ модели из постоянно работающей выбранной среды. Границы платформы остаются под контролем владельца.
 - состав: `BR_001`, `BR_004`, `BR_005`, `BR_006`, `BR_033`, `BR_036`, `SYS_001`, `SYS_002`, `SYS_003`, `SYS_004`, `SYS_006`, `SYS_020`, `SYS_024`, `SYS_027`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_003`, `SEC_CTL_005`, `SEC_CTL_008`, `SEC_CTL_020`, `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_003`, `INF_REQ_006`, `INF_REQ_010`, `INF_REQ_012`, `INF_REQ_013`, `INF_REQ_015`, `INF_REQ_016`.
 
