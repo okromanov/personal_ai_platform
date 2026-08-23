@@ -82,9 +82,9 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     v1_reqs = []
     br_path = root / "specifications" / "business_requirements.md"
     if br_path.exists():
-        content = br_path.read_text(encoding='utf-8')
+        content = br_path.read_text(encoding="utf-8")
         # Extract BR_ items with priority: core
-        matches = re.findall(r'- `(BR_\d+)`.*priority:.*core', content)
+        matches = re.findall(r"- `(BR_\d+)`.*priority:.*core", content)
         v1_reqs = sorted(set(matches))
 
     lines = [
@@ -131,7 +131,9 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
 
         # Add description based on milestone
         if mid == "m01":
-            lines.append("- **Что это:** подготовка структуры документов, правил и автоматических проверок")
+            lines.append(
+                "- **Что это:** подготовка структуры документов, правил и автоматических проверок"
+            )
         elif mid == "m02":
             lines.append("- **Что это:** выбор среды агента и первая интеграция с Telegram")
         elif mid == "m03":
@@ -151,7 +153,9 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
             lines.append("- **Когда будет готово:** запланирован")
 
         if mid == "m02":
-            lines.append("- **Требования:** точный машинно проверяемый состав задан в [`milestones.md`](milestones.md#m02); ручные счётчики здесь не дублируются")
+            lines.append(
+                "- **Требования:** точный машинно проверяемый состав задан в [`milestones.md`](milestones.md#m02); ручные счётчики здесь не дублируются"
+            )
 
         lines.append("")
 
@@ -159,7 +163,7 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     if v1_reqs and current_id == "m01":
         lines.append("## Состав V1 (обязательный периметр)")
         lines.append("")
-        lines.append("Эти бизнес-требования определяют, что такое \"готовая первая версия\":")
+        lines.append('Эти бизнес-требования определяют, что такое "готовая первая версия":')
         lines.append("")
         for req in v1_reqs[:18]:  # Show first 18
             lines.append(f"- {req}")
@@ -168,38 +172,48 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         lines.append("")
 
     # Document statistics with dynamic status
-    adr_status = "✅ ADR_001–ADR_004 приняты; ADR_005–ADR_009 — кандидаты для m02" if current_id not in {"m01"} else "⏳ ADR_001–ADR_004 ожидают принятия m01; ADR_005–ADR_009 — кандидаты для m02"
-    check_status = "✅ Смысловая проверка успешна" if current_id not in {"m01"} else "⏳ Смысловая проверка (ждёт этапа m01)"
+    adr_status = (
+        "✅ ADR_001–ADR_004 приняты; ADR_005–ADR_009 — кандидаты для m02"
+        if current_id not in {"m01"}
+        else "⏳ ADR_001–ADR_004 ожидают принятия m01; ADR_005–ADR_009 — кандидаты для m02"
+    )
+    check_status = (
+        "✅ Смысловая проверка успешна"
+        if current_id not in {"m01"}
+        else "⏳ Смысловая проверка (ждёт этапа m01)"
+    )
 
-    lines.extend([
-        "## Статистика документов",
-        "",
-        "| Тип | Количество | Статус |",
-        "|---|---|---|",
-        "| Бизнес-требования | 39 | ✅ актуальны |",
-        "| Угрозы | 19 | ✅ актуальны |",
-        "| Системные требования | 36 | ✅ актуальны |",
-        "| Меры безопасности | 20 | ✅ актуальны |",
-        "| Инфраструктурные требования | 16 | ✅ актуальны |",
-        f"| ADR | 9 | {adr_status} |",
-        f"| Проектные TASK | {task_count} | — |",
-        "| Спецификации проверок | 5 | ✅ 2 для m01; 3 для m02+ |",
-        "",
-        "## Автоматические проверки",
-        "",
-        "- ✅ Структура документов (документы корректны)",
-        "- ✅ Трассировка требований (связи целостны)",
-        "- ✅ Версионирование (метаданные верны)",
-        "- ✅ Производные представления (могут пересчитаны)",
-        f"- {check_status}",
-        "",
-        "## GitHub Actions",
-        "",
-        "Статус серверной проверки не хранится в этом документе, потому что он быстро устаревает. Перед смысловой проверкой агент обязан получить результат GitHub Actions для точного проверяемого SHA и сверить evidence artifact. Пока это не выполнено, серверная готовность считается неподтверждённой.",
-        "",
-        "## Оставшиеся ворота",
-        "",
-    ])
+    lines.extend(
+        [
+            "## Статистика документов",
+            "",
+            "| Тип | Количество | Статус |",
+            "|---|---|---|",
+            "| Бизнес-требования | 39 | ✅ актуальны |",
+            "| Угрозы | 19 | ✅ актуальны |",
+            "| Системные требования | 36 | ✅ актуальны |",
+            "| Меры безопасности | 20 | ✅ актуальны |",
+            "| Инфраструктурные требования | 16 | ✅ актуальны |",
+            f"| ADR | 9 | {adr_status} |",
+            f"| Проектные TASK | {task_count} | — |",
+            "| Спецификации проверок | 5 | ✅ 2 для m01; 3 для m02+ |",
+            "",
+            "## Автоматические проверки",
+            "",
+            "- ✅ Структура документов (документы корректны)",
+            "- ✅ Трассировка требований (связи целостны)",
+            "- ✅ Версионирование (метаданные верны)",
+            "- ✅ Производные представления (могут пересчитаны)",
+            f"- {check_status}",
+            "",
+            "## GitHub Actions",
+            "",
+            "Статус серверной проверки не хранится в этом документе, потому что он быстро устаревает. Перед смысловой проверкой агент обязан получить результат GitHub Actions для точного проверяемого SHA и сверить evidence artifact. Пока это не выполнено, серверная готовность считается неподтверждённой.",
+            "",
+            "## Оставшиеся ворота",
+            "",
+        ]
+    )
 
     # Add dynamic gates section
     gates_title, gates = get_gates_for_milestone(current_id)
@@ -218,13 +232,15 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         lines.append(f"| {command} | {actor} | {when} |")
     lines.append("")
 
-    lines.extend([
-        "## Ссылки на правила",
-        "",
-        "- **Как работает процесс:** [`project_rules.md`](project_rules.md)",
-        "- **Как вносятся изменения:** [`operations/change_process.md`](operations/change_process.md)",
-        "- **Инструкция агенту:** [`AGENTS.md`](AGENTS.md)",
-        "",
-    ])
+    lines.extend(
+        [
+            "## Ссылки на правила",
+            "",
+            "- **Как работает процесс:** [`project_rules.md`](project_rules.md)",
+            "- **Как вносятся изменения:** [`operations/change_process.md`](operations/change_process.md)",
+            "- **Инструкция агенту:** [`AGENTS.md`](AGENTS.md)",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
