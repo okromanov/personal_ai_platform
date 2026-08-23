@@ -101,7 +101,7 @@ jobs:
           py operations\scripts\documents\check.py --all --json | Tee-Object -FilePath runtime\check_summary.json
           exit $LASTEXITCODE
 
-      - name: Run unit tests
+      - name: Run unit and integration tests
         if: always()
         shell: pwsh
         run: |
@@ -110,7 +110,12 @@ jobs:
           $testResult = $LASTEXITCODE
           $testResult | Out-File -FilePath runtime\test_result.txt
           Get-Content runtime\test_output.txt
-          exit $testResult
+          if ($testResult -ne 0) { exit $testResult }
+
+          py -m unittest discover -s operations/tests/integration -v *>> runtime\test_output.txt
+          $integrationResult = $LASTEXITCODE
+          if ($integrationResult -ne 0) { exit $integrationResult }
+          exit 0
 
       - name: Check generated drift
         if: always()
@@ -127,6 +132,9 @@ jobs:
           path: |
             runtime/check_summary.json
             runtime/test_output.txt
+            runtime/security_audit.json
+            runtime/code_analysis.json
+            runtime/dead_code.txt
             tasks.md
             generated/document_index.md
             generated/repository_structure.md
@@ -242,6 +250,9 @@ jobs:
             --output runtime/evidence/quality_suite.json \
             --artifact runtime/check_summary.json \
             --artifact runtime/test_output.txt \
+            --artifact runtime/security_audit.json \
+            --artifact runtime/code_analysis.json \
+            --artifact runtime/dead_code.txt \
             --artifact runtime/ruff_check.txt \
             --artifact runtime/ruff_format.txt \
             --artifact runtime/mypy_baseline.txt \
@@ -271,6 +282,9 @@ jobs:
           path: |
             runtime/check_summary.json
             runtime/test_output.txt
+            runtime/security_audit.json
+            runtime/code_analysis.json
+            runtime/dead_code.txt
             runtime/ruff_check.txt
             runtime/ruff_format.txt
             runtime/mypy_baseline.txt
