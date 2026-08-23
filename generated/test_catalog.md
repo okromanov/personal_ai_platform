@@ -10,8 +10,8 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `280` |
-| Core logic (acceptance, governance, lifecycle) | `121` |
+| Всего тестов | `283` |
+| Core logic (acceptance, governance, lifecycle) | `124` |
 | Tooling (quality scripts, registries, traceability) | `127` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
@@ -88,6 +88,9 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_durability.py` | `ContentIntegrityTest` | `test_round_trip_preserves_unicode_content` | Round trip preserves unicode content |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_durability.py` | `CrashDuringWriteTest` | `test_exception_during_temp_file_write_leaves_original_intact` | Exception during temp file write leaves original intact |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_durability.py` | `CrashDuringWriteTest` | `test_os_replace_failure_leaves_original_and_no_visible_partial_file` | Os replace failure leaves original and no visible partial file |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_durability.py` | `ReplaceRetryTest` | `test_gives_up_after_exhausting_retry_attempts` | Gives up after exhausting retry attempts |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_durability.py` | `ReplaceRetryTest` | `test_non_permission_os_error_is_not_retried` | Non permission os error is not retried |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_durability.py` | `ReplaceRetryTest` | `test_succeeds_after_transient_permission_errors` | Succeeds after transient permission errors |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_generation_safety.py` | `GenerationSafetyTests` | `test_checker_exception_is_localized_and_other_checks_continue` | Checker exception is localized and other checks continue |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_generation_safety.py` | `GenerationSafetyTests` | `test_renderer_failure_does_not_partially_write_outputs` | Renderer failure does not partially write outputs |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_accepts_and_empty_product_scope_never_produce_empty_evidence_targets` | Accepts and empty product scope never produce empty evidence targets |

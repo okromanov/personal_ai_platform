@@ -11,6 +11,7 @@ re-read from disk exactly as written.
 
 from __future__ import annotations
 
+import os
 import sys
 import tempfile
 import unittest
@@ -94,6 +95,78 @@ class CrashDuringWriteTest(unittest.TestCase):
 
         # Original committed content must survive the failed rename.
         self.assertEqual(read_text(target), "stable content\n")
+
+
+class ReplaceRetryTest(unittest.TestCase):
+    """os.replace() has no POSIX-style guarantee on Windows that a rename
+    succeeds while the destination is momentarily open elsewhere; these
+    exercise _replace_with_retry's bounded-retry behavior directly rather
+    than relying on a genuine Windows-only race to trigger it."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+
+    def test_succeeds_after_transient_permission_errors(self) -> None:
+        target = self.root / "data.txt"
+        real_replace = os.replace
+        calls: list[int] = []
+
+        def flaky_replace(src: str, dst: str) -> None:
+            calls.append(1)
+            if len(calls) < 3:
+                raise PermissionError("transient lock, simulating Windows contention")
+            real_replace(src, dst)
+
+        with (
+            mock.patch("os.replace", side_effect=flaky_replace),
+            mock.patch("time.sleep") as sleep_mock,
+        ):
+            changed = atomic_write(target, "eventually written")
+
+        self.assertTrue(changed)
+        self.assertEqual(read_text(target), "eventually written\n")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(sleep_mock.call_count, 2)
+
+    def test_gives_up_after_exhausting_retry_attempts(self) -> None:
+        target = self.root / "data.txt"
+        atomic_write(target, "original content")
+        calls: list[int] = []
+
+        def always_locked(_src: str, _dst: str) -> None:
+            calls.append(1)
+            raise PermissionError("destination permanently locked")
+
+        with (
+            mock.patch("os.replace", side_effect=always_locked),
+            mock.patch("time.sleep"),
+        ):
+            with self.assertRaises(PermissionError):
+                atomic_write(target, "content that must not land")
+
+        # Every configured attempt was made, not just one.
+        self.assertEqual(len(calls), 5)
+        # The original file survives, and the temp file was cleaned up.
+        self.assertEqual(read_text(target), "original content\n")
+        leftover_temp_files = [path for path in self.root.iterdir() if path.name != "data.txt"]
+        self.assertEqual(leftover_temp_files, [])
+
+    def test_non_permission_os_error_is_not_retried(self) -> None:
+        target = self.root / "data.txt"
+        atomic_write(target, "original content")
+        calls: list[int] = []
+
+        def unrelated_failure(_src: str, _dst: str) -> None:
+            calls.append(1)
+            raise OSError("disk full, unrelated to Windows file locking")
+
+        with mock.patch("os.replace", side_effect=unrelated_failure):
+            with self.assertRaises(OSError):
+                atomic_write(target, "content that must not land")
+
+        self.assertEqual(len(calls), 1, "Non-PermissionError failures must not be retried")
 
 
 class ContentIntegrityTest(unittest.TestCase):
