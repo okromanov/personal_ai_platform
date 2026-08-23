@@ -43,8 +43,10 @@ MAINTENANCE_PATH_PATTERNS = [
     ".gitignore",
     "AGENTS.md",
     "operations/**",
+    "pyproject.toml",
     "work/acceptance/**",
     "work/evidence/**",
+    "work/procedures/**",
     "work/tasks/**",
     "work/tests/**",
 ]
