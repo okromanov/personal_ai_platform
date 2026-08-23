@@ -16,6 +16,7 @@ import re
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 
 def parse_yaml_frontmatter(content: str) -> dict:
@@ -34,7 +35,7 @@ def parse_yaml_frontmatter(content: str) -> dict:
 
 def collect_files(root_path: str | Path | None = None) -> dict:
     """Collect all tracked files and their metadata"""
-    files = defaultdict(dict)
+    files: dict[str, Any] = defaultdict(dict)
     root = Path(root_path) if root_path else Path(".")
 
     try:
