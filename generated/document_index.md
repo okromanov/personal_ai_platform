@@ -29,7 +29,7 @@ version: 1.0
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.3` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.0` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
-| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.3` | Процедуры изменений и публикации |
+| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.4` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.2` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
