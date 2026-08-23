@@ -2,8 +2,8 @@
 id: owner_acceptance_procedure
 type: operations
 document_state: current
-version: 1.0
-updated: 2026-08-22
+version: 1.1
+updated: 2026-08-23
 depends_on: []
 ---
 

@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `188` |
+| Всего файлов | `186` |
 
 ```text
 personal_ai_platform/
@@ -59,7 +59,6 @@ personal_ai_platform/
 - operations/scripts/__init__.py
 - operations/scripts/acceptance/__init__.py
 - operations/scripts/acceptance/apply.py
-- operations/scripts/automation/__init__.py
 - operations/scripts/common/__init__.py
 - operations/scripts/common/project.py
 - operations/scripts/common/status_types.py
@@ -92,7 +91,6 @@ personal_ai_platform/
 - operations/scripts/quality/run_suite.py
 - operations/scripts/quality/run_unittests.py
 - operations/scripts/quality/test_coverage.py
-- operations/scripts/reports/__init__.py
 - operations/scripts/requirements/__init__.py
 - operations/scripts/requirements/apply_requirements.py
 - operations/scripts/requirements/requirement_wizard.py
