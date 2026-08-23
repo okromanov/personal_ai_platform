@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `283` |
+| Всего тестов | `284` |
 | Core logic (acceptance, governance, lifecycle) | `124` |
-| Tooling (quality scripts, registries, traceability) | `127` |
+| Tooling (quality scripts, registries, traceability) | `128` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -228,6 +228,7 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_main_routes_profiles_and_reports_failures` | Main routes profiles and reports failures |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_run_step_records_and_accumulates_step_timings` | owner_dashboard.py sources its test/scan runtime stats from this file. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_run_step_records_combined_output_and_propagates_failure` | Run step records combined output and propagates failure |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_run_step_writes_placeholder_for_empty_but_successful_output` | A clean tool run (e.g. Vulture finding no dead code) produces empty |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `ApplyRequirementsTests` | `test_apply_wizard_result_reports_the_complete_operation` | Apply wizard result reports the complete operation |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `ApplyRequirementsTests` | `test_apply_writes_specifications_tests_tasks_and_milestone` | Apply writes specifications tests tasks and milestone |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `ApplyRequirementsTests` | `test_missing_optional_specifications_are_not_reported` | Missing optional specifications are not reported |
