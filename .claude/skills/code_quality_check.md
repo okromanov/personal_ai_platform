@@ -2,7 +2,7 @@
 
 **ID:** code_quality_check  
 **Type:** Periodic Quality Check  
-**Frequency:** Automated static subset weekly and on every repository event; semantic audit after substantial changes or on-demand
+**Frequency:** Automated static subset on every repository event (push/PR/merge candidate); semantic audit after substantial changes or on-demand
 **Framework:** LLM-agnostic (Claude, other LLMs, or CLI automation)
 
 ## Purpose
@@ -95,7 +95,7 @@ Generate report with:
 
 ## When to Run
 
-- **Automatic:** Ruff, mypy, coverage and deterministic repository checks run weekly and on every push/PR/merge candidate
+- **Automatic:** Ruff, mypy, coverage and deterministic repository checks run on every push/PR/merge candidate
 - **Manual:** This reasoning-based playbook runs after substantial code changes; it is not falsely represented as an unattended LLM review
 - **On-demand:** Before production deployment
 - **In PR:** As pre-merge validation (if CI integrated)

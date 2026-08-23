@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class QualityIntegrationTests(unittest.TestCase):
-    def test_event_gate_covers_push_pr_manual_and_weekly(self) -> None:
+    def test_event_gate_covers_push_pr_and_manual(self) -> None:
         workflow = (ROOT / ".github/workflows/project_check.yml").read_text(encoding="utf-8")
         runner = (ROOT / "operations/scripts/quality/run_suite.py").read_text(encoding="utf-8")
         for trigger in (
@@ -17,9 +17,12 @@ class QualityIntegrationTests(unittest.TestCase):
             "pull_request:",
             "merge_group:",
             "push:",
-            "schedule:",
         ):
             self.assertIn(trigger, workflow)
+        # No cron schedule: every code change already triggers the full
+        # suite via push/pull_request, so a time-based run would only
+        # re-check an unchanged tree.
+        self.assertNotIn("schedule:", workflow)
         self.assertIn("quality-skills:", workflow)
         self.assertIn("QUALITY_RESULT", workflow)
         self.assertIn("operations/quality/requirements_dev.txt", workflow)

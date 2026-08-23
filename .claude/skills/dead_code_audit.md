@@ -2,7 +2,7 @@
 
 **ID:** dead_code_audit  
 **Type:** Quality Check  
-**Frequency:** Every push, every pull request, weekly, or on-demand  
+**Frequency:** Every push, every pull request, or on-demand  
 **Framework:** LLM-agnostic
 
 ## Purpose
@@ -63,7 +63,7 @@ Generate report with:
 
 ## When to Run
 
-- **Automatic:** Weekly via scheduled trigger
+- **Automatic:** Every push and pull request, via `run_suite.py full`
 - **Manual:** After refactoring or adding large features
 - **On-demand:** Before major release
 - **In PR:** For substantial changes (>200 lines)

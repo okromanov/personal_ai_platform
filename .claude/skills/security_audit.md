@@ -2,7 +2,7 @@
 
 **ID:** security_audit  
 **Type:** Blocking Quality Gate  
-**Frequency:** Every push, every pull request, weekly, or on-demand  
+**Frequency:** Every push, every pull request, or on-demand  
 **Framework:** LLM-agnostic
 
 ## Purpose

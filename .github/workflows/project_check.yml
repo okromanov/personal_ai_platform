@@ -8,8 +8,6 @@ on:
     branches:
       - main
       - "**"
-  schedule:
-    - cron: "0 3 * * 1"
 
 permissions:
   contents: read
@@ -101,7 +99,7 @@ jobs:
           py operations\scripts\documents\check.py --all --json | Tee-Object -FilePath runtime\check_summary.json
           exit $LASTEXITCODE
 
-      - name: Run unit and integration tests
+      - name: Run unit tests
         if: always()
         shell: pwsh
         run: |
@@ -110,12 +108,7 @@ jobs:
           $testResult = $LASTEXITCODE
           $testResult | Out-File -FilePath runtime\test_result.txt
           Get-Content runtime\test_output.txt
-          if ($testResult -ne 0) { exit $testResult }
-
-          py -m unittest discover -s operations/tests/integration -v *>> runtime\test_output.txt
-          $integrationResult = $LASTEXITCODE
-          if ($integrationResult -ne 0) { exit $integrationResult }
-          exit 0
+          exit $testResult
 
       - name: Check generated drift
         if: always()

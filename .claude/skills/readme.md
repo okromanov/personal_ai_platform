@@ -38,8 +38,11 @@ bash .claude/skills/pre_commit_hook.sh
 - on every push to any branch;
 - on every pull request;
 - for every merge-queue candidate;
-- on manual dispatch;
-- weekly on the default branch.
+- on manual dispatch.
+
+There is no scheduled (cron) run: every code change already triggers the full
+suite via push or pull_request, so a time-based run would only re-check an
+unchanged tree.
 
 The final `Project check` gate requires Windows portability validation and the canonical Linux quality suite. The Linux job also runs Actionlint, ShellCheck, pip-audit and Gitleaks. Failed jobs upload diagnostic artifacts when available.
 

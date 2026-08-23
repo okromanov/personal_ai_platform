@@ -2,7 +2,7 @@
 
 **ID:** documentation_audit  
 **Type:** Periodic Quality Check  
-**Frequency:** Every push, every pull request, weekly, or on-demand  
+**Frequency:** Every push, every pull request, or on-demand  
 **Framework:** LLM-agnostic (Claude, other LLMs, or CLI automation)
 
 ## Purpose
@@ -57,7 +57,7 @@ Generate report with:
 
 ## When to Run
 
-- **Automatic:** Weekly via scheduled trigger
+- **Automatic:** Every push and pull request, via `check.py --all`
 - **Manual:** After any documentation changes, before release
 - **On-demand:** When inconsistencies are suspected
 
