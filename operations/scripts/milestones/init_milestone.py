@@ -18,14 +18,14 @@ from datetime import date
 
 def init_milestone(milestone_id: str) -> bool:
     """Initialize milestone folder structure."""
+    try:
+        milestone_dir = Path(f"work/{milestone_id}")
+        milestone_dir.mkdir(parents=True, exist_ok=True)
 
-    milestone_dir = Path(f"work/{milestone_id}")
-    milestone_dir.mkdir(exist_ok=True)
+        today = date.today().isoformat()
 
-    today = date.today().isoformat()
-
-    # 1. owner_checklist.md
-    checklist_content = f"""---
+        # 1. owner_checklist.md
+        checklist_content = f"""---
 id: {milestone_id}_owner_checklist
 type: owner_acceptance_checklist
 acceptance_state: pending
@@ -72,10 +72,10 @@ milestone: {milestone_id}
 **Подпись/инициалы**:
 """
 
-    (milestone_dir / "owner_checklist.md").write_text(checklist_content)
+        (milestone_dir / "owner_checklist.md").write_text(checklist_content, encoding='utf-8')
 
-    # 2. semantic_review.md
-    semantic_review_content = f"""---
+        # 2. semantic_review.md
+        semantic_review_content = f"""---
 id: {milestone_id}_semantic_review
 type: semantic_review
 review_state: pending
@@ -119,10 +119,10 @@ depends_on: []
 После успешной проверки владелец выбирает: `ПРИНИМАЮ {milestone_id.upper()}` или `ВОЗВРАЩАЮ {milestone_id.upper()}: <причина>`.
 """
 
-    (milestone_dir / "semantic_review.md").write_text(semantic_review_content)
+        (milestone_dir / "semantic_review.md").write_text(semantic_review_content, encoding='utf-8')
 
-    # 3. final_report.md
-    final_report_content = f"""---
+        # 3. final_report.md
+        final_report_content = f"""---
 id: {milestone_id}_final_report
 type: milestone_completion_report
 completion_state: pending
@@ -175,9 +175,12 @@ next_milestone: m03
 (Рекомендации для следующего этапа разработки)
 """
 
-    (milestone_dir / "final_report.md").write_text(final_report_content)
+        (milestone_dir / "final_report.md").write_text(final_report_content, encoding='utf-8')
 
-    return True
+        return True
+    except Exception as e:
+        print(f"ERROR: Failed to initialize milestone {milestone_id}: {e}", file=sys.stderr)
+        return False
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

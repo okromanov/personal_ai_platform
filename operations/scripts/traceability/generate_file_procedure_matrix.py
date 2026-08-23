@@ -30,38 +30,56 @@ def parse_yaml_frontmatter(content: str) -> dict:
             fields[key.strip()] = value.strip()
     return fields
 
-def collect_files() -> dict:
+def collect_files(root_path=None) -> dict:
     """Collect all tracked files and their metadata"""
     files = defaultdict(dict)
+    root = Path(root_path) if root_path else Path(".")
 
-    # Collect TASK files
-    for task_file in Path('work/tasks').glob('*.md'):
-        meta = parse_yaml_frontmatter(task_file.read_text())
-        if meta.get('id'):
-            files['tasks'][meta['id']] = {
-                'path': str(task_file),
-                'work_state': meta.get('work_state'),
-                'depends_on': meta.get('depends_on', '').split(',') if meta.get('depends_on') else [],
-                'tests': meta.get('tests', '').split(',') if meta.get('tests') else [],
-            }
+    try:
+        # Collect TASK files
+        work_tasks = root / 'work' / 'tasks'
+        if work_tasks.exists():
+            for task_file in work_tasks.glob('*.md'):
+                try:
+                    meta = parse_yaml_frontmatter(task_file.read_text(encoding='utf-8'))
+                    if meta.get('id'):
+                        files['tasks'][meta['id']] = {
+                            'path': str(task_file),
+                            'work_state': meta.get('work_state'),
+                            'depends_on': meta.get('depends_on', '').split(',') if meta.get('depends_on') else [],
+                            'tests': meta.get('tests', '').split(',') if meta.get('tests') else [],
+                        }
+                except Exception as e:
+                    print(f"WARNING: Failed to parse {task_file}: {e}", file=__import__('sys').stderr)
+                    continue
 
-    # Collect TEST files
-    for test_file in Path('work/tests').glob('*.md'):
-        meta = parse_yaml_frontmatter(test_file.read_text())
-        if meta.get('id'):
-            files['tests'][meta['id']] = {
-                'path': str(test_file),
-                'execution': meta.get('execution'),
-                'traces_to': meta.get('traces_to', '').split(',') if meta.get('traces_to') else [],
-            }
+        # Collect TEST files
+        work_tests = root / 'work' / 'tests'
+        if work_tests.exists():
+            for test_file in work_tests.glob('*.md'):
+                try:
+                    meta = parse_yaml_frontmatter(test_file.read_text(encoding='utf-8'))
+                    if meta.get('id'):
+                        files['tests'][meta['id']] = {
+                            'path': str(test_file),
+                            'execution': meta.get('execution'),
+                            'traces_to': meta.get('traces_to', '').split(',') if meta.get('traces_to') else [],
+                        }
+                except Exception as e:
+                    print(f"WARNING: Failed to parse {test_file}: {e}", file=__import__('sys').stderr)
+                    continue
 
-    # Collect milestone files
-    for milestone_dir in Path('work').glob('m[0-9]*'):
-        milestone_id = milestone_dir.name
-        files['milestones'][milestone_id] = {
-            'path': str(milestone_dir),
-            'files': list(milestone_dir.glob('*.md'))
-        }
+        # Collect milestone files
+        work_dir = root / 'work'
+        if work_dir.exists():
+            for milestone_dir in work_dir.glob('m[0-9]*'):
+                milestone_id = milestone_dir.name
+                files['milestones'][milestone_id] = {
+                    'path': str(milestone_dir),
+                    'files': list(milestone_dir.glob('*.md'))
+                }
+    except Exception as e:
+        print(f"WARNING: Failed to collect files: {e}", file=__import__('sys').stderr)
 
     return files
 
@@ -143,19 +161,23 @@ Creates:
 
 def generate_file_procedure_matrix(root_path=None) -> bool:
     """Generate and write the traceability matrix. Returns True if file changed."""
-    files = collect_files()
-    matrix = generate_matrix(files)
+    try:
+        root = Path(root_path) if root_path else Path(".")
+        files = collect_files(root)
+        matrix = generate_matrix(files)
 
-    root = Path(root_path) if root_path else Path(".")
-    output_path = root / "generated" / "file_procedure_traceability_matrix.md"
-    output_path.parent.mkdir(exist_ok=True)
+        output_path = root / "generated" / "file_procedure_traceability_matrix.md"
+        output_path.parent.mkdir(exist_ok=True)
 
-    existing = output_path.read_text() if output_path.exists() else ""
-    if existing == matrix:
+        existing = output_path.read_text(encoding='utf-8') if output_path.exists() else ""
+        if existing == matrix:
+            return False
+
+        output_path.write_text(matrix, encoding='utf-8')
+        return True
+    except Exception as e:
+        print(f"ERROR: Failed to generate traceability matrix: {e}", file=__import__('sys').stderr)
         return False
-
-    output_path.write_text(matrix)
-    return True
 
 if __name__ == "__main__":
     if generate_file_procedure_matrix():

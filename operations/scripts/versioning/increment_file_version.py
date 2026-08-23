@@ -27,34 +27,38 @@ def increment_version(version_str: str) -> str:
 
 def update_file_version(file_path: str) -> bool:
     """Update version in YAML frontmatter."""
-    path = Path(file_path)
+    try:
+        path = Path(file_path)
 
-    if not path.exists() or not path.suffix == '.md':
+        if not path.exists() or not path.suffix == '.md':
+            return False
+
+        content = path.read_text(encoding='utf-8')
+
+        # Find version field in frontmatter
+        version_match = re.search(r'^version:\s*([0-9.]+)', content, re.MULTILINE)
+        if not version_match:
+            return False
+
+        old_version = version_match.group(1)
+        new_version = increment_version(old_version)
+
+        if old_version != new_version:
+            new_content = re.sub(
+                r'^version:\s*[0-9.]+',
+                f'version: {new_version}',
+                content,
+                count=1,
+                flags=re.MULTILINE
+            )
+            path.write_text(new_content, encoding='utf-8')
+            print(f"  {path}: {old_version} → {new_version}")
+            return True
+
         return False
-
-    content = path.read_text(encoding='utf-8')
-
-    # Find version field in frontmatter
-    version_match = re.search(r'^version:\s*([0-9.]+)', content, re.MULTILINE)
-    if not version_match:
+    except Exception as e:
+        print(f"WARNING: Failed to update version in {file_path}: {e}", file=sys.stderr)
         return False
-
-    old_version = version_match.group(1)
-    new_version = increment_version(old_version)
-
-    if old_version != new_version:
-        new_content = re.sub(
-            r'^version:\s*[0-9.]+',
-            f'version: {new_version}',
-            content,
-            count=1,
-            flags=re.MULTILINE
-        )
-        path.write_text(new_content, encoding='utf-8')
-        print(f"  {path}: {old_version} → {new_version}")
-        return True
-
-    return False
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
