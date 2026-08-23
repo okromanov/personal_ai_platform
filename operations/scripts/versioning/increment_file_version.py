@@ -62,6 +62,7 @@ def update_file_version(file_path: str) -> bool:
         print(f"WARNING: Failed to update version in {file_path}: {e}", file=sys.stderr)
         return False
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(
