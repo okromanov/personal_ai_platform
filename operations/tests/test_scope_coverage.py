@@ -15,7 +15,13 @@ from operations.scripts.status.generate_project_status import (
 
 
 def _milestone(scope: list[str]) -> MilestoneItem:
-    return {"id": "m01", "title": "Основа", "work_state": "in-progress", "scope": scope}
+    return {
+        "id": "m01",
+        "title": "Основа",
+        "work_state": "in-progress",
+        "scope": scope,
+        "result": "",
+    }
 
 
 def _profile(

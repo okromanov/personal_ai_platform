@@ -58,6 +58,7 @@ class MilestoneItem(TypedDict):
     title: str
     work_state: str
     scope: list[str]
+    result: str
 
 
 class MilestonesReport(TypedDict):

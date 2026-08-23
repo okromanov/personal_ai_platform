@@ -6,9 +6,9 @@ import unittest
 from pathlib import Path
 
 from operations.scripts.common.project import iter_files, today_iso
-from operations.scripts.common.status_types import TaskItem
+from operations.scripts.common.status_types import MilestoneItem, TaskItem
 from operations.scripts.documents.traceability import collect_traceable_elements
-from operations.scripts.status.generate_project_status import collect_test_specs
+from operations.scripts.status.generate_project_status import collect_milestones, collect_test_specs
 from operations.scripts.tasks.generate import collect_tasks
 
 CODE_DIRECTORIES = (
@@ -114,6 +114,17 @@ def _completed_task_results(root: Path) -> list[tuple[TaskItem, str]]:
     ]
 
 
+def _completed_milestones(root: Path) -> list[MilestoneItem]:
+    return [item for item in collect_milestones(root)["items"] if item["work_state"] == "completed"]
+
+
+def _is_product_milestone(milestone_id: str) -> bool:
+    """m01 is the foundation stage (documents, traceability, tooling) and by
+    design delivers no end-user-facing capability; m02 onward is product
+    (see operations/acceptance.md §6, "Этапы m02–m06 составляют V1")."""
+    return milestone_id.lower() != "m01"
+
+
 def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     """Render owner dashboard: repository statistics and functional readiness.
 
@@ -185,8 +196,9 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
             "",
             "> Покрытие и время прогона — из последнего локального запуска "
             "`operations/scripts/quality/run_suite.py full` на этой машине "
-            "(`runtime/*.json`, не хранится в git). Это не статус конкретного SHA в CI — "
-            "см. раздел «GitHub Actions» ниже.",
+            "(`runtime/*.json`, не хранится в git). Это не статус конкретного SHA в CI: "
+            "перед смысловой проверкой агент обязан получить результат GitHub Actions для "
+            "точного проверяемого SHA отдельно.",
             "",
             "## Статистика документов",
             "",
@@ -202,13 +214,29 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
 
     lines.append("## Что уже реализовано")
     lines.append("")
-    completed = _completed_task_results(root)
-    if not completed:
-        lines.append(
-            "Пока ни одна проектная TASK не завершена. Текущую работу и следующий шаг "
-            "см. в [`project_status.md`](project_status.md)."
-        )
+    milestones_done = _completed_milestones(root)
+    if not milestones_done:
+        lines.append("Пока ни один этап не завершён.")
+        lines.append("")
     else:
+        lines.append("### Завершённые этапы")
+        lines.append("")
+        for milestone in milestones_done:
+            milestone_id = str(milestone["id"])
+            lines.append(f"#### `{milestone_id.upper()}` — {milestone['title']}")
+            lines.append("")
+            result = str(milestone.get("result", ""))
+            lines.append(result or "_Цель этапа не задана строкой «результат» в milestones.md._")
+            lines.append("")
+            report_path = f"work/{milestone_id}/final_report.md"
+            if (root / report_path).exists():
+                lines.append(f"[Итоговый отчёт этапа]({report_path})")
+                lines.append("")
+
+    completed = _completed_task_results(root)
+    if completed:
+        lines.append("### Реализованные компоненты")
+        lines.append("")
         for task, result_text in completed:
             component = str(task.get("component", "")) or "—"
             task_id = str(task["id"])
@@ -217,29 +245,30 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
                 ", ".join(f"[`{test['id']}`]({test['path']})" for test in task.get("tests", []))
                 or "—"
             )
-            lines.append(f"### `{component}` — {task['title']} (`{task_id}`)")
+            lines.append(f"#### `{component}` — {task['title']} (`{task_id}`)")
             lines.append("")
             lines.append(result_text or "_Раздел «Результат» пуст._")
             lines.append("")
             lines.append(f"[Карточка задачи]({path}) · Доказательство: {tests}")
             lines.append("")
 
-    lines.extend(
-        [
-            "## GitHub Actions",
-            "",
-            "Статус серверной проверки не хранится в этом документе, потому что он быстро "
-            "устаревает. Перед смысловой проверкой агент обязан получить результат GitHub "
-            "Actions для точного проверяемого SHA и сверить evidence artifact. Пока это не "
-            "выполнено, серверная готовность считается неподтверждённой.",
-            "",
-            "## Ссылки на правила",
-            "",
-            "- **Как работает процесс:** [`project_rules.md`](project_rules.md)",
-            "- **Как вносятся изменения:** [`operations/change_process.md`](operations/change_process.md)",
-            "- **Инструкция агенту:** [`AGENTS.md`](AGENTS.md)",
-            "",
-        ]
-    )
+    lines.append("## Что уже может делать пользователь")
+    lines.append("")
+    product_capabilities = [
+        milestone for milestone in milestones_done if _is_product_milestone(str(milestone["id"]))
+    ]
+    if not product_capabilities:
+        lines.append(
+            "Пока ничего: ни один продуктовый этап (m02 и далее) ещё не принят. `m01` — "
+            "этап основы, он не даёт функциональности, доступной пользователю напрямую. "
+            "Текущий прогресс и следующий шаг см. в [`project_status.md`](project_status.md)."
+        )
+        lines.append("")
+    else:
+        for milestone in product_capabilities:
+            milestone_id = str(milestone["id"])
+            result = str(milestone.get("result", "")) or "_Цель этапа не задана._"
+            lines.append(f"- **`{milestone_id.upper()}`:** {result}")
+        lines.append("")
 
     return "\n".join(lines)

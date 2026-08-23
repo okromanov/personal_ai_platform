@@ -21,6 +21,7 @@ def _minimal_snapshot(milestone_id: str, *, tracked_targets: list[str]) -> Progr
         "title": "",
         "work_state": "in-progress",
         "scope": [],
+        "result": "",
     }
     return {
         "overall": "healthy",

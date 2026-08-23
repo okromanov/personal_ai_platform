@@ -40,6 +40,7 @@ def _minimal_snapshot(
         "title": "",
         "work_state": "in-progress",
         "scope": [],
+        "result": "",
     }
     test: EffectiveTestItem = {
         "id": "TEST_001",

@@ -71,8 +71,11 @@ def _test_purpose(root: Path, test_path: str) -> str:
     return first_line
 
 
-def _task_file_sections(root: Path, tasks: list[TaskItem]) -> str:
-    groups: list[str] = []
+def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
+    """One table row per delivered file: name+link, owning TASK, and a real
+    description sourced from that TASK's TEST "Назначение" section (never
+    invented — if the TEST has no such section, the row says so plainly)."""
+    rows: list[str] = []
     for task in tasks:
         paths = _deliverable_paths(task)
         if not paths:
@@ -81,16 +84,13 @@ def _task_file_sections(root: Path, tasks: list[TaskItem]) -> str:
         test_refs = task.get("tests", [])
         if test_refs:
             purpose = _test_purpose(root, test_refs[0]["path"])
-        header = f"### [`{task['id']}` — {task['title']}](work/tasks/{Path(task['path']).name})"
-        lines = [header, ""]
-        if purpose:
-            lines.append(f"_По TEST `{test_refs[0]['id']}`:_ {purpose}")
-            lines.append("")
-        lines.extend(f"- [`{path}`]({path})" for path in paths)
-        groups.append("\n".join(lines))
-    if not groups:
+        description = purpose or "_Описание не задано (у TEST нет раздела «Назначение»)._"
+        task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
+        for path in paths:
+            rows.append(f"| [`{path}`]({path}) | {task_link} | {description} |")
+    if not rows:
         return "Ни одна TASK ещё не поставила файлы за пределами собственной карточки."
-    return "\n\n".join(groups)
+    return "\n".join(["| Файл | Задача | Описание |", "|---|---|---|", *rows])
 
 
 def render_repository_project_status(root: Path) -> str:
@@ -360,13 +360,7 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 
 ## Файлы, созданные в рамках задач
 
-{_task_file_sections(root, tasks)}
-
-## Справочная информация
-
-- Все задачи: [`tasks.md`](tasks.md)
-- Правила: [`project_rules.md`](project_rules.md)
-- Состав этапов: [`milestones.md`](milestones.md)
+{_task_file_rows(root, tasks)}
 """
 
 

@@ -22,7 +22,7 @@ from operations.scripts.status.generate_project_status import (
 
 
 def _milestone(milestone_id: str) -> MilestoneItem:
-    return {"id": milestone_id, "title": "", "work_state": "in-progress", "scope": []}
+    return {"id": milestone_id, "title": "", "work_state": "in-progress", "scope": [], "result": ""}
 
 
 def _coverage(*, scope: list[str], tracked_targets: list[str]) -> CoverageResult:

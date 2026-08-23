@@ -110,9 +110,11 @@ class OwnerDashboardRenderTests(unittest.TestCase):
             "## Статистика репозитория",
             "## Статистика документов",
             "## Что уже реализовано",
-            "## GitHub Actions",
+            "## Что уже может делать пользователь",
         ]:
             self.assertIn(heading, rendered)
+        for removed_heading in ["## GitHub Actions", "## Ссылки на правила"]:
+            self.assertNotIn(removed_heading, rendered)
 
         # TASK_001 is the one completed TASK in this repo; its Результат section
         # must actually surface here, not the auto_generate_tasks.py placeholder.

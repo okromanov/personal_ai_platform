@@ -38,6 +38,7 @@ def _milestones_report(milestone_id: str, title: str, work_state: str) -> Milest
         "title": title,
         "work_state": work_state,
         "scope": [],
+        "result": "",
     }
     return {"count": 1, "items": [item], "current": item, "states": {work_state: 1}}
 

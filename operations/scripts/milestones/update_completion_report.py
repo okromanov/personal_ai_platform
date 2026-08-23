@@ -31,7 +31,6 @@ from operations.scripts.tasks.generate import collect_tasks
 
 RESULT_SECTION = re.compile(r"(?ms)^##\s+(?:\d+\.\s*)?Результат\s*$\n(.*?)(?=^##\s|\Z)")
 EXCLUDED_DIFF_PREFIXES = ("generated/",)
-MILESTONE_RESULT_LINE = re.compile(r"(?m)^-\s*результат:\s*(.+)$")
 
 
 def _link(milestone_id: str, target_path: str) -> str:
@@ -59,19 +58,6 @@ def _milestone_item(root: Path, milestone_id: str) -> MilestoneItem | None:
         if str(item["id"]).lower() == milestone_id.lower():
             return item
     return None
-
-
-def _milestone_result_text(root: Path, milestone_id: str) -> str:
-    """The milestone's own '- результат: ...' goal statement from milestones.md."""
-    content = (root / "milestones.md").read_text(encoding="utf-8")
-    section_pattern = re.compile(
-        rf"(?ms)^##\s+{re.escape(milestone_id)}\b.*?(?=^##\s|\Z)", re.IGNORECASE
-    )
-    section_match = section_pattern.search(content)
-    if section_match is None:
-        return ""
-    result_match = MILESTONE_RESULT_LINE.search(section_match.group(0))
-    return result_match.group(1).strip() if result_match else ""
 
 
 def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
@@ -234,7 +220,7 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         "## 2. Что реализовано функционально",
         "",
     ]
-    result_text = _milestone_result_text(root, milestone_id)
+    result_text = milestone["result"]
     if result_text:
         milestones_link = _link(milestone_id, "milestones.md")
         lines.append(f"**Цель этапа (из [`milestones.md`]({milestones_link})):** {result_text}")

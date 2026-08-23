@@ -43,6 +43,7 @@ from operations.scripts.tasks.semantics import delivery_closure, validate_task_s
 
 MILESTONE_HEADING = re.compile(r"^##\s+(m\d{2})\s+—\s+(.+?)\s*$", re.MULTILINE | re.IGNORECASE)
 MILESTONE_WORK_STATE = re.compile(r"(?m)^-\s+work_state:\s+`?([a-z-]+)`?\s*$", re.IGNORECASE)
+MILESTONE_RESULT = re.compile(r"(?m)^-\s*результат:\s*(.+)$")
 MILESTONE_WORK_STATES = {"planned", "in-progress", "blocked", "completed"}
 V1_BOUNDARY = re.compile(r"поставка\s+завершается\s+после\s+`?(m\d{2})`?", re.IGNORECASE)
 UNIT_RAN = re.compile(r"Ran\s+(\d+)\s+tests?\s+in\s+([0-9.]+)s", re.IGNORECASE)
@@ -165,12 +166,14 @@ def collect_milestones(root: Path) -> MilestonesReport:
         work_state = state_match.group(1).lower()
         if work_state not in MILESTONE_WORK_STATES:
             raise ValueError(f"{match.group(1).lower()}: неизвестный work_state '{work_state}'")
+        result_match = MILESTONE_RESULT.search(section)
         items.append(
             {
                 "id": match.group(1).lower(),
                 "title": match.group(2).strip(),
                 "work_state": work_state,
                 "scope": parse_scope_references(section),
+                "result": result_match.group(1).strip() if result_match else "",
             }
         )
     current = next((item for item in items if item["work_state"] != "completed"), items[-1])
