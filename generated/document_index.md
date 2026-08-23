@@ -27,7 +27,7 @@ version: 1.0
 | [`adr/adr_008_data_storage_schema.md`](../adr/adr_008_data_storage_schema.md) | `ADR_008` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_008 — Выбор схемы хранилища данных |
 | [`adr/adr_009_secret_management_strategy.md`](../adr/adr_009_secret_management_strategy.md) | `ADR_009` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_009 — Стратегия управления секретами и ключами |
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.3` | Этапы развития personal_ai_platform |
-| [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.0` | Процедура принятия этапа |
+| [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.1` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
 | [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.5` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.2` | Стандарт frontmatter для документов |

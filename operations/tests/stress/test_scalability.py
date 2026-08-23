@@ -43,11 +43,11 @@ def _synthetic_milestones_md(count: int) -> str:
 
 def _synthetic_task_item(number: int, *, work_state: str, depends_on: list[str]) -> TaskItem:
     return {
-        "id": f"TASK_{number:04d}",
+        "id": f"TASK_{number:03d}",
         "title": f"Synthetic task {number}",
         "work_state": work_state,
         "version": "1.0",
-        "path": f"work/tasks/task_{number:04d}.md",
+        "path": f"work/tasks/task_{number:03d}.md",
         "depends_on": depends_on,
         "traces_to": [],
         "implements": [],
@@ -129,7 +129,7 @@ class TaskSequenceScalabilityTest(unittest.TestCase):
             items.append(
                 _synthetic_task_item(number, work_state="completed", depends_on=depends_on)
             )
-            previous_id = f"TASK_{number:04d}"
+            previous_id = f"TASK_{number:03d}"
         # Last task must be the only non-terminal one to satisfy the
         # "single active task" invariant.
         items[-1]["work_state"] = "in-progress"
@@ -149,7 +149,7 @@ class TaskSequenceScalabilityTest(unittest.TestCase):
             items.append(
                 _synthetic_task_item(number, work_state="completed", depends_on=depends_on)
             )
-            previous_id = f"TASK_{number:04d}"
+            previous_id = f"TASK_{number:03d}"
         items[-1]["work_state"] = "in-progress"
 
         # Break a single dependency link deep in the middle of a large chain.
@@ -166,7 +166,7 @@ class TaskSequenceScalabilityTest(unittest.TestCase):
             depends_on = [previous_id] if previous_id else []
             state = "in-progress" if number in (count // 3, count // 2) else "completed"
             items.append(_synthetic_task_item(number, work_state=state, depends_on=depends_on))
-            previous_id = f"TASK_{number:04d}"
+            previous_id = f"TASK_{number:03d}"
 
         with self.assertRaises(ValueError):
             _validate_task_sequence(items)

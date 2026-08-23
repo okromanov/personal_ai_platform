@@ -86,6 +86,12 @@ class QualityIntegrationTests(unittest.TestCase):
         def strip_updated(text: str) -> str:
             return "\n".join(line for line in text.splitlines() if not line.startswith("updated: "))
 
+        report = (ROOT / "work/m01/final_report.md").read_text(encoding="utf-8")
+        rendered = render_final_report(ROOT, "m01")
+        self.assertEqual(strip_updated(report), strip_updated(rendered))
+        for stale_claim in ("70/70", "21/21", "38 требований", "100%", "evidence_state:"):
+            self.assertNotIn(stale_claim, report)
+
     def test_pre_push_hook_wrapper_delegates_to_canonical_full_profile(self) -> None:
         canonical = (ROOT / ".claude/skills/pre_push_hook.sh").read_text(encoding="utf-8")
         wrapper = (ROOT / "operations/hooks/pre_push_hook.sh").read_text(encoding="utf-8")
@@ -105,13 +111,6 @@ class QualityIntegrationTests(unittest.TestCase):
             "operations/hooks/pre_push_hook.sh",
         ):
             self.assertIn(hook_path, workflow)
-
-    def test_superseded_report_cannot_claim_acceptance_readiness(self) -> None:
-        report = (ROOT / "work/m01/final_report.md").read_text(encoding="utf-8")
-        rendered = render_final_report(ROOT, "m01")
-        self.assertEqual(strip_updated(report), strip_updated(rendered))
-        for stale_claim in ("70/70", "21/21", "38 требований", "100%", "evidence_state:"):
-            self.assertNotIn(stale_claim, report)
 
     def test_proposed_technology_adrs_require_m02_evidence(self) -> None:
         for number in range(5, 10):
