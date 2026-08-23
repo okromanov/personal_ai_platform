@@ -65,7 +65,10 @@ def update_file_version(file_path: str) -> bool:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path> [file_path2 ...]")
+        print(
+            "Usage: python3 operations/scripts/versioning/increment_file_version.py "
+            "<file_path> [file_path2 ...]"
+        )
         sys.exit(1)
 
     updated_count = 0
