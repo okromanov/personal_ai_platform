@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `72` |
+| Всего документов | `73` |
 
 > В список входят первичные Markdown-документы. Производные и периодические представления исключены.
 
@@ -26,7 +26,7 @@ version: 1.0
 | [`adr/adr_007_cloud_provider_selection.md`](../adr/adr_007_cloud_provider_selection.md) | `ADR_007` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_007 — Выбор облачного провайдера |
 | [`adr/adr_008_data_storage_schema.md`](../adr/adr_008_data_storage_schema.md) | `ADR_008` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_008 — Выбор схемы хранилища данных |
 | [`adr/adr_009_secret_management_strategy.md`](../adr/adr_009_secret_management_strategy.md) | `ADR_009` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_009 — Стратегия управления секретами и ключами |
-| [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.0` | Этапы развития personal_ai_platform |
+| [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.1` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.0` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
 | [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.0` | Процедуры изменений и публикации |
@@ -34,6 +34,7 @@ version: 1.0
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.0` | SAMPLE_TASK_0001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
 | [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.0` | Карта операционных процедур |
+| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.0` | Матрица зависимостей обновления файлов |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
 | [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.0` | Pre-commit Hook Setup |
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.0` | Диаграммы состояний и переходы |
@@ -56,8 +57,8 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
-| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `in-progress` | `1.0` | TASK_0001 — Реализация ARC_CMP_001 |
-| [`work/tasks/task_0002_arc_002.md`](../work/tasks/task_0002_arc_002.md) | `TASK_0002` | `task` | `work_state` | `planned` | `1.0` | TASK_0002 — Реализация ARC_CMP_002 |
+| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `completed` | `1.1` | TASK_0001 — Реализация ARC_CMP_001 |
+| [`work/tasks/task_0002_arc_002.md`](../work/tasks/task_0002_arc_002.md) | `TASK_0002` | `task` | `work_state` | `in-progress` | `1.0` | TASK_0002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_0003_arc_003.md`](../work/tasks/task_0003_arc_003.md) | `TASK_0003` | `task` | `work_state` | `planned` | `1.0` | TASK_0003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_0004_arc_004.md`](../work/tasks/task_0004_arc_004.md) | `TASK_0004` | `task` | `work_state` | `planned` | `1.0` | TASK_0004 — Реализация ARC_CMP_004 |
 | [`work/tasks/task_0005_arc_005.md`](../work/tasks/task_0005_arc_005.md) | `TASK_0005` | `task` | `work_state` | `planned` | `1.0` | TASK_0005 — Реализация ARC_CMP_005 |

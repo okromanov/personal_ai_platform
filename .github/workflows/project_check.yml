@@ -105,6 +105,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Path runtime -Force | Out-Null
           py operations\scripts\quality\run_unittests.py *> runtime\test_output.txt
           $testResult = $LASTEXITCODE
           $testResult | Out-File -FilePath runtime\test_result.txt
@@ -150,6 +151,11 @@ jobs:
           git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=2 origin "$GITHUB_SHA"
           git checkout --detach FETCH_HEAD
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5.2.0
+        with:
+          python-version: "3.14"
 
       - name: Install pinned development tools
         shell: bash

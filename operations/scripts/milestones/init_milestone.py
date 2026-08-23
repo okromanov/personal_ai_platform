@@ -12,9 +12,9 @@ Usage: python3 operations/scripts/milestones/init_milestone.py m02
 """
 
 import sys
-import json
-from pathlib import Path
 from datetime import date
+from pathlib import Path
+
 
 def init_milestone(milestone_id: str) -> bool:
     """Initialize milestone folder structure."""
@@ -72,7 +72,7 @@ milestone: {milestone_id}
 **Подпись/инициалы**:
 """
 
-        (milestone_dir / "owner_checklist.md").write_text(checklist_content, encoding='utf-8')
+        (milestone_dir / "owner_checklist.md").write_text(checklist_content, encoding="utf-8")
 
         # 2. semantic_review.md
         semantic_review_content = f"""---
@@ -119,7 +119,7 @@ depends_on: []
 После успешной проверки владелец выбирает: `ПРИНИМАЮ {milestone_id.upper()}` или `ВОЗВРАЩАЮ {milestone_id.upper()}: <причина>`.
 """
 
-        (milestone_dir / "semantic_review.md").write_text(semantic_review_content, encoding='utf-8')
+        (milestone_dir / "semantic_review.md").write_text(semantic_review_content, encoding="utf-8")
 
         # 3. final_report.md
         final_report_content = f"""---
@@ -175,12 +175,13 @@ next_milestone: m03
 (Рекомендации для следующего этапа разработки)
 """
 
-        (milestone_dir / "final_report.md").write_text(final_report_content, encoding='utf-8')
+        (milestone_dir / "final_report.md").write_text(final_report_content, encoding="utf-8")
 
         return True
     except Exception as e:
         print(f"ERROR: Failed to initialize milestone {milestone_id}: {e}", file=sys.stderr)
         return False
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

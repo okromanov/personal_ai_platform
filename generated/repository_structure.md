@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `184` |
+| Всего файлов | `195` |
 
 ```text
 personal_ai_platform/
@@ -36,6 +36,7 @@ personal_ai_platform/
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
 - generated/document_index.md
+- generated/file_procedure_traceability_matrix.md
 - generated/repository_structure.md
 - generated/traceability_matrix.md
 - milestones.md
@@ -47,8 +48,10 @@ personal_ai_platform/
 - operations/examples/sample_task_lifecycle.md
 - operations/hooks/__init__.py
 - operations/hooks/pre_commit_hook.sh
+- operations/hooks/pre_commit_regenerate_dashboards.sh
 - operations/local_development_windows.md
 - operations/procedure_map.md
+- operations/procedures/file_update_dependencies.md
 - operations/project_config.json
 - operations/quality/requirements_dev.txt
 - operations/quality_baseline.json
@@ -66,6 +69,7 @@ personal_ai_platform/
 - operations/scripts/documents/index.py
 - operations/scripts/documents/links.py
 - operations/scripts/documents/metadata.py
+- operations/scripts/documents/owner_dashboard.py
 - operations/scripts/documents/repository_tree.py
 - operations/scripts/documents/traceability.py
 - operations/scripts/evidence/__init__.py
@@ -74,7 +78,9 @@ personal_ai_platform/
 - operations/scripts/github/__init__.py
 - operations/scripts/github/post_pr_comment.py
 - operations/scripts/milestones/__init__.py
+- operations/scripts/milestones/init_milestone.py
 - operations/scripts/milestones/start.py
+- operations/scripts/milestones/update_completion_report.py
 - operations/scripts/quality/__init__.py
 - operations/scripts/quality/action_practicality.py
 - operations/scripts/quality/check_coverage.py
@@ -101,7 +107,9 @@ personal_ai_platform/
 - operations/scripts/traceability/__init__.py
 - operations/scripts/traceability/auto_link.py
 - operations/scripts/traceability/full_traceability.py
+- operations/scripts/traceability/generate_file_procedure_matrix.py
 - operations/scripts/traceability/semantic_consistency.py
+- operations/scripts/versioning/increment_file_version.py
 - operations/semantic_review.md
 - operations/setup_precommit.md
 - operations/state_machines.md
@@ -163,8 +171,11 @@ personal_ai_platform/
 - work/acceptance/m01.json
 - work/m01/final_report.md
 - work/m01/owner_checklist.md
-- work/m01/semantic_review.json
 - work/m01/semantic_review.md
+- work/m02/final_report.md
+- work/m02/owner_checklist.md
+- work/m02/semantic_review.md
+- work/procedures/file_procedure_traceability_matrix.md
 - work/tasks/.gitkeep
 - work/tasks/task_0001_arc_001.md
 - work/tasks/task_0002_arc_002.md

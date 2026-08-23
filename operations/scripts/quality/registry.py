@@ -7,7 +7,14 @@ from pathlib import Path
 
 REGISTRY_PATH = "operations/quality_registry.json"
 COVERAGE_MODES = {"task_test", "global_evidence"}
-DERIVED_PATH_PATTERNS = ("generated/**", "runtime/**", "project_status.md", "tasks.md")
+DERIVED_PATH_PATTERNS = (
+    "generated/**",
+    "runtime/**",
+    "project_status.md",
+    "tasks.md",
+    "owner_dashboard.md",
+    "work/m*/final_report.md",
+)
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 RUN_URL_PATTERN = re.compile(r"^https://github\.com/[^/]+/[^/]+/actions/runs/\d+$")

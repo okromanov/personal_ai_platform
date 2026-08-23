@@ -5,9 +5,9 @@ Handles single interface with stateless message normalization.
 """
 
 import asyncio
-from typing import Any, Optional
+from typing import Optional
 
-from .base import Channel, ChannelError, TaskMessage, TaskState
+from .base import Channel, ChannelError, TaskMessage
 
 
 class TelegramChannel(Channel):
