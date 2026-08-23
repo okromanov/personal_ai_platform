@@ -51,7 +51,9 @@ def collect_files(root_path=None) -> dict:
                             else []
                         )
                         tests = (
-                            meta.get("tests", "").split(",") if meta.get("tests") else []
+                            meta.get("tests", "").split(",")
+                            if meta.get("tests")
+                            else []
                         )
                         files["tasks"][meta["id"]] = {
                             "path": str(task_file),
