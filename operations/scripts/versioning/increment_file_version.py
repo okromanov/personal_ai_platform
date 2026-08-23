@@ -12,6 +12,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def increment_version(version_str: str) -> str:
     """Increment semantic version: 1.0 → 1.1, 1.9 → 2.0"""
     match = re.match(r"(\d+)\.(\d+)", version_str)
