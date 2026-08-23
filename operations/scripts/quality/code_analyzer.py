@@ -13,7 +13,6 @@ from __future__ import annotations
 import ast
 import json
 import sys
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
