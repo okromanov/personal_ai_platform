@@ -2,7 +2,7 @@
 id: m01_semantic_review
 type: semantic_review
 review_state: completed
-version: 1.0
+version: 1.2
 created: 2026-08-17
 updated: 2026-08-23
 milestone: m01
@@ -22,7 +22,7 @@ depends_on:
 ## 2. Предусловия
 
 1. Все обязательные GitHub Actions успешны на одном опубликованном SHA.
-2. Evidence bundle для этого SHA подтверждает `TEST_0001` и `TEST_0002`.
+2. Evidence bundle для этого SHA подтверждает `TEST_001` и `TEST_002`.
 3. Проверку выполняет новый сеанс без истории разработки либо отдельный проверяющий.
 
 Аудит в том же контексте считается предварительным и не может создать формальный `pass`.

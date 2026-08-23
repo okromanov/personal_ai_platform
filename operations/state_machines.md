@@ -2,8 +2,8 @@
 id: state_machines
 type: guide
 document_state: current
-version: 1.0
-updated: 2026-08-22
+version: 1.2
+updated: 2026-08-23
 depends_on:
   - project_rules
 ---
@@ -58,7 +58,7 @@ depends_on:
 | `planned` | `in-progress` | Начало работы | Задача активирована |
 | `in-progress` | `blocked` | Обнаружена зависимость | Задача заблокирована |
 | `blocked` | `in-progress` | Блокировка разрешена | Задача возобновляется |
-| `in-progress` | `completed` | Работа завершена | Задача принята владельцем |
+| `in-progress` | `completed` | Работа и все проверки завершены | Задача закрыта агентом |
 | `planned` | `cancelled` | Отмена владельцем | Задача отменяется |
 | `in-progress` | `cancelled` | Отмена владельцем | Задача отменяется |
 | `blocked` | `cancelled` | Отмена владельцем | Задача отменяется |
@@ -247,15 +247,15 @@ completed
 ### Сценарий 1: Нормальное завершение задачи
 
 ```
-TASK_0001: planned 
+TASK_001: planned 
     → in-progress (агент начал работу)
-    → completed (агент завершил работу, владелец принял)
+    → completed (агент завершил работу и все проверки прошли; не зависит от решения по этапу — см. acceptance.md)
 ```
 
 ### Сценарий 2: Задача была заблокирована
 
 ```
-TASK_0001: planned 
+TASK_001: planned 
     → in-progress (агент начал работу)
     → blocked (обнаружена зависимость)
     → in-progress (зависимость разрешена)
@@ -272,6 +272,6 @@ ADR_100: accepted (решение было принято)
 ### Сценарий 4: Тест был заменён
 
 ```
-TEST_0001: current (исходный тест)
-    → superseded (новый тест - TEST_0001_v2 - лучше и полнее)
+TEST_001: current (исходный тест)
+    → superseded (новый тест - TEST_001_v2 - лучше и полнее)
 ```

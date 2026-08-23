@@ -15,7 +15,7 @@ ELEMENT_HEADING_PATTERN = re.compile(
     r"^#{2,4}\s+((?:BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW)_\d{3})\s+—\s+(.+?)\s*$",
     re.MULTILINE,
 )
-DOCUMENT_ELEMENT_ID = re.compile(r"^(ADR_\d{3}|TASK_\d{4}|TEST_\d{4})$")
+DOCUMENT_ELEMENT_ID = re.compile(r"^(ADR_\d{3}|TASK_\d{3}|TEST_\d{3})$")
 MILESTONE_HEADING_PATTERN = re.compile(
     r"^##\s+(m\d{2})\s+—\s+(.+?)\s*$", re.MULTILINE | re.IGNORECASE
 )
@@ -25,13 +25,13 @@ RELATION_LINE_PATTERN = re.compile(
     re.MULTILINE,
 )
 REFERENCE_PATTERN = re.compile(
-    r"\b(?:BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW)_\d{3}\b|\bADR_\d{3}\b|\bTASK_\d{4}\b|\bTEST_\d{4}\b|\bm\d{2}\b",
+    r"\b(?:BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW)_\d{3}\b|\bADR_\d{3}\b|\bTASK_\d{3}\b|\bTEST_\d{3}\b|\bm\d{2}\b",
     re.IGNORECASE,
 )
 RANGE_PATTERN = re.compile(
-    r"`?(?P<family>BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW|ADR|TASK|TEST)_(?P<start>\d{3,4})`?"
+    r"`?(?P<family>BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW|ADR|TASK|TEST)_(?P<start>\d{3})`?"
     r"\s*[–—-]\s*"
-    r"`?(?P=family)_(?P<end>\d{3,4})`?",
+    r"`?(?P=family)_(?P<end>\d{3})`?",
     re.IGNORECASE,
 )
 METADATA_RELATION_KEYS = (

@@ -64,8 +64,8 @@ REFERENCE_KEYS = (
     "verifies",
     "accepts",
 )
-TEST_FILE_PATTERN = re.compile(r"^test_\d{4}\.md$")
-TEST_ID_PATTERN = re.compile(r"^TEST_\d{4}$")
+TEST_FILE_PATTERN = re.compile(r"^test_\d{3}\.md$")
+TEST_ID_PATTERN = re.compile(r"^TEST_\d{3}$")
 TEST_EXECUTIONS = {"automated", "manual"}
 FAMILY_WIDTH = {
     "BR": 3,
@@ -76,8 +76,8 @@ FAMILY_WIDTH = {
     "INF_CMP": 3,
     "INF_FLOW": 3,
     "ADR": 3,
-    "TASK": 4,
-    "TEST": 4,
+    "TASK": 3,
+    "TEST": 3,
 }
 REQUIRED_TEMPLATES = [
     "business_requirement_template.md",
@@ -902,6 +902,17 @@ def check_tasks(root: Path) -> CheckResult:
             errors.append(
                 f"{relative}: завершённая или отменённая TASK должна иметь next_actor=none"
             )
+        if str(task["work_state"]) == "completed":
+            component = str(task.get("component", ""))
+            placeholder_result = (
+                f"Компонент `{component}` полностью реализован, протестирован и интегрирован."
+            )
+            if _markdown_section(body, "Результат") == placeholder_result:
+                errors.append(
+                    f"{relative}: раздел 'Результат' завершённой TASK не может оставаться "
+                    "шаблонной заглушкой auto_generate_tasks.py — опишите, что реально "
+                    "поставлено (конкретные модули, ограничения, что НЕ сделано)"
+                )
         if str(task["work_state"]) in {"planned", "in-progress", "blocked"} and actor == "none":
             errors.append(
                 f"{relative}: незавершённая TASK должна иметь одного следующего исполнителя"
@@ -974,7 +985,7 @@ def check_test_specs(root: Path) -> CheckResult:
         doc = load_document(path)
         identifier = str(doc.metadata.get("id", "")).strip()
         if not TEST_ID_PATTERN.fullmatch(identifier):
-            errors.append(f"{relative}: id должен иметь формат TEST_0001")
+            errors.append(f"{relative}: id должен иметь формат TEST_001")
         if identifier in seen:
             errors.append(f"Дублирующий TEST id: {identifier}")
         seen.add(identifier)

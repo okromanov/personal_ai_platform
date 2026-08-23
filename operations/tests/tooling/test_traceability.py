@@ -57,7 +57,7 @@ class TraceabilityTests(unittest.TestCase):
         matrix = render_traceability(root)
         self.assertIn("| `THR_001` | `THR` | `mitigated_by`: `SEC_CTL_001` | — |", matrix)
         self.assertIn("| `SYS_030` | `SYS` | `traces_to`: `BR_013`, `BR_028` | — |", matrix)
-        self.assertIn("| `TEST_0003` | `TEST` |", matrix)
+        self.assertIn("| `TEST_003` | `TEST` |", matrix)
         self.assertIn("`m02_contract_tests` |", matrix)
         self.assertNotIn("Входящие ссылки", matrix)
 

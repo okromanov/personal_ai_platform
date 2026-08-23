@@ -59,20 +59,20 @@ class MilestoneStartAndTaskSemanticsTests(unittest.TestCase):
             encoding="utf-8",
         )
         implemented = "BR_002" if unrelated else "ARC_CMP_001"
-        (root / "work/tasks/task_0001_adapter.md").write_text(
-            "---\nid: TASK_0001\ntype: task\ntitle: Adapter\ncomponent: ARC_CMP_001\n"
+        (root / "work/tasks/task_001_adapter.md").write_text(
+            "---\nid: TASK_001\ntype: task\ntitle: Adapter\ncomponent: ARC_CMP_001\n"
             "work_state: planned\nversion: 1.0\nupdated: 2026-08-20\n"
             "next_actor: agent\nowner_action: none\nallowed_paths:\n"
-            "  - work/tasks/task_0001_adapter.md\ntraces_to:\n  - m02\nimplements:\n"
-            f"  - {implemented}\n---\n# TASK_0001 — Adapter\n\n"
+            "  - work/tasks/task_001_adapter.md\ntraces_to:\n  - m02\nimplements:\n"
+            f"  - {implemented}\n---\n# TASK_001 — Adapter\n\n"
             "## 5. План выполнения\n\n- [ ] Build\n",
             encoding="utf-8",
         )
         if with_test:
-            (root / "work/tests/test_0001.md").write_text(
-                "---\nid: TEST_0001\ntype: test\nspec_state: current\nversion: 1.0\n"
-                "traces_to:\n  - TASK_0001\nverifies:\n  - SYS_001\naccepts:\n  - m02\n"
-                "automated_evidence: e\n---\n# TEST_0001 — Adapter\n",
+            (root / "work/tests/test_001.md").write_text(
+                "---\nid: TEST_001\ntype: test\nspec_state: current\nversion: 1.0\n"
+                "traces_to:\n  - TASK_001\nverifies:\n  - SYS_001\naccepts:\n  - m02\n"
+                "automated_evidence: e\n---\n# TEST_001 — Adapter\n",
                 encoding="utf-8",
             )
 

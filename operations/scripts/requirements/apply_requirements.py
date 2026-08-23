@@ -169,10 +169,10 @@ def apply_tests_and_tasks(root: Path, wizard_result: dict) -> list[str]:
 
     for i, test in enumerate(wizard_result["tests"]):
         test_num = 5000 + i  # Начиная с 5000, чтобы не пересекаться с основными
-        test_file = test_dir / f"test_{test_num:04d}.md"
+        test_file = test_dir / f"test_{test_num:03d}.md"
 
         test_content = f"""---
-id: TEST_{test_num:04d}
+id: TEST_{test_num:03d}
 type: test
 title: {test["title"]}
 spec_state: current
@@ -185,7 +185,7 @@ accepts:
   - {milestone}
 ---
 
-# TEST_{test_num:04d} — {test["title"]}
+# TEST_{test_num:03d} — {test["title"]}
 
 ## 1. Назначение
 
@@ -209,7 +209,7 @@ accepts:
 """
 
         test_file.write_text(test_content, encoding="utf-8")
-        created.append(f"work/tests/test_{test_num:04d}.md")
+        created.append(f"work/tests/test_{test_num:03d}.md")
 
     # Создать TASK документы
     task_dir = root / "work" / "tasks"
@@ -217,10 +217,10 @@ accepts:
 
     for i, task in enumerate(wizard_result["tasks"]):
         task_num = 5000 + i
-        task_file = task_dir / f"task_{task_num:04d}_{milestone}_component.md"
+        task_file = task_dir / f"task_{task_num:03d}_{milestone}_component.md"
 
         task_content = f"""---
-id: TASK_{task_num:04d}
+id: TASK_{task_num:03d}
 type: task
 title: {task["title"]}
 work_state: planned
@@ -237,7 +237,7 @@ implements:
   - {task["implements"]}
 ---
 
-# TASK_{task_num:04d} — {task["title"]}
+# TASK_{task_num:03d} — {task["title"]}
 
 ## 1. Зачем это делаем
 
@@ -282,7 +282,7 @@ implements:
 """
 
         task_file.write_text(task_content, encoding="utf-8")
-        created.append(f"work/tasks/task_{task_num:04d}_{milestone}_component.md")
+        created.append(f"work/tasks/task_{task_num:03d}_{milestone}_component.md")
 
     return created
 

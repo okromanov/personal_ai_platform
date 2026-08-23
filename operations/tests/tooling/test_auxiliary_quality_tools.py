@@ -39,12 +39,12 @@ class AutoGenerateTaskTests(unittest.TestCase):
             7,
             "ARC_CMP_001",
             "m02",
-            "TASK_0006",
-            "work/tasks/task_0007_arc_001.md",
+            "TASK_006",
+            "work/tasks/task_007_arc_001.md",
         )
-        self.assertIn("id: TASK_0007", text)
-        self.assertIn("  - TASK_0006", text)
-        self.assertIn("  - work/tasks/task_0007_arc_001.md", text)
+        self.assertIn("id: TASK_007", text)
+        self.assertIn("  - TASK_006", text)
+        self.assertIn("  - work/tasks/task_007_arc_001.md", text)
 
     def test_generates_only_in_scope_uncovered_components(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -59,8 +59,8 @@ class AutoGenerateTaskTests(unittest.TestCase):
             (root / "specifications" / "infrastructure_baseline.md").write_text(
                 "### INF_CMP_001 — Infra\n\n`implements`: SYS_001\n", encoding="utf-8"
             )
-            (root / "work" / "tasks" / "task_0004_old.md").write_text(
-                "---\nid: TASK_0004\ntitle: Existing\n---\n", encoding="utf-8"
+            (root / "work" / "tasks" / "task_004_old.md").write_text(
+                "---\nid: TASK_004\ntitle: Existing\n---\n", encoding="utf-8"
             )
 
             state = {"current": {"id": "m02", "work_state": "in-progress", "scope": ["SYS_001"]}}
@@ -73,11 +73,11 @@ class AutoGenerateTaskTests(unittest.TestCase):
 
             self.assertEqual(
                 created,
-                ["work/tasks/task_0005_arc_001.md", "work/tasks/task_0006_inf_001.md"],
+                ["work/tasks/task_005_arc_001.md", "work/tasks/task_006_inf_001.md"],
             )
             self.assertEqual(repeated, [])
             second = (root / created[1]).read_text(encoding="utf-8")
-            self.assertIn("  - TASK_0005", second)
+            self.assertIn("  - TASK_005", second)
 
     def test_generation_is_blocked_before_an_active_scoped_stage(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -284,7 +284,7 @@ class QualityUtilityTests(unittest.TestCase):
             tasks = root / "work" / "tasks"
             tasks.mkdir(parents=True)
             (root / "existing.txt").write_text("ok", encoding="utf-8")
-            (tasks / "task_0001.md").write_text(
+            (tasks / "task_001.md").write_text(
                 "allowed_paths:\n  - missing.txt\n  - src/**\n  - existing.txt\n", encoding="utf-8"
             )
             errors = validate_task_paths(root)

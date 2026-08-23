@@ -2,7 +2,7 @@
 id: file_procedure_traceability_matrix
 type: procedure_reference
 title: File and Procedure Traceability Matrix
-version: 1.3
+version: 1.5
 created: 2026-08-23
 updated: 2026-08-23
 scope: project_state_management
@@ -83,11 +83,11 @@ CI Validation: check generated drift + acceptance gate
 
 | File | Field/Section | Old Value | New Value | Who | Validation |
 |------|---|---|---|---|---|
-| `work/tasks/taskXXXX_*.md` | `work_state` | `planned` | `in-progress` | Agent | Signals active work |
-| `work/tasks/taskXXXX_*.md` | `updated` | previous date | current date | Agent | Must reflect actual modification |
-| `work/tasks/taskXXXX_*.md` | `next_actor` | previous | `agent` | Agent | Clarifies who acts next |
-| `work/tasks/taskXXXX_*.md` | `allowed_paths` | narrow/empty | actual paths | Agent | MUST expand before coding |
-| `work/tasks/taskXXXX_*.md` | Section 5 Plan | checkbox states | mark start | Agent | Progress tracking |
+| `work/tasks/taskXXX_*.md` | `work_state` | `planned` | `in-progress` | Agent | Signals active work |
+| `work/tasks/taskXXX_*.md` | `updated` | previous date | current date | Agent | Must reflect actual modification |
+| `work/tasks/taskXXX_*.md` | `next_actor` | previous | `agent` | Agent | Clarifies who acts next |
+| `work/tasks/taskXXX_*.md` | `allowed_paths` | narrow/empty | actual paths | Agent | MUST expand before coding |
+| `work/tasks/taskXXX_*.md` | Section 5 Plan | checkbox states | mark start | Agent | Progress tracking |
 | [`project_status.md`](../../project_status.md) | `current_project_task` | previous | new task | Auto-generate | Dashboard shows current task |
 | [`project_status.md`](../../project_status.md) | `next_actor` | previous | `agent` | Auto-generate | Workflow state |
 | [`project_status.md`](../../project_status.md) | Step list | previous | current steps | Auto-generate | What's happening now |
@@ -134,12 +134,12 @@ CI Validation: check generated drift
 
 | File | Field/Section | Old Value | New Value | Who | Validation |
 |------|---|---|---|---|---|
-| `work/tasks/taskXXXX_*.md` | `work_state` | `in-progress` | `completed` | Agent | Signals completion |
-| `work/tasks/taskXXXX_*.md` | `updated` | previous date | current date | Agent | Must reflect actual completion |
-| `work/tasks/taskXXXX_*.md` | Section 8 Checklist | incomplete | all ✅ | Agent | All criteria met |
-| `work/tests/test_XXXX.md` (linked) | `execution` | `spec` or `planned` | `automated` | Agent | Evidence of testing |
-| `work/tests/test_XXXX.md` (linked) | `automated_evidence` | `null` | evidence source | Agent | Links to proof |
-| `work/tests/test_XXXX.md` (linked) | `updated` | previous date | current date | Agent | Reflects evidence generation |
+| `work/tasks/taskXXX_*.md` | `work_state` | `in-progress` | `completed` | Agent | Signals completion |
+| `work/tasks/taskXXX_*.md` | `updated` | previous date | current date | Agent | Must reflect actual completion |
+| `work/tasks/taskXXX_*.md` | Section 8 Checklist | incomplete | all ✅ | Agent | All criteria met |
+| `work/tests/test_XXX.md` (linked) | `execution` | `spec` or `planned` | `automated` | Agent | Evidence of testing |
+| `work/tests/test_XXX.md` (linked) | `automated_evidence` | `null` | evidence source | Agent | Links to proof |
+| `work/tests/test_XXX.md` (linked) | `updated` | previous date | current date | Agent | Reflects evidence generation |
 | [`project_status.md`](../../project_status.md) | current task row | ✗ unchecked | ✅ checked | Auto-generate | Dashboard reflects completion |
 | [`project_status.md`](../../project_status.md) | `next_actor` | `agent` (current) | `owner` or `agent` (next) | Auto-generate | Next workflow step |
 | [`project_status.md`](../../project_status.md) | `current_project_task` | completed task | next task | Auto-generate | Shows new current task |
@@ -189,8 +189,8 @@ CI Validation: all tests pass + generated drift check
 
 | File | Action | Contents | Who | Validation |
 |------|---|---|---|---|
-| `work/tests/test_XXXX.md` | Create | Full test spec | Agent | Must match schema |
-| `work/tasks/taskYYYY_*.md` | Update | Add `tests: [TEST_XXXX]` | Agent | Links task to test |
+| `work/tests/test_XXX.md` | Create | Full test spec | Agent | Must match schema |
+| `work/tasks/taskYYY_*.md` | Update | Add `tests: [TEST_XXX]` | Agent | Links task to test |
 | [`generated/document_index.md`](../../generated/document_index.md) | Auto-generate | Add test entry | Script | Reflects new test |
 | [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) | Auto-generate | Add test traces | Script | Shows all linkages |
 
@@ -208,7 +208,7 @@ For **automated tests**:
 ### 4.4 Validation Rules
 
 - Test file must have schema matching document specification rules for semantic review
-- Test name must match `TEST_XXXX` pattern (T-E-S-T underscore four digits)
+- Test name must match `TEST_XXX` pattern (T-E-S-T underscore three digits)
 - Metadata consistency check: all dates must be ISO format
 - Traceability check: test must appear in at least one task's `tests:` field
 
@@ -221,13 +221,13 @@ For **automated tests**:
 ```
 ARC_CMP_XXX specification defined
   ↓
-TASK_XXXX created → work/tasks/taskXXXX_*.md
+TASK_XXX created → work/tasks/taskXXX_*.md
   ↓
 allowed_paths expanded in TASK
   ↓
 Implementation in src/... (within allowed_paths)
   ↓
-TEST_YYYY created → work/tests/test_YYYY.md
+TEST_YYY created → work/tests/test_YYY.md
   ↓
 Evidence generated (test runs, logs, artifacts)
   ↓
@@ -317,7 +317,7 @@ During CI (Quality skills):
 
 ### 7.2 Dashboard Not Updating After Task Completion
 
-**Issue**: Dashboard still showed TASK_0001 as current after it was marked completed.
+**Issue**: Dashboard still showed TASK_001 as current after it was marked completed.
 
 **Root Cause**: Auto-generation script wasn't explicitly called or wasn't detecting state changes.
 
@@ -435,7 +435,7 @@ real evidence source that only exists once the requirement is implemented.
 - [ ] TASK file: mark all Section 8 checkboxes ✅
 - [ ] TEST file: set `execution: automated`, `automated_evidence: quality_suite`
 - [ ] TEST file: add evidence section with actual test results
-- [ ] TASK file: add `tests: [TEST_XXXX]` if not already there
+- [ ] TASK file: add `tests: [TEST_XXX]` if not already there
 - [ ] All files: verify `updated: today`
 - [ ] Run: `python3 operations/scripts/status/generate_project_status.py`
 - [ ] Run: `python3 operations/scripts/documents/generate.py --all`

@@ -1,11 +1,11 @@
 ---
-id: TEST_0003
+id: TEST_003
 type: test
 title: Контракты среды агента и поставщика модели
 spec_state: current
 execution: automated
 automated_evidence: m02_contract_tests
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 accepts:
   - m02
@@ -15,8 +15,8 @@ verifies:
   - SYS_027
 ---
 
-<a id="test_0003"></a>
-# TEST_0003 — Контракты среды агента и поставщика модели
+<a id="test_003"></a>
+# TEST_003 — Контракты среды агента и поставщика модели
 
 Автоматическая проверка. Действия владельца не требуются.
 

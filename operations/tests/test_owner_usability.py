@@ -91,6 +91,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Этапы V1",
             "Проектные задачи текущего этапа",
             "Шаги текущей работы",
+            "Файлы, созданные в рамках задач",
             "выполнено",
             "осталось",
             "[x]",
@@ -116,14 +117,31 @@ class OwnerUsabilityTests(unittest.TestCase):
         ]:
             self.assertNotIn(internal, rendered)
 
+    def test_task_files_section_lists_real_deliverables_with_links_and_test_purpose(
+        self,
+    ) -> None:
+        rendered = render_repository_project_status(self.root)
+        section = rendered[
+            rendered.index("## Файлы, созданные в рамках задач") : rendered.index(
+                "## Справочная информация"
+            )
+        ]
+        # TASK_001 expanded allowed_paths beyond its own card and shipped real files;
+        # TASK_002+ have not (their allowed_paths is still just their own card), so
+        # only TASK_001 should appear here.
+        self.assertIn("TASK_001", section)
+        self.assertIn("[`src/channels/base.py`](src/channels/base.py)", section)
+        self.assertIn("По TEST `TEST_007`", section)
+        self.assertNotIn("TASK_002", section)
+
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
-            _task_item("TASK_0001", "planned", traces_to=["m01"], owner_action="none"),
-            _task_item("TASK_0002", "blocked", traces_to=["m01"], owner_action="none"),
+            _task_item("TASK_001", "planned", traces_to=["m01"], owner_action="none"),
+            _task_item("TASK_002", "blocked", traces_to=["m01"], owner_action="none"),
         ]
         current = select_current_task(tasks, "m01")
         assert current is not None
-        self.assertEqual(current["id"], "TASK_0001")
+        self.assertEqual(current["id"], "TASK_001")
 
     def test_technical_status_has_one_russian_owner_action_and_real_foundation_count(self) -> None:
         action = build_owner_next_action(
@@ -261,9 +279,9 @@ class OwnerUsabilityTests(unittest.TestCase):
     def test_project_status_shows_exact_decision_when_owner_is_next(self) -> None:
         milestone = {"id": "m01", "title": "Основа", "work_state": "in-progress"}
         task = {
-            "id": "TASK_0003",
+            "id": "TASK_003",
             "title": "Подготовить решение",
-            "path": "work/tasks/task_0003_finish_m01.md",
+            "path": "work/tasks/task_003_finish_m01.md",
             "traces_to": ["m01"],
             "work_state": "in-progress",
             "next_actor": "owner",

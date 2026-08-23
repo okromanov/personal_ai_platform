@@ -116,12 +116,12 @@ class ScopeCoverageTests(unittest.TestCase):
         self.assertEqual(missing["scope_covered"], 0)
         self.assertTrue(any("SYS_001" in item for item in missing["blockers"]))
 
-        tasks = [_task("TASK_0001", ["SYS_001"])]
+        tasks = [_task("TASK_001", ["SYS_001"])]
         tests = [
             _effective_test(
-                "TEST_0001",
+                "TEST_001",
                 effective_result="passed",
-                traces_to=["TASK_0001"],
+                traces_to=["TASK_001"],
                 verifies=["SYS_001"],
             )
         ]

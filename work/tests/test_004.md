@@ -1,11 +1,11 @@
 ---
-id: TEST_0004
+id: TEST_004
 type: test
 title: Контроль владельца и аварийное отключение
 spec_state: current
 execution: automated
 automated_evidence: m02_security_tests
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 accepts:
   - m02
@@ -21,8 +21,8 @@ verifies:
   - SEC_CTL_020
 ---
 
-<a id="test_0004"></a>
-# TEST_0004 — Контроль владельца и аварийное отключение
+<a id="test_004"></a>
+# TEST_004 — Контроль владельца и аварийное отключение
 
 Автоматическая негативная проверка. Действия владельца не требуются.
 

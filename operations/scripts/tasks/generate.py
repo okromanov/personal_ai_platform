@@ -13,8 +13,8 @@ from operations.scripts.documents.metadata import (
 )
 
 GENERATED_HEADER = "<!-- generated file: do not edit manually -->"
-TASK_ID_PATTERN = re.compile(r"^TASK_\d{4}$")
-TEST_ID_PATTERN = re.compile(r"^TEST_\d{4}$")
+TASK_ID_PATTERN = re.compile(r"^TASK_\d{3}$")
+TEST_ID_PATTERN = re.compile(r"^TEST_\d{3}$")
 TASK_STATES = {"planned", "in-progress", "blocked", "completed", "cancelled"}
 TERMINAL_STATES = {"completed", "cancelled"}
 ACTIVE_STATES = {"in-progress", "blocked"}
@@ -65,10 +65,10 @@ def checklist_items(body: str) -> list[ChecklistItem]:
 
 def _validate_task_sequence(items: list[TaskItem]) -> None:
     actual_ids = [str(item["id"]) for item in items]
-    expected_ids = [f"TASK_{number:04d}" for number in range(1, len(items) + 1)]
+    expected_ids = [f"TASK_{number:03d}" for number in range(1, len(items) + 1)]
     if actual_ids != expected_ids:
         raise ValueError(
-            "Очередь TASK должна начинаться с TASK_0001 и идти без пропусков: "
+            "Очередь TASK должна начинаться с TASK_001 и идти без пропусков: "
             f"ожидалось {', '.join(expected_ids)}, найдено {', '.join(actual_ids)}"
         )
 

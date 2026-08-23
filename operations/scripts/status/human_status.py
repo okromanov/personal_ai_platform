@@ -5,6 +5,7 @@ from pathlib import Path
 
 from operations.scripts.common.project import atomic_write
 from operations.scripts.common.status_types import TaskItem
+from operations.scripts.documents.metadata import load_document
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -48,6 +49,48 @@ def _task_context(tasks: list[TaskItem], milestone_id: str) -> TaskItem | None:
 
 def _checkbox(done: bool) -> str:
     return "[x]" if done else "[ ]"
+
+
+def _deliverable_paths(task: TaskItem) -> list[str]:
+    """`allowed_paths` minus the task's own card: the files it actually ships."""
+    own_path = str(task["path"])
+    return [path for path in task.get("allowed_paths", []) if path != own_path]
+
+
+def _test_purpose(root: Path, test_path: str) -> str:
+    """First line of a TEST doc's '## 1. Назначение' section, or "" if unavailable."""
+    full_path = root / test_path
+    if not full_path.is_file():
+        return ""
+    try:
+        body = load_document(full_path).body
+    except ValueError:
+        return ""
+    purpose = _section(body, "Назначение")
+    first_line = purpose.splitlines()[0].strip() if purpose else ""
+    return first_line
+
+
+def _task_file_sections(root: Path, tasks: list[TaskItem]) -> str:
+    groups: list[str] = []
+    for task in tasks:
+        paths = _deliverable_paths(task)
+        if not paths:
+            continue
+        purpose = ""
+        test_refs = task.get("tests", [])
+        if test_refs:
+            purpose = _test_purpose(root, test_refs[0]["path"])
+        header = f"### [`{task['id']}` — {task['title']}](work/tasks/{Path(task['path']).name})"
+        lines = [header, ""]
+        if purpose:
+            lines.append(f"_По TEST `{test_refs[0]['id']}`:_ {purpose}")
+            lines.append("")
+        lines.extend(f"- [`{path}`]({path})" for path in paths)
+        groups.append("\n".join(lines))
+    if not groups:
+        return "Ни одна TASK ещё не поставила файлы за пределами собственной карточки."
+    return "\n\n".join(groups)
 
 
 def render_repository_project_status(root: Path) -> str:
@@ -314,6 +357,10 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 ## Что будет дальше
 
 {next_text}
+
+## Файлы, созданные в рамках задач
+
+{_task_file_sections(root, tasks)}
 
 ## Справочная информация
 

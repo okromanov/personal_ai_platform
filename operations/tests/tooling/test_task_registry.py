@@ -4,7 +4,28 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from operations.scripts.tasks.generate import collect_tasks, render_task_index
+from operations.scripts.tasks.generate import (
+    TASK_ID_PATTERN,
+    TEST_ID_PATTERN,
+    collect_tasks,
+    render_task_index,
+)
+
+
+class TaskTestIdWidthTests(unittest.TestCase):
+    """TASK/TEST IDs are three digits (TASK_XXX/TEST_XXX), per operations/change_process.md.
+
+    Locks the width so a future edit can't silently drift back to the old
+    four-digit form without a test failing here.
+    """
+
+    def test_task_id_pattern_accepts_three_digits_and_rejects_four(self) -> None:
+        self.assertTrue(TASK_ID_PATTERN.fullmatch("TASK_001"))
+        self.assertFalse(TASK_ID_PATTERN.fullmatch("TASK_0001"))
+
+    def test_test_id_pattern_accepts_three_digits_and_rejects_four(self) -> None:
+        self.assertTrue(TEST_ID_PATTERN.fullmatch("TEST_001"))
+        self.assertFalse(TEST_ID_PATTERN.fullmatch("TEST_0001"))
 
 
 class TaskRegistryTests(unittest.TestCase):
@@ -45,22 +66,22 @@ class TaskRegistryTests(unittest.TestCase):
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
             task_text = (
-                "---\nid: TASK_0001\ntype: task\ntitle: Sample\nwork_state: in-progress\nversion: 1.0\n"
+                "---\nid: TASK_001\ntype: task\ntitle: Sample\nwork_state: in-progress\nversion: 1.0\n"
                 "next_actor: agent\nowner_action: none\n"
-                "traces_to:\n  - m01\nimplements:\n  - SYS_001\n---\n# TASK_0001 — Sample\n"
+                "traces_to:\n  - m01\nimplements:\n  - SYS_001\n---\n# TASK_001 — Sample\n"
                 "\n## 5. План выполнения\n\n- [ ] Шаг\n"
             )
-            (root / "work/tasks/task_0001_sample.md").write_text(task_text, encoding="utf-8")
-            (root / "work/tests/test_0001.md").write_text(
-                "---\nid: TEST_0001\ntype: test\nspec_state: current\nversion: 1.0\ntraces_to:\n  - TASK_0001\nverifies:\n  - SYS_001\n---\n# TEST_0001 — Sample\n",
+            (root / "work/tasks/task_001_sample.md").write_text(task_text, encoding="utf-8")
+            (root / "work/tests/test_001.md").write_text(
+                "---\nid: TEST_001\ntype: test\nspec_state: current\nversion: 1.0\ntraces_to:\n  - TASK_001\nverifies:\n  - SYS_001\n---\n# TEST_001 — Sample\n",
                 encoding="utf-8",
             )
             state = collect_tasks(root)
             self.assertEqual(state["tasks"][0]["implements"], ["SYS_001"])
-            self.assertEqual(state["tasks"][0]["tests"][0]["id"], "TEST_0001")
+            self.assertEqual(state["tasks"][0]["tests"][0]["id"], "TEST_001")
             index = render_task_index(root)
             self.assertIn("SYS_001", index)
-            self.assertIn("TEST_0001", index)
+            self.assertIn("TEST_001", index)
 
     def test_duplicate_task_id_is_rejected_before_rendering(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -68,13 +89,13 @@ class TaskRegistryTests(unittest.TestCase):
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
             task = (
-                "---\nid: TASK_0001\ntype: task\ntitle: Sample\nwork_state: in-progress\nversion: 1.0\n"
+                "---\nid: TASK_001\ntype: task\ntitle: Sample\nwork_state: in-progress\nversion: 1.0\n"
                 "next_actor: agent\nowner_action: none\nallowed_paths:\n  - work/tasks/**\n"
-                "---\n# TASK_0001 — Sample\n\n## 5. План выполнения\n\n- [ ] Шаг\n"
+                "---\n# TASK_001 — Sample\n\n## 5. План выполнения\n\n- [ ] Шаг\n"
             )
-            (root / "work/tasks/task_0001_first.md").write_text(task, encoding="utf-8")
-            (root / "work/tasks/task_0001_second.md").write_text(task, encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "Дублирующий TASK ID TASK_0001"):
+            (root / "work/tasks/task_001_first.md").write_text(task, encoding="utf-8")
+            (root / "work/tasks/task_001_second.md").write_text(task, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Дублирующий TASK ID TASK_001"):
                 collect_tasks(root)
 
     def test_task_ids_must_be_continuous(self) -> None:
@@ -82,8 +103,8 @@ class TaskRegistryTests(unittest.TestCase):
             root = Path(tmp)
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
-            self._write_task(root, "TASK_0001", "completed")
-            self._write_task(root, "TASK_0003", "planned", depends_on="TASK_0001")
+            self._write_task(root, "TASK_001", "completed")
+            self._write_task(root, "TASK_003", "planned", depends_on="TASK_001")
             with self.assertRaisesRegex(ValueError, "без пропусков"):
                 collect_tasks(root)
 
@@ -92,10 +113,10 @@ class TaskRegistryTests(unittest.TestCase):
             root = Path(tmp)
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
-            self._write_task(root, "TASK_0001", "completed")
-            self._write_task(root, "TASK_0002", "completed", depends_on="TASK_0001")
-            self._write_task(root, "TASK_0003", "planned", depends_on="TASK_0001")
-            with self.assertRaisesRegex(ValueError, "непосредственно предыдущую TASK_0002"):
+            self._write_task(root, "TASK_001", "completed")
+            self._write_task(root, "TASK_002", "completed", depends_on="TASK_001")
+            self._write_task(root, "TASK_003", "planned", depends_on="TASK_001")
+            with self.assertRaisesRegex(ValueError, "непосредственно предыдущую TASK_002"):
                 collect_tasks(root)
 
     def test_completed_tasks_must_form_queue_prefix(self) -> None:
@@ -103,8 +124,8 @@ class TaskRegistryTests(unittest.TestCase):
             root = Path(tmp)
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
-            self._write_task(root, "TASK_0001", "planned")
-            self._write_task(root, "TASK_0002", "completed", depends_on="TASK_0001")
+            self._write_task(root, "TASK_001", "planned")
+            self._write_task(root, "TASK_002", "completed", depends_on="TASK_001")
             with self.assertRaisesRegex(ValueError, "непрерывное начало очереди"):
                 collect_tasks(root)
 
@@ -113,8 +134,8 @@ class TaskRegistryTests(unittest.TestCase):
             root = Path(tmp)
             (root / "work/tasks").mkdir(parents=True)
             (root / "work/tests").mkdir(parents=True)
-            self._write_task(root, "TASK_0001", "in-progress")
-            self._write_task(root, "TASK_0002", "blocked", depends_on="TASK_0001")
+            self._write_task(root, "TASK_001", "in-progress")
+            self._write_task(root, "TASK_002", "blocked", depends_on="TASK_001")
             with self.assertRaisesRegex(ValueError, "только одна активная TASK"):
                 collect_tasks(root)
 

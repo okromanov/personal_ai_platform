@@ -1,11 +1,11 @@
 ---
-id: TEST_0005
+id: TEST_005
 type: test
 title: Сквозной сценарий Telegram и перезапуск
 spec_state: current
 execution: automated
 automated_evidence: m02_e2e_tests
-version: 1.0
+version: 1.2
 updated: 2026-08-23
 accepts:
   - m02
@@ -15,8 +15,8 @@ verifies:
   - SYS_027
 ---
 
-<a id="test_0005"></a>
-# TEST_0005 — Сквозной сценарий Telegram и перезапуск
+<a id="test_005"></a>
+# TEST_005 — Сквозной сценарий Telegram и перезапуск
 
 Автоматизированная проверка минимального живого контура. Действия владельца не требуются.
 

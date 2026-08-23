@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `190` |
+| Всего файлов | `191` |
 
 ```text
 personal_ai_platform/
@@ -150,6 +150,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_metadata_parsing.py
 - operations/tests/tooling/test_milestone_lifecycle.py
 - operations/tests/tooling/test_milestone_start_and_task_semantics.py
+- operations/tests/tooling/test_owner_dashboard.py
 - operations/tests/tooling/test_project_common.py
 - operations/tests/tooling/test_quality_baseline.py
 - operations/tests/tooling/test_quality_registry.py
@@ -184,24 +185,24 @@ personal_ai_platform/
 - work/m02/semantic_review.md
 - work/procedures/file_procedure_traceability_matrix.md
 - work/tasks/.gitkeep
-- work/tasks/task_0001_arc_001.md
-- work/tasks/task_0002_arc_002.md
-- work/tasks/task_0003_arc_003.md
-- work/tasks/task_0004_arc_004.md
-- work/tasks/task_0005_arc_005.md
-- work/tasks/task_0006_arc_007.md
-- work/tasks/task_0007_arc_009.md
-- work/tasks/task_0008_inf_001.md
-- work/tasks/task_0009_inf_002.md
-- work/tasks/task_0010_inf_003.md
-- work/tasks/task_0011_inf_005.md
-- work/tasks/task_0012_inf_007.md
-- work/tasks/task_0013_inf_008.md
-- work/tests/test_0001.md
-- work/tests/test_0002.md
-- work/tests/test_0003.md
-- work/tests/test_0004.md
-- work/tests/test_0005.md
-- work/tests/test_0006.md
-- work/tests/test_0007.md
+- work/tasks/task_001_arc_001.md
+- work/tasks/task_002_arc_002.md
+- work/tasks/task_003_arc_003.md
+- work/tasks/task_004_arc_004.md
+- work/tasks/task_005_arc_005.md
+- work/tasks/task_006_arc_007.md
+- work/tasks/task_007_arc_009.md
+- work/tasks/task_008_inf_001.md
+- work/tasks/task_009_inf_002.md
+- work/tasks/task_010_inf_003.md
+- work/tasks/task_011_inf_005.md
+- work/tasks/task_012_inf_007.md
+- work/tasks/task_013_inf_008.md
+- work/tests/test_001.md
+- work/tests/test_002.md
+- work/tests/test_003.md
+- work/tests/test_004.md
+- work/tests/test_005.md
+- work/tests/test_006.md
+- work/tests/test_007.md
 ```

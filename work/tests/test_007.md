@@ -1,16 +1,16 @@
 ---
-id: TEST_0007
+id: TEST_007
 type: test
 title: "ARC_CMP_001 — Каналы: нормализация входа для Telegram"
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.3
+version: 1.5
 updated: 2026-08-23
 accepts:
   - m02
 traces_to:
-  - TASK_0001
+  - TASK_001
   - SYS_001
   - SYS_005
   - SYS_006
@@ -138,9 +138,9 @@ operations/tests/product/
 
 ## 11. Что будет дальше
 
-1. TASK_0002: Реализация ARC_CMP_002 (Контроль владельца)
-2. TASK_0003: Реализация ARC_CMP_003 (Оркестрация и RuntimePort)
-3. TASK_0004: Реализация ARC_CMP_004 (Шлюз моделей)
+1. TASK_002: Реализация ARC_CMP_002 (Контроль владельца)
+2. TASK_003: Реализация ARC_CMP_003 (Оркестрация и RuntimePort)
+3. TASK_004: Реализация ARC_CMP_004 (Шлюз моделей)
 4. Затем интеграция: Telegram → Каналы → Контроль → Оркестрация → Модель
 
 ## 12. Примечания для разработчика

@@ -14,7 +14,7 @@ version: 1.0
 
 > **Чтобы продолжить, отправьте агенту одну команду.**
 >
-> `ПРОДОЛЖАЙ TASK_0002`
+> `ПРОДОЛЖАЙ TASK_002`
 
 Других действий от вас сейчас не требуется. Агент сам выполнит внутренние проверки и сообщит результат.
 
@@ -25,7 +25,7 @@ version: 1.0
 | Параметр | Значение |
 |---|---|
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
-| Текущая проектная задача | [`TASK_0002` — Реализация ARC_CMP_002](work/tasks/task_0002_arc_002.md) |
+| Текущая проектная задача | [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md) |
 | Место в очереди проекта | **2 из 13** |
 | Следующий исполнитель | **агент** |
 
@@ -42,7 +42,7 @@ version: 1.0
 
 Путь до следующего результата:
 
-1. **Сейчас** отправьте команду `ПРОДОЛЖАЙ TASK_0002`.
+1. **Сейчас** отправьте команду `ПРОДОЛЖАЙ TASK_002`.
 2. **Затем** агент выполнит оставшиеся шаги. Осталось: **6**.
 3. **После проверки** агент сообщит результат и покажет следующее действие.
 
@@ -68,19 +68,19 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 
 ## Проектные задачи текущего этапа
 
-- [x] [`TASK_0001` — Реализация ARC_CMP_001](work/tasks/task_0001_arc_001.md)
-- [ ] [`TASK_0002` — Реализация ARC_CMP_002](work/tasks/task_0002_arc_002.md)
-- [ ] [`TASK_0003` — Реализация ARC_CMP_003](work/tasks/task_0003_arc_003.md)
-- [ ] [`TASK_0004` — Реализация ARC_CMP_004](work/tasks/task_0004_arc_004.md)
-- [ ] [`TASK_0005` — Реализация ARC_CMP_005](work/tasks/task_0005_arc_005.md)
-- [ ] [`TASK_0006` — Реализация ARC_CMP_007](work/tasks/task_0006_arc_007.md)
-- [ ] [`TASK_0007` — Реализация ARC_CMP_009](work/tasks/task_0007_arc_009.md)
-- [ ] [`TASK_0008` — Реализация INF_CMP_001](work/tasks/task_0008_inf_001.md)
-- [ ] [`TASK_0009` — Реализация INF_CMP_002](work/tasks/task_0009_inf_002.md)
-- [ ] [`TASK_0010` — Реализация INF_CMP_003](work/tasks/task_0010_inf_003.md)
-- [ ] [`TASK_0011` — Реализация INF_CMP_005](work/tasks/task_0011_inf_005.md)
-- [ ] [`TASK_0012` — Реализация INF_CMP_007](work/tasks/task_0012_inf_007.md)
-- [ ] [`TASK_0013` — Реализация INF_CMP_008](work/tasks/task_0013_inf_008.md)
+- [x] [`TASK_001` — Реализация ARC_CMP_001](work/tasks/task_001_arc_001.md)
+- [ ] [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md)
+- [ ] [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md)
+- [ ] [`TASK_004` — Реализация ARC_CMP_004](work/tasks/task_004_arc_004.md)
+- [ ] [`TASK_005` — Реализация ARC_CMP_005](work/tasks/task_005_arc_005.md)
+- [ ] [`TASK_006` — Реализация ARC_CMP_007](work/tasks/task_006_arc_007.md)
+- [ ] [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_009.md)
+- [ ] [`TASK_008` — Реализация INF_CMP_001](work/tasks/task_008_inf_001.md)
+- [ ] [`TASK_009` — Реализация INF_CMP_002](work/tasks/task_009_inf_002.md)
+- [ ] [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md)
+- [ ] [`TASK_011` — Реализация INF_CMP_005](work/tasks/task_011_inf_005.md)
+- [ ] [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md)
+- [ ] [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md)
 
 ## Шаги текущей работы
 
@@ -98,6 +98,21 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 ## Что будет дальше
 
 После завершения этой TASK перейти к следующему компоненту или интеграционным испытаниям.
+
+## Файлы, созданные в рамках задач
+
+### [`TASK_001` — Реализация ARC_CMP_001](work/tasks/task_001_arc_001.md)
+
+_По TEST `TEST_007`:_ Доказать, что компонент ARC_CMP_001 (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям SYS_001.
+
+- [`src/channels/`](src/channels/)
+- [`src/channels/__init__.py`](src/channels/__init__.py)
+- [`src/channels/base.py`](src/channels/base.py)
+- [`src/channels/telegram.py`](src/channels/telegram.py)
+- [`src/__init__.py`](src/__init__.py)
+- [`operations/tests/product/__init__.py`](operations/tests/product/__init__.py)
+- [`operations/tests/product/test_channels.py`](operations/tests/product/test_channels.py)
+- [`work/tests/test_007.md`](work/tests/test_007.md)
 
 ## Справочная информация
 
