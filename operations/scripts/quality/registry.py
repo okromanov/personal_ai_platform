@@ -5,6 +5,7 @@ import json
 import re
 from collections.abc import Mapping
 from pathlib import Path
+from typing import TypedDict, cast
 
 REGISTRY_PATH = "operations/quality_registry.json"
 COVERAGE_MODES = {"task_test", "global_evidence"}
@@ -20,6 +21,40 @@ SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 RUN_URL_PATTERN = re.compile(r"^https://github\.com/[^/]+/[^/]+/actions/runs/\d+$")
 RECORD_TYPES = {"quality_suite", "test_evidence"}
+
+
+class QualityProfile(TypedDict):
+    """Coerced, typed view of a `profiles.<id>` entry from quality_registry.json.
+
+    The raw JSON value is `object`-typed by construction (parsed at runtime,
+    validated separately by `validate_quality_registry`). Parsing it once into
+    this shape here means every consumer works with real list[str]/str fields
+    instead of re-deriving them from `object` at each call site.
+    """
+
+    milestones: list[str]
+    required_evidence: list[str]
+    paths: list[str]
+    scope_coverage: str
+    scope_evidence: list[str]
+
+
+def _parse_profile(raw: dict[str, object]) -> QualityProfile:
+    milestones = raw.get("milestones", [])
+    required = raw.get("required_evidence", [])
+    paths = raw.get("paths", [])
+    scope_evidence = raw.get("scope_evidence", [])
+    return {
+        "milestones": [str(value) for value in milestones] if isinstance(milestones, list) else [],
+        "required_evidence": (
+            [str(value) for value in required] if isinstance(required, list) else []
+        ),
+        "paths": [str(value) for value in paths] if isinstance(paths, list) else [],
+        "scope_coverage": str(raw.get("scope_coverage", "task_test")),
+        "scope_evidence": (
+            [str(value) for value in scope_evidence] if isinstance(scope_evidence, list) else []
+        ),
+    }
 
 
 def validate_server_source(
@@ -212,17 +247,17 @@ def validate_quality_registry(root: Path, milestone_ids: set[str]) -> list[str]:
 
 def profiles_for_milestone(
     registry: dict[str, object], milestone_id: str
-) -> list[tuple[str, dict[str, object]]]:
+) -> list[tuple[str, QualityProfile]]:
     profiles = registry.get("profiles", {})
-    result: list[tuple[str, dict[str, object]]] = []
+    result: list[tuple[str, QualityProfile]] = []
     if not isinstance(profiles, dict):
         return result
     for profile_id, raw in profiles.items():
         if not isinstance(raw, dict):
             continue
-        milestones = [str(value).lower() for value in raw.get("milestones", []) if str(value)]
-        if milestone_id.lower() in milestones:
-            result.append((str(profile_id), raw))
+        profile = _parse_profile(raw)
+        if milestone_id.lower() in [value.lower() for value in profile["milestones"]]:
+            result.append((str(profile_id), profile))
     return result
 
 
@@ -249,18 +284,18 @@ def impacted_profiles(registry: dict[str, object], changed_paths: list[str]) -> 
     for profile_id, raw in profiles.items():
         if not isinstance(raw, dict):
             continue
-        patterns = [str(value) for value in raw.get("paths", []) if str(value)]
+        patterns = _parse_profile(raw)["paths"]
         if any(_matches(path, patterns) for path in changed_paths):
             result.append(str(profile_id))
     return result
 
 
 def uncovered_paths(
-    selected_profiles: list[tuple[str, dict[str, object]]], changed_paths: list[str]
+    selected_profiles: list[tuple[str, QualityProfile]], changed_paths: list[str]
 ) -> list[str]:
     patterns: list[str] = []
-    for _, raw in selected_profiles:
-        patterns.extend(str(value) for value in raw.get("paths", []) if str(value))
+    for _, profile in selected_profiles:
+        patterns.extend(profile["paths"])
     result: list[str] = []
     for path in changed_paths:
         normalized = _normalize_path(path)
@@ -279,10 +314,11 @@ def evidence_results(
     unit_summary: Mapping[str, object],
     context: Mapping[str, object] | None = None,
 ) -> dict[str, dict[str, object]]:
+    # check_summary is external input (parsed from check.py's JSON output), not
+    # typed beyond Mapping[str, object].
+    raw_checks = cast(list[object], check_summary.get("checks", []))
     checks = {
-        str(item.get("name")): bool(item.get("ok"))
-        for item in check_summary.get("checks", [])
-        if isinstance(item, dict)
+        str(item.get("name")): bool(item.get("ok")) for item in raw_checks if isinstance(item, dict)
     }
     context = context or {}
     results: dict[str, dict[str, object]] = {}
@@ -355,6 +391,14 @@ def evidence_results(
     return results
 
 
+class MilestoneQualityResult(TypedDict):
+    profiles: list[str]
+    evidence: list[dict[str, object]]
+    blockers: list[str]
+    warnings: list[str]
+    ready: bool
+
+
 def evaluate_milestone_quality(
     root: Path,
     milestone_id: str,
@@ -362,7 +406,7 @@ def evaluate_milestone_quality(
     check_summary: Mapping[str, object],
     unit_summary: Mapping[str, object],
     context: Mapping[str, object] | None = None,
-) -> dict[str, object]:
+) -> MilestoneQualityResult:
     registry = load_quality_registry(root)
     results = evidence_results(
         registry,
@@ -374,9 +418,8 @@ def evaluate_milestone_quality(
     selected_profiles = profiles_for_milestone(registry, milestone_id)
     selected = [profile_id for profile_id, _ in selected_profiles]
     required: list[str] = []
-    for _, raw in selected_profiles:
-        for evidence in raw.get("required_evidence", []):
-            value = str(evidence)
+    for _, profile in selected_profiles:
+        for value in profile["required_evidence"]:
             if value and value not in required:
                 required.append(value)
 

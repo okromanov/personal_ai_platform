@@ -16,7 +16,7 @@ from pathlib import Path
 
 def check_project_status(root: Path) -> list[str]:
     """Проверить project_status.md на практичность действий."""
-    errors = []
+    errors: list[str] = []
 
     status_file = root / "project_status.md"
     if not status_file.exists():

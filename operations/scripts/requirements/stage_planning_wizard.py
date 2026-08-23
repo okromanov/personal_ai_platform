@@ -171,7 +171,7 @@ def collect_stage_info(root: Path) -> StageContext:
     key_features = _ask_question("Основные функции:", "list")
     if not key_features:
         # Подсказать на основе выбранных областей
-        typical = []
+        typical: list[str] = []
         for area in focus_areas:
             typical.extend(AREA_TEMPLATES[area]["typical_features"][:2])
         print(f"   Подсказка: {', '.join(typical)}")
@@ -191,7 +191,7 @@ def collect_stage_info(root: Path) -> StageContext:
     risk_areas = _ask_question("Области риска:", "list")
     if not risk_areas:
         # Подсказать на основе выбранных областей
-        typical_risks = []
+        typical_risks: list[str] = []
         for area in focus_areas:
             typical_risks.extend(AREA_TEMPLATES[area]["risks"][:2])
         if typical_risks:

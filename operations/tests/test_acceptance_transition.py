@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 from operations.scripts.acceptance.apply import (
@@ -611,7 +612,7 @@ class AcceptanceTransitionTests(unittest.TestCase):
                 root / "specifications" / "business_requirements.md",
             )
             path = root / "semantic.json"
-            data = {
+            data: dict[str, Any] = {
                 "type": "semantic_review",
                 "milestone": "m01",
                 "result": "pass",
@@ -704,7 +705,7 @@ class AcceptanceTransitionTests(unittest.TestCase):
             )
             (root / "project_status.md").write_text("# Состояние\n", encoding="utf-8")
             path = root / "semantic.json"
-            data = {
+            data: dict[str, Any] = {
                 "type": "semantic_review",
                 "milestone": "m01",
                 "result": "pass",

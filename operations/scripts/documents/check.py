@@ -4,8 +4,9 @@ import argparse
 import json
 import re
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict, cast
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -91,7 +92,7 @@ REQUIRED_TEMPLATES = [
     "task_template.md",
     "test_template.md",
 ]
-STABLE_CONTENT_PATHS = {}
+STABLE_CONTENT_PATHS: dict[str, object] = {}
 STABLE_FORBIDDEN = [
     # Версия поставки, но не версия протокола или формата: "TLS v1.3" и "OAuth v2.0"
     # обязаны оставаться допустимыми в предметной спецификации.
@@ -340,7 +341,12 @@ def check_metadata(root: Path) -> CheckResult:
 
 def _expected_ids(family: str, actual: list[str]) -> set[str]:
     width = FAMILY_WIDTH[family]
-    numbers = [int(re.search(r"(\d+)$", identifier).group(1)) for identifier in actual]
+    numbers = []
+    for identifier in actual:
+        match = re.search(r"(\d+)$", identifier)
+        if not match:
+            raise ValueError(f"{identifier}: идентификатор должен заканчиваться числом")
+        numbers.append(int(match.group(1)))
     maximum = max(numbers)
     return {f"{family}_{index:0{width}d}" for index in range(1, maximum + 1)}
 
@@ -371,7 +377,9 @@ def check_traceability(root: Path) -> CheckResult:
             )
 
     for identifier, record in records.items():
-        relations = dict(record.get("relations", {}))
+        # "relations" is always dict[str, list[str]] by construction — see
+        # collect_traceable_elements() in traceability.py.
+        relations = cast(dict[str, list[str]], record.get("relations", {}))
         for key, targets in relations.items():
             for target in targets:
                 if target not in records:
@@ -393,7 +401,8 @@ def check_traceability(root: Path) -> CheckResult:
                 if label not in section:
                     errors.append(f"{identifier}: отсутствует обязательное поле {label}")
         if family == "SEC_CTL" and not any(
-            identifier in other.get("relations", {}).get("mitigated_by", [])
+            identifier
+            in cast(dict[str, list[str]], other.get("relations", {})).get("mitigated_by", [])
             for other in records.values()
             if other.get("family") == "THR"
         ):
@@ -1306,10 +1315,7 @@ def check_test_coverage_quality(root: Path) -> CheckResult:
     # На m01 только подготовка основы, требования будут протестированы на m02+
     # Эта проверка информационная и не блокирует принятие m01
     try:
-        import sys
-
-        sys.path.insert(0, str(root / "operations/scripts/quality"))
-        from test_coverage import validate_test_coverage
+        from operations.scripts.quality.test_coverage import validate_test_coverage
 
         return _result("test_coverage", validate_test_coverage(root))
     except Exception as exc:
@@ -1319,10 +1325,7 @@ def check_test_coverage_quality(root: Path) -> CheckResult:
 def check_owner_action_quality(root: Path) -> CheckResult:
     """Проверка практичности действий владельца."""
     try:
-        import sys
-
-        sys.path.insert(0, str(root / "operations/scripts/quality"))
-        from action_practicality import check_project_status
+        from operations.scripts.quality.action_practicality import check_project_status
 
         errors = check_project_status(root)
         return _result("owner_actions", errors if errors else [])
@@ -1333,10 +1336,7 @@ def check_owner_action_quality(root: Path) -> CheckResult:
 def check_allowed_paths_quality(root: Path) -> CheckResult:
     """Проверка консистентности путей в allowed_paths."""
     try:
-        import sys
-
-        sys.path.insert(0, str(root / "operations/scripts/quality"))
-        from paths_validation import validate_task_paths
+        from operations.scripts.quality.paths_validation import validate_task_paths
 
         errors = validate_task_paths(root)
         return _result("allowed_paths", errors if errors else [])
@@ -1511,10 +1511,32 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
     return results
 
 
-def summarize(results: list[CheckResult]) -> dict[str, object]:
+class CheckResultDict(TypedDict):
+    name: str
+    ok: bool
+    errors: list[str]
+    warnings: list[str]
+
+
+class Summary(TypedDict):
+    ok: bool
+    checks: list[CheckResultDict]
+    error_count: int
+    warning_count: int
+
+
+def summarize(results: list[CheckResult]) -> Summary:
     return {
         "ok": all(result.ok for result in results),
-        "checks": [asdict(result) for result in results],
+        "checks": [
+            {
+                "name": result.name,
+                "ok": result.ok,
+                "errors": result.errors,
+                "warnings": result.warnings,
+            }
+            for result in results
+        ],
         "error_count": sum(len(result.errors) for result in results),
         "warning_count": sum(len(result.warnings) for result in results),
     }

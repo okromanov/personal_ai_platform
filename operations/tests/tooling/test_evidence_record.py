@@ -76,7 +76,7 @@ def _acceptance(*, coverage: CoverageResult, tests: list[EffectiveTestItem]) -> 
         "tests_total": len(tests),
         "tests_passed": len(tests),
         "tests": tests,
-        "quality": {"profiles": [], "evidence": []},
+        "quality": {"profiles": [], "evidence": [], "blockers": [], "warnings": [], "ready": True},
         "coverage": coverage,
         "evidence_results": {},
         "evidence_context": {
@@ -185,6 +185,9 @@ class EvidenceRecordTests(unittest.TestCase):
         acceptance["quality"] = {
             "profiles": ["m02"],
             "evidence": [{"id": "project_checks", "result": "passed", "class": "hard"}],
+            "blockers": [],
+            "warnings": [],
+            "ready": True,
         }
         acceptance["impacted_profiles"] = ["m02"]
         snapshot = _snapshot("m02", acceptance)

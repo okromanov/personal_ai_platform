@@ -148,7 +148,11 @@ def run_command(command: Sequence[str], *, cwd: Path, timeout: int = 180) -> Com
     except FileNotFoundError as exc:
         return CommandResult(tuple(command), 127, "", str(exc))
     except subprocess.TimeoutExpired as exc:
-        return CommandResult(tuple(command), 124, exc.stdout or "", str(exc.stderr or "timeout"))
+        # text=True above means stdout/stderr are str at runtime, but
+        # TimeoutExpired's own type doesn't know that call context.
+        stdout = exc.stdout if isinstance(exc.stdout, str) else ""
+        stderr = exc.stderr if isinstance(exc.stderr, str) else "timeout"
+        return CommandResult(tuple(command), 124, stdout, stderr)
 
 
 def git_info(root: Path) -> dict[str, object]:

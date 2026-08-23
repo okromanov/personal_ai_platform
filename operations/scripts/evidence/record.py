@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import cast
 
 from operations.scripts.common.project import atomic_write
 from operations.scripts.quality.registry import (
@@ -76,12 +75,8 @@ def build_evidence_bundle(
     if provenance_errors:
         raise ValueError("Некорректный server_source: " + "; ".join(provenance_errors))
     targets_by_evidence = _evidence_targets(root, snapshot)
-    # `quality` comes from evaluate_milestone_quality() in registry.py, which is not
-    # yet typed beyond dict[str, object]; "evidence"/"profiles" are documented lists.
-    quality_evidence = cast(list[dict[str, object]], acceptance["quality"].get("evidence", []))
-    quality_profiles = cast(list[object], acceptance["quality"].get("profiles", []))
     evidence_rows = []
-    for raw in quality_evidence:
+    for raw in acceptance["quality"]["evidence"]:
         evidence_id = str(raw.get("id", ""))
         evidence_rows.append({**raw, "targets": targets_by_evidence.get(evidence_id, [])})
 
@@ -95,7 +90,7 @@ def build_evidence_bundle(
         "timestamp": str(context.get("timestamp", "unknown")),
         "environment": context.get("environment", {}),
         "server_source": server_source,
-        "quality_profiles": list(quality_profiles),
+        "quality_profiles": list(acceptance["quality"]["profiles"]),
         "impacted_profiles": acceptance["impacted_profiles"],
         "coverage_base": acceptance["coverage_base"],
         "changed_paths": acceptance["changed_paths"],

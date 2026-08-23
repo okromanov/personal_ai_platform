@@ -13,13 +13,23 @@ from operations.scripts.documents.check import (
     check_milestones,
 )
 from operations.scripts.evidence.record import _evidence_targets
-from operations.scripts.quality.registry import _matches, uncovered_paths
+from operations.scripts.quality.registry import QualityProfile, _matches, uncovered_paths
 from operations.scripts.status.generate_project_status import (
     AcceptanceResult,
     CoverageResult,
     EffectiveTestItem,
     ProgressSnapshot,
 )
+
+
+def _profile(*, paths: list[str]) -> QualityProfile:
+    return {
+        "milestones": ["m01"],
+        "required_evidence": [],
+        "paths": paths,
+        "scope_coverage": "task_test",
+        "scope_evidence": [],
+    }
 
 
 def _minimal_snapshot(
@@ -67,7 +77,7 @@ def _minimal_snapshot(
         "tests_total": 1,
         "tests_passed": 1,
         "tests": [test],
-        "quality": {"evidence": []},
+        "quality": {"profiles": [], "evidence": [], "blockers": [], "warnings": [], "ready": True},
         "coverage": coverage,
         "evidence_results": {},
         "evidence_context": {},
@@ -152,14 +162,14 @@ class GovernanceHardeningTests(unittest.TestCase):
 
     def test_dot_directory_path_matches_without_losing_leading_dot(self) -> None:
         self.assertTrue(_matches(".github/workflows/project_check.yml", [".github/workflows/**"]))
-        profiles: list[tuple[str, dict[str, object]]] = [
-            ("foundation", {"paths": [".github/workflows/**"]})
+        profiles: list[tuple[str, QualityProfile]] = [
+            ("foundation", _profile(paths=[".github/workflows/**"]))
         ]
         self.assertEqual(uncovered_paths(profiles, [".github/workflows/project_check.yml"]), [])
 
     def test_derived_paths_do_not_block_profile_coverage(self) -> None:
-        profiles: list[tuple[str, dict[str, object]]] = [
-            ("foundation", {"paths": ["operations/**"]})
+        profiles: list[tuple[str, QualityProfile]] = [
+            ("foundation", _profile(paths=["operations/**"]))
         ]
         self.assertEqual(
             uncovered_paths(

@@ -29,6 +29,8 @@ from operations.scripts.documents.traceability import (
     parse_scope_references,
 )
 from operations.scripts.quality.registry import (
+    MilestoneQualityResult,
+    QualityProfile,
     evaluate_milestone_quality,
     evidence_results,
     impacted_profiles,
@@ -130,7 +132,7 @@ class AcceptanceResult(TypedDict):
     tests_total: int
     tests_passed: int
     tests: list[EffectiveTestItem]
-    quality: dict[str, object]
+    quality: MilestoneQualityResult
     coverage: CoverageResult
     evidence_results: dict[str, dict[str, object]]
     evidence_context: dict[str, object]
@@ -415,7 +417,7 @@ def _coverage(
     current: MilestoneItem,
     current_tasks: list[TaskItem],
     effective_tests: list[EffectiveTestItem],
-    profiles: list[tuple[str, dict[str, object]]],
+    profiles: list[tuple[str, QualityProfile]],
     evidence: dict[str, dict[str, object]],
     traceability_records: dict[str, dict[str, object]] | None = None,
 ) -> CoverageResult:
@@ -425,21 +427,15 @@ def _coverage(
     foundation_targets: list[str] = []
     foundation_covered: set[str] = set()
 
-    coverage_modes = {str(raw.get("scope_coverage", "task_test")) for _, raw in profiles}
+    coverage_modes = {profile["scope_coverage"] for _, profile in profiles}
     global_evidence: list[str] = []
-    for _, raw in profiles:
-        if str(raw.get("scope_coverage", "task_test")) == "global_evidence":
-            raw_scope_evidence = raw.get("scope_evidence", [])
-            if isinstance(raw_scope_evidence, list):
-                global_evidence.extend(str(value) for value in raw_scope_evidence if str(value))
+    for _, profile in profiles:
+        if profile["scope_coverage"] == "global_evidence":
+            global_evidence.extend(value for value in profile["scope_evidence"] if value)
             if not scope:
-                # `raw` comes from quality_registry.json via registry.py, which is not
-                # yet typed beyond dict[str, object]; "paths" is documented there as a
-                # list of path patterns.
-                raw_paths = cast(list[object], raw.get("paths", []))
-                for value in raw_paths:
+                for value in profile["paths"]:
                     target = f"path:{value}"
-                    if str(value) and target not in foundation_targets:
+                    if value and target not in foundation_targets:
                         foundation_targets.append(target)
 
     if "global_evidence" in coverage_modes:
@@ -603,10 +599,7 @@ def evaluate_acceptance(
         evidence=results,
         traceability_records=collect_traceable_elements(root),
     )
-    # `quality` comes from evaluate_milestone_quality() in registry.py, not yet typed
-    # beyond dict[str, object]; "blockers" is documented there as list[str].
-    quality_blockers = cast(list[str], quality["blockers"])
-    blockers: list[str] = [*quality_blockers, *coverage["blockers"]]
+    blockers: list[str] = [*quality["blockers"], *coverage["blockers"]]
     if requires_project_tasks:
         blockers.extend(validate_task_semantics(root, current_id))
 
@@ -803,15 +796,12 @@ def render_progress_sections(snapshot: ProgressSnapshot) -> str:
             return "структурированная запись"
         return source_labels.get(source, source)
 
-    # `quality` comes from evaluate_milestone_quality() in registry.py, not yet typed
-    # beyond dict[str, object]; "evidence" is documented there as a list of records.
-    quality_evidence = cast(list[dict[str, object]], acceptance["quality"].get("evidence", []))
     evidence_rows = (
         "\n".join(
             f"| `{row['id']}` | {result_labels.get(str(row['result']), str(row['result']))} | "
             f"{class_labels.get(str(row['class']), str(row['class']))} | "
             f"{source_label(row['source'])} | `{str(row.get('git_sha', 'unknown'))[:12]}` |"
-            for row in quality_evidence
+            for row in acceptance["quality"]["evidence"]
         )
         or "| — | — | — | — | — |"
     )

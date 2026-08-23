@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from operations.scripts.common.status_types import MilestoneItem, TaskItem
-from operations.scripts.quality.registry import uncovered_paths
+from operations.scripts.quality.registry import QualityProfile, uncovered_paths
 from operations.scripts.status.generate_project_status import (
     EffectiveTestItem,
     _change_scope,
@@ -16,6 +16,21 @@ from operations.scripts.status.generate_project_status import (
 
 def _milestone(scope: list[str]) -> MilestoneItem:
     return {"id": "m01", "title": "Основа", "work_state": "in-progress", "scope": scope}
+
+
+def _profile(
+    *,
+    scope_coverage: str = "task_test",
+    paths: list[str] | None = None,
+    scope_evidence: list[str] | None = None,
+) -> QualityProfile:
+    return {
+        "milestones": ["m01"],
+        "required_evidence": [],
+        "paths": paths or [],
+        "scope_coverage": scope_coverage,
+        "scope_evidence": scope_evidence or [],
+    }
 
 
 def _task(task_id: str, implements: list[str]) -> TaskItem:
@@ -82,7 +97,7 @@ class ScopeCoverageTests(unittest.TestCase):
             git("commit", "-m", "allowed final change")
 
             scope = _change_scope(root, "m01")
-            gaps = uncovered_paths([("foundation", {"paths": ["*.md"]})], list(scope["paths"]))
+            gaps = uncovered_paths([("foundation", _profile(paths=["*.md"]))], list(scope["paths"]))
 
             self.assertEqual(scope["mode"], "tracked_tree")
             self.assertIn("rogue.py", scope["paths"])
@@ -90,9 +105,7 @@ class ScopeCoverageTests(unittest.TestCase):
 
     def test_task_test_mode_blocks_uncovered_scope_and_task_implements(self) -> None:
         current = _milestone(["SYS_001"])
-        profiles: list[tuple[str, dict[str, object]]] = [
-            ("feature", {"scope_coverage": "task_test"})
-        ]
+        profiles: list[tuple[str, QualityProfile]] = [("feature", _profile())]
         missing = _coverage(
             current=current,
             current_tasks=[],
@@ -124,10 +137,10 @@ class ScopeCoverageTests(unittest.TestCase):
 
     def test_global_evidence_covers_scope_only_when_passed(self) -> None:
         current = _milestone(["SYS_001", "SYS_002"])
-        profiles: list[tuple[str, dict[str, object]]] = [
+        profiles: list[tuple[str, QualityProfile]] = [
             (
                 "foundation",
-                {"scope_coverage": "global_evidence", "scope_evidence": ["project_checks"]},
+                _profile(scope_coverage="global_evidence", scope_evidence=["project_checks"]),
             )
         ]
         failed = _coverage(
@@ -151,14 +164,14 @@ class ScopeCoverageTests(unittest.TestCase):
         self.assertEqual(passed["blockers"], [])
 
     def test_foundation_paths_replace_empty_product_scope_in_status_counts(self) -> None:
-        profiles: list[tuple[str, dict[str, object]]] = [
+        profiles: list[tuple[str, QualityProfile]] = [
             (
                 "foundation",
-                {
-                    "paths": ["*.md", "operations/**"],
-                    "scope_coverage": "global_evidence",
-                    "scope_evidence": ["project_checks"],
-                },
+                _profile(
+                    paths=["*.md", "operations/**"],
+                    scope_coverage="global_evidence",
+                    scope_evidence=["project_checks"],
+                ),
             )
         ]
         result = _coverage(

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -31,11 +31,7 @@ class RequirementContext:
     arch_components: list[str]  # ["web_server", "database", "queue"]
     potential_threats: list[str]  # auto-identified
     user_story: str = ""
-    acceptance_criteria: list[str] = None
-
-    def __post_init__(self):
-        if self.acceptance_criteria is None:
-            self.acceptance_criteria = []
+    acceptance_criteria: list[str] = field(default_factory=list)
 
 
 THREAT_PATTERNS = {
@@ -234,8 +230,8 @@ def generate_threats_and_controls(
     context: RequirementContext,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Generate THR_* and SEC_CTL_* from identified threats."""
-    threats = []
-    controls = []
+    threats: list[dict[str, Any]] = []
+    controls: list[dict[str, Any]] = []
 
     for threat_desc in context.potential_threats:
         threat_id = f"THR_{len(threats) + 1:03d}"
@@ -266,7 +262,7 @@ def generate_threats_and_controls(
 
 def generate_architecture_components(context: RequirementContext) -> list[dict[str, Any]]:
     """Generate ARC_* components for the requirement."""
-    components = []
+    components: list[dict[str, Any]] = []
 
     for comp_name in context.arch_components:
         components.append(
@@ -283,7 +279,7 @@ def generate_architecture_components(context: RequirementContext) -> list[dict[s
 
 def generate_test_documents(context: RequirementContext, sys_count: int) -> list[dict[str, Any]]:
     """Generate TEST_* documents for verification."""
-    tests = []
+    tests: list[dict[str, Any]] = []
 
     # Один тест на основное требование
     tests.append(
