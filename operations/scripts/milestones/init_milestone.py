@@ -182,6 +182,7 @@ next_milestone: m03
         print(f"ERROR: Failed to initialize milestone {milestone_id}: {e}", file=sys.stderr)
         return False
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python3 operations/scripts/milestones/init_milestone.py <milestone_id>")
