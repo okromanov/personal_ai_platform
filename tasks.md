@@ -3,7 +3,7 @@
 id: task_index
 type: generated_task_index
 generation_state: generated
-version: 1.1
+version: 1.0
 ---
 
 # Проектные задачи

@@ -7,6 +7,49 @@ from operations.scripts.common.project import today_iso
 from operations.scripts.status.generate_project_status import collect_milestones
 
 
+def get_gates_for_milestone(milestone_id: str) -> tuple[str, list[str]]:
+    """Get remaining gates for a milestone."""
+    gates_map = {
+        "m01": (
+            "До принятия `m01` остаются три обязательных ворот",
+            [
+                "Серверная проверка на GitHub",
+                "Смысловая проверка документов",
+                "Подтверждение владельца по составу V1",
+            ],
+        ),
+        "m02": (
+            "До принятия `m02` остаются обязательные ворота",
+            [
+                "Реализация всех компонентов ARC_CMP",
+                "Интеграционные тесты успешны",
+                "Смысловая проверка реализации",
+                "Подтверждение владельца готовности",
+            ],
+        ),
+    }
+    return gates_map.get(milestone_id, ("Оставшиеся ворота", []))
+
+
+def get_actions_for_milestone(milestone_id: str) -> list[tuple[str, str, str]]:
+    """Get available actions for a milestone. Returns list of (command, actor, when)."""
+    actions_map = {
+        "m01": [
+            ("`ПРОДОЛЖАЙ m01`", "Агент", "Сейчас (новый сеанс)"),
+            ("`ПОДТВЕРЖДАЮ СОСТАВ V1`", "Вы", "После шага 5 агента"),
+            ("`ИЗМЕНИ СОСТАВ V1: ...`", "Вы", "Если нужны изменения в периметре"),
+            ("`ПРИНИМАЮ m01`", "Вы", "После зелёной проверки"),
+            ("`ВОЗВРАЩАЮ m01: ...`", "Вы", "Если нужна переделка"),
+        ],
+        "m02": [
+            ("`ПРОДОЛЖАЙ TASK_0002`", "Агент", "Сейчас (новый сеанс)"),
+            ("`ПОДТВЕРЖДАЮ m02`", "Вы", "После завершения компонентов"),
+            ("`ВОЗВРАЩАЮ m02: <причина>`", "Вы", "Если нужна доработка"),
+        ],
+    }
+    return actions_map.get(milestone_id, [])
+
+
 def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     """Render owner dashboard from current project state."""
     generated_date = date or today_iso()
@@ -112,8 +155,8 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
 
         lines.append("")
 
-    # V1 requirements
-    if v1_reqs:
+    # V1 requirements (only for m01)
+    if v1_reqs and current_id == "m01":
         lines.append("## Состав V1 (обязательный периметр)")
         lines.append("")
         lines.append("Эти бизнес-требования определяют, что такое \"готовая первая версия\":")
@@ -124,7 +167,10 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         lines.append("**Статус:** ожидает подтверждения владельца перед `m01`")
         lines.append("")
 
-    # Document statistics
+    # Document statistics with dynamic status
+    adr_status = "✅ ADR_001–ADR_004 приняты; ADR_005–ADR_009 — кандидаты для m02" if current_id not in {"m01"} else "⏳ ADR_001–ADR_004 ожидают принятия m01; ADR_005–ADR_009 — кандидаты для m02"
+    check_status = "✅ Смысловая проверка успешна" if current_id not in {"m01"} else "⏳ Смысловая проверка (ждёт этапа m01)"
+
     lines.extend([
         "## Статистика документов",
         "",
@@ -135,9 +181,9 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         "| Системные требования | 36 | ✅ актуальны |",
         "| Меры безопасности | 20 | ✅ актуальны |",
         "| Инфраструктурные требования | 16 | ✅ актуальны |",
-        "| ADR | 9 | ⏳ ADR_001–ADR_004 ожидают принятия m01; ADR_005–ADR_009 — кандидаты для m02 |",
+        f"| ADR | 9 | {adr_status} |",
         f"| Проектные TASK | {task_count} | — |",
-        "| Спецификации проверок | 5 | ✅ 2 для m01; 3 заранее определены для m02 |",
+        "| Спецификации проверок | 5 | ✅ 2 для m01; 3 для m02+ |",
         "",
         "## Автоматические проверки",
         "",
@@ -145,7 +191,7 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         "- ✅ Трассировка требований (связи целостны)",
         "- ✅ Версионирование (метаданные верны)",
         "- ✅ Производные представления (могут пересчитаны)",
-        "- ⏳ Смысловая проверка (ждёт этапа m01)",
+        f"- {check_status}",
         "",
         "## GitHub Actions",
         "",
@@ -153,21 +199,26 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         "",
         "## Оставшиеся ворота",
         "",
-        "До принятия `m01` остаются три обязательных ворот:",
-        "1. Серверная проверка на GitHub",
-        "2. Смысловая проверка документов",
-        "3. Подтверждение владельца по составу V1",
-        "",
-        "## Действия, доступные сейчас",
-        "",
-        "| Команда | Кто | Когда |",
-        "|---|---|---|",
-        "| `ПРОДОЛЖАЙ m01` | Агент | Сейчас (новый сеанс) |",
-        "| `ПОДТВЕРЖДАЮ СОСТАВ V1` | Вы | После шага 5 агента |",
-        "| `ИЗМЕНИ СОСТАВ V1: ...` | Вы | Если нужны изменения в периметре |",
-        "| `ПРИНИМАЮ m01` | Вы | После зелёной проверки |",
-        "| `ВОЗВРАЩАЮ m01: ...` | Вы | Если нужна переделка |",
-        "",
+    ])
+
+    # Add dynamic gates section
+    gates_title, gates = get_gates_for_milestone(current_id)
+    lines.append(gates_title + ":")
+    for i, gate in enumerate(gates, 1):
+        lines.append(f"{i}. {gate}")
+    lines.append("")
+
+    # Add dynamic actions section
+    lines.append("## Действия, доступные сейчас")
+    lines.append("")
+    lines.append("| Команда | Кто | Когда |")
+    lines.append("|---|---|---|")
+    actions = get_actions_for_milestone(current_id)
+    for command, actor, when in actions:
+        lines.append(f"| {command} | {actor} | {when} |")
+    lines.append("")
+
+    lines.extend([
         "## Ссылки на правила",
         "",
         "- **Как работает процесс:** [`project_rules.md`](project_rules.md)",

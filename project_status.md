@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-version: 1.1
+version: 1.0
 ---
 
 # Состояние проекта

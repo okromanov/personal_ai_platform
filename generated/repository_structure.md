@@ -3,7 +3,7 @@
 id: generated_repository_structure
 type: generated_document
 generation_state: generated
-version: 1.1
+version: 1.0
 ---
 
 # Структура репозитория
