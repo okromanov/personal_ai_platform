@@ -105,6 +105,7 @@ jobs:
         if: always()
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Path runtime -Force | Out-Null
           py operations\scripts\quality\run_unittests.py *> runtime\test_output.txt
           $testResult = $LASTEXITCODE
           $testResult | Out-File -FilePath runtime\test_result.txt
