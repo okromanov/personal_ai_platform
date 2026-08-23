@@ -10,8 +10,8 @@ Usage: python3 operations/scripts/milestones/update_completion_report.py m01
 
 import re
 import sys
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 
 
 def update_completion_report(milestone_id: str, root: Path = None) -> bool:
