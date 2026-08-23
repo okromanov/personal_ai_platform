@@ -48,12 +48,16 @@ def collect_files(root_path=None) -> dict:
                         files["tasks"][meta["id"]] = {
                             "path": str(task_file),
                             "work_state": meta.get("work_state"),
-                            "depends_on": meta.get("depends_on", "").split(",")
-                            if meta.get("depends_on")
-                            else [],
-                            "tests": meta.get("tests", "").split(",")
-                            if meta.get("tests")
-                            else [],
+                            "depends_on": (
+                                meta.get("depends_on", "").split(",")
+                                if meta.get("depends_on")
+                                else []
+                            ),
+                            "tests": (
+                                meta.get("tests", "").split(",")
+                                if meta.get("tests")
+                                else []
+                            ),
                         }
                 except Exception as e:
                     print(
@@ -72,9 +76,11 @@ def collect_files(root_path=None) -> dict:
                         files["tests"][meta["id"]] = {
                             "path": str(test_file),
                             "execution": meta.get("execution"),
-                            "traces_to": meta.get("traces_to", "").split(",")
-                            if meta.get("traces_to")
-                            else [],
+                            "traces_to": (
+                                meta.get("traces_to", "").split(",")
+                                if meta.get("traces_to")
+                                else []
+                            ),
                         }
                 except Exception as e:
                     print(
