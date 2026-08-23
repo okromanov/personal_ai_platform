@@ -139,7 +139,7 @@ class ComplexityAnalyzer(ast.NodeVisitor):
         self.functions: dict[str, int] = {}
         self.current_function: str | None = None
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+    def visit_FunctionDef(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
         self.current_function = node.name
         complexity = 1
         complexity += sum(1 for _ in ast.walk(node) if isinstance(_, ast.If))

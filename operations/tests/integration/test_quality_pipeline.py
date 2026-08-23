@@ -12,9 +12,14 @@ import sys
 import unittest
 from pathlib import Path
 
+from operations.scripts.quality.run_suite import VULTURE_IGNORED_NAMES
+
 
 class QualityPipelineIntegrationTest(unittest.TestCase):
     """Test the full quality pipeline works end-to-end."""
+
+    project_root: Path
+    runtime_dir: Path
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -89,6 +94,7 @@ class QualityPipelineIntegrationTest(unittest.TestCase):
                 "high",
                 "-f",
                 "json",
+                "-q",
             ],
             cwd=self.project_root,
             capture_output=True,
@@ -98,29 +104,34 @@ class QualityPipelineIntegrationTest(unittest.TestCase):
         # Exit code 0 = no issues, 1 = issues found
         self.assertIn(result.returncode, [0, 1])
 
-        # Should produce valid JSON
+        # Should produce valid JSON. Without -q, Bandit's progress indicator
+        # writes to stdout ahead of the JSON payload and breaks json.loads.
         if result.stdout:
             report = json.loads(result.stdout)
             self.assertIn("results", report)
 
     def test_vulture_runs_without_errors(self) -> None:
-        """Verify Vulture dead code detection works."""
+        """Verify Vulture dead code detection runs clean against the same
+        invocation (including the known-false-positive ignore list)
+        run_suite.py uses."""
         result = subprocess.run(
             [
                 sys.executable,
                 "-m",
                 "vulture",
                 "operations/scripts",
+                "operations/tests",
                 "--min-confidence",
                 "80",
+                "--ignore-names",
+                VULTURE_IGNORED_NAMES,
             ],
             cwd=self.project_root,
             capture_output=True,
             text=True,
         )
 
-        # Vulture should run (exit code indicates found/not found)
-        self.assertIn(result.returncode, [0, 1])
+        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_mypy_type_checking_integration(self) -> None:
         """Verify mypy baseline checking works."""

@@ -41,10 +41,13 @@ traces_to: m01, m02  # Milestone IDs this document traces to
 
 ### Internal Cross-References
 
-Valid formats:
-- `[Link text](./path/to/file.md)` - Relative path from document
-- `[Link text](#section-anchor)` - Same document anchor
-- `[Link text](./other.md#section-anchor)` - File + anchor
+Valid formats — a markdown link's `[text]` followed by its target in
+parentheses (written here with a separating arrow so this reference itself
+isn't parsed as a real link to a nonexistent path):
+
+- `[Link text]` → `./path/to/file.md` — relative path from document
+- `[Link text]` → `#section-anchor` — same document anchor
+- `[Link text]` → `./other.md#anchor` — file + anchor
 
 **Violations:**
 - Links to non-existent files
@@ -110,28 +113,28 @@ Valid formats:
 ### Naming Conventions
 
 **Authority documents** (must match exactly):
-- `project_rules.md`
-- `AGENTS.md`
-- `operations/change_process.md`
+- [`project_rules.md`](../../project_rules.md)
+- [`AGENTS.md`](../../AGENTS.md)
+- [`operations/change_process.md`](../../operations/change_process.md)
 - Milestone definitions in specifications
 
 **Specification documents:**
-- `specifications/business_requirements.md`
-- `specifications/threat_model.md`
-- `specifications/system_specification.md`
-- `specifications/architecture_baseline.md`
-- `specifications/infrastructure_baseline.md`
+- [`specifications/business_requirements.md`](../../specifications/business_requirements.md)
+- [`specifications/threat_model.md`](../../specifications/threat_model.md)
+- [`specifications/system_specification.md`](../../specifications/system_specification.md)
+- [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md)
+- [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md)
 
 ## Generated Files
 
 **Definition:** Files created by scripts (not manually edited)
 
 **Current generated files:**
-- `project_status.md` - Auto-generated from status script
-- `tasks.md` - Auto-generated from task registry
-- `generated/document_index.md` - Index of all docs
-- `generated/repository_structure.md` - Directory tree
-- `generated/traceability_matrix.md` - Requirement traceability
+- [`project_status.md`](../../project_status.md) - Auto-generated from status script
+- [`tasks.md`](../../tasks.md) - Auto-generated from task registry
+- [`generated/document_index.md`](../../generated/document_index.md) - Index of all docs
+- [`generated/repository_structure.md`](../../generated/repository_structure.md) - Directory tree
+- [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) - Requirement traceability
 
 **Rule:** Generated files must be bit-identical with last run
 

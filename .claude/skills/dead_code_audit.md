@@ -98,4 +98,3 @@ Code duplication (>100 lines):
 
 - [code_quality_check](code_quality_check.md) - Comprehensive code audit
 - [python_lint_check](python_lint_check.md) - Lint and style checks
-- [complexity_metrics](complexity_metrics.md) - Detailed complexity analysis

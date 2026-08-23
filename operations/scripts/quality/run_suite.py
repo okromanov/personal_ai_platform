@@ -24,6 +24,14 @@ EXACT_REQUIREMENT = re.compile(
     r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)==(?P<version>[A-Za-z0-9][A-Za-z0-9._+!-]*)$"
 )
 DEV_REQUIREMENTS_PATH = Path("operations/quality/requirements_dev.txt")
+# Function parameters Vulture flags as unused (100% confidence) but that are
+# kept intentionally: evidence_ref/semantic_review_ref preserve caller
+# clarity in acceptance/apply.py's apply_acceptance() even though only their
+# digests are persisted (local file paths aren't reproducible across
+# machines); arch_count mirrors sibling generator signatures in
+# requirements/requirement_wizard.py's generate_task_documents(), which
+# iterates context.arch_components directly instead.
+VULTURE_IGNORED_NAMES = "evidence_ref,semantic_review_ref,arch_count"
 
 
 def _ignored_config_path(path: Path) -> bool:
@@ -192,6 +200,7 @@ def run_full(root: Path, python: str, base: str | None) -> None:
             "medium",
             "-f",
             "json",
+            "-q",
         ],
         artifact="runtime/security_audit.json",
     )
@@ -212,6 +221,8 @@ def run_full(root: Path, python: str, base: str | None) -> None:
             "operations/tests",
             "--min-confidence",
             "80",
+            "--ignore-names",
+            VULTURE_IGNORED_NAMES,
         ],
         artifact="runtime/dead_code.txt",
     )
