@@ -8,9 +8,10 @@ Increments version: 1.0 → 1.1 → 1.2 → 2.0 → 2.1, etc.
 Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path>
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
+
 
 def increment_version(version_str: str) -> str:
     """Increment semantic version: 1.0 → 1.1, 1.9 → 2.0"""
@@ -24,6 +25,7 @@ def increment_version(version_str: str) -> str:
         return f"{major}.{minor + 1}"
     else:
         return f"{major + 1}.0"
+
 
 def update_file_version(file_path: str) -> bool:
     """Update version in YAML frontmatter."""
@@ -57,12 +59,20 @@ def update_file_version(file_path: str) -> bool:
 
         return False
     except Exception as e:
-        print(f"WARNING: Failed to update version in {file_path}: {e}", file=sys.stderr)
+        print(
+            f"WARNING: Failed to update version in {file_path}: {e}",
+            file=sys.stderr,
+        )
         return False
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path> [file_path2 ...]")
+        print(
+            "Usage: python3 "
+            "operations/scripts/versioning/increment_file_version.py "
+            "<file_path> [file_path2 ...]"
+        )
         sys.exit(1)
 
     updated_count = 0
