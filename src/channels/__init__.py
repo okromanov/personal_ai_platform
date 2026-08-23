@@ -6,13 +6,13 @@ business logic, persistent memory, or tool permissions.
 This module implements ARC_CMP_001 — Каналы (Channels).
 """
 
-from .base import Channel, TaskMessage, TaskState, ChannelError
+from .base import Channel, ChannelError, TaskMessage, TaskState
 from .telegram import TelegramChannel
 
 __all__ = [
     "Channel",
+    "ChannelError",
     "TaskMessage",
     "TaskState",
-    "ChannelError",
     "TelegramChannel",
 ]
