@@ -8,9 +8,10 @@ Increments version: 1.0 → 1.1 → 1.2 → 2.0 → 2.1, etc.
 Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path>
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
+
 
 def increment_version(version_str: str) -> str:
     """Increment semantic version: 1.0 → 1.1, 1.9 → 2.0"""
