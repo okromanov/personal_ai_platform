@@ -46,11 +46,14 @@ python3 operations/scripts/milestones/init_milestone.py m0X
 ```
 
 Creates:
-- `work/m0X/owner_checklist.md` - acceptance checklist
-- `work/m0X/semantic_review.md` - review procedure
-- `work/m0X/final_report.md` - completion report
+- `work/m0X/final_report.md` - completion report (regenerated after acceptance
+  by `operations/scripts/milestones/update_completion_report.py`)
+
+owner_checklist.md and semantic_review.md are not auto-created: they are
+written by hand only when a milestone needs a record beyond what
+operations/acceptance.md and operations/semantic_review.md already specify.
 
 ---
 
 *Last generated: 2026-08-23*
-*This is an auto-generated file. See work/procedures/ for detailed procedures documentation.*
+*This is an auto-generated file.*

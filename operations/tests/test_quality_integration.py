@@ -68,10 +68,25 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn(".claude/skills/pre_commit_hook.sh", wrapper)
         self.assertNotIn("documents/check.py", wrapper)
 
-    def test_superseded_report_cannot_claim_acceptance_readiness(self) -> None:
+    def test_final_report_matches_current_repository_state(self) -> None:
+        """work/m01/final_report.md is fully computed by render_final_report()
+        (see operations/scripts/milestones/update_completion_report.py), so it
+        can never carry a stale hand-edited claim left over from an earlier
+        quality report: regenerating it must reproduce the committed file
+        exactly, aside from the "updated" timestamp, which tracks the date
+        update_completion_report.py was last run rather than repository
+        content."""
+        from operations.scripts.milestones.update_completion_report import (
+            render_final_report,
+        )
+
+        def strip_updated(text: str) -> str:
+            return "\n".join(line for line in text.splitlines() if not line.startswith("updated: "))
+
         report = (ROOT / "work/m01/final_report.md").read_text(encoding="utf-8")
-        self.assertIn("evidence_state: superseded", report)
-        for stale_claim in ("70/70", "21/21", "38 требований", "100%"):
+        rendered = render_final_report(ROOT, "m01")
+        self.assertEqual(strip_updated(report), strip_updated(rendered))
+        for stale_claim in ("70/70", "21/21", "38 требований", "100%", "evidence_state:"):
             self.assertNotIn(stale_claim, report)
 
     def test_proposed_technology_adrs_require_m02_evidence(self) -> None:
