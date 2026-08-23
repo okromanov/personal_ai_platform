@@ -17,6 +17,7 @@ from operations.scripts.documents.auto_generate_tasks import auto_generate_tasks
 from operations.scripts.documents.index import render_index
 from operations.scripts.documents.owner_dashboard import render_owner_dashboard
 from operations.scripts.documents.repository_tree import render_repository_structure
+from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import render_traceability
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.status.human_status import render_repository_project_status
@@ -33,13 +34,18 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     # requirement is actually implemented — see TASK template step "написать тесты".
     changed.extend(auto_generate_tasks(root))
 
+    # repository_structure.md scans the filesystem for every tracked-style
+    # file (including the other generated outputs and itself), so it must be
+    # rendered and written last - after every other output below has already
+    # landed on disk. Rendering it earlier would snapshot a file listing one
+    # generation cycle stale whenever a new generated file is introduced.
     outputs = [
         (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
         (root / "owner_dashboard.md", render_owner_dashboard(root, date)),
         (root / "generated" / "document_index.md", render_index(root, date)),
         (root / "generated" / "traceability_matrix.md", render_traceability(root, date)),
-        (root / "generated" / "repository_structure.md", render_repository_structure(root, date)),
+        (root / "generated" / "test_catalog.md", render_test_catalog(root, date)),
     ]
     for path, rendered in outputs:
         if atomic_write(path, rendered):
@@ -52,6 +58,10 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     if semantic_review.exists() and current_id != "m01":
         semantic_review.unlink()
         changed.append(semantic_review.relative_to(root).as_posix())
+
+    repository_structure_path = root / "generated" / "repository_structure.md"
+    if atomic_write(repository_structure_path, render_repository_structure(root, date)):
+        changed.append(repository_structure_path.relative_to(root).as_posix())
 
     return changed
 
