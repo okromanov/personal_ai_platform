@@ -6,13 +6,11 @@ Runs tests without external dependencies, creates evidence record.
 
 import asyncio
 import sys
-import traceback
-from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.channels import TelegramChannel, TaskState, ChannelError
+from src.channels import ChannelError, TaskState, TelegramChannel
 
 
 class TestResult:
@@ -127,8 +125,8 @@ async def run_tests() -> TestResult:
     # Test 7: Multiple messages
     try:
         channel = TelegramChannel(bot_token="test_token")
-        msg1 = await channel.inject_message("First message", user_id="user1")
-        msg2 = await channel.inject_message("Second message", user_id="user2")
+        await channel.inject_message("First message", user_id="user1")
+        await channel.inject_message("Second message", user_id="user2")
 
         received1 = await asyncio.wait_for(channel.receive(), timeout=1.0)
         assert received1.user_input == "First message"
