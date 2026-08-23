@@ -62,7 +62,10 @@ def find_project_root(start: Path | None = None) -> Path:
 
 
 def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8-sig")
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"{path}: файл не в UTF-8 ({exc})") from exc
 
 
 def atomic_write(path: Path, content: str) -> bool:
@@ -148,7 +151,11 @@ def run_command(command: Sequence[str], *, cwd: Path, timeout: int = 180) -> Com
     except FileNotFoundError as exc:
         return CommandResult(tuple(command), 127, "", str(exc))
     except subprocess.TimeoutExpired as exc:
-        return CommandResult(tuple(command), 124, exc.stdout or "", str(exc.stderr or "timeout"))
+        # text=True above means stdout/stderr are str at runtime, but
+        # TimeoutExpired's own type doesn't know that call context.
+        stdout = exc.stdout if isinstance(exc.stdout, str) else ""
+        stderr = exc.stderr if isinstance(exc.stderr, str) else "timeout"
+        return CommandResult(tuple(command), 124, stdout, stderr)
 
 
 def git_info(root: Path) -> dict[str, object]:
@@ -166,7 +173,8 @@ def git_info(root: Path) -> dict[str, object]:
     commit = run_command(["git", "rev-parse", "HEAD"], cwd=root)
     status = run_command(["git", "status", "--short"], cwd=root)
     changes = [line for line in status.stdout.splitlines() if line.strip()]
-    full_sha = commit.stdout.strip() or "none"
+    full_sha = commit.stdout.strip() if commit.ok else ""
+    full_sha = full_sha or "none"
     return {
         "available": True,
         "branch": branch.stdout.strip() or "detached",

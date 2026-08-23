@@ -6,6 +6,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import SupportsInt, cast
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -268,8 +269,14 @@ def validate_evidence_bundle(root: Path, path: Path, milestone_id: str) -> dict[
     ):
         raise ValueError("Evidence bundle не подтверждает полное milestone scope coverage")
     if isinstance(coverage, dict):
-        tracked_total = int(coverage.get("tracked_total", coverage.get("scope_total", 0)))
-        tracked_covered = int(coverage.get("tracked_covered", coverage.get("scope_covered", 0)))
+        raw_tracked_total = coverage.get("tracked_total")
+        if raw_tracked_total is None:
+            raw_tracked_total = coverage.get("scope_total", 0)
+        raw_tracked_covered = coverage.get("tracked_covered")
+        if raw_tracked_covered is None:
+            raw_tracked_covered = coverage.get("scope_covered", 0)
+        tracked_total = int(cast(SupportsInt, raw_tracked_total))
+        tracked_covered = int(cast(SupportsInt, raw_tracked_covered))
         if tracked_covered != tracked_total:
             raise ValueError("Evidence bundle не подтверждает полное покрытие проверяемых областей")
         if milestone_id.lower() == "m01" and tracked_total <= 0:
@@ -508,7 +515,7 @@ def apply_acceptance(
             if updated != original:
                 planned_writes.append((path, updated))
 
-    technical_evidence = {
+    technical_evidence: dict[str, object] = {
         "git_sha": source_sha,
         "sha256": evidence_digest or "not-recorded",
     }

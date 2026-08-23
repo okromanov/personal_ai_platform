@@ -13,6 +13,7 @@ Generates: generated/file_procedure_traceability_matrix.md
 """
 
 import re
+import sys
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
@@ -57,7 +58,7 @@ def collect_files(root_path: str | Path | None = None) -> dict:
                 except Exception as e:
                     print(
                         f"WARNING: Failed to parse {task_file}: {e}",
-                        file=__import__("sys").stderr,
+                        file=sys.stderr,
                     )
                     continue
 
@@ -77,7 +78,7 @@ def collect_files(root_path: str | Path | None = None) -> dict:
                 except Exception as e:
                     print(
                         f"WARNING: Failed to parse {test_file}: {e}",
-                        file=__import__("sys").stderr,
+                        file=sys.stderr,
                     )
                     continue
 
@@ -91,7 +92,7 @@ def collect_files(root_path: str | Path | None = None) -> dict:
                     "files": list(milestone_dir.glob("*.md")),
                 }
     except Exception as e:
-        print(f"WARNING: Failed to collect files: {e}", file=__import__("sys").stderr)
+        print(f"WARNING: Failed to collect files: {e}", file=sys.stderr)
 
     return files
 
@@ -192,7 +193,7 @@ def generate_file_procedure_matrix(root_path=None) -> bool:
     except Exception as e:
         print(
             f"ERROR: Failed to generate traceability matrix: {e}",
-            file=__import__("sys").stderr,
+            file=sys.stderr,
         )
         return False
 

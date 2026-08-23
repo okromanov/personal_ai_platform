@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `195` |
+| Всего файлов | `190` |
 
 ```text
 personal_ai_platform/
@@ -62,6 +62,7 @@ personal_ai_platform/
 - operations/scripts/automation/__init__.py
 - operations/scripts/common/__init__.py
 - operations/scripts/common/project.py
+- operations/scripts/common/status_types.py
 - operations/scripts/documents/__init__.py
 - operations/scripts/documents/auto_generate_tasks.py
 - operations/scripts/documents/check.py
@@ -126,6 +127,8 @@ personal_ai_platform/
 - operations/templates/test_template.md
 - operations/templates/threat_template.md
 - operations/tests/__init__.py
+- operations/tests/product/__init__.py
+- operations/tests/product/test_channels.py
 - operations/tests/test_acceptance.py
 - operations/tests/test_acceptance_cli_edges.py
 - operations/tests/test_acceptance_transition.py
@@ -141,9 +144,13 @@ personal_ai_platform/
 - operations/tests/tooling/test_change_scope.py
 - operations/tests/tooling/test_coverage_policy.py
 - operations/tests/tooling/test_evidence_record.py
+- operations/tests/tooling/test_file_procedure_matrix.py
 - operations/tests/tooling/test_full_traceability.py
 - operations/tests/tooling/test_links.py
+- operations/tests/tooling/test_metadata_parsing.py
+- operations/tests/tooling/test_milestone_lifecycle.py
 - operations/tests/tooling/test_milestone_start_and_task_semantics.py
+- operations/tests/tooling/test_project_common.py
 - operations/tests/tooling/test_quality_baseline.py
 - operations/tests/tooling/test_quality_registry.py
 - operations/tests/tooling/test_quality_runner.py
@@ -151,7 +158,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_semantic_consistency.py
 - operations/tests/tooling/test_task_registry.py
 - operations/tests/tooling/test_traceability.py
-- operations/tests_implementation/verify_channels.py
+- operations/tests/tooling/test_versioning.py
 - operations/threat_review_triggers.md
 - owner_dashboard.md
 - project_rules.md
@@ -197,16 +204,4 @@ personal_ai_platform/
 - work/tests/test_0005.md
 - work/tests/test_0006.md
 - work/tests/test_0007.md
-- work/tests/test_0008.md
-- work/tests/test_0009.md
-- work/tests/test_0010.md
-- work/tests/test_0011.md
-- work/tests/test_0012.md
-- work/tests/test_0013.md
-- work/tests/test_0014.md
-- work/tests/test_0015.md
-- work/tests/test_0016.md
-- work/tests/test_0017.md
-- work/tests/test_0018.md
-- work/tests/test_0019.md
 ```

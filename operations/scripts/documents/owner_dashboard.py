@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any
 
 from operations.scripts.common.project import today_iso
+from operations.scripts.common.status_types import MilestoneItem
 from operations.scripts.status.generate_project_status import collect_milestones
 
 
@@ -56,10 +56,10 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     generated_date = date or today_iso()
 
     # Count milestones
-    milestones_data: dict[str, Any] = collect_milestones(root)
-    current_milestone: dict[str, Any] = milestones_data.get("current", {})
-    items: list[Any] = milestones_data.get("items", [])
-    completed = len([m for m in items if m.get("work_state") == "completed"])
+    milestones_data = collect_milestones(root)
+    current_milestone: MilestoneItem = milestones_data["current"]
+    items: list[MilestoneItem] = milestones_data["items"]
+    completed = len([m for m in items if m["work_state"] == "completed"])
     total_milestones = len(items)
     remaining = total_milestones - completed
 
@@ -68,13 +68,13 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
     task_count = len(list(tasks_dir.glob("*.md"))) if tasks_dir.exists() else 0
 
     # Get current milestone ID
-    current_id = current_milestone.get("id", "m01")
+    current_id = current_milestone["id"]
 
     # Build milestone status lines
     milestone_lines = []
     for m in items:
-        mid = m.get("id", "")
-        mstate = m.get("work_state", "")
+        mid = m["id"]
+        mstate = m["work_state"]
         status_icon = "✅" if mstate == "completed" else "🔄" if mstate == "in-progress" else "⏳"
         is_current = " — **текущий этап**" if mid == current_id else ""
         milestone_lines.append(f"- [{status_icon}] [`{mid}`](milestones.md#{mid}){is_current}")
@@ -122,11 +122,11 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
 
     # Add milestone details
     for m in items:
-        mid = m.get("id", "")
-        mstate = m.get("work_state", "")
-        mdesc = m.get("description", "")
+        mid = m["id"]
+        mstate = m["work_state"]
+        mtitle = m["title"]
 
-        lines.append(f"### {mid} — {mdesc}")
+        lines.append(f"### {mid} — {mtitle}")
         lines.append("")
         lines.append(f"- **Статус:** `{mstate}`")
 

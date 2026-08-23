@@ -31,7 +31,7 @@ def get_all_tracked_paths(root: Path) -> set[str]:
 
 def validate_task_paths(root: Path) -> list[str]:
     """Валидировать allowed_paths в карточках TASK."""
-    errors = []
+    errors: list[str] = []
 
     tasks_dir = root / "work/tasks"
     if not tasks_dir.exists():

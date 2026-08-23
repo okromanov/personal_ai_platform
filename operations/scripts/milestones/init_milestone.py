@@ -16,10 +16,23 @@ from datetime import date
 from pathlib import Path
 
 
-def init_milestone(milestone_id: str) -> bool:
+def _write_if_absent(path: Path, content: str) -> None:
+    """Write content only if the file does not already exist.
+
+    Milestone init must stay idempotent: re-running it must never overwrite
+    an owner checklist, review, or final report that already carries decisions.
+    """
+    if not path.exists():
+        path.write_text(content, encoding="utf-8")
+
+
+def init_milestone(milestone_id: str, root: Path | None = None) -> bool:
     """Initialize milestone folder structure."""
+    if root is None:
+        root = Path.cwd()
+
     try:
-        milestone_dir = Path(f"work/{milestone_id}")
+        milestone_dir = root / "work" / milestone_id
         milestone_dir.mkdir(parents=True, exist_ok=True)
 
         today = date.today().isoformat()
@@ -72,7 +85,7 @@ milestone: {milestone_id}
 **Подпись/инициалы**:
 """
 
-        (milestone_dir / "owner_checklist.md").write_text(checklist_content, encoding="utf-8")
+        _write_if_absent(milestone_dir / "owner_checklist.md", checklist_content)
 
         # 2. semantic_review.md
         semantic_review_content = f"""---
@@ -119,7 +132,7 @@ depends_on: []
 После успешной проверки владелец выбирает: `ПРИНИМАЮ {milestone_id.upper()}` или `ВОЗВРАЩАЮ {milestone_id.upper()}: <причина>`.
 """
 
-        (milestone_dir / "semantic_review.md").write_text(semantic_review_content, encoding="utf-8")
+        _write_if_absent(milestone_dir / "semantic_review.md", semantic_review_content)
 
         # 3. final_report.md
         final_report_content = f"""---
@@ -175,7 +188,7 @@ next_milestone: m03
 (Рекомендации для следующего этапа разработки)
 """
 
-        (milestone_dir / "final_report.md").write_text(final_report_content, encoding="utf-8")
+        _write_if_absent(milestone_dir / "final_report.md", final_report_content)
 
         return True
     except Exception as e:

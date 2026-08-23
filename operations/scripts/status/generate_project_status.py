@@ -5,12 +5,22 @@ import platform
 import re
 from collections import Counter
 from pathlib import Path
+from typing import TypedDict, cast
 
 from operations.scripts.common.project import (
     iter_files,
     now_iso_minutes,
     relative_posix,
     run_command,
+)
+from operations.scripts.common.status_types import (
+    MilestoneItem,
+    MilestonesReport,
+    TaskItem,
+    TasksReport,
+    TestSpecItem,
+    TestSpecsReport,
+    UnitSummary,
 )
 from operations.scripts.documents.index import is_primary_markdown
 from operations.scripts.documents.metadata import load_document, metadata_list, typed_state
@@ -19,6 +29,8 @@ from operations.scripts.documents.traceability import (
     parse_scope_references,
 )
 from operations.scripts.quality.registry import (
+    MilestoneQualityResult,
+    QualityProfile,
     evaluate_milestone_quality,
     evidence_results,
     impacted_profiles,
@@ -38,7 +50,104 @@ UNIT_FAILED = re.compile(r"FAILED\s*\(([^)]*)\)", re.IGNORECASE)
 UNIT_FAILURE_LINE = re.compile(r"^(FAIL|ERROR):\s+(.+)$", re.MULTILINE)
 
 
-def collect_milestones(root: Path) -> dict[str, object]:
+class AcceptanceDocument(TypedDict):
+    id: str
+    state_field: str
+    state: str
+    path: str
+
+
+class AcceptanceDocumentsReport(TypedDict):
+    count: int
+    current: list[AcceptanceDocument]
+    proposed_decisions: list[AcceptanceDocument]
+
+
+class ChangeScopeResult(TypedDict):
+    mode: str
+    base_sha: str | None
+    paths: list[str]
+    error: str | None
+
+
+class NextActionCommand(TypedDict):
+    label: str
+    value: str
+
+
+class NextAction(TypedDict):
+    actor: str
+    instruction: str
+    commands: list[NextActionCommand]
+    requires_fresh_session: bool
+
+
+class EffectiveTestItem(TestSpecItem):
+    effective_result: str
+
+
+class CoverageResult(TypedDict):
+    scope_total: int
+    scope_covered: int
+    scope: list[str]
+    covered: list[str]
+    tracked_kind: str
+    tracked_total: int
+    tracked_covered: int
+    tracked_targets: list[str]
+    blockers: list[str]
+    modes: list[str]
+
+
+class CoverageBase(TypedDict):
+    mode: str
+    git_sha: str | None
+
+
+class ProgressSnapshot(TypedDict):
+    overall: str
+    milestones: MilestonesReport
+    current: MilestoneItem
+    next_milestone: MilestoneItem | None
+    tasks: TasksReport
+    tests: TestSpecsReport
+    checks_passed: int
+    checks_total: int
+    check_summary: dict[str, object]
+    unit: UnitSummary
+    acceptance: AcceptanceResult
+    deviations: list[str]
+    next_action: NextAction
+    git: dict[str, object]
+
+
+class AcceptanceResult(TypedDict):
+    state: str
+    technical_ready: bool
+    accepted: bool
+    pending_gates: list[str]
+    owner_action: str
+    tasks_total: int
+    tasks_verified: int
+    tests_total: int
+    tests_passed: int
+    tests: list[EffectiveTestItem]
+    quality: MilestoneQualityResult
+    coverage: CoverageResult
+    evidence_results: dict[str, dict[str, object]]
+    evidence_context: dict[str, object]
+    changed_paths: list[str]
+    coverage_base: CoverageBase
+    uncovered_paths: list[str]
+    impacted_profiles: list[str]
+    documents_total: int
+    documents_current: int
+    decisions_proposed: int
+    remaining: list[str]
+    blockers: list[str]
+
+
+def collect_milestones(root: Path) -> MilestonesReport:
     path = root / "milestones.md"
     if not path.is_file():
         raise ValueError("Отсутствует milestones.md")
@@ -46,7 +155,7 @@ def collect_milestones(root: Path) -> dict[str, object]:
     matches = list(MILESTONE_HEADING.finditer(text))
     if not matches:
         raise ValueError("milestones.md не содержит m01, m02, ...")
-    items: list[dict[str, object]] = []
+    items: list[MilestoneItem] = []
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         section = text[match.end() : end]
@@ -87,8 +196,8 @@ def v1_milestone_ids(root: Path) -> list[str]:
     return items[: items.index(boundary) + 1] if boundary in items else items
 
 
-def collect_test_specs(root: Path) -> dict[str, object]:
-    items: list[dict[str, object]] = []
+def collect_test_specs(root: Path) -> TestSpecsReport:
+    items: list[TestSpecItem] = []
     tests_dir = root / "work/tests"
     if tests_dir.is_dir():
         for path in sorted(tests_dir.glob("test_*.md")):
@@ -121,7 +230,7 @@ def collect_test_specs(root: Path) -> dict[str, object]:
     }
 
 
-def parse_unit_test_summary(returncode: int, output: str) -> dict[str, object]:
+def parse_unit_test_summary(returncode: int, output: str) -> UnitSummary:
     ran = UNIT_RAN.search(output)
     total = int(ran.group(1)) if ran else 0
     duration = float(ran.group(2)) if ran else None
@@ -152,7 +261,7 @@ def parse_unit_test_summary(returncode: int, output: str) -> dict[str, object]:
     }
 
 
-def format_unit_result_ru(unit: dict[str, object]) -> str:
+def format_unit_result_ru(unit: UnitSummary) -> str:
     if unit.get("ok"):
         result = f"{unit['passed']}/{unit['total']} успешно" if unit.get("total") else "успешно"
     else:
@@ -161,21 +270,22 @@ def format_unit_result_ru(unit: dict[str, object]) -> str:
             if unit.get("total")
             else "ошибка"
         )
-    if unit.get("duration") is not None:
-        result += f" · {float(unit['duration']):.1f} с"
+    duration = unit["duration"]
+    if duration is not None:
+        result += f" · {duration:.1f} с"
     return result
 
 
-def _task_milestones(task: dict[str, object]) -> list[str]:
+def _task_milestones(task: TaskItem) -> list[str]:
     return [
-        str(value).lower()
-        for value in task.get("traces_to", [])
-        if re.fullmatch(r"m\d{2}", str(value), re.IGNORECASE)
+        value.lower()
+        for value in task["traces_to"]
+        if re.fullmatch(r"m\d{2}", value, re.IGNORECASE)
     ]
 
 
-def _acceptance_documents(root: Path) -> dict[str, object]:
-    items: list[dict[str, str]] = []
+def _acceptance_documents(root: Path) -> AcceptanceDocumentsReport:
+    items: list[AcceptanceDocument] = []
     for path in iter_files(root, suffixes={".md"}, include_generated=False):
         relative = relative_posix(path, root)
         if not is_primary_markdown(relative) or relative.startswith(("work/tasks/", "work/tests/")):
@@ -222,7 +332,7 @@ def _git_paths(root: Path, command: list[str]) -> tuple[list[str], str | None]:
     )
 
 
-def _change_scope(root: Path, milestone_id: str) -> dict[str, object]:
+def _change_scope(root: Path, milestone_id: str) -> ChangeScopeResult:
     """Вернуть все пути, изменённые после принятия предыдущего этапа.
 
     Для m01 проверяется всё отслеживаемое дерево. Следующие этапы начинаются с
@@ -275,7 +385,7 @@ def build_owner_next_action(
     resume_target: str,
     requires_fresh_session: bool,
     owner_action: str = "none",
-) -> dict[str, object]:
+) -> NextAction:
     """Return the single owner-facing action model used by every status view."""
     if owner_action != "none":
         return {
@@ -304,30 +414,28 @@ def build_owner_next_action(
 
 def _coverage(
     *,
-    current: dict[str, object],
-    current_tasks: list[dict[str, object]],
-    effective_tests: list[dict[str, object]],
-    profiles: list[tuple[str, dict[str, object]]],
+    current: MilestoneItem,
+    current_tasks: list[TaskItem],
+    effective_tests: list[EffectiveTestItem],
+    profiles: list[tuple[str, QualityProfile]],
     evidence: dict[str, dict[str, object]],
     traceability_records: dict[str, dict[str, object]] | None = None,
-) -> dict[str, object]:
-    scope = [str(value) for value in current.get("scope", [])]
+) -> CoverageResult:
+    scope = current["scope"]
     blockers: list[str] = []
     covered: set[str] = set()
     foundation_targets: list[str] = []
     foundation_covered: set[str] = set()
 
-    coverage_modes = {str(raw.get("scope_coverage", "task_test")) for _, raw in profiles}
+    coverage_modes = {profile["scope_coverage"] for _, profile in profiles}
     global_evidence: list[str] = []
-    for _, raw in profiles:
-        if str(raw.get("scope_coverage", "task_test")) == "global_evidence":
-            raw_scope_evidence = raw.get("scope_evidence", [])
-            if isinstance(raw_scope_evidence, list):
-                global_evidence.extend(str(value) for value in raw_scope_evidence if str(value))
+    for _, profile in profiles:
+        if profile["scope_coverage"] == "global_evidence":
+            global_evidence.extend(value for value in profile["scope_evidence"] if value)
             if not scope:
-                for value in raw.get("paths", []):
+                for value in profile["paths"]:
                     target = f"path:{value}"
-                    if str(value) and target not in foundation_targets:
+                    if value and target not in foundation_targets:
                         foundation_targets.append(target)
 
     if "global_evidence" in coverage_modes:
@@ -422,26 +530,26 @@ def _coverage(
 def evaluate_acceptance(
     root: Path,
     *,
-    milestones: dict[str, object],
-    tasks: dict[str, object],
-    tests: dict[str, object],
+    milestones: MilestonesReport,
+    tasks: TasksReport,
+    tests: TestSpecsReport,
     check_summary: dict[str, object],
-    unit_summary: dict[str, object],
+    unit_summary: UnitSummary,
     git: dict[str, object],
-) -> dict[str, object]:
+) -> AcceptanceResult:
     current = milestones["current"]
-    current_id = str(current["id"])
-    current_work_state = str(current.get("work_state", "planned"))
+    current_id = current["id"]
+    current_work_state = current["work_state"]
     current_tasks = [item for item in tasks["tasks"] if current_id in _task_milestones(item)]
-    task_ids = {str(item["id"]) for item in current_tasks}
+    task_ids = {item["id"] for item in current_tasks}
     current_tests = [
         item
         for item in tests["items"]
-        if current_id in {str(value).lower() for value in item.get("accepts", [])}
-        or task_ids.intersection(set(item.get("traces_to", [])))
+        if current_id in {value.lower() for value in item["accepts"]}
+        or task_ids.intersection(set(item["traces_to"]))
     ]
 
-    context = {
+    context: dict[str, object] = {
         "git_sha": str(git.get("commit", "unknown")),
         "timestamp": now_iso_minutes(),
         "environment": _environment(),
@@ -454,13 +562,11 @@ def evaluate_acceptance(
         unit_summary=unit_summary,
         context=context,
     )
-    effective_tests: list[dict[str, object]] = []
+    effective_tests: list[EffectiveTestItem] = []
     for item in current_tests:
-        execution = str(item.get("execution", "owner"))
+        execution = item["execution"] or "owner"
         evidence_id = (
-            str(item.get("automated_evidence", ""))
-            if execution == "automated"
-            else str(item.get("manual_evidence", ""))
+            item["automated_evidence"] if execution == "automated" else item["manual_evidence"]
         )
         if evidence_id:
             result = str(results.get(evidence_id, {}).get("result", "missing"))
@@ -468,16 +574,10 @@ def evaluate_acceptance(
             result = "missing"
         effective_tests.append({**item, "effective_result": result})
 
-    passed_ids = {
-        str(item["id"]) for item in effective_tests if item["effective_result"] == "passed"
-    }
+    passed_ids = {item["id"] for item in effective_tests if item["effective_result"] == "passed"}
     verified_tasks = 0
     for task in current_tasks:
-        linked = {
-            str(test["id"])
-            for test in current_tests
-            if str(task["id"]) in set(test.get("traces_to", []))
-        }
+        linked = {test["id"] for test in current_tests if task["id"] in set(test["traces_to"])}
         if linked and linked.issubset(passed_ids):
             verified_tasks += 1
 
@@ -588,7 +688,7 @@ def build_progress_snapshot(
     test_returncode: int,
     test_output: str,
     git: dict[str, object],
-) -> dict[str, object]:
+) -> ProgressSnapshot:
     milestones = collect_milestones(root)
     tasks = collect_tasks(root)
     tests = collect_test_specs(root)
@@ -611,14 +711,19 @@ def build_progress_snapshot(
         if current_index + 1 < len(milestones["items"])
         else None
     )
-    checks = [item for item in check_summary.get("checks", []) if isinstance(item, dict)]
+    # check_summary is external input (parsed from check.py's JSON output), not yet
+    # typed beyond dict[str, object].
+    raw_checks = cast(list[object], check_summary.get("checks", []))
+    checks: list[dict[str, object]] = [item for item in raw_checks if isinstance(item, dict)]
     deviations: list[str] = []
     for item in checks:
-        for error in item.get("errors", []) if isinstance(item.get("errors"), list) else []:
+        raw_errors = item.get("errors")
+        for error in raw_errors if isinstance(raw_errors, list) else []:
             deviations.append(f"{item.get('name')}: {error}")
-        for warning in item.get("warnings", []) if isinstance(item.get("warnings"), list) else []:
+        raw_warnings = item.get("warnings")
+        for warning in raw_warnings if isinstance(raw_warnings, list) else []:
             deviations.append(f"{item.get('name')}: ПРЕДУПРЕЖДЕНИЕ: {warning}")
-    for problem in unit.get("problems", []):
+    for problem in unit["problems"]:
         deviations.append(f"модульные тесты: {problem}")
     overall = "healthy" if bool(check_summary.get("ok")) and bool(unit.get("ok")) else "attention"
     current_id = str(current["id"])
@@ -651,17 +756,13 @@ def build_progress_snapshot(
     }
 
 
-def render_progress_sections(snapshot: dict[str, object]) -> str:
+def render_progress_sections(snapshot: ProgressSnapshot) -> str:
     current = snapshot["current"]
-    next_milestone = snapshot.get("next_milestone")
+    next_milestone = snapshot["next_milestone"]
     acceptance = snapshot["acceptance"]
     unit = snapshot["unit"]
-    next_label = (
-        f"{next_milestone['id']} — {next_milestone['title']}"
-        if isinstance(next_milestone, dict)
-        else "—"
-    )
-    pending = list(acceptance.get("pending_gates", []))
+    next_label = f"{next_milestone['id']} — {next_milestone['title']}" if next_milestone else "—"
+    pending = acceptance["pending_gates"]
     pending_labels = {
         "semantic_review": "смысловая проверка",
     }
@@ -700,21 +801,17 @@ def render_progress_sections(snapshot: dict[str, object]) -> str:
             f"| `{row['id']}` | {result_labels.get(str(row['result']), str(row['result']))} | "
             f"{class_labels.get(str(row['class']), str(row['class']))} | "
             f"{source_label(row['source'])} | `{str(row.get('git_sha', 'unknown'))[:12]}` |"
-            for row in acceptance["quality"].get("evidence", [])
+            for row in acceptance["quality"]["evidence"]
         )
         or "| — | — | — | — | — |"
     )
     coverage = acceptance["coverage"]
     coverage_label = (
-        "Области основы" if coverage.get("tracked_kind") == "foundation_paths" else "Состав этапа"
+        "Области основы" if coverage["tracked_kind"] == "foundation_paths" else "Состав этапа"
     )
     profile_labels = {"foundation": "основа"}
     impacted = (
-        ", ".join(
-            profile_labels.get(str(item), str(item))
-            for item in acceptance.get("impacted_profiles", [])
-        )
-        or "—"
+        ", ".join(profile_labels.get(item, item) for item in acceptance["impacted_profiles"]) or "—"
     )
     work_state_labels = {
         "planned": "запланирован",
@@ -731,9 +828,7 @@ def render_progress_sections(snapshot: dict[str, object]) -> str:
     unit_result = format_unit_result_ru(unit)
     next_action = snapshot["next_action"]
     action_commands = "\n".join(
-        f"- {item['label']}: `{item['value']}`."
-        for item in next_action.get("commands", [])
-        if isinstance(item, dict)
+        f"- {item['label']}: `{item['value']}`." for item in next_action["commands"]
     )
     return f"""## Прогресс
 

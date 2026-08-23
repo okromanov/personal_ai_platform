@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from operations.scripts.common.status_types import MilestoneItem
 from operations.scripts.documents.check import (
     _block_scalar_errors,
     check_automation_policy,
@@ -12,7 +13,114 @@ from operations.scripts.documents.check import (
     check_milestones,
 )
 from operations.scripts.evidence.record import _evidence_targets
-from operations.scripts.quality.registry import _matches, uncovered_paths
+from operations.scripts.quality.registry import QualityProfile, _matches, uncovered_paths
+from operations.scripts.status.generate_project_status import (
+    AcceptanceResult,
+    CoverageResult,
+    EffectiveTestItem,
+    ProgressSnapshot,
+)
+
+
+def _profile(*, paths: list[str]) -> QualityProfile:
+    return {
+        "milestones": ["m01"],
+        "required_evidence": [],
+        "paths": paths,
+        "scope_coverage": "task_test",
+        "scope_evidence": [],
+    }
+
+
+def _minimal_snapshot(
+    milestone_id: str, *, evidence_id: str, verifies: list[str]
+) -> ProgressSnapshot:
+    milestone: MilestoneItem = {
+        "id": milestone_id,
+        "title": "",
+        "work_state": "in-progress",
+        "scope": [],
+    }
+    test: EffectiveTestItem = {
+        "id": "TEST_0001",
+        "spec_state": "current",
+        "execution": "automated",
+        "automated_evidence": evidence_id,
+        "manual_evidence": "",
+        "traces_to": [],
+        "verifies": verifies,
+        "accepts": [milestone_id],
+        "title": "",
+        "path": "",
+        "effective_result": "passed",
+    }
+    coverage: CoverageResult = {
+        "scope_total": 0,
+        "scope_covered": 0,
+        "scope": [],
+        "covered": [],
+        "tracked_kind": "foundation_paths",
+        "tracked_total": 0,
+        "tracked_covered": 0,
+        "tracked_targets": [],
+        "blockers": [],
+        "modes": [],
+    }
+    acceptance: AcceptanceResult = {
+        "state": "not-ready",
+        "technical_ready": False,
+        "accepted": False,
+        "pending_gates": [],
+        "owner_action": "none",
+        "tasks_total": 0,
+        "tasks_verified": 0,
+        "tests_total": 1,
+        "tests_passed": 1,
+        "tests": [test],
+        "quality": {"profiles": [], "evidence": [], "blockers": [], "warnings": [], "ready": True},
+        "coverage": coverage,
+        "evidence_results": {},
+        "evidence_context": {},
+        "changed_paths": [],
+        "coverage_base": {"mode": "tracked_tree", "git_sha": None},
+        "uncovered_paths": [],
+        "impacted_profiles": [],
+        "documents_total": 0,
+        "documents_current": 0,
+        "decisions_proposed": 0,
+        "remaining": [],
+        "blockers": [],
+    }
+    return {
+        "overall": "healthy",
+        "milestones": {"count": 1, "items": [milestone], "current": milestone, "states": {}},
+        "current": milestone,
+        "next_milestone": None,
+        "tasks": {"count": 0, "states": {}, "tasks": []},
+        "tests": {"count": 1, "items": [], "states": {}},
+        "checks_passed": 0,
+        "checks_total": 0,
+        "check_summary": {},
+        "unit": {
+            "ok": True,
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "duration": None,
+            "label": "",
+            "problems": [],
+        },
+        "acceptance": acceptance,
+        "deviations": [],
+        "next_action": {
+            "actor": "владелец",
+            "instruction": "",
+            "commands": [],
+            "requires_fresh_session": False,
+        },
+        "git": {},
+    }
+
 
 MINIMAL_PROJECT_WORKFLOW = """\
 name: Project check
@@ -54,11 +162,15 @@ class GovernanceHardeningTests(unittest.TestCase):
 
     def test_dot_directory_path_matches_without_losing_leading_dot(self) -> None:
         self.assertTrue(_matches(".github/workflows/project_check.yml", [".github/workflows/**"]))
-        profiles = [("foundation", {"paths": [".github/workflows/**"]})]
+        profiles: list[tuple[str, QualityProfile]] = [
+            ("foundation", _profile(paths=[".github/workflows/**"]))
+        ]
         self.assertEqual(uncovered_paths(profiles, [".github/workflows/project_check.yml"]), [])
 
     def test_derived_paths_do_not_block_profile_coverage(self) -> None:
-        profiles = [("foundation", {"paths": ["operations/**"]})]
+        profiles: list[tuple[str, QualityProfile]] = [
+            ("foundation", _profile(paths=["operations/**"]))
+        ]
         self.assertEqual(
             uncovered_paths(
                 profiles, ["generated/traceability_matrix.md", "runtime/evidence/x.json"]
@@ -86,19 +198,7 @@ class GovernanceHardeningTests(unittest.TestCase):
             (root / "operations/quality_registry.json").write_text(
                 json.dumps(registry), encoding="utf-8"
             )
-            snapshot = {
-                "current": {"id": "m01"},
-                "acceptance": {
-                    "coverage": {"scope": []},
-                    "tests": [
-                        {
-                            "automated_evidence": "unit_tests",
-                            "verifies": ["SEC_CTL_018"],
-                            "accepts": ["m01"],
-                        }
-                    ],
-                },
-            }
+            snapshot = _minimal_snapshot("m01", evidence_id="unit_tests", verifies=["SEC_CTL_018"])
             targets = _evidence_targets(root, snapshot)
             self.assertEqual(targets["unit_tests"], ["path:operations/**"])
             self.assertTrue(targets["unit_tests"])

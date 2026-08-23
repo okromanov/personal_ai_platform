@@ -261,7 +261,7 @@ class QualityRegistryTests(unittest.TestCase):
             self.assertNotIn(str(current["id"]), covered)
 
     def test_manual_record_changes_missing_to_passed(self) -> None:
-        registry = {
+        registry: dict[str, object] = {
             "evidence_catalog": {
                 "manual": {
                     "class": "hard",

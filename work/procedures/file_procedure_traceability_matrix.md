@@ -2,7 +2,7 @@
 id: file_procedure_traceability_matrix
 type: procedure_reference
 title: File and Procedure Traceability Matrix
-version: 1.0
+version: 1.3
 created: 2026-08-23
 updated: 2026-08-23
 scope: project_state_management
@@ -336,7 +336,7 @@ git commit -m "Regenerate project status after task state update"
 
 ### 7.3 Test File `updated` Field Mismatched with Actual Modification Date
 
-**Issue**: [`test_0008.md`](../tests/test_0008.md) claimed `updated: 2026-08-22` but was actually modified 2026-08-23.
+**Issue**: `test_0008.md` (a since-removed stub, see §7.5) claimed `updated: 2026-08-22` but was actually modified 2026-08-23.
 
 **Root Cause**: Template or batch creation set dates without verifying actual modification times.
 
@@ -368,6 +368,37 @@ git commit -m "Regenerate project status after task state update"
 1. Remove entire milestone profile block from quality_registry.json
 2. Verify remaining profiles are only for active milestones
 3. Re-run quality registry validation
+```
+
+### 7.5 TEST Stubs Created to Satisfy the Linkage Checker Instead of Real Verification
+
+**Issue**: `test_0008.md`–`test_0019.md` were created as placeholder specs for
+ARC_CMP_002–009 and INF_CMP_001–008, declaring `execution: automated` and
+`automated_evidence: quality_suite` while the components themselves did not
+exist yet (`Доказательство реализации будет представлено при выполнении
+TASK_000X`). `quality_suite` evidence trivially "passes" for a component with
+no code and no test exercising it, so this made the traceability matrix claim
+verification that never happened.
+
+**Root Cause**: TEST documents were generated in bulk to make a linkage/scope
+checker pass, rather than written when a requirement was actually implemented
+and had real evidence — the opposite of the rule this document itself states
+in `generate.py`: TEST specs are not auto-generated because they require a
+real evidence source that only exists once the requirement is implemented.
+
+**Prevention**:
+- AGENTS.md §5.1 explicitly forbids stub TEST/TASK docs claiming automated
+  evidence that does not exist.
+- Removing the 12 stub files did not break `test_specs`, `full_traceability`,
+  or `acceptance_model` — confirming no check actually required them; they
+  were unnecessary defensive padding, not a real constraint.
+
+**Recovery**:
+```
+1. Delete the stub TEST file (git rm work/tests/test_00XX.md)
+2. Confirm the owning TASK does not reference it in `tests:` (none did here)
+3. Regenerate derived docs: python3 operations/scripts/documents/generate.py --all
+4. Write the real TEST spec only when the component is actually implemented
 ```
 
 ---

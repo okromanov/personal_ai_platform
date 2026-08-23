@@ -86,7 +86,7 @@ def _extract_requirement_definitions(root: Path) -> dict[str, dict[str, Any]]:
 
 def _find_traces_to_relationships(root: Path, requirements: dict) -> dict[str, list[str]]:
     """Find traces_to relationships from specifications."""
-    traces = {}
+    traces: dict[str, list[str]] = {}
 
     # Rules for finding traces
     # SYS -> ARC (system requirements implemented by architecture)

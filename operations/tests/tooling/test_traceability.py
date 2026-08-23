@@ -3,12 +3,19 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from typing import cast
 
 from operations.scripts.documents.traceability import (
     collect_traceable_elements,
     parse_scope_references,
     render_traceability,
 )
+
+
+def _relations(record: dict[str, object]) -> dict[str, list[str]]:
+    """`relations` is always dict[str, list[str]] by construction — see
+    collect_traceable_elements() in traceability.py."""
+    return cast(dict[str, list[str]], record["relations"])
 
 
 class TraceabilityTests(unittest.TestCase):
@@ -56,8 +63,8 @@ class TraceabilityTests(unittest.TestCase):
 
         for record in records.values():
             if record["family"] == "SEC_CTL":
-                self.assertNotIn("mitigates", record["relations"])
-                self.assertNotIn("implemented_by", record["relations"])
+                self.assertNotIn("mitigates", _relations(record))
+                self.assertNotIn("implemented_by", _relations(record))
 
     def test_lower_layers_never_duplicate_the_threat_to_control_edge(self) -> None:
         """Связь «угроза — мера» хранится один раз, как THR.mitigated_by.
@@ -68,7 +75,7 @@ class TraceabilityTests(unittest.TestCase):
             identifier: sorted(
                 target
                 for key in ("traces_to", "implements")
-                for target in record["relations"].get(key, [])
+                for target in _relations(record).get(key, [])
                 if target.startswith("THR_")
             )
             for identifier, record in records.items()
@@ -91,7 +98,7 @@ class TraceabilityTests(unittest.TestCase):
             records = collect_traceable_elements(fake)
             leaked = [
                 target
-                for target in records["INF_REQ_001"]["relations"]["traces_to"]
+                for target in _relations(records["INF_REQ_001"])["traces_to"]
                 if target.startswith("THR_")
             ]
             self.assertEqual(leaked, ["THR_001"])
@@ -120,10 +127,10 @@ class TraceabilityTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[3]
         records = collect_traceable_elements(root)
         self.assertEqual(
-            records["m02"]["relations"]["scope"][:6],
+            _relations(records["m02"])["scope"][:6],
             ["BR_001", "BR_004", "BR_005", "BR_006", "BR_033", "BR_036"],
         )
-        self.assertIn("SYS_027", records["m02"]["relations"]["scope"])
+        self.assertIn("SYS_027", _relations(records["m02"])["scope"])
 
 
 if __name__ == "__main__":

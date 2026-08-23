@@ -37,6 +37,12 @@ def update_file_version(file_path: str) -> bool:
 
         content = path.read_text(encoding="utf-8")
 
+        # Fully auto-generated files own their `version` field via their generator
+        # (which always writes a fixed value); bumping it here would only be undone
+        # by the next generate.py run, producing permanent drift between the two.
+        if content.startswith("<!-- generated file: do not edit manually -->"):
+            return False
+
         # Find version field in frontmatter
         version_match = re.search(r"^version:\s*([0-9.]+)", content, re.MULTILINE)
         if not version_match:

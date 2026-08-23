@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `73` |
+| Всего документов | `61` |
 
 > В список входят первичные Markdown-документы. Производные и периодические представления исключены.
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `1.0` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `1.4` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -57,7 +57,7 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
-| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `completed` | `1.1` | TASK_0001 — Реализация ARC_CMP_001 |
+| [`work/tasks/task_0001_arc_001.md`](../work/tasks/task_0001_arc_001.md) | `TASK_0001` | `task` | `work_state` | `completed` | `1.4` | TASK_0001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_0002_arc_002.md`](../work/tasks/task_0002_arc_002.md) | `TASK_0002` | `task` | `work_state` | `in-progress` | `1.0` | TASK_0002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_0003_arc_003.md`](../work/tasks/task_0003_arc_003.md) | `TASK_0003` | `task` | `work_state` | `planned` | `1.0` | TASK_0003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_0004_arc_004.md`](../work/tasks/task_0004_arc_004.md) | `TASK_0004` | `task` | `work_state` | `planned` | `1.0` | TASK_0004 — Реализация ARC_CMP_004 |
@@ -76,16 +76,4 @@ version: 1.0
 | [`work/tests/test_0004.md`](../work/tests/test_0004.md) | `TEST_0004` | `test` | `spec_state` | `current` | `1.0` | TEST_0004 — Контроль владельца и аварийное отключение |
 | [`work/tests/test_0005.md`](../work/tests/test_0005.md) | `TEST_0005` | `test` | `spec_state` | `current` | `1.0` | TEST_0005 — Сквозной сценарий Telegram и перезапуск |
 | [`work/tests/test_0006.md`](../work/tests/test_0006.md) | `TEST_0006` | `test` | `spec_state` | `current` | `1.0` | TEST_0006 — Инфраструктурный контур первого живого помощника |
-| [`work/tests/test_0007.md`](../work/tests/test_0007.md) | `TEST_0007` | `test` | `spec_state` | `current` | `1.0` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |
-| [`work/tests/test_0008.md`](../work/tests/test_0008.md) | `TEST_0008` | `test` | `spec_state` | `current` | `1.0` | TEST_0008 — Контроль владельца платформой |
-| [`work/tests/test_0009.md`](../work/tests/test_0009.md) | `TEST_0009` | `test` | `spec_state` | `current` | `1.0` | TEST_0009 — Оркестрация и RuntimePort |
-| [`work/tests/test_0010.md`](../work/tests/test_0010.md) | `TEST_0010` | `test` | `spec_state` | `current` | `1.0` | TEST_0010 — Шлюз моделей |
-| [`work/tests/test_0011.md`](../work/tests/test_0011.md) | `TEST_0011` | `test` | `spec_state` | `current` | `1.0` | TEST_0011 — Управление памятью и контекстом |
-| [`work/tests/test_0012.md`](../work/tests/test_0012.md) | `TEST_0012` | `test` | `spec_state` | `current` | `1.0` | TEST_0012 — Мониторинг и логирование |
-| [`work/tests/test_0013.md`](../work/tests/test_0013.md) | `TEST_0013` | `test` | `spec_state` | `current` | `1.0` | TEST_0013 — Инфраструктура: вычисления |
-| [`work/tests/test_0014.md`](../work/tests/test_0014.md) | `TEST_0014` | `test` | `spec_state` | `current` | `1.0` | TEST_0014 — Инфраструктура: сеть |
-| [`work/tests/test_0015.md`](../work/tests/test_0015.md) | `TEST_0015` | `test` | `spec_state` | `current` | `1.0` | TEST_0015 — Инфраструктура: хранилище |
-| [`work/tests/test_0016.md`](../work/tests/test_0016.md) | `TEST_0016` | `test` | `spec_state` | `current` | `1.0` | TEST_0016 — Инфраструктура: безопасность |
-| [`work/tests/test_0017.md`](../work/tests/test_0017.md) | `TEST_0017` | `test` | `spec_state` | `current` | `1.0` | TEST_0017 — Инфраструктура: мониторинг |
-| [`work/tests/test_0018.md`](../work/tests/test_0018.md) | `TEST_0018` | `test` | `spec_state` | `current` | `1.0` | TEST_0018 — Точка входа сценария |
-| [`work/tests/test_0019.md`](../work/tests/test_0019.md) | `TEST_0019` | `test` | `spec_state` | `current` | `1.0` | TEST_0019 — Инфраструктура: управление жизненным циклом |
+| [`work/tests/test_0007.md`](../work/tests/test_0007.md) | `TEST_0007` | `test` | `spec_state` | `current` | `1.3` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |

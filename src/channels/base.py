@@ -8,7 +8,7 @@ interface without owning business logic, memory, or permissions.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Optional
 from uuid import uuid4
@@ -47,7 +47,7 @@ class TaskMessage:
     user_input: str = field(default="")
     metadata: dict[str, Any] = field(default_factory=dict)
     state: TaskState = field(default=TaskState.PENDING)
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     completed_at: Optional[datetime] = field(default=None)
     error_message: Optional[str] = field(default=None)
 
@@ -58,18 +58,18 @@ class TaskMessage:
     def mark_completed(self) -> None:
         """Update state to completed."""
         self.state = TaskState.COMPLETED
-        self.completed_at = datetime.utcnow()
+        self.completed_at = datetime.now(UTC)
 
     def mark_failed(self, error: str) -> None:
         """Update state to failed with error message."""
         self.state = TaskState.FAILED
-        self.completed_at = datetime.utcnow()
+        self.completed_at = datetime.now(UTC)
         self.error_message = error
 
     def mark_cancelled(self) -> None:
         """Update state to cancelled."""
         self.state = TaskState.CANCELLED
-        self.completed_at = datetime.utcnow()
+        self.completed_at = datetime.now(UTC)
 
 
 class Channel(ABC):
