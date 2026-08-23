@@ -117,7 +117,9 @@ async def run_tests() -> TestResult:
         await channel.send_status(TaskState.COMPLETED, task_id)
         response = channel.get_response(task_id)
         assert response is not None, "Response should not be None"
-        assert "completed" in response.lower(), f"Response should contain 'completed', got: {response}"
+        assert "completed" in response.lower(), (
+            f"Response should contain 'completed', got: {response}"
+        )
         result.add_pass("send_status")
     except Exception as e:
         result.add_fail("send_status", f"{type(e).__name__}: {str(e)}")
