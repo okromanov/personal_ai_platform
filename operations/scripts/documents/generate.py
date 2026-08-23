@@ -20,6 +20,7 @@ from operations.scripts.documents.traceability import render_traceability
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.status.human_status import render_repository_project_status
 from operations.scripts.tasks.generate import render_task_index
+from operations.scripts.traceability.generate_file_procedure_matrix import generate_file_procedure_matrix
 
 
 def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
@@ -42,6 +43,14 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     for path, rendered in outputs:
         if atomic_write(path, rendered):
             changed.append(path.relative_to(root).as_posix())
+
+    # Generate file/procedure traceability matrix (optional, non-blocking)
+    try:
+        if generate_file_procedure_matrix(root):
+            changed.append("generated/file_procedure_traceability_matrix.md")
+    except Exception as e:
+        print(f"WARNING: Failed to generate traceability matrix: {e}", file=sys.stderr)
+        # Continue anyway - this is not critical for CI pass
 
     # Remove semantic_review_v1.md when moving past m01
     current_milestone = collect_milestones(root)["current"]
