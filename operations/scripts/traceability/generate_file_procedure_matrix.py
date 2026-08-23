@@ -13,9 +13,10 @@ Generates: generated/file_procedure_traceability_matrix.md
 """
 
 import re
-from pathlib import Path
-from datetime import date
 from collections import defaultdict
+from datetime import date
+from pathlib import Path
+
 
 def parse_yaml_frontmatter(content: str) -> dict:
     """Extract YAML frontmatter fields"""
@@ -181,6 +182,6 @@ def generate_file_procedure_matrix(root_path=None) -> bool:
 
 if __name__ == "__main__":
     if generate_file_procedure_matrix():
-        print(f"✓ Generated generated/file_procedure_traceability_matrix.md")
+        print("✓ Generated generated/file_procedure_traceability_matrix.md")
     else:
         print("✓ Generated file is up to date")

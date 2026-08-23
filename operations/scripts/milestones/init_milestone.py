@@ -12,9 +12,9 @@ Usage: python3 operations/scripts/milestones/init_milestone.py m02
 """
 
 import sys
-import json
-from pathlib import Path
 from datetime import date
+from pathlib import Path
+
 
 def init_milestone(milestone_id: str) -> bool:
     """Initialize milestone folder structure."""

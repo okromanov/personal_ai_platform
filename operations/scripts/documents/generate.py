@@ -15,12 +15,15 @@ from operations.scripts.common.project import (
 )
 from operations.scripts.documents.auto_generate_tasks import auto_generate_tasks
 from operations.scripts.documents.index import render_index
+from operations.scripts.documents.owner_dashboard import render_owner_dashboard
 from operations.scripts.documents.repository_tree import render_repository_structure
 from operations.scripts.documents.traceability import render_traceability
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.status.human_status import render_repository_project_status
 from operations.scripts.tasks.generate import render_task_index
-from operations.scripts.traceability.generate_file_procedure_matrix import generate_file_procedure_matrix
+from operations.scripts.traceability.generate_file_procedure_matrix import (
+    generate_file_procedure_matrix,
+)
 
 
 def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
@@ -36,6 +39,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     outputs = [
         (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
+        (root / "owner_dashboard.md", render_owner_dashboard(root, date)),
         (root / "generated" / "document_index.md", render_index(root, date)),
         (root / "generated" / "traceability_matrix.md", render_traceability(root, date)),
         (root / "generated" / "repository_structure.md", render_repository_structure(root, date)),

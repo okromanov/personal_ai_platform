@@ -61,6 +61,30 @@
         "unit_tests",
         "quality_suite"
       ]
+    },
+    "m02_development": {
+      "milestones": [
+        "m02"
+      ],
+      "paths": [
+        "src/**",
+        "work/tasks/**",
+        "work/tests/**",
+        "work/m02/**",
+        "operations/**",
+        ".github/workflows/**"
+      ],
+      "scope_coverage": "global_evidence",
+      "scope_evidence": [
+        "project_checks",
+        "quality_suite"
+      ],
+      "required_evidence": [
+        "project_checks",
+        "unit_tests",
+        "quality_suite",
+        "m02_contract_tests"
+      ]
     }
   }
 }
