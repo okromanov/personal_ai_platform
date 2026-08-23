@@ -86,6 +86,12 @@ def _run_git(root: Path, *args: str) -> None:
     subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True)
 
 
+def _run_git_output(root: Path, *args: str) -> str:
+    return subprocess.run(
+        ["git", *args], cwd=root, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
 def _init_repo(root: Path) -> None:
     _run_git(root, "init", "-q")
     _run_git(root, "config", "user.email", "test@example.com")
@@ -137,9 +143,24 @@ class UpdateCompletionReportTests(unittest.TestCase):
         self.assertIn("completion_state: completed", content)
         self.assertIn("- Статус: завершено", content)
         self.assertNotIn("Дата завершения: —", content)
-        # The completion commit's own diff must be scoped to the completion
-        # commit itself, not to whatever came after it in later history.
-        self.assertIn("milestones.md", content)
+
+    def test_refuses_to_render_when_completion_commit_is_a_shallow_boundary(self) -> None:
+        """A shallow clone's boundary commit makes `git log`/`git show` look
+        like nothing existed before it — the completion commit might really
+        be earlier than local history reaches. render_final_report() must
+        raise rather than silently trust that illusion (this is exactly what
+        broke CI: work/m01/final_report.md rendered with a fraction of its
+        real content because a shallow checkout's boundary commit already
+        showed m01 as completed)."""
+        root = self._make_repo("m06")
+        _write_milestone_section(root, "m06", "completed")
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "complete milestone")
+        completion_sha = _run_git_output(root, "rev-parse", "HEAD")
+        (root / ".git" / "shallow").write_text(f"{completion_sha}\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "мелкий чекаут"):
+            render_final_report(root, "m06")
 
     def test_returns_false_when_milestone_unknown(self) -> None:
         """final_report.md exists on disk but milestones.md has no matching

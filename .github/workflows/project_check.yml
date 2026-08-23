@@ -85,6 +85,16 @@ jobs:
             git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=100 origin $env:GITHUB_SHA $env:BASE_SHA
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+          # work/mXX/final_report.md is regenerated from real git history; a
+          # shallow clone makes the graft commit look like it "just created"
+          # every file it contains (see render_final_report()'s shallow-repo
+          # guard in operations/scripts/milestones/update_completion_report.py).
+          # The unit test suite below exercises that generator against this
+          # checkout, so it needs full history here too, not only on main.
+          if ((git rev-parse --is-shallow-repository) -eq "true") {
+            git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --unshallow origin $env:GITHUB_SHA
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
       - name: Check changed paths against TASK
         if: github.event_name == 'pull_request'
         shell: pwsh
@@ -166,7 +176,7 @@ jobs:
           python3 -m pip install --disable-pip-version-check \
             -r operations/quality/requirements_dev.txt
 
-      - name: Fetch default branch for metadata comparison
+      - name: Fetch default branch and full history
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -177,6 +187,17 @@ jobs:
           git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags origin main:refs/remotes/origin/main
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
             git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=100 origin "$GITHUB_SHA" "$BASE_SHA"
+          fi
+          # work/mXX/final_report.md is regenerated from real git history
+          # (operations/scripts/milestones/update_completion_report.py walks
+          # git log/git show across arbitrary past commits). A shallow clone
+          # makes the graft commit look like it "just created" every file it
+          # contains, silently producing a plausible but wrong report instead
+          # of an honest error — see render_final_report()'s shallow-repo
+          # guard. The unit test suite exercises that generator against this
+          # real checkout, so it needs full history here, not just on main.
+          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+            git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --unshallow origin "$GITHUB_SHA"
           fi
 
       - name: Install pinned external quality tools

@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `204` |
+| Всего файлов | `201` |
 
 ```text
 personal_ai_platform/
@@ -42,7 +42,6 @@ personal_ai_platform/
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
 - generated/document_index.md
-- generated/file_procedure_traceability_matrix.md
 - generated/repository_structure.md
 - generated/traceability_matrix.md
 - milestones.md
@@ -114,7 +113,6 @@ personal_ai_platform/
 - operations/scripts/traceability/__init__.py
 - operations/scripts/traceability/auto_link.py
 - operations/scripts/traceability/full_traceability.py
-- operations/scripts/traceability/generate_file_procedure_matrix.py
 - operations/scripts/traceability/semantic_consistency.py
 - operations/scripts/versioning/increment_file_version.py
 - operations/semantic_review.md
@@ -160,7 +158,6 @@ personal_ai_platform/
 - operations/tests/tooling/test_change_scope.py
 - operations/tests/tooling/test_coverage_policy.py
 - operations/tests/tooling/test_evidence_record.py
-- operations/tests/tooling/test_file_procedure_matrix.py
 - operations/tests/tooling/test_full_traceability.py
 - operations/tests/tooling/test_links.py
 - operations/tests/tooling/test_metadata_parsing.py

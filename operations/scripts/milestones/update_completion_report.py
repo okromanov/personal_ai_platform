@@ -60,8 +60,33 @@ def _milestone_item(root: Path, milestone_id: str) -> MilestoneItem | None:
     return None
 
 
+def _shallow_boundary_commits(root: Path) -> set[str]:
+    """SHA-1s of commits at the edge of a shallow clone (empty in a full clone).
+
+    Git records these in .git/shallow: commits it has, but whose parents it
+    does not. At that boundary, `git log --diff-filter=A` shows every file as
+    "just added" and `git show <sha>:path` shows whatever state existed there
+    as if it were the earliest — indistinguishable from genuinely being the
+    first commit. A result that lands exactly on one of these SHAs cannot be
+    trusted; a result elsewhere in history is unaffected by the boundary.
+    """
+    shallow_file = root / ".git" / "shallow"
+    if not shallow_file.is_file():
+        return set()
+    return {
+        line.strip()
+        for line in shallow_file.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+
+
 def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
-    """(sha, date) of the commit that first created this milestone's final_report.md."""
+    """(sha, date) of the commit that first created this milestone's final_report.md.
+
+    Returns None both when no such commit is found and when the only match is
+    a shallow-clone boundary commit — in the latter case the file may really
+    have been added earlier, before the point history was cut off.
+    """
     result = run_command(
         [
             "git",
@@ -78,6 +103,8 @@ def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
     if not lines:
         return None
     sha, commit_date = lines[-1].split(" ", 1)
+    if sha in _shallow_boundary_commits(root):
+        return None
     return sha, commit_date
 
 
@@ -88,7 +115,10 @@ def _milestone_completion_commit(root: Path, milestone_id: str) -> tuple[str, st
     Using "now" (HEAD) as the diff endpoint would fold every later, unrelated
     commit into an already-finished milestone's report. Walking history to the
     actual completion commit keeps the report scoped to what that milestone
-    delivered.
+    delivered. If the earliest available commit already shows "completed" and
+    that commit is a shallow-clone boundary, the real completion commit may be
+    further back than local history reaches — treated as not found rather than
+    silently accepted.
     """
     result = run_command(
         ["git", "log", "--reverse", "--format=%H %ad", "--date=short", "--", "milestones.md"],
@@ -97,6 +127,7 @@ def _milestone_completion_commit(root: Path, milestone_id: str) -> tuple[str, st
     section_pattern = re.compile(
         rf"(?ms)^##\s+{re.escape(milestone_id)}\b.*?(?=^##\s|\Z)", re.IGNORECASE
     )
+    boundary_commits = _shallow_boundary_commits(root)
     for line in result.stdout.strip().splitlines():
         if not line:
             continue
@@ -104,6 +135,8 @@ def _milestone_completion_commit(root: Path, milestone_id: str) -> tuple[str, st
         content = run_command(["git", "show", f"{sha}:milestones.md"], cwd=root).stdout
         match = section_pattern.search(content)
         if match and "work_state: `completed`" in match.group(0):
+            if sha in boundary_commits:
+                return None
             return sha, commit_date
     return None
 
@@ -186,6 +219,12 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         all_tasks_done_text = "нет"
 
     completion = _milestone_completion_commit(root, milestone_id) if completed else None
+    if completed and (start is None or completion is None):
+        raise ValueError(
+            f"{milestone_id}: work_state завершено, но локальная история Git не содержит "
+            "коммит начала или завершения этапа (мелкий чекаут?). Нужен полный git fetch, "
+            "иначе отчёт будет молча неверным."
+        )
     if completed and start is not None and completion is not None:
         end_sha, end_date = completion
         added, modified = _git_file_changes(root, start[0], end_sha)
