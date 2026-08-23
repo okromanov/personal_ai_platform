@@ -62,7 +62,10 @@ def find_project_root(start: Path | None = None) -> Path:
 
 
 def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8-sig")
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"{path}: файл не в UTF-8 ({exc})") from exc
 
 
 def atomic_write(path: Path, content: str) -> bool:
@@ -170,7 +173,8 @@ def git_info(root: Path) -> dict[str, object]:
     commit = run_command(["git", "rev-parse", "HEAD"], cwd=root)
     status = run_command(["git", "status", "--short"], cwd=root)
     changes = [line for line in status.stdout.splitlines() if line.strip()]
-    full_sha = commit.stdout.strip() or "none"
+    full_sha = commit.stdout.strip() if commit.ok else ""
+    full_sha = full_sha or "none"
     return {
         "available": True,
         "branch": branch.stdout.strip() or "detached",

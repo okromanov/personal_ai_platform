@@ -24,6 +24,30 @@ class MarkdownDocument:
     title: str
 
 
+def _split_inline_list(inner: str) -> list[str]:
+    """Split `a, "b, c", d` on top-level commas without breaking quoted items."""
+    parts: list[str] = []
+    current: list[str] = []
+    quote_char: str | None = None
+    for char in inner:
+        if quote_char:
+            current.append(char)
+            if char == quote_char:
+                quote_char = None
+        elif char in "\"'":
+            quote_char = char
+            current.append(char)
+        elif char == ",":
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(char)
+    if quote_char is not None:
+        raise ValueError(f"Незакрытая кавычка в inline-списке: {inner}")
+    parts.append("".join(current))
+    return parts
+
+
 def _parse_scalar(value: str) -> Any:
     value = value.strip()
     if not value:
@@ -41,7 +65,7 @@ def _parse_scalar(value: str) -> Any:
         return None
     if value.startswith("[") and value.endswith("]"):
         inner = value[1:-1].strip()
-        return [] if not inner else [_parse_scalar(part) for part in inner.split(",")]
+        return [] if not inner else [_parse_scalar(part) for part in _split_inline_list(inner)]
     if re.fullmatch(r"-?\d+", value):
         return int(value)
     return value
@@ -57,6 +81,7 @@ def parse_front_matter(text: str) -> tuple[dict[str, Any], str]:
     raw = normalized[4:end]
     body = normalized[end + 5 :]
     metadata: dict[str, Any] = {}
+    seen_keys: set[str] = set()
     current_list_key: str | None = None
     for line_number, raw_line in enumerate(raw.splitlines(), start=2):
         if not raw_line.strip() or raw_line.lstrip().startswith("#"):
@@ -76,6 +101,9 @@ def parse_front_matter(text: str) -> tuple[dict[str, Any], str]:
         key = key.strip()
         if not re.fullmatch(r"[A-Za-z0-9_-]+", key):
             raise ValueError(f"Некорректный ключ front matter: {key}")
+        if key in seen_keys:
+            raise ValueError(f"Повторяющийся ключ front matter '{key}', строка {line_number}")
+        seen_keys.add(key)
         if value.strip() == "":
             metadata[key] = []
             current_list_key = key

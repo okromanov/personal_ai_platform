@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `188` |
+| Всего файлов | `190` |
 
 ```text
 personal_ai_platform/
@@ -147,8 +147,10 @@ personal_ai_platform/
 - operations/tests/tooling/test_file_procedure_matrix.py
 - operations/tests/tooling/test_full_traceability.py
 - operations/tests/tooling/test_links.py
+- operations/tests/tooling/test_metadata_parsing.py
 - operations/tests/tooling/test_milestone_lifecycle.py
 - operations/tests/tooling/test_milestone_start_and_task_semantics.py
+- operations/tests/tooling/test_project_common.py
 - operations/tests/tooling/test_quality_baseline.py
 - operations/tests/tooling/test_quality_registry.py
 - operations/tests/tooling/test_quality_runner.py
