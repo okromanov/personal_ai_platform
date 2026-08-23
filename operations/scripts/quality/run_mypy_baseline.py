@@ -26,6 +26,7 @@ def main() -> int:
         "mypy",
         "operations/scripts",
         "operations/tests",
+        "src",
         "--show-error-codes",
         "--no-error-summary",
     ]

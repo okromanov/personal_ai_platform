@@ -55,6 +55,7 @@ def changed_lines(root: Path, base: str) -> dict[str, set[int]]:
             f"{base}..HEAD",
             "--",
             "operations/scripts",
+            "src",
         ],
         cwd=root,
     )

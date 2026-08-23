@@ -5,15 +5,45 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+from operations.scripts.common.status_types import MilestoneItem, TaskItem
 from operations.scripts.documents.check import check_structure
 from operations.scripts.documents.metadata import load_document
 from operations.scripts.status.generate_project_status import (
+    AcceptanceResult,
+    CoverageResult,
+    ProgressSnapshot,
     build_owner_next_action,
     collect_milestones,
     render_progress_sections,
 )
 from operations.scripts.status.human_status import render_repository_project_status
 from operations.scripts.tasks.generate import collect_tasks, select_current_task
+
+
+def _task_item(
+    task_id: str, work_state: str, *, traces_to: list[str], owner_action: str
+) -> TaskItem:
+    return {
+        "id": task_id,
+        "title": task_id,
+        "work_state": work_state,
+        "version": "1.0",
+        "path": f"work/tasks/{task_id.lower()}.md",
+        "depends_on": [],
+        "traces_to": traces_to,
+        "implements": [],
+        "component": "",
+        "allowed_paths": [],
+        "blocker": "",
+        "tests": [],
+        "next_actor": "agent",
+        "owner_action": owner_action,
+        "checklist": [],
+        "steps_done": 0,
+        "steps_total": 0,
+        "steps_remaining": 0,
+        "body": "",
+    }
 
 
 class OwnerUsabilityTests(unittest.TestCase):
@@ -88,20 +118,12 @@ class OwnerUsabilityTests(unittest.TestCase):
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
-            {
-                "id": "TASK_0001",
-                "work_state": "planned",
-                "traces_to": ["m01"],
-                "owner_action": "none",
-            },
-            {
-                "id": "TASK_0002",
-                "work_state": "blocked",
-                "traces_to": ["m01"],
-                "owner_action": "none",
-            },
+            _task_item("TASK_0001", "planned", traces_to=["m01"], owner_action="none"),
+            _task_item("TASK_0002", "blocked", traces_to=["m01"], owner_action="none"),
         ]
-        self.assertEqual(select_current_task(tasks, "m01")["id"], "TASK_0001")
+        current = select_current_task(tasks, "m01")
+        assert current is not None
+        self.assertEqual(current["id"], "TASK_0001")
 
     def test_technical_status_has_one_russian_owner_action_and_real_foundation_count(self) -> None:
         action = build_owner_next_action(
@@ -109,38 +131,85 @@ class OwnerUsabilityTests(unittest.TestCase):
             resume_target="m01",
             requires_fresh_session=True,
         )
-        rendered = render_progress_sections(
-            {
-                "overall": "healthy",
-                "current": {"id": "m01", "title": "Основа", "work_state": "in-progress"},
-                "next_milestone": {"id": "m02", "title": "Следующий этап"},
-                "checks_passed": 16,
-                "checks_total": 16,
-                "unit": {"ok": True, "passed": 40, "total": 40, "failed": 0, "duration": 0.3},
-                "deviations": [],
-                "next_action": action,
-                "acceptance": {
-                    "remaining": [],
-                    "pending_gates": ["semantic_review"],
-                    "tasks_verified": 3,
-                    "tasks_total": 3,
-                    "tests_passed": 3,
-                    "tests_total": 3,
-                    "coverage": {
-                        "scope_covered": 0,
-                        "scope_total": 0,
-                        "tracked_kind": "foundation_paths",
-                        "tracked_covered": 7,
-                        "tracked_total": 7,
-                    },
-                    "impacted_profiles": ["foundation"],
-                    "quality": {"evidence": []},
-                    "state": "ready-for-semantic-review",
-                    "documents_current": 12,
-                    "decisions_proposed": 4,
-                },
-            }
-        )
+        current: MilestoneItem = {
+            "id": "m01",
+            "title": "Основа",
+            "work_state": "in-progress",
+            "scope": [],
+        }
+        next_milestone: MilestoneItem = {
+            "id": "m02",
+            "title": "Следующий этап",
+            "work_state": "planned",
+            "scope": [],
+        }
+        coverage: CoverageResult = {
+            "scope_total": 0,
+            "scope_covered": 0,
+            "scope": [],
+            "covered": [],
+            "tracked_kind": "foundation_paths",
+            "tracked_total": 7,
+            "tracked_covered": 7,
+            "tracked_targets": [f"path:foundation_{n}" for n in range(7)],
+            "blockers": [],
+            "modes": ["global_evidence"],
+        }
+        acceptance: AcceptanceResult = {
+            "state": "ready-for-semantic-review",
+            "technical_ready": True,
+            "accepted": False,
+            "pending_gates": ["semantic_review"],
+            "owner_action": "none",
+            "tasks_total": 3,
+            "tasks_verified": 3,
+            "tests_total": 3,
+            "tests_passed": 3,
+            "tests": [],
+            "quality": {"evidence": []},
+            "coverage": coverage,
+            "evidence_results": {},
+            "evidence_context": {},
+            "changed_paths": [],
+            "coverage_base": {"mode": "tracked_tree", "git_sha": None},
+            "uncovered_paths": [],
+            "impacted_profiles": ["foundation"],
+            "documents_total": 12,
+            "documents_current": 12,
+            "decisions_proposed": 4,
+            "remaining": [],
+            "blockers": [],
+        }
+        snapshot: ProgressSnapshot = {
+            "overall": "healthy",
+            "milestones": {
+                "count": 2,
+                "items": [current, next_milestone],
+                "current": current,
+                "states": {"in-progress": 1, "planned": 1},
+            },
+            "current": current,
+            "next_milestone": next_milestone,
+            "tasks": {"count": 0, "states": {}, "tasks": []},
+            "tests": {"count": 0, "items": [], "states": {}},
+            "checks_passed": 16,
+            "checks_total": 16,
+            "check_summary": {"ok": True, "checks": []},
+            "unit": {
+                "ok": True,
+                "total": 40,
+                "passed": 40,
+                "failed": 0,
+                "duration": 0.3,
+                "label": "40/40 PASS",
+                "problems": [],
+            },
+            "acceptance": acceptance,
+            "deviations": [],
+            "next_action": action,
+            "git": {"commit": "a" * 40},
+        }
+        rendered = render_progress_sections(snapshot)
 
         self.assertIn("| Области основы | `7/7` |", rendered)
         self.assertIn("Откройте новый сеанс агента", rendered)

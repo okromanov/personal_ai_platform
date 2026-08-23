@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import cast
 
 from operations.scripts.common.project import atomic_write
 from operations.scripts.quality.registry import (
@@ -10,33 +11,35 @@ from operations.scripts.quality.registry import (
     profiles_for_milestone,
     validate_server_source,
 )
-from operations.scripts.status.generate_project_status import build_progress_snapshot
+from operations.scripts.status.generate_project_status import (
+    ProgressSnapshot,
+    build_progress_snapshot,
+)
 
 
-def _evidence_targets(root: Path, snapshot: dict[str, object]) -> dict[str, list[str]]:
+def _evidence_targets(root: Path, snapshot: ProgressSnapshot) -> dict[str, list[str]]:
     acceptance = snapshot["acceptance"]
-    milestone_id = str(snapshot["current"]["id"])
-    coverage = acceptance.get("coverage", {})
-    milestone_scope = [str(value) for value in coverage.get("scope", [])]
-    tracked_targets = [str(value) for value in coverage.get("tracked_targets", [])]
+    milestone_id = snapshot["current"]["id"]
+    coverage = acceptance["coverage"]
+    milestone_scope = coverage["scope"]
+    tracked_targets = coverage["tracked_targets"]
     result: dict[str, list[str]] = {}
 
-    for test in acceptance.get("tests", []):
-        if not isinstance(test, dict):
-            continue
-        evidence_id = str(test.get("automated_evidence", ""))
+    for test in acceptance["tests"]:
+        evidence_id = test["automated_evidence"]
         if not evidence_id:
             continue
         targets = result.setdefault(evidence_id, [])
-        for value in test.get("verifies", []):
-            item = str(value)
-            if item and item not in targets:
-                targets.append(item)
-        for value in test.get("accepts", []):
-            item = f"milestone:{str(value).lower()}"
+        for value in test["verifies"]:
+            if value and value not in targets:
+                targets.append(value)
+        for value in test["accepts"]:
+            item = f"milestone:{value.lower()}"
             if item != "milestone:" and item not in targets:
                 targets.append(item)
 
+    # `profile` comes from profiles_for_milestone() in registry.py, which is not yet
+    # typed beyond dict[str, object].
     registry = load_quality_registry(root)
     for _, profile in profiles_for_milestone(registry, milestone_id):
         profile_targets = list(tracked_targets or milestone_scope)
@@ -67,47 +70,48 @@ def build_evidence_bundle(
         git=git,
     )
     acceptance = snapshot["acceptance"]
-    context = acceptance.get("evidence_context", {})
+    context = acceptance["evidence_context"]
     git_sha = str(context.get("git_sha", git.get("commit", "unknown")))
     provenance_errors = validate_server_source(server_source, expected_sha=git_sha)
     if provenance_errors:
         raise ValueError("Некорректный server_source: " + "; ".join(provenance_errors))
     targets_by_evidence = _evidence_targets(root, snapshot)
+    # `quality` comes from evaluate_milestone_quality() in registry.py, which is not
+    # yet typed beyond dict[str, object]; "evidence"/"profiles" are documented lists.
+    quality_evidence = cast(list[dict[str, object]], acceptance["quality"].get("evidence", []))
+    quality_profiles = cast(list[object], acceptance["quality"].get("profiles", []))
     evidence_rows = []
-    for raw in acceptance.get("quality", {}).get("evidence", []):
-        if not isinstance(raw, dict):
-            continue
+    for raw in quality_evidence:
         evidence_id = str(raw.get("id", ""))
         evidence_rows.append({**raw, "targets": targets_by_evidence.get(evidence_id, [])})
 
     return {
         "schema_version": 2,
-        "milestone": str(snapshot["current"]["id"]),
-        "acceptance_state": str(acceptance["state"]),
-        "blockers": list(acceptance.get("blockers", [])),
-        "pending_gates": list(acceptance.get("pending_gates", [])),
+        "milestone": snapshot["current"]["id"],
+        "acceptance_state": acceptance["state"],
+        "blockers": acceptance["blockers"],
+        "pending_gates": acceptance["pending_gates"],
         "git_sha": git_sha,
         "timestamp": str(context.get("timestamp", "unknown")),
         "environment": context.get("environment", {}),
         "server_source": server_source,
-        "quality_profiles": list(acceptance.get("quality", {}).get("profiles", [])),
-        "impacted_profiles": list(acceptance.get("impacted_profiles", [])),
-        "coverage_base": acceptance.get("coverage_base", {}),
-        "changed_paths": list(acceptance.get("changed_paths", [])),
-        "uncovered_paths": list(acceptance.get("uncovered_paths", [])),
-        "coverage": acceptance.get("coverage", {}),
+        "quality_profiles": list(quality_profiles),
+        "impacted_profiles": acceptance["impacted_profiles"],
+        "coverage_base": acceptance["coverage_base"],
+        "changed_paths": acceptance["changed_paths"],
+        "uncovered_paths": acceptance["uncovered_paths"],
+        "coverage": acceptance["coverage"],
         "evidence": evidence_rows,
         "tests": [
             {
-                "test_id": str(item.get("id", "")),
-                "result": str(item.get("effective_result", "missing")),
-                "verifies": list(item.get("verifies", [])),
-                "accepts": list(item.get("accepts", [])),
-                "traces_to": list(item.get("traces_to", [])),
-                "automated_evidence": str(item.get("automated_evidence", "")),
+                "test_id": item["id"],
+                "result": item["effective_result"],
+                "verifies": item["verifies"],
+                "accepts": item["accepts"],
+                "traces_to": item["traces_to"],
+                "automated_evidence": item["automated_evidence"],
             }
-            for item in acceptance.get("tests", [])
-            if isinstance(item, dict)
+            for item in acceptance["tests"]
         ],
     }
 

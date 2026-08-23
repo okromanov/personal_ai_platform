@@ -17,10 +17,63 @@ from operations.scripts.acceptance.apply import (
     validate_evidence_bundle,
     validate_semantic_review,
 )
+from operations.scripts.common.status_types import (
+    MilestoneItem,
+    MilestonesReport,
+    TasksReport,
+    TestSpecItem,
+    TestSpecsReport,
+    UnitSummary,
+)
 from operations.scripts.status.generate_project_status import (
     collect_milestones,
     evaluate_acceptance,
 )
+
+
+def _milestones_report(milestone_id: str, title: str, work_state: str) -> MilestonesReport:
+    item: MilestoneItem = {
+        "id": milestone_id,
+        "title": title,
+        "work_state": work_state,
+        "scope": [],
+    }
+    return {"count": 1, "items": [item], "current": item, "states": {work_state: 1}}
+
+
+def _empty_tasks() -> TasksReport:
+    return {"count": 0, "states": {}, "tasks": []}
+
+
+def _passing_test(test_id: str, milestone_id: str) -> TestSpecItem:
+    return {
+        "id": test_id,
+        "spec_state": "current",
+        "execution": "automated",
+        "automated_evidence": "project_checks",
+        "manual_evidence": "",
+        "traces_to": [],
+        "verifies": [],
+        "accepts": [milestone_id],
+        "title": test_id,
+        "path": f"work/tests/{test_id.lower()}.md",
+    }
+
+
+def _tests_report(*items: TestSpecItem) -> TestSpecsReport:
+    return {"count": len(items), "items": list(items), "states": {}}
+
+
+def _passing_unit_summary() -> UnitSummary:
+    return {
+        "ok": True,
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "duration": 0.1,
+        "label": "1/1 PASS",
+        "problems": [],
+    }
 
 
 def _server_source(sha: str = "a" * 40) -> dict[str, object]:
@@ -38,19 +91,8 @@ def _server_source(sha: str = "a" * 40) -> dict[str, object]:
 class AcceptanceTransitionTests(unittest.TestCase):
     def test_m01_reaches_semantic_review_without_repository_maintenance_tasks(self) -> None:
         root = Path(__file__).resolve().parents[2]
-        project_tasks = {"tasks": []}
-        passing_tests = {
-            "items": [
-                {
-                    "id": "TEST_0001",
-                    "execution": "automated",
-                    "automated_evidence": "project_checks",
-                    "traces_to": [],
-                    "verifies": [],
-                    "accepts": ["m01"],
-                }
-            ]
-        }
+        project_tasks = _empty_tasks()
+        passing_tests = _tests_report(_passing_test("TEST_0001", "m01"))
         passing_evidence = {
             evidence_id: {"result": "passed", "class": "hard", "source": "test"}
             for evidence_id in ["project_checks", "unit_tests", "quality_suite"]
@@ -76,21 +118,11 @@ class AcceptanceTransitionTests(unittest.TestCase):
         ):
             result = evaluate_acceptance(
                 root,
-                milestones={
-                    "items": [
-                        {"id": "m01", "title": "Основа", "work_state": "in-progress", "scope": []}
-                    ],
-                    "current": {
-                        "id": "m01",
-                        "title": "Основа",
-                        "work_state": "in-progress",
-                        "scope": [],
-                    },
-                },
+                milestones=_milestones_report("m01", "Основа", "in-progress"),
                 tasks=project_tasks,
                 tests=passing_tests,
                 check_summary={"ok": True, "checks": []},
-                unit_summary={"ok": True},
+                unit_summary=_passing_unit_summary(),
                 git={"commit": "a" * 40},
             )
 
@@ -138,19 +170,8 @@ class AcceptanceTransitionTests(unittest.TestCase):
         следующих этапах.
         """
         root = Path(__file__).resolve().parents[2]
-        project_tasks = {"tasks": []}
-        passing_tests = {
-            "items": [
-                {
-                    "id": "TEST_9001",
-                    "execution": "automated",
-                    "automated_evidence": "project_checks",
-                    "traces_to": [],
-                    "verifies": [],
-                    "accepts": ["m02"],
-                }
-            ]
-        }
+        project_tasks = _empty_tasks()
+        passing_tests = _tests_report(_passing_test("TEST_9001", "m02"))
         passing_evidence = {
             evidence_id: {"result": "passed", "class": "hard", "source": "test"}
             for evidence_id in ["project_checks", "unit_tests"]
@@ -200,26 +221,11 @@ class AcceptanceTransitionTests(unittest.TestCase):
         ):
             result = evaluate_acceptance(
                 root,
-                milestones={
-                    "items": [
-                        {
-                            "id": "m02",
-                            "title": "Второй этап",
-                            "work_state": "in-progress",
-                            "scope": [],
-                        }
-                    ],
-                    "current": {
-                        "id": "m02",
-                        "title": "Второй этап",
-                        "work_state": "in-progress",
-                        "scope": [],
-                    },
-                },
+                milestones=_milestones_report("m02", "Второй этап", "in-progress"),
                 tasks=project_tasks,
                 tests=passing_tests,
                 check_summary={"ok": True, "checks": []},
-                unit_summary={"ok": True},
+                unit_summary=_passing_unit_summary(),
                 git={"commit": "a" * 40},
             )
 

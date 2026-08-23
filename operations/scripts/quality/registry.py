@@ -3,6 +3,7 @@ from __future__ import annotations
 import fnmatch
 import json
 import re
+from collections.abc import Mapping
 from pathlib import Path
 
 REGISTRY_PATH = "operations/quality_registry.json"
@@ -274,9 +275,9 @@ def evidence_results(
     registry: dict[str, object],
     *,
     root: Path | None = None,
-    check_summary: dict[str, object],
-    unit_summary: dict[str, object],
-    context: dict[str, object] | None = None,
+    check_summary: Mapping[str, object],
+    unit_summary: Mapping[str, object],
+    context: Mapping[str, object] | None = None,
 ) -> dict[str, dict[str, object]]:
     checks = {
         str(item.get("name")): bool(item.get("ok"))
@@ -358,9 +359,9 @@ def evaluate_milestone_quality(
     root: Path,
     milestone_id: str,
     *,
-    check_summary: dict[str, object],
-    unit_summary: dict[str, object],
-    context: dict[str, object] | None = None,
+    check_summary: Mapping[str, object],
+    unit_summary: Mapping[str, object],
+    context: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     registry = load_quality_registry(root)
     results = evidence_results(

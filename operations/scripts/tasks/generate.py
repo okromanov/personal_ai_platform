@@ -5,6 +5,7 @@ from collections import Counter
 from pathlib import Path
 
 from operations.scripts.common.project import atomic_write, relative_posix
+from operations.scripts.common.status_types import ChecklistItem, TaskItem, TasksReport, TestRef
 from operations.scripts.documents.metadata import (
     load_document,
     metadata_list,
@@ -39,8 +40,8 @@ def _section(body: str, title: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _test_map(root: Path) -> dict[str, list[dict[str, str]]]:
-    result: dict[str, list[dict[str, str]]] = {}
+def _test_map(root: Path) -> dict[str, list[TestRef]]:
+    result: dict[str, list[TestRef]] = {}
     for path in sorted((root / "work/tests").glob("test_*.md")):
         doc = load_document(path)
         test_id = str(doc.metadata.get("id", "")).strip()
@@ -55,14 +56,14 @@ def _test_map(root: Path) -> dict[str, list[dict[str, str]]]:
     return result
 
 
-def checklist_items(body: str) -> list[dict[str, object]]:
+def checklist_items(body: str) -> list[ChecklistItem]:
     plan = _section(body, "План выполнения")
     return [
         {"done": mark.lower() == "x", "text": text.strip()} for mark, text in CHECKBOX.findall(plan)
     ]
 
 
-def _validate_task_sequence(items: list[dict[str, object]]) -> None:
+def _validate_task_sequence(items: list[TaskItem]) -> None:
     actual_ids = [str(item["id"]) for item in items]
     expected_ids = [f"TASK_{number:04d}" for number in range(1, len(items) + 1)]
     if actual_ids != expected_ids:
@@ -107,9 +108,9 @@ def _validate_task_sequence(items: list[dict[str, object]]) -> None:
             raise ValueError(f"{task_id}: активная TASK не может находиться после запланированной")
 
 
-def collect_tasks(root: Path) -> dict[str, object]:
+def collect_tasks(root: Path) -> TasksReport:
     tests = _test_map(root)
-    items: list[dict[str, object]] = []
+    items: list[TaskItem] = []
     task_paths: dict[str, str] = {}
     for path in sorted((root / "work/tasks").glob("task_*.md")):
         doc = load_document(path)
@@ -175,9 +176,7 @@ def collect_tasks(root: Path) -> dict[str, object]:
     }
 
 
-def select_current_task(
-    items: list[dict[str, object]], milestone_id: str | None = None
-) -> dict[str, object] | None:
+def select_current_task(items: list[TaskItem], milestone_id: str | None = None) -> TaskItem | None:
     candidates = [
         item
         for item in items

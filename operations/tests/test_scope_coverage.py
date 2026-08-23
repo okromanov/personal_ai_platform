@@ -5,8 +5,59 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from operations.scripts.common.status_types import MilestoneItem, TaskItem
 from operations.scripts.quality.registry import uncovered_paths
-from operations.scripts.status.generate_project_status import _change_scope, _coverage
+from operations.scripts.status.generate_project_status import (
+    EffectiveTestItem,
+    _change_scope,
+    _coverage,
+)
+
+
+def _milestone(scope: list[str]) -> MilestoneItem:
+    return {"id": "m01", "title": "Основа", "work_state": "in-progress", "scope": scope}
+
+
+def _task(task_id: str, implements: list[str]) -> TaskItem:
+    return {
+        "id": task_id,
+        "title": task_id,
+        "work_state": "in-progress",
+        "version": "1.0",
+        "path": f"work/tasks/{task_id.lower()}.md",
+        "depends_on": [],
+        "traces_to": [],
+        "implements": implements,
+        "component": "",
+        "allowed_paths": [],
+        "blocker": "",
+        "tests": [],
+        "next_actor": "agent",
+        "owner_action": "none",
+        "checklist": [],
+        "steps_done": 0,
+        "steps_total": 0,
+        "steps_remaining": 0,
+        "body": "",
+    }
+
+
+def _effective_test(
+    test_id: str, *, effective_result: str, traces_to: list[str], verifies: list[str]
+) -> EffectiveTestItem:
+    return {
+        "id": test_id,
+        "spec_state": "current",
+        "execution": "automated",
+        "automated_evidence": "project_checks",
+        "manual_evidence": "",
+        "traces_to": traces_to,
+        "verifies": verifies,
+        "accepts": [],
+        "title": test_id,
+        "path": f"work/tests/{test_id.lower()}.md",
+        "effective_result": effective_result,
+    }
 
 
 class ScopeCoverageTests(unittest.TestCase):
@@ -38,8 +89,10 @@ class ScopeCoverageTests(unittest.TestCase):
             self.assertEqual(gaps, ["rogue.py"])
 
     def test_task_test_mode_blocks_uncovered_scope_and_task_implements(self) -> None:
-        current = {"scope": ["SYS_001"]}
-        profiles = [("feature", {"scope_coverage": "task_test"})]
+        current = _milestone(["SYS_001"])
+        profiles: list[tuple[str, dict[str, object]]] = [
+            ("feature", {"scope_coverage": "task_test"})
+        ]
         missing = _coverage(
             current=current,
             current_tasks=[],
@@ -50,14 +103,14 @@ class ScopeCoverageTests(unittest.TestCase):
         self.assertEqual(missing["scope_covered"], 0)
         self.assertTrue(any("SYS_001" in item for item in missing["blockers"]))
 
-        tasks = [{"id": "TASK_0001", "implements": ["SYS_001"]}]
+        tasks = [_task("TASK_0001", ["SYS_001"])]
         tests = [
-            {
-                "id": "TEST_0001",
-                "effective_result": "passed",
-                "traces_to": ["TASK_0001"],
-                "verifies": ["SYS_001"],
-            }
+            _effective_test(
+                "TEST_0001",
+                effective_result="passed",
+                traces_to=["TASK_0001"],
+                verifies=["SYS_001"],
+            )
         ]
         covered = _coverage(
             current=current,
@@ -70,8 +123,8 @@ class ScopeCoverageTests(unittest.TestCase):
         self.assertEqual(covered["blockers"], [])
 
     def test_global_evidence_covers_scope_only_when_passed(self) -> None:
-        current = {"scope": ["SYS_001", "SYS_002"]}
-        profiles = [
+        current = _milestone(["SYS_001", "SYS_002"])
+        profiles: list[tuple[str, dict[str, object]]] = [
             (
                 "foundation",
                 {"scope_coverage": "global_evidence", "scope_evidence": ["project_checks"]},
@@ -98,7 +151,7 @@ class ScopeCoverageTests(unittest.TestCase):
         self.assertEqual(passed["blockers"], [])
 
     def test_foundation_paths_replace_empty_product_scope_in_status_counts(self) -> None:
-        profiles = [
+        profiles: list[tuple[str, dict[str, object]]] = [
             (
                 "foundation",
                 {
@@ -109,7 +162,7 @@ class ScopeCoverageTests(unittest.TestCase):
             )
         ]
         result = _coverage(
-            current={"scope": []},
+            current=_milestone([]),
             current_tasks=[],
             effective_tests=[],
             profiles=profiles,

@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from operations.scripts.common.project import atomic_write
+from operations.scripts.common.status_types import TaskItem
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -28,23 +29,21 @@ def _actor_action(body: str, actor: str) -> str:
     return section
 
 
-def _linked_tasks(tasks: list[dict[str, object]], milestone_id: str) -> list[dict[str, object]]:
+def _linked_tasks(tasks: list[TaskItem], milestone_id: str) -> list[TaskItem]:
     return [
-        item
-        for item in tasks
-        if milestone_id.lower() in {str(value).lower() for value in item.get("traces_to", [])}
+        item for item in tasks if milestone_id.lower() in {v.lower() for v in item["traces_to"]}
     ]
 
 
-def _task_context(tasks: list[dict[str, object]], milestone_id: str) -> dict[str, object] | None:
+def _task_context(tasks: list[TaskItem], milestone_id: str) -> TaskItem | None:
     current = select_current_task(tasks, milestone_id)
     if current:
         return current
     linked = _linked_tasks(tasks, milestone_id)
-    owner_decisions = [item for item in linked if str(item.get("owner_action", "none")) != "none"]
+    owner_decisions = [item for item in linked if item["owner_action"] != "none"]
     if owner_decisions:
-        return sorted(owner_decisions, key=lambda item: str(item["id"]))[-1]
-    return sorted(linked, key=lambda item: str(item["id"]))[-1] if linked else None
+        return sorted(owner_decisions, key=lambda item: item["id"])[-1]
+    return sorted(linked, key=lambda item: item["id"])[-1] if linked else None
 
 
 def _checkbox(done: bool) -> str:
@@ -190,6 +189,7 @@ def render_repository_project_status(root: Path) -> str:
         and str(current_task["owner_action"]) != "none"
     )
     if owner_is_next:
+        assert current_task is not None
         next_action = build_owner_next_action(
             current_id,
             resume_target=current_id,
