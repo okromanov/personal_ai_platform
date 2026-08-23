@@ -112,7 +112,6 @@ class ChangeScopeTests(unittest.TestCase):
                         "operations/tool.py",
                         "work/tasks/old.md",
                         "pyproject.toml",
-                        "work/procedures/file_procedure_traceability_matrix.md",
                     ],
                 ),
                 [],

@@ -1,105 +1,157 @@
 from __future__ import annotations
 
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
 from operations.scripts.milestones.init_milestone import init_milestone
 from operations.scripts.milestones.update_completion_report import (
+    render_final_report,
     update_completion_report,
 )
 
 
+def _write_milestone_section(root: Path, milestone_id: str, work_state: str) -> None:
+    (root / "milestones.md").write_text(
+        f"## {milestone_id} — Тестовый этап\n\n- work_state: `{work_state}`\n",
+        encoding="utf-8",
+    )
+
+
 class InitMilestoneTests(unittest.TestCase):
-    def test_creates_all_three_milestone_files(self) -> None:
+    """render_final_report() needs milestones.md to already list the
+    milestone (as start.py --apply would have set it before init_milestone.py
+    runs), so every test here writes that section first."""
+
+    def test_creates_only_final_report(self) -> None:
+        """owner_checklist.md and semantic_review.md are deliberately not
+        auto-generated: a per-milestone stub that only restates
+        operations/acceptance.md and operations/semantic_review.md never
+        accumulates content worth keeping (see init_milestone.py docstring)."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            _write_milestone_section(root, "m09", "in-progress")
             self.assertTrue(init_milestone("m09", root=root))
 
             milestone_dir = root / "work" / "m09"
-            self.assertTrue((milestone_dir / "owner_checklist.md").exists())
-            self.assertTrue((milestone_dir / "semantic_review.md").exists())
             self.assertTrue((milestone_dir / "final_report.md").exists())
+            self.assertFalse((milestone_dir / "owner_checklist.md").exists())
+            self.assertFalse((milestone_dir / "semantic_review.md").exists())
 
-    def test_checklist_frontmatter_references_milestone(self) -> None:
+    def test_final_report_frontmatter_references_milestone(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            _write_milestone_section(root, "m03", "in-progress")
             init_milestone("m03", root=root)
 
-            checklist = (root / "work" / "m03" / "owner_checklist.md").read_text(encoding="utf-8")
-            self.assertIn("id: m03_owner_checklist", checklist)
-            self.assertIn("milestone: m03", checklist)
-            self.assertIn("acceptance_state: pending", checklist)
+            report = (root / "work" / "m03" / "final_report.md").read_text(encoding="utf-8")
+            self.assertIn("id: m03_final_report", report)
+            self.assertIn("milestone: m03", report)
 
     def test_final_report_starts_pending(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            _write_milestone_section(root, "m04", "in-progress")
             init_milestone("m04", root=root)
 
             report = (root / "work" / "m04" / "final_report.md").read_text(encoding="utf-8")
             self.assertIn("completion_state: pending", report)
-            self.assertIn("Все задачи завершены: нет", report)
+            self.assertIn("не применимо (TASK для этапа не создаются)", report)
 
     def test_does_not_overwrite_existing_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            _write_milestone_section(root, "m05", "in-progress")
             init_milestone("m05", root=root)
-            checklist_path = root / "work" / "m05" / "owner_checklist.md"
-            checklist_path.write_text("custom content", encoding="utf-8")
+            report_path = root / "work" / "m05" / "final_report.md"
+            report_path.write_text("custom content", encoding="utf-8")
 
             init_milestone("m05", root=root)
 
-            self.assertEqual(checklist_path.read_text(encoding="utf-8"), "custom content")
+            self.assertEqual(report_path.read_text(encoding="utf-8"), "custom content")
+
+    def test_fails_when_milestone_missing_from_milestones_md(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "milestones.md").write_text(
+                "## m01 — Другой этап\n\n- work_state: `completed`\n", encoding="utf-8"
+            )
+            self.assertFalse(init_milestone("m20", root=root))
+            self.assertFalse((root / "work" / "m20" / "final_report.md").exists())
+
+
+def _run_git(root: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=root, check=True, capture_output=True, text=True)
+
+
+def _init_repo(root: Path) -> None:
+    _run_git(root, "init", "-q")
+    _run_git(root, "config", "user.email", "test@example.com")
+    _run_git(root, "config", "user.name", "Test")
 
 
 class UpdateCompletionReportTests(unittest.TestCase):
-    def _write_pending_report(self, root: Path, milestone_id: str) -> Path:
-        report_dir = root / "work" / milestone_id
-        report_dir.mkdir(parents=True)
-        report_path = report_dir / "final_report.md"
-        report_path.write_text(
-            "---\n"
-            f"id: {milestone_id}_final_report\n"
-            "completion_state: pending\n"
-            "version: 1.0\n"
-            "updated: 2026-01-01\n"
-            "---\n\n"
-            "## 1. Состояние завершения\n\n"
-            "- Статус: в процессе\n"
-            "- Дата начала: 2026-01-01\n"
-            "- Дата завершения: —\n"
-            "- Все задачи завершены: нет\n",
-            encoding="utf-8",
-        )
-        return report_path
+    """render_final_report() reads real git history, so these tests build a
+    small real repository rather than mocking every collect_* call."""
 
-    def test_marks_report_completed(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            report_path = self._write_pending_report(root, "m06")
-
-            self.assertTrue(update_completion_report("m06", root=root))
-
-            content = report_path.read_text(encoding="utf-8")
-            self.assertIn("completion_state: completed", content)
-            self.assertIn("- Статус: завершено", content)
-            self.assertIn("- Все задачи завершены: да", content)
-            self.assertNotIn("Дата завершения: —", content)
+    def _make_repo(self, milestone_id: str) -> Path:
+        tmp = tempfile.mkdtemp()
+        root = Path(tmp)
+        self.addCleanup(lambda: shutil.rmtree(root, ignore_errors=True))
+        _init_repo(root)
+        _write_milestone_section(root, milestone_id, "in-progress")
+        init_milestone(milestone_id, root=root)
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "start milestone")
+        return root
 
     def test_returns_false_when_report_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.assertFalse(update_completion_report("m07", root=root))
 
-    def test_updates_metadata_date(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            report_path = self._write_pending_report(root, "m08")
+    def test_render_pending_milestone_stays_in_progress(self) -> None:
+        root = self._make_repo("m06")
 
-            update_completion_report("m08", root=root)
+        rendered = render_final_report(root, "m06")
 
-            content = report_path.read_text(encoding="utf-8")
-            self.assertNotIn("updated: 2026-01-01", content)
+        self.assertIn("completion_state: pending", rendered)
+        self.assertIn("- Статус: в процессе", rendered)
+        self.assertIn("не применимо (TASK для этапа не создаются)", rendered)
+
+    def test_marks_report_completed_at_the_completion_commit(self) -> None:
+        root = self._make_repo("m06")
+        (root / "extra_during_progress.txt").write_text("noise", encoding="utf-8")
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "unrelated progress commit")
+
+        _write_milestone_section(root, "m06", "completed")
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "complete milestone")
+
+        self.assertTrue(update_completion_report("m06", root=root))
+
+        content = (root / "work" / "m06" / "final_report.md").read_text(encoding="utf-8")
+        self.assertIn("completion_state: completed", content)
+        self.assertIn("- Статус: завершено", content)
+        self.assertNotIn("Дата завершения: —", content)
+        # The completion commit's own diff must be scoped to the completion
+        # commit itself, not to whatever came after it in later history.
+        self.assertIn("milestones.md", content)
+
+    def test_returns_false_when_milestone_unknown(self) -> None:
+        """final_report.md exists on disk but milestones.md has no matching
+        section: render_final_report() raises, and update_completion_report()
+        must report failure rather than write a broken file."""
+        root = self._make_repo("m06")
+        report_path = root / "work" / "m10" / "final_report.md"
+        report_path.parent.mkdir(parents=True)
+        report_path.write_text("placeholder", encoding="utf-8")
+
+        self.assertFalse(update_completion_report("m10", root=root))
+        self.assertEqual(report_path.read_text(encoding="utf-8"), "placeholder")
 
 
 if __name__ == "__main__":

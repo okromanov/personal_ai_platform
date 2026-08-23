@@ -3,24 +3,38 @@
 Initialize milestone folder and files on transition.
 
 When milestone state changes (planned → in-progress), creates:
-- work/m0X/milestone_spec.md (from architecture spec)
-- work/m0X/owner_checklist.md (acceptance checklist template)
-- work/m0X/semantic_review.md (review procedure template)
-- work/m0X/final_report.md (completion report template)
+- work/m0X/final_report.md, rendered by render_final_report() (the same
+  function operations/scripts/milestones/update_completion_report.py uses to
+  regenerate it after acceptance) so the initial and final report are always
+  the same format, never two hand-kept templates drifting apart.
+
+owner_checklist.md and semantic_review.md are deliberately not generated:
+the acceptance checklist and the semantic-review procedure are already
+fully specified in operations/acceptance.md and operations/semantic_review.md
+respectively, and a per-milestone stub that just restates them (as m01's
+owner_checklist.md and m02's semantic_review.md did, before they were
+removed) never accumulates milestone-specific content worth keeping. A
+milestone that genuinely needs a written record beyond the canonical
+procedure (as m01/semantic_review.md does, once a real review happened)
+gets one created deliberately, not auto-generated as an empty shell.
 
 Usage: python3 operations/scripts/milestones/init_milestone.py m02
 """
 
 import sys
-from datetime import date
 from pathlib import Path
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from operations.scripts.milestones.update_completion_report import render_final_report
 
 
 def _write_if_absent(path: Path, content: str) -> None:
     """Write content only if the file does not already exist.
 
     Milestone init must stay idempotent: re-running it must never overwrite
-    an owner checklist, review, or final report that already carries decisions.
+    a final report that already carries decisions.
     """
     if not path.exists():
         path.write_text(content, encoding="utf-8")
@@ -35,160 +49,10 @@ def init_milestone(milestone_id: str, root: Path | None = None) -> bool:
         milestone_dir = root / "work" / milestone_id
         milestone_dir.mkdir(parents=True, exist_ok=True)
 
-        today = date.today().isoformat()
-
-        # 1. owner_checklist.md
-        checklist_content = f"""---
-id: {milestone_id}_owner_checklist
-type: owner_acceptance_checklist
-acceptance_state: pending
-version: 1.0
-updated: {today}
-milestone: {milestone_id}
----
-
-# {milestone_id.upper()} — Чек-лист принятия этапа
-
-> Этот чек-лист владелец заполняет при завершении этапа перед финальным решением.
-
-## Техническая готовность
-
-- [ ] Все TASK этапа помечены `completed`
-- [ ] Все TEST имеют `execution: automated` и доказательства
-- [ ] CI проходит на основной ветке
-- [ ] Никаких блокирующих ошибок валидации
-
-## Функциональная готовность
-
-- [ ] Все компоненты этапа реализованы и протестированы
-- [ ] Интеграция между компонентами проверена
-- [ ] Нет известных багов в критических путях
-
-## Документирование
-
-- [ ] Все файлы обновлены с текущей датой
-- [ ] Версии файлов согласованы
-- [ ] Финальный отчет подготовлен
-- [ ] Процедура семантической проверки завершена
-
-## Решение владельца
-
-После проверки этого чек-листа владелец выбирает:
-
-- [ ] **ПРИНИМАЮ {milestone_id.upper()}** — этап одобрен, переход к следующему
-- [ ] **ВОЗВРАЩАЮ {milestone_id.upper()}: <причина>** — требуются исправления
-
-**Решение принято**:
-
-**Дата и время**:
-
-**Подпись/инициалы**:
-"""
-
-        _write_if_absent(milestone_dir / "owner_checklist.md", checklist_content)
-
-        # 2. semantic_review.md
-        semantic_review_content = f"""---
-id: {milestone_id}_semantic_review
-type: semantic_review
-review_state: pending
-version: 1.0
-created: {today}
-updated: {today}
-milestone: {milestone_id}
-reviewed_sha: null
-reviewer: null
-depends_on: []
----
-
-# {milestone_id.upper()} — Процедура смысловой проверки
-
-## 1. Назначение
-
-Проверка полноты и корректности реализации этапа {milestone_id.upper()} согласно архитектурным требованиям.
-
-## 2. Предусловия
-
-1. Все обязательные GitHub Actions успешны
-2. Все TASK completed с доказательствами
-3. Проверка выполняется новым сеансом без истории разработки
-
-## 3. Область проверки
-
-Проверяющий охватывает:
-- Все компоненты этапа: реализация, тесты, интеграция
-- Архитектурные требования (SYS, ARC, INF)
-- Трассировка: TASK → TEST → компоненты
-- Полноту доказательств
-
-## 4. Результат
-
-Отчет сохраняется как `work/{milestone_id}/semantic_review.json` и проверяется CI.
-
-Проверка со старым SHA, иным набором полей или с неразрешённым critical/high не открывает переход.
-
-## 5. Следующее действие
-
-После успешной проверки владелец выбирает: `ПРИНИМАЮ {milestone_id.upper()}` или `ВОЗВРАЩАЮ {milestone_id.upper()}: <причина>`.
-"""
-
-        _write_if_absent(milestone_dir / "semantic_review.md", semantic_review_content)
-
-        # 3. final_report.md
-        final_report_content = f"""---
-id: {milestone_id}_final_report
-type: milestone_completion_report
-completion_state: pending
-version: 1.0
-created: {today}
-updated: {today}
-milestone: {milestone_id}
-next_milestone: m03
----
-
-# {milestone_id.upper()} — Итоговый отчет
-
-## 1. Состояние завершения
-
-- Статус: в процессе
-- Дата начала: {today}
-- Дата завершения: —
-- Все задачи завершены: нет
-
-## 2. Выполненные компоненты
-
-| Компонент | Статус | TASK | TEST | Доказательства |
-|---|---|---|---|---|
-| (заполняется при завершении) | — | — | — | — |
-
-## 3. Результаты тестирования
-
-- Модульные тесты: ожидание
-- Интеграционные тесты: ожидание
-- Покрытие кода: ожидание
-
-## 4. Изменения в архитектуре
-
-(Краткое описание архитектурных решений и изменений на этапе)
-
-## 5. Известные ограничения
-
-(Список известных ограничений, отложенных задач и т.д.)
-
-## 6. Переход к следующему этапу
-
-Условия для перехода к m03:
-- ✅ Все компоненты реализованы
-- ✅ Все тесты проходят
-- ✅ Семантическая проверка успешна
-- ✅ Владелец принял этап
-
-## 7. Рекомендации
-
-(Рекомендации для следующего этапа разработки)
-"""
-
-        _write_if_absent(milestone_dir / "final_report.md", final_report_content)
+        # The initial (pending) final_report.md is rendered by the same
+        # function that regenerates it after acceptance, so the two never
+        # drift into two different report formats.
+        _write_if_absent(milestone_dir / "final_report.md", render_final_report(root, milestone_id))
 
         return True
     except Exception as e:

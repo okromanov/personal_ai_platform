@@ -2,7 +2,7 @@
 
 **ID:** python_lint_check  
 **Type:** Periodic Quality Check  
-**Frequency:** Every push, every pull request, weekly, or on-demand  
+**Frequency:** Every push, every pull request, or on-demand  
 **Framework:** LLM-agnostic (Claude, other LLMs, or CLI automation)
 
 ## Purpose
@@ -64,7 +64,7 @@ Generate report with:
 
 ## When to Run
 
-- **Automatic:** Weekly via scheduled trigger
+- **Automatic:** Every push and pull request, via `run_suite.py`
 - **Manual:** After substantial code changes
 - **On-demand:** Before production deployment
 - **In PR:** As pre-merge validation (if CI integrated)

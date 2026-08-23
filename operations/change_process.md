@@ -2,7 +2,7 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.4
+version: 1.5
 updated: 2026-08-23
 depends_on:
   - project_rules
@@ -296,7 +296,7 @@ acceptance_profiles:
 Пример:
 ```yaml
 ---
-id: m01_owner_checklist
+id: m02_owner_checklist
 type: checklist
 document_state: current
 version: 1.0

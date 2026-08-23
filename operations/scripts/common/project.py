@@ -76,12 +76,18 @@ def atomic_write(path: Path, content: str) -> bool:
     if old == normalized:
         return False
     path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        "w", encoding="utf-8", newline="\n", delete=False, dir=path.parent
-    ) as handle:
-        handle.write(normalized)
-        temp_name = handle.name
-    os.replace(temp_name, path)
+    temp_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w", encoding="utf-8", newline="\n", delete=False, dir=path.parent
+        ) as handle:
+            temp_name = handle.name
+            handle.write(normalized)
+        os.replace(temp_name, path)
+    except BaseException:
+        if temp_name is not None and os.path.exists(temp_name):
+            os.unlink(temp_name)
+        raise
     return True
 
 
