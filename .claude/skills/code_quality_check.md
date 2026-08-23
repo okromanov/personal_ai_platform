@@ -25,24 +25,33 @@ Verifies:
 
 ## Execution Steps
 
-1. **Search for stub markers:**
+**UPDATED (v3.4):** Uses AST analysis instead of regex for accuracy.
+
+1. **Run advanced code analyzer (AST-based):**
    ```bash
-   # TODO/FIXME/XXX/HACK comments (outside templates)
-   grep -r "TODO\|FIXME\|XXX\|HACK" --include="*.py" operations/scripts/ --exclude-dir=templates
+   python3.12 operations/scripts/quality/code_analyzer.py > runtime/code_analysis.json
+   ```
    
-   # Explicit stub indicators
-   grep -r "pass$\|return None\|raise NotImplementedError" --include="*.py" operations/scripts/
-   ```
+   This detects:
+   - Functions with only `pass` (true stubs, not legitimate exception handlers)
+   - `raise NotImplementedError` in production code
+   - TODOs/FIXMEs in function docstrings (not in file paths or URLs)
+   - Unused imports and variables (excludes `_` prefixed names)
+   - Cyclomatic complexity per function
 
-2. **Search for hardcoded placeholders:**
+2. **Search for hardcoded values (regex-based, human review):**
    ```bash
-   grep -r "test_\|temp_\|demo_\|stub\|placeholder\|mock" --include="*.py" operations/scripts/ | grep -v "# " | grep -v "unittest\|pytest"
+   grep -r "test_data\|temp_file\|demo_config\|stub_" --include="*.py" operations/scripts/ | grep -v "# " | grep -v mock
    ```
+   
+   **Note:** This is a suggestion list requiring manual verification to avoid false positives.
 
-3. **Check for mutable default arguments (risky pattern):**
+3. **Security-focused checks (Bandit):**
    ```bash
-   grep -r "def.*=\[.*\]\|def.*={.*}" --include="*.py" operations/scripts/
+   python3.12 -m bandit -r operations/scripts --severity-level medium
    ```
+   
+   Detects hardcoded secrets, SQL injection patterns, insecure deserialization.
 
 4. **Verify critical paths:**
    - `operations/scripts/acceptance/apply.py` - Must have complete state machine
