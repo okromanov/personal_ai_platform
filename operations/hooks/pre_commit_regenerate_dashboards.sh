@@ -8,6 +8,25 @@
 
 set -uo pipefail
 
+# Increment file versions for modified .md files first. Dashboards below embed
+# each document's version number, so they must be regenerated *after* this
+# step — otherwise they'd snapshot the pre-bump version and immediately drift
+# from what generate.py would produce on the very next run. Deleted files have
+# nothing to version-bump or re-add, so exclude them (git diff --cached lists
+# them too).
+if command -v python3 >/dev/null 2>&1; then
+    modified_md=()
+    while IFS= read -r path; do
+        [ -f "$path" ] && modified_md+=("$path")
+    done < <(git diff --cached --name-only -- '*.md' 2>/dev/null)
+    if [ "${#modified_md[@]}" -gt 0 ]; then
+        if ! python3 operations/scripts/versioning/increment_file_version.py "${modified_md[@]}"; then
+            echo "⚠️  increment_file_version.py failed (see output above) — versions may not be bumped" >&2
+        fi
+        git add "${modified_md[@]}"
+    fi
+fi
+
 # Check if any task or test files were staged
 if git diff --cached --name-only 2>/dev/null | grep -qE "^work/(tasks|tests|m[0-9]+)/"; then
     echo "📊 Detected changes in task/test files, regenerating dashboards..."
@@ -27,21 +46,6 @@ if git diff --cached --name-only 2>/dev/null | grep -qE "^work/(tasks|tests|m[0-
             echo "⚡ Dashboard changes detected, adding to commit..."
             git add project_status.md tasks.md generated/
         fi
-    fi
-fi
-
-# Increment file versions for modified .md files. Deleted files have nothing
-# to version-bump or re-add, so exclude them (git diff --cached lists them too).
-if command -v python3 >/dev/null 2>&1; then
-    modified_md=()
-    while IFS= read -r path; do
-        [ -f "$path" ] && modified_md+=("$path")
-    done < <(git diff --cached --name-only -- '*.md' 2>/dev/null)
-    if [ "${#modified_md[@]}" -gt 0 ]; then
-        if ! python3 operations/scripts/versioning/increment_file_version.py "${modified_md[@]}"; then
-            echo "⚠️  increment_file_version.py failed (see output above) — versions may not be bumped" >&2
-        fi
-        git add "${modified_md[@]}"
     fi
 fi
 
