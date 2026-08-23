@@ -47,6 +47,12 @@ class CrashDuringWriteTest(unittest.TestCase):
                 return self
 
             def __exit__(self, *_exc: object) -> None:
+                # A real NamedTemporaryFile's own __exit__ always closes the
+                # underlying OS handle even when the body raised - without
+                # this, atomic_write's later os.unlink() would fail with
+                # PermissionError on Windows, where a file cannot be deleted
+                # while still open.
+                self._real.__exit__(*_exc)  # type: ignore[attr-defined]
                 return None
 
             @property

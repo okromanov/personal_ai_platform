@@ -46,6 +46,10 @@ jobs:
         shell: pwsh
         run: py --version
 
+      - name: Install pinned development tools
+        shell: pwsh
+        run: py -m pip install --disable-pip-version-check -r operations/quality/requirements_dev.txt
+
       - name: Reject a direct update of main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
