@@ -15,7 +15,7 @@ from pathlib import Path
 
 def increment_version(version_str: str) -> str:
     """Increment semantic version: 1.0 → 1.1, 1.9 → 2.0"""
-    match = re.match(r'(\d+)\.(\d+)', version_str)
+    match = re.match(r"(\d+)\.(\d+)", version_str)
     if not match:
         return version_str
 
@@ -26,18 +26,19 @@ def increment_version(version_str: str) -> str:
     else:
         return f"{major + 1}.0"
 
+
 def update_file_version(file_path: str) -> bool:
     """Update version in YAML frontmatter."""
     try:
         path = Path(file_path)
 
-        if not path.exists() or not path.suffix == '.md':
+        if not path.exists() or not path.suffix == ".md":
             return False
 
-        content = path.read_text(encoding='utf-8')
+        content = path.read_text(encoding="utf-8")
 
         # Find version field in frontmatter
-        version_match = re.search(r'^version:\s*([0-9.]+)', content, re.MULTILINE)
+        version_match = re.search(r"^version:\s*([0-9.]+)", content, re.MULTILINE)
         if not version_match:
             return False
 
@@ -46,13 +47,13 @@ def update_file_version(file_path: str) -> bool:
 
         if old_version != new_version:
             new_content = re.sub(
-                r'^version:\s*[0-9.]+',
-                f'version: {new_version}',
+                r"^version:\s*[0-9.]+",
+                f"version: {new_version}",
                 content,
                 count=1,
-                flags=re.MULTILINE
+                flags=re.MULTILINE,
             )
-            path.write_text(new_content, encoding='utf-8')
+            path.write_text(new_content, encoding="utf-8")
             print(f"  {path}: {old_version} → {new_version}")
             return True
 
@@ -61,9 +62,12 @@ def update_file_version(file_path: str) -> bool:
         print(f"WARNING: Failed to update version in {file_path}: {e}", file=sys.stderr)
         return False
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path> [file_path2 ...]")
+        print(
+            "Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path> [file_path2 ...]"
+        )
         sys.exit(1)
 
     updated_count = 0
