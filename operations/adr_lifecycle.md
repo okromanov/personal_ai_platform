@@ -3,7 +3,7 @@ id: operations_adr_lifecycle
 type: operations
 document_state: current
 version: 1.0
-updated: 2026-08-22
+updated: 2026-08-23
 depends_on:
   - operations_change_process
 ---
@@ -36,7 +36,7 @@ depends_on:
 **Условия создания:**
 - Все альтернативы сравнены на реальном примере
 - Есть обоснование выбора (раздел "Последствия")
-- Указан требование (поле `traces_to_requirement`)
+- Указан требование (поле `traces_to`)
 - Создана в папке `adr/` с ID `ADR_XXX`
 
 **Проверка перед утверждением:**
@@ -75,7 +75,7 @@ ADR, явно связанные с этапом m01 машинным полем
 ### Фаза 3: Замена (superseded)
 
 **Когда ADR заменяется:**
-- Требование (`traces_to_requirement`) изменилось или удалено
+- Требование (`traces_to`) изменилось или удалено
 - Найдено лучшее решение той же проблемы
 - Технология или контекст настолько изменились, что решение больше не применяется
 
@@ -158,15 +158,13 @@ decision_state: proposed|accepted|rejected|superseded
 version: 1.0
 updated: <текущая дата>
 traces_to:
-  - <реализует что: SYS/ARC/INF ID>
-traces_to_requirement:
-  - <зависит от: SYS_XXX>
+  - <SYS/ARC/SEC/INF ID, на которые ссылается решение>
 superseded_by: ADR_YYY  # Только если superseded
 ---
 ```
 
 - `superseded_by` используется ТОЛЬКО если `decision_state: superseded`
-- `version` увеличивается если требование из `traces_to_requirement` изменилось и повлияло на решение
+- `version` увеличивается если требование из `traces_to` изменилось и повлияло на решение
 - `updated` отражает день последнего пересмотра (не обязательно смены версии)
 
 ## 6. Таблица переходов состояний
@@ -194,7 +192,7 @@ rejected          superseded
 
 **Как найти активное решение:**
 1. Прочитать требование (SYS/ARC/SEC/INF ID)
-2. Найти ADR через `traces_to_requirement`
+2. Найти ADR через `traces_to`
 3. Если `decision_state: superseded` → перейти по `superseded_by`
 4. Если `decision_state: accepted` → это действующее решение
 5. Если `decision_state: rejected` → решение не применяется
@@ -208,7 +206,7 @@ rejected          superseded
 2. Найти лучший технологический вариант
 3. Сравнить 2-3 варианта на примере
 4. Создать ADR_015 с выбранным решением
-   traces_to_requirement: [SYS_030]
+   traces_to: [SYS_030]
 5. PR → обсуждение → accepted
 ```
 
@@ -229,7 +227,7 @@ rejected          superseded
 1. SYS_030 изменило область или фокус
 2. ADR_015 больше не полностью покрывает требование
 3. Создать ADR_017 с переоцененным решением
-   traces_to_requirement: [SYS_030]  # то же требование
+   traces_to: [SYS_030]  # то же требование
 4. Обновить ADR_015:
    decision_state: superseded
    superseded_by: ADR_017
@@ -240,7 +238,7 @@ rejected          superseded
 
 В `check.py` нет встроенной проверки, но можно вручную:
 
-- Все ADR имеют `traces_to_requirement`?
+- Все ADR имеют `traces_to`?
 - Если `superseded` → указан `superseded_by`?
 - Если `superseded_by: ADR_YYY` → ADR_YYY существует?
 - `updated` соответствует дате последнего изменения?

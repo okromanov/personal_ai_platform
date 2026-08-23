@@ -3,7 +3,7 @@ id: template_adr
 type: document_template
 document_state: current
 version: 1.0
-updated: 2026-08-22
+updated: 2026-08-23
 depends_on: []
 ---
 
@@ -19,9 +19,7 @@ decision_state: proposed
 version: 1.0
 updated: <yyyy-mm-dd>
 traces_to:
-  - <SYS/ARC/SEC/INF ID>
-traces_to_requirement:
-  - <SYS_XXX>
+  - <SYS/ARC/SEC/INF ID, на которые ссылается решение>
 ---
 
 # ADR_XXX — <Решение>

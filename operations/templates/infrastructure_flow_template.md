@@ -13,10 +13,12 @@ depends_on: []
 
 Структура элемента:
 
-    <a id="inf_flow_xxx"></a>
-    ### INF_FLOW_XXX — <Название>
+```markdown
+<a id="inf_flow_xxx"></a>
+### INF_FLOW_XXX — <Название>
 
-    - `implements`: `INF_REQ_XXX`
+- `implements`: `INF_REQ_XXX`
 
-    Поток:
-    шаг → шаг → проверенный результат
+Поток:
+шаг → шаг → проверенный результат
+```
