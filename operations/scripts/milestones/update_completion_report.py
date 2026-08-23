@@ -71,7 +71,9 @@ def update_completion_report(milestone_id: str, root: Path = None) -> bool:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 operations/scripts/milestones/update_completion_report.py <milestone_id>")
+        print(
+            "Usage: python3 operations/scripts/milestones/update_completion_report.py <milestone_id>"
+        )
         sys.exit(1)
 
     milestone_id = sys.argv[1]
