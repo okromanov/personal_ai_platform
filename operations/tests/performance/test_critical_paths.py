@@ -50,18 +50,20 @@ class AtomicWritePerformanceTest(unittest.TestCase):
         large_duration = self._write_n_files(large_count, prefix="large")
 
         # An absolute ceiling catches a real regression regardless of ratio
-        # noise on fast, small operations.
+        # noise on fast, small operations. Generous enough to absorb slow CI
+        # I/O (e.g. Windows runners with real-time antivirus scanning on
+        # every file create, routinely 2-3x slower than Linux for this).
         self.assertLess(
             large_duration,
-            5.0,
-            f"atomic_write on {large_count} files took {large_duration:.3f}s — expected well under 5s",
+            20.0,
+            f"atomic_write on {large_count} files took {large_duration:.3f}s — expected well under 20s",
         )
         # Generous ratio check (40x slack for a 10x input) as a secondary
         # signal for genuine super-linear behavior, without being fragile
         # against filesystem noise on the small, fast baseline run.
         self.assertLess(
             large_duration,
-            max(small_duration * 40, 1.0),
+            max(small_duration * 40, 4.0),
             f"atomic_write on {large_count} files took {large_duration:.3f}s vs "
             f"{small_duration:.3f}s for {small_count} files — looks super-linear",
         )

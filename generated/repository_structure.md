@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `201` |
+| Всего файлов | `204` |
 
 ```text
 personal_ai_platform/
@@ -43,6 +43,7 @@ personal_ai_platform/
 - adr/adr_009_secret_management_strategy.md
 - generated/document_index.md
 - generated/repository_structure.md
+- generated/test_catalog.md
 - generated/traceability_matrix.md
 - milestones.md
 - operations/__init__.py
@@ -77,6 +78,7 @@ personal_ai_platform/
 - operations/scripts/documents/metadata.py
 - operations/scripts/documents/owner_dashboard.py
 - operations/scripts/documents/repository_tree.py
+- operations/scripts/documents/test_catalog.py
 - operations/scripts/documents/traceability.py
 - operations/scripts/evidence/__init__.py
 - operations/scripts/evidence/generate_bundle.py
@@ -171,6 +173,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_requirement_tooling.py
 - operations/tests/tooling/test_semantic_consistency.py
 - operations/tests/tooling/test_task_registry.py
+- operations/tests/tooling/test_test_catalog.py
 - operations/tests/tooling/test_traceability.py
 - operations/tests/tooling/test_versioning.py
 - operations/threat_review_triggers.md

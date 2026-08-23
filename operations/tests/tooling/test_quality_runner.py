@@ -102,6 +102,20 @@ class QualityRunnerTests(unittest.TestCase):
                 with self.assertRaisesRegex(run_suite.QualityFailure, "exit code 7"):
                     run_suite.run_step(root, "step", ["command"])
 
+    def test_run_step_writes_placeholder_for_empty_but_successful_output(self) -> None:
+        """A clean tool run (e.g. Vulture finding no dead code) produces empty
+        stdout; record_quality_suite.py rejects a zero-byte artifact as
+        evidence the step never ran, so the artifact must not be empty."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            clean_run = SimpleNamespace(returncode=0, stdout="")
+            with patch.object(run_suite.subprocess, "run", return_value=clean_run):
+                run_suite.run_step(
+                    root, "Dead code scan", ["command"], artifact="runtime/dead_code.txt"
+                )
+            content = (root / "runtime/dead_code.txt").read_text("utf-8")
+            self.assertTrue(content.strip())
+
     def test_run_step_records_and_accumulates_step_timings(self) -> None:
         """owner_dashboard.py sources its test/scan runtime stats from this file."""
         with tempfile.TemporaryDirectory() as tmp:
