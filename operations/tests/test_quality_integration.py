@@ -71,6 +71,26 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn(".claude/skills/pre_commit_hook.sh", wrapper)
         self.assertNotIn("documents/check.py", wrapper)
 
+    def test_pre_push_hook_wrapper_delegates_to_canonical_full_profile(self) -> None:
+        canonical = (ROOT / ".claude/skills/pre_push_hook.sh").read_text(encoding="utf-8")
+        wrapper = (ROOT / "operations/hooks/pre_push_hook.sh").read_text(encoding="utf-8")
+        self.assertIn("operations/scripts/quality/run_suite.py full", canonical)
+        self.assertIn(".claude/skills/pre_push_hook.sh", wrapper)
+        # Network-fetched, pinned-binary checks stay CI-only, not invoked from
+        # this local hook (mentioning them in the explanatory comment is fine).
+        for ci_only_invocation in ("actionlint ", "gitleaks dir", "-m pip_audit"):
+            self.assertNotIn(ci_only_invocation, canonical)
+
+    def test_shellcheck_covers_both_pre_commit_and_pre_push_hooks(self) -> None:
+        workflow = (ROOT / ".github/workflows/project_check.yml").read_text(encoding="utf-8")
+        for hook_path in (
+            ".claude/skills/pre_commit_hook.sh",
+            "operations/hooks/pre_commit_hook.sh",
+            ".claude/skills/pre_push_hook.sh",
+            "operations/hooks/pre_push_hook.sh",
+        ):
+            self.assertIn(hook_path, workflow)
+
     def test_superseded_report_cannot_claim_acceptance_readiness(self) -> None:
         report = (ROOT / "work/m01/final_report.md").read_text(encoding="utf-8")
         self.assertIn("evidence_state: superseded", report)

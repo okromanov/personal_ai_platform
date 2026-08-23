@@ -8,6 +8,11 @@ The files in this directory are repository-specific QA playbooks. Their commands
 python3.12 -m pip install -r operations/quality/requirements_dev.txt
 cp .claude/skills/pre_commit_hook.sh .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
+
+# Optional but recommended: catch mypy/format/coverage/security/dead-code
+# regressions before they leave the machine, not just on the next CI run.
+cp .claude/skills/pre_push_hook.sh .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
 ```
 
 ## Playbooks
@@ -19,6 +24,7 @@ chmod +x .git/hooks/pre-commit
 | [code_quality_check](code_quality_check.md) | Manual findings classified by severity | `python3.12 operations/scripts/quality/code_analyzer.py` |
 | [documentation_audit](documentation_audit.md) | Zero checker errors and warnings | `python3.12 operations/scripts/documents/check.py --all` |
 | [pre_commit_validation](pre_commit_validation.md) | Fast syntax, JSON/TOML/dependency, repository, Ruff, unit-test and drift checks | `bash .claude/skills/pre_commit_hook.sh` |
+| [pre_push_validation](pre_push_validation.md) | Full local profile (mypy, format, coverage, security, dead-code) before code leaves the machine | `bash .claude/skills/pre_push_hook.sh` |
 | [python_lint_check](python_lint_check.md) | Zero findings for the configured Ruff rules and format | `python3.12 -m ruff check ...` |
 | [python_type_check](python_type_check.md) | No total or per-file/error-code increase over checked-in mypy debt | `python3.12 operations/scripts/quality/run_mypy_baseline.py` |
 | [unit_tests](unit_tests.md) | All tests pass and coverage stays above its floor | Follow the coverage commands in the playbook |

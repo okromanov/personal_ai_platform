@@ -201,7 +201,7 @@ jobs:
           set -euo pipefail
           /tmp/actionlint -shellcheck=shellcheck 2>&1 | tee runtime/actionlint.txt
           echo "actionlint passed" >> runtime/actionlint.txt
-          shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh 2>&1 | tee runtime/shellcheck.txt
+          shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh .claude/skills/pre_push_hook.sh operations/hooks/pre_push_hook.sh 2>&1 | tee runtime/shellcheck.txt
           echo "shellcheck passed" >> runtime/shellcheck.txt
 
       - name: Scan dependencies and secrets

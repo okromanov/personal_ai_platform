@@ -63,7 +63,7 @@ Verifies:
    ```bash
    python3.12 -m pip_audit --no-deps --requirement operations/quality/requirements_dev.txt
    actionlint -shellcheck=shellcheck
-   shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh
+   shellcheck .claude/skills/pre_commit_hook.sh operations/hooks/pre_commit_hook.sh .claude/skills/pre_push_hook.sh operations/hooks/pre_push_hook.sh
    gitleaks dir . --redact --no-banner
    ```
 
