@@ -45,19 +45,19 @@ def collect_files(root_path=None) -> dict:
                 try:
                     meta = parse_yaml_frontmatter(task_file.read_text(encoding="utf-8"))
                     if meta.get("id"):
+                        depends_on = (
+                            meta.get("depends_on", "").split(",")
+                            if meta.get("depends_on")
+                            else []
+                        )
+                        tests = (
+                            meta.get("tests", "").split(",") if meta.get("tests") else []
+                        )
                         files["tasks"][meta["id"]] = {
                             "path": str(task_file),
                             "work_state": meta.get("work_state"),
-                            "depends_on": (
-                                meta.get("depends_on", "").split(",")
-                                if meta.get("depends_on")
-                                else []
-                            ),
-                            "tests": (
-                                meta.get("tests", "").split(",")
-                                if meta.get("tests")
-                                else []
-                            ),
+                            "depends_on": depends_on,
+                            "tests": tests,
                         }
                 except Exception as e:
                     print(
@@ -73,14 +73,15 @@ def collect_files(root_path=None) -> dict:
                 try:
                     meta = parse_yaml_frontmatter(test_file.read_text(encoding="utf-8"))
                     if meta.get("id"):
+                        traces_to = (
+                            meta.get("traces_to", "").split(",")
+                            if meta.get("traces_to")
+                            else []
+                        )
                         files["tests"][meta["id"]] = {
                             "path": str(test_file),
                             "execution": meta.get("execution"),
-                            "traces_to": (
-                                meta.get("traces_to", "").split(",")
-                                if meta.get("traces_to")
-                                else []
-                            ),
+                            "traces_to": traces_to,
                         }
                 except Exception as e:
                     print(
