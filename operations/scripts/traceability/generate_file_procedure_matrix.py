@@ -83,7 +83,7 @@ updated: {today}
 
 > Automatic matrix of file state transitions and their dependencies.
 > Regenerated on each CI run from actual project structure.
-> Manual matrix kept at: `work/procedures/file_procedure_traceability_matrix.md`
+> Manual matrix kept at: See `work/procedures/` for detailed procedures documentation
 
 ## Task → Test → Component Linkage
 
@@ -136,7 +136,7 @@ Creates:
 ---
 
 *Last generated: {today}*
-*This is an auto-generated file. Manual procedures at `work/procedures/file_procedure_traceability_matrix.md`*
+*This is an auto-generated file. See work/procedures/ for detailed procedures documentation.*
 """
 
     return matrix
