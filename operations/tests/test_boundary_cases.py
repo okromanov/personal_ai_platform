@@ -25,7 +25,7 @@ from operations.scripts.acceptance.apply import (
     expected_confirmation,
     validate_confirmation,
 )
-from operations.scripts.common.project import atomic_write, read_text, relative_posix
+from operations.scripts.common.project import atomic_write, read_text
 from operations.scripts.status.generate_project_status import parse_unit_test_summary
 
 
@@ -194,11 +194,9 @@ class UnitSummaryBoundaryTest(unittest.TestCase):
 
 
 class PathHandlingBoundaryTest(unittest.TestCase):
-    def test_relative_posix_rejects_path_outside_root(self) -> None:
-        with tempfile.TemporaryDirectory() as outer, tempfile.TemporaryDirectory() as inner:
-            outside_path = Path(outer) / "escape.txt"
-            with self.assertRaises(ValueError):
-                relative_posix(outside_path, Path(inner))
+    # relative_posix's path-traversal rejection is covered by
+    # PathTraversalContainmentTest in test_security_extended.py — not
+    # duplicated here.
 
     def test_atomic_write_rejects_empty_path_component_gracefully(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
