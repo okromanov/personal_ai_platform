@@ -3,7 +3,7 @@ id: document_frontmatter_standard
 type: guide
 document_state: current
 version: 1.2
-updated: 2026-08-22
+updated: 2026-08-23
 depends_on:
   - project_rules
 ---

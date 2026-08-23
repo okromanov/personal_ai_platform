@@ -99,6 +99,21 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 
 После завершения этой TASK перейти к следующему компоненту или интеграционным испытаниям.
 
+## Файлы, созданные в рамках задач
+
+### [`TASK_001` — Реализация ARC_CMP_001](work/tasks/task_001_arc_001.md)
+
+_По TEST `TEST_007`:_ Доказать, что компонент ARC_CMP_001 (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям SYS_001.
+
+- [`src/channels/`](src/channels/)
+- [`src/channels/__init__.py`](src/channels/__init__.py)
+- [`src/channels/base.py`](src/channels/base.py)
+- [`src/channels/telegram.py`](src/channels/telegram.py)
+- [`src/__init__.py`](src/__init__.py)
+- [`operations/tests/product/__init__.py`](operations/tests/product/__init__.py)
+- [`operations/tests/product/test_channels.py`](operations/tests/product/test_channels.py)
+- [`work/tests/test_007.md`](work/tests/test_007.md)
+
 ## Справочная информация
 
 - Все задачи: [`tasks.md`](tasks.md)

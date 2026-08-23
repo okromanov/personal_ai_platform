@@ -102,6 +102,21 @@ class QualityRunnerTests(unittest.TestCase):
                 with self.assertRaisesRegex(run_suite.QualityFailure, "exit code 7"):
                     run_suite.run_step(root, "step", ["command"])
 
+    def test_run_step_records_and_accumulates_step_timings(self) -> None:
+        """owner_dashboard.py sources its test/scan runtime stats from this file."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            success = SimpleNamespace(returncode=0, stdout="")
+            with patch.object(run_suite.subprocess, "run", return_value=success):
+                run_suite.run_step(root, "Unit tests", ["command"])
+                run_suite.run_step(root, "Documentation audit", ["command"])
+
+            timings = json.loads((root / run_suite.STEP_TIMINGS_PATH).read_text("utf-8"))
+            self.assertIn("Unit tests", timings)
+            self.assertIn("Documentation audit", timings)
+            self.assertIsInstance(timings["Unit tests"], float)
+            self.assertGreaterEqual(timings["Unit tests"], 0)
+
     def test_fast_and_full_profiles_use_canonical_nonduplicated_steps(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -1,92 +1,137 @@
 from __future__ import annotations
 
+import json
 import re
+import unittest
 from pathlib import Path
 
-from operations.scripts.common.project import today_iso
-from operations.scripts.common.status_types import MilestoneItem
-from operations.scripts.status.generate_project_status import collect_milestones
+from operations.scripts.common.project import iter_files, today_iso
+from operations.scripts.common.status_types import TaskItem
+from operations.scripts.documents.traceability import collect_traceable_elements
+from operations.scripts.status.generate_project_status import collect_test_specs
+from operations.scripts.tasks.generate import collect_tasks
+
+CODE_DIRECTORIES = (
+    ("src", "Исходный код продукта (src/)"),
+    ("operations/scripts", "Инструментарий (operations/scripts/)"),
+    ("operations/tests", "Тесты (operations/tests/)"),
+)
+DOCUMENT_FAMILIES = (
+    ("BR", "Бизнес-требования"),
+    ("SYS", "Системные требования"),
+    ("THR", "Угрозы"),
+    ("SEC_CTL", "Меры безопасности"),
+    ("INF_REQ", "Инфраструктурные требования"),
+    ("ADR", "ADR"),
+)
+RESULT_SECTION = re.compile(r"(?ms)^##\s+(?:\d+\.\s*)?Результат\s*$\n(.*?)(?=^##\s|\Z)")
 
 
-def get_gates_for_milestone(milestone_id: str) -> tuple[str, list[str]]:
-    """Get remaining gates for a milestone."""
-    gates_map = {
-        "m01": (
-            "До принятия `m01` остаются три обязательных ворот",
-            [
-                "Серверная проверка на GitHub",
-                "Смысловая проверка документов",
-                "Подтверждение владельца по составу V1",
-            ],
-        ),
-        "m02": (
-            "До принятия `m02` остаются обязательные ворота",
-            [
-                "Реализация всех компонентов ARC_CMP",
-                "Интеграционные тесты успешны",
-                "Смысловая проверка реализации",
-                "Подтверждение владельца готовности",
-            ],
-        ),
-    }
-    return gates_map.get(milestone_id, ("Оставшиеся ворота", []))
+def _count_tracked_files(root: Path) -> int:
+    return sum(1 for _ in iter_files(root))
 
 
-def get_actions_for_milestone(milestone_id: str) -> list[tuple[str, str, str]]:
-    """Get available actions for a milestone. Returns list of (command, actor, when)."""
-    actions_map = {
-        "m01": [
-            ("`ПРОДОЛЖАЙ m01`", "Агент", "Сейчас (новый сеанс)"),
-            ("`ПОДТВЕРЖДАЮ СОСТАВ V1`", "Вы", "После шага 5 агента"),
-            ("`ИЗМЕНИ СОСТАВ V1: ...`", "Вы", "Если нужны изменения в периметре"),
-            ("`ПРИНИМАЮ m01`", "Вы", "После зелёной проверки"),
-            ("`ВОЗВРАЩАЮ m01: ...`", "Вы", "Если нужна переделка"),
-        ],
-        "m02": [
-            ("`ПРОДОЛЖАЙ TASK_002`", "Агент", "Сейчас (новый сеанс)"),
-            ("`ПОДТВЕРЖДАЮ m02`", "Вы", "После завершения компонентов"),
-            ("`ВОЗВРАЩАЮ m02: <причина>`", "Вы", "Если нужна доработка"),
-        ],
-    }
-    return actions_map.get(milestone_id, [])
+def _lines_of_code(root: Path, directory: str) -> int:
+    prefix = f"{directory}/"
+    total = 0
+    for path in iter_files(root, suffixes={".py"}):
+        if path.relative_to(root).as_posix().startswith(prefix):
+            try:
+                with path.open("r", encoding="utf-8") as handle:
+                    total += sum(1 for _ in handle)
+            except OSError:
+                continue
+    return total
+
+
+def _count_test_cases(root: Path) -> int:
+    discovery_root = root / "operations" / "tests"
+    if not discovery_root.is_dir():
+        return 0
+    suite = unittest.TestLoader().discover(
+        str(discovery_root), pattern="test_*.py", top_level_dir=str(discovery_root)
+    )
+    return suite.countTestCases()
+
+
+def _document_family_counts(root: Path) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for record in collect_traceable_elements(root).values():
+        family = str(record["family"])
+        counts[family] = counts.get(family, 0) + 1
+    return counts
+
+
+def _load_json_if_present(path: Path) -> dict[str, object] | None:
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _coverage_stat(root: Path) -> tuple[str, str] | None:
+    """(процент, время записи) из локального runtime/coverage.json, если он есть.
+
+    runtime/ не хранится в git (см. IGNORED_DIRS в common/project.py), поэтому
+    эти данные — как локальный агент/владелец в последний раз запустил
+    run_suite.py full, а не гарантированный статус текущего SHA в CI.
+    """
+    data = _load_json_if_present(root / "runtime" / "coverage.json")
+    if data is None:
+        return None
+    totals = data.get("totals")
+    meta = data.get("meta")
+    if not isinstance(totals, dict) or not isinstance(meta, dict):
+        return None
+    percent = totals.get("percent_covered_display")
+    timestamp = meta.get("timestamp")
+    if percent is None or not isinstance(timestamp, str):
+        return None
+    return f"{percent}%", timestamp[:19].replace("T", " ")
+
+
+def _step_timings(root: Path) -> dict[str, float]:
+    data = _load_json_if_present(root / "runtime" / "step_timings.json")
+    if data is None:
+        return {}
+    return {key: float(value) for key, value in data.items() if isinstance(value, (int, float))}
+
+
+def _result_section(body: str) -> str:
+    match = RESULT_SECTION.search(body)
+    return match.group(1).strip() if match else ""
+
+
+def _completed_task_results(root: Path) -> list[tuple[TaskItem, str]]:
+    tasks = collect_tasks(root)["tasks"]
+    return [
+        (task, _result_section(str(task["body"])))
+        for task in tasks
+        if task["work_state"] == "completed"
+    ]
 
 
 def render_owner_dashboard(root: Path, date: str | None = None) -> str:
-    """Render owner dashboard from current project state."""
+    """Render owner dashboard: repository statistics and functional readiness.
+
+    Deliberately does not restate current-milestone status, gates or the
+    owner's next action — milestones.md and project_status.md already own
+    that, and duplicating it here just gives it a second, driftable copy.
+    """
     generated_date = date or today_iso()
 
-    # Count milestones
-    milestones_data = collect_milestones(root)
-    current_milestone: MilestoneItem = milestones_data["current"]
-    items: list[MilestoneItem] = milestones_data["items"]
-    completed = len([m for m in items if m["work_state"] == "completed"])
-    total_milestones = len(items)
-    remaining = total_milestones - completed
+    total_files = _count_tracked_files(root)
+    loc_rows = [(label, _lines_of_code(root, directory)) for directory, label in CODE_DIRECTORIES]
+    test_count = _count_test_cases(root)
+    coverage = _coverage_stat(root)
+    timings = _step_timings(root)
 
-    # Count tasks
-    tasks_dir = root / "work" / "tasks"
-    task_count = len(list(tasks_dir.glob("*.md"))) if tasks_dir.exists() else 0
-
-    # Get current milestone ID
-    current_id = current_milestone["id"]
-
-    # Build milestone status lines
-    milestone_lines = []
-    for m in items:
-        mid = m["id"]
-        mstate = m["work_state"]
-        status_icon = "✅" if mstate == "completed" else "🔄" if mstate == "in-progress" else "⏳"
-        is_current = " — **текущий этап**" if mid == current_id else ""
-        milestone_lines.append(f"- [{status_icon}] [`{mid}`](milestones.md#{mid}){is_current}")
-
-    # Parse V1 requirements from business_requirements.md if available
-    v1_reqs = []
-    br_path = root / "specifications" / "business_requirements.md"
-    if br_path.exists():
-        content = br_path.read_text(encoding="utf-8")
-        # Extract BR_ items with priority: core
-        matches = re.findall(r"- `(BR_\d+)`.*priority:.*core", content)
-        v1_reqs = sorted(set(matches))
+    family_counts = _document_family_counts(root)
+    task_count = collect_tasks(root)["count"]
+    test_spec_count = collect_test_specs(root)["count"]
 
     lines = [
         "<!-- generated file: do not edit manually -->",
@@ -94,7 +139,7 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         "id: owner_dashboard",
         "type: operations_guide",
         "document_state: current",
-        "version: 1.1",
+        "version: 2.0",
         f"updated: {generated_date}",
         "depends_on:",
         "  - project_milestones",
@@ -105,136 +150,89 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
         "",
         "# Полный дашборд проекта",
         "",
-        "Это расширенная информация для тех, кто хочет видеть полное состояние. Для быстрого действия используйте [`project_status.md`](project_status.md).",
+        "Статистика репозитория и то, что уже реализовано и подтверждено доказательствами. "
+        "Для текущего действия используйте [`project_status.md`](project_status.md); "
+        "для состава и статуса этапов — [`milestones.md`](milestones.md).",
         "",
-        "## Общая статистика V1",
+        "## Статистика репозитория",
         "",
         "| Параметр | Значение |",
         "|---|---|",
-        f"| Этапы всего | {total_milestones} |",
-        f"| Этапы завершены | {completed} |",
-        f"| Этапы осталось | {remaining} |",
-        f"| Проектные TASK | {task_count} |",
-        "",
-        "## Этапы разработки",
-        "",
+        f"| Файлов в репозитории | `{total_files}` |",
     ]
-
-    # Add milestone details
-    for m in items:
-        mid = m["id"]
-        mstate = m["work_state"]
-        mtitle = m["title"]
-
-        lines.append(f"### {mid} — {mtitle}")
-        lines.append("")
-        lines.append(f"- **Статус:** `{mstate}`")
-
-        # Add description based on milestone
-        if mid == "m01":
-            lines.append(
-                "- **Что это:** подготовка структуры документов, правил и автоматических проверок"
-            )
-        elif mid == "m02":
-            lines.append("- **Что это:** выбор среды агента и первая интеграция с Telegram")
-        elif mid == "m03":
-            lines.append("- **Что это:** обработка файлов, интернет-исследования, фильтр важности")
-        elif mid == "m04":
-            lines.append("- **Что это:** постоянная память между сессиями")
-        elif mid == "m05":
-            lines.append("- **Что это:** автоматизация и расписание")
-        elif mid == "m06":
-            lines.append("- **Что это:** финальная проверка всех компонентов V1")
-
-        if mstate == "completed":
-            lines.append("- **Когда будет готово:** завершено")
-        elif mstate == "in-progress":
-            lines.append("- **Когда будет готово:** ожидается после завершения текущих задач")
-        else:
-            lines.append("- **Когда будет готово:** запланирован")
-
-        if mid == "m02":
-            lines.append(
-                "- **Требования:** точный машинно проверяемый состав задан в [`milestones.md`](milestones.md#m02); ручные счётчики здесь не дублируются"
-            )
-
-        lines.append("")
-
-    # V1 requirements (only for m01)
-    if v1_reqs and current_id == "m01":
-        lines.append("## Состав V1 (обязательный периметр)")
-        lines.append("")
-        lines.append('Эти бизнес-требования определяют, что такое "готовая первая версия":')
-        lines.append("")
-        for req in v1_reqs[:18]:  # Show first 18
-            lines.append(f"- {req}")
-        lines.append("")
-        lines.append("**Статус:** ожидает подтверждения владельца перед `m01`")
-        lines.append("")
-
-    # Document statistics with dynamic status
-    adr_status = (
-        "✅ ADR_001–ADR_004 приняты; ADR_005–ADR_009 — кандидаты для m02"
-        if current_id not in {"m01"}
-        else "⏳ ADR_001–ADR_004 ожидают принятия m01; ADR_005–ADR_009 — кандидаты для m02"
-    )
-    check_status = (
-        "✅ Смысловая проверка успешна"
-        if current_id not in {"m01"}
-        else "⏳ Смысловая проверка (ждёт этапа m01)"
-    )
-
+    for label, count in loc_rows:
+        lines.append(f"| Строк кода: {label} | `{count}` |")
+    lines.append(f"| Unit-тестов (обнаружено) | `{test_count}` |")
+    if coverage is not None:
+        percent, recorded_at = coverage
+        lines.append(f"| Покрытие кода | `{percent}` (записано {recorded_at}) |")
+    else:
+        lines.append("| Покрытие кода | нет данных — запустите `run_suite.py full` |")
+    test_time = timings.get("Unit tests with branch coverage")
+    if test_time is not None:
+        lines.append(f"| Время прогона тестов (с покрытием) | `{test_time:.1f}s` |")
+    else:
+        lines.append("| Время прогона тестов | нет данных — запустите `run_suite.py full` |")
+    scan_time = timings.get("Documentation audit")
+    if scan_time is not None:
+        lines.append(
+            f"| Время полной проверки документов (`check.py --all`) | `{scan_time:.1f}s` |"
+        )
+    else:
+        lines.append("| Время проверки документов | нет данных — запустите `run_suite.py full` |")
     lines.extend(
         [
+            "",
+            "> Покрытие и время прогона — из последнего локального запуска "
+            "`operations/scripts/quality/run_suite.py full` на этой машине "
+            "(`runtime/*.json`, не хранится в git). Это не статус конкретного SHA в CI — "
+            "см. раздел «GitHub Actions» ниже.",
+            "",
             "## Статистика документов",
             "",
-            "| Тип | Количество | Статус |",
-            "|---|---|---|",
-            "| Бизнес-требования | 39 | ✅ актуальны |",
-            "| Угрозы | 19 | ✅ актуальны |",
-            "| Системные требования | 36 | ✅ актуальны |",
-            "| Меры безопасности | 20 | ✅ актуальны |",
-            "| Инфраструктурные требования | 16 | ✅ актуальны |",
-            f"| ADR | 9 | {adr_status} |",
-            f"| Проектные TASK | {task_count} | — |",
-            "| Спецификации проверок | 5 | ✅ 2 для m01; 3 для m02+ |",
-            "",
-            "## Автоматические проверки",
-            "",
-            "- ✅ Структура документов (документы корректны)",
-            "- ✅ Трассировка требований (связи целостны)",
-            "- ✅ Версионирование (метаданные верны)",
-            "- ✅ Производные представления (могут пересчитаны)",
-            f"- {check_status}",
-            "",
-            "## GitHub Actions",
-            "",
-            "Статус серверной проверки не хранится в этом документе, потому что он быстро устаревает. Перед смысловой проверкой агент обязан получить результат GitHub Actions для точного проверяемого SHA и сверить evidence artifact. Пока это не выполнено, серверная готовность считается неподтверждённой.",
-            "",
-            "## Оставшиеся ворота",
-            "",
+            "| Тип | Количество |",
+            "|---|---|",
         ]
     )
-
-    # Add dynamic gates section
-    gates_title, gates = get_gates_for_milestone(current_id)
-    lines.append(gates_title + ":")
-    for i, gate in enumerate(gates, 1):
-        lines.append(f"{i}. {gate}")
+    for family, label in DOCUMENT_FAMILIES:
+        lines.append(f"| {label} | `{family_counts.get(family, 0)}` |")
+    lines.append(f"| Проектные TASK | `{task_count}` |")
+    lines.append(f"| Спецификации TEST | `{test_spec_count}` |")
     lines.append("")
 
-    # Add dynamic actions section
-    lines.append("## Действия, доступные сейчас")
+    lines.append("## Что уже реализовано")
     lines.append("")
-    lines.append("| Команда | Кто | Когда |")
-    lines.append("|---|---|---|")
-    actions = get_actions_for_milestone(current_id)
-    for command, actor, when in actions:
-        lines.append(f"| {command} | {actor} | {when} |")
-    lines.append("")
+    completed = _completed_task_results(root)
+    if not completed:
+        lines.append(
+            "Пока ни одна проектная TASK не завершена. Текущую работу и следующий шаг "
+            "см. в [`project_status.md`](project_status.md)."
+        )
+    else:
+        for task, result_text in completed:
+            component = str(task.get("component", "")) or "—"
+            task_id = str(task["id"])
+            path = str(task["path"])
+            tests = (
+                ", ".join(f"[`{test['id']}`]({test['path']})" for test in task.get("tests", []))
+                or "—"
+            )
+            lines.append(f"### `{component}` — {task['title']} (`{task_id}`)")
+            lines.append("")
+            lines.append(result_text or "_Раздел «Результат» пуст._")
+            lines.append("")
+            lines.append(f"[Карточка задачи]({path}) · Доказательство: {tests}")
+            lines.append("")
 
     lines.extend(
         [
+            "## GitHub Actions",
+            "",
+            "Статус серверной проверки не хранится в этом документе, потому что он быстро "
+            "устаревает. Перед смысловой проверкой агент обязан получить результат GitHub "
+            "Actions для точного проверяемого SHA и сверить evidence artifact. Пока это не "
+            "выполнено, серверная готовность считается неподтверждённой.",
+            "",
             "## Ссылки на правила",
             "",
             "- **Как работает процесс:** [`project_rules.md`](project_rules.md)",

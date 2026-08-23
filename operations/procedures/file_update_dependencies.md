@@ -19,8 +19,8 @@ updated: 2026-08-23
 | work/m0X/semantic_review.md | - | Создаётся init_milestone.py | автомат (событие) | git добавляется |
 | work/m0X/final_report.md | - | Создаётся init_milestone.py | автомат (событие) | git добавляется |
 | milestones.md | work_state | Меняется на `in-progress` | владелец вручную | check.py: milestones |
-| project_status.md | текущий этап | Обновляется | автомат (generate.py) | check.py: generated |
-| owner_dashboard.md | Ворота и действия | Обновляются динамически | автомат (render_owner_dashboard) | check.py: generated |
+| project_status.md | текущий этап, файлы задач | Обновляется | автомат (generate.py) | check.py: generated |
+| owner_dashboard.md | статистика документов/репозитория | Пересчитывается | автомат (render_owner_dashboard) | check.py: generated |
 
 ## Когда milestone переходит из in-progress → completed
 
@@ -31,8 +31,7 @@ updated: 2026-08-23
 | work/m0X/final_report.md | дата завершения | "-" → date.today() | update_completion_report.py | manual review |
 | milestones.md | work_state | Меняется на `completed` | владелец вручную | check.py: milestones |
 | project_status.md | Прогресс | Обновляется | автомат (generate.py) | check.py: generated |
-| owner_dashboard.md | Статус m0X | Обновляется | автомат (render_owner_dashboard) | check.py: generated |
-| owner_dashboard.md | Ворота и действия | Обновляются на следующий этап | автомат (render_owner_dashboard) | check.py: generated |
+| owner_dashboard.md | "Что уже реализовано" | Добавляется раздел завершённой TASK | автомат (render_owner_dashboard) | check.py: tasks (запрет заглушки в "Результат") |
 
 ## Зависимости по типам файлов
 
@@ -52,16 +51,18 @@ updated: 2026-08-23
 
 ### project_status.md
 - **Зависит от:** milestones.md, work/tasks/*, work/tests/*
-- **Генерируется:** render_repository_project_status()
-- **Проверка:** check.py: generated (drift check)
+- **Генерируется:** render_repository_project_status() в operations/scripts/status/human_status.py
+- **Проверка:** check.py: generated (drift check), check.py: owner_interface (запрещённые внутренние детали)
+- **Раздел "Файлы, созданные в рамках задач":** для каждой TASK, чей `allowed_paths` вышел за пределы собственной карточки (`_deliverable_paths()`), перечисляет эти пути гиперссылками; однострочное описание берётся из раздела "Назначение" первого связанного TEST (`_test_purpose()`, читает `task.tests[0].path` напрямую с диска). Если у TASK нет доказательства или её `allowed_paths` ещё не расширен — TASK не показывается вовсе, ничего не выдумывается.
 
 ### owner_dashboard.md
-- **Зависит от:** milestones.md (current_id, work_state)
-- **Генерируется:** render_owner_dashboard()
-- **Динамические части:**
-  - "Оставшиеся ворота" → get_gates_for_milestone()
-  - "Действия" → get_actions_for_milestone()
-  - "Статус проверок" → depends on current_id
+- **Зависит от:** весь трассируемый граф документов (для статистики по семействам), work/tasks/*, work/tests/*, локально записанные `runtime/coverage.json` и `runtime/step_timings.json` (не хранятся в git)
+- **Генерируется:** render_owner_dashboard() в operations/scripts/documents/owner_dashboard.py
+- **Разделы:**
+  - "Статистика репозитория" — файлы/строки кода/тесты считаются вживую при каждой генерации (`iter_files`, построчный подсчёт, `unittest` discovery без запуска); покрытие и время прогона читаются из `runtime/*.json`, если они есть локально, иначе — явная пометка "нет данных"
+  - "Статистика документов" — реальные счётчики через `collect_traceable_elements()` по семействам (BR/SYS/THR/SEC_CTL/INF_REQ/ADR) плюс `collect_tasks()`/`collect_test_specs()` для TASK/TEST; никогда не хардкодится
+  - "Что уже реализовано" — для каждой `work_state: completed` TASK дословно показывает её раздел "Результат"; `check.py` (`check_tasks`) отдельно запрещает оставлять здесь автосгенерированную заглушку у завершённой TASK, поэтому текст в этом разделе не бывает пустым шаблоном
+  - Не дублирует статус этапа/ворота/действие владельца — это зона project_status.md и milestones.md
 
 ## Процедура обновления при завершении milestone
 
@@ -83,7 +84,6 @@ updated: 2026-08-23
 - [ ] Шаблоны в work/m0X/ (created автоматически init_milestone.py)
 - [ ] Запись в milestones.md с work_state: planned
 - [ ] Профиль в operations/quality_registry.json если in-progress/completed
-- [ ] Функции в owner_dashboard.py для gates и actions (если не in-progress)
 - [ ] Процедура обновления completion_state (update_completion_report.py)
 
 ## Проверка полноты

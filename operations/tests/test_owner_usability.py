@@ -91,6 +91,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Этапы V1",
             "Проектные задачи текущего этапа",
             "Шаги текущей работы",
+            "Файлы, созданные в рамках задач",
             "выполнено",
             "осталось",
             "[x]",
@@ -115,6 +116,23 @@ class OwnerUsabilityTests(unittest.TestCase):
             "evidence bundle",
         ]:
             self.assertNotIn(internal, rendered)
+
+    def test_task_files_section_lists_real_deliverables_with_links_and_test_purpose(
+        self,
+    ) -> None:
+        rendered = render_repository_project_status(self.root)
+        section = rendered[
+            rendered.index("## Файлы, созданные в рамках задач") : rendered.index(
+                "## Справочная информация"
+            )
+        ]
+        # TASK_001 expanded allowed_paths beyond its own card and shipped real files;
+        # TASK_002+ have not (their allowed_paths is still just their own card), so
+        # only TASK_001 should appear here.
+        self.assertIn("TASK_001", section)
+        self.assertIn("[`src/channels/base.py`](src/channels/base.py)", section)
+        self.assertIn("По TEST `TEST_007`", section)
+        self.assertNotIn("TASK_002", section)
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
