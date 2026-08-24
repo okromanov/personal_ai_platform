@@ -84,7 +84,9 @@ def collect_git_metrics(root: Path) -> RepositoryMetrics:
             text=True,
             timeout=10,
         )
-        branches = [b.strip() for b in result.stdout.split("\n") if b.strip()]
+        branches = [
+            b.strip().removeprefix("* ").strip() for b in result.stdout.split("\n") if b.strip()
+        ]
 
         result = subprocess.run(
             ["git", "config", "--get", "remote.origin.url"],
@@ -128,7 +130,7 @@ def collect_test_metrics(root: Path) -> TestMetrics:
     try:
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "coverage",
                 "run",

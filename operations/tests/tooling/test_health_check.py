@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -58,6 +59,18 @@ class CollectGitMetricsTests(unittest.TestCase):
             metrics = collect_git_metrics(root)
 
             self.assertFalse(metrics.working_tree_clean)
+
+    def test_current_branch_name_has_no_git_marker_prefix(self) -> None:
+        # `git branch -a` marks the checked-out branch with a leading "* ",
+        # e.g. "* main"; reporter.py renders branches[0] verbatim as the
+        # report's "Ветка" value, so a raw "* " prefix would leak into it.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _init_repo(root)
+
+            metrics = collect_git_metrics(root)
+
+            self.assertEqual(metrics.branches, ["main"])
 
 
 class CollectCodeQualityMetricsTests(unittest.TestCase):
@@ -144,6 +157,23 @@ class CollectTestMetricsTests(unittest.TestCase):
         self.assertEqual(metrics.total_passed, 10)
         self.assertEqual(metrics.total_failed, 2)
         self.assertAlmostEqual(metrics.execution_time_sec, 3.45)
+
+    def test_runs_pytest_under_the_current_interpreter(self) -> None:
+        # A bare "python" on PATH can resolve to a different interpreter
+        # than the one running this script (e.g. one without pytest/coverage
+        # installed), which silently yields "0 passed" instead of real
+        # results. The command must pin sys.executable instead.
+        completed = subprocess.CompletedProcess(
+            ["pytest"], 0, stdout="1 passed in 0.1s\n", stderr=""
+        )
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            patch("subprocess.run", return_value=completed) as mock_run,
+        ):
+            collect_test_metrics(Path(tmp))
+
+        called_cmd = mock_run.call_args[0][0]
+        self.assertEqual(called_cmd[0], sys.executable)
 
     def test_reads_coverage_percent_from_runtime_coverage_json(self) -> None:
         completed = subprocess.CompletedProcess(

@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `304` |
+| Всего тестов | `306` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
-| Tooling (quality scripts, registries, traceability) | `147` |
+| Tooling (quality scripts, registries, traceability) | `149` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -183,10 +183,12 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_counts_ruff_issues_from_summary_line_and_flags_noncompliant_formatting` | Подсчёт замечаний ruff по итоговой строке и флаг несоответствия форматированию. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_missing_tools_leave_safe_defaults` | Отсутствующие инструменты дают безопасные значения по умолчанию. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_ruff_output_with_no_findings_counts_zero` | Вывод ruff без замечаний даёт ноль в счётчике. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_current_branch_name_has_no_git_marker_prefix` | Current branch name has no git marker prefix |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_dirty_working_tree_is_reported_as_not_clean` | Незакоммиченное рабочее дерево отмечается как «не чистое». |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_reports_real_commit_and_branch_metadata` | Отчёт содержит реальные метаданные коммита и ветки. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_parses_pytest_summary_line` | Итоговая строка pytest корректно разбирается. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_reads_coverage_percent_from_runtime_coverage_json` | Процент покрытия читается из runtime/coverage.json. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_runs_pytest_under_the_current_interpreter` | Runs pytest under the current interpreter |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_includes_key_metrics` | Сгенерированный отчёт включает ключевые метрики. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_print_summary_writes_key_lines_to_stdout` | Краткая сводка выводит ключевые строки в stdout. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_clickable_markdown_reference` | Кликабельная markdown-ссылка принимается. |
