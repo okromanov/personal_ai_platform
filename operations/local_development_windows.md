@@ -3,7 +3,7 @@ id: operations_local_development_windows
 type: operations_guide
 document_state: current
 version: 1.0
-updated: 2026-08-22
+updated: 2026-08-24
 traces_to:
   - ADR_001
 ---
@@ -91,7 +91,7 @@ py operations\scripts\milestones\start.py --milestone mXX --apply
 
 ## 5. Принятие владельцем
 
-Для каждого этапа артефакт GitHub Actions сначала должен содержать `ready-for-semantic-review`. Затем свежий проверяющий выполняет смысловую проверку с результатом `pass` на том же SHA (для `m01` он дополнительно подтверждает состав V1). Только после этого владелец может дать `ПРИНИМАЮ mXX`.
+Для каждого этапа артефакт GitHub Actions сначала должен содержать `ready-for-semantic-review`. Затем свежий проверяющий выполняет смысловую проверку с результатом `pass` на том же SHA (для [`m01`](../milestones.md#m01) он дополнительно подтверждает состав V1). Только после этого владелец может дать `ПРИНИМАЮ mXX`.
 
 Создаётся отдельная ветка от точного SHA доказательства. Нужные файлы помещаются локально в `runtime/evidence/`.
 

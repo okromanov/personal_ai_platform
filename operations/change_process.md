@@ -2,7 +2,7 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.6
+version: 1.7
 updated: 2026-08-24
 depends_on:
   - project_rules
@@ -179,18 +179,18 @@ traces_to:
 **Проектные задачи (TASK)**:
 
 Обязательные поля:
-- `id` — формат `TASK_XXX` где `XXX` — трёхзначный номер (стартует с `TASK_001`)
+- `id` — формат `TASK_XXX` где `XXX` — трёхзначный номер (стартует с [`TASK_001`](../work/tasks/task_001_arc_001.md))
 - `type` — значение `task`
 - `title` — короткое название задачи
 - `component` — ровно один `ARC_CMP_*`, `ARC_FLOW_*`, `INF_CMP_*` или `INF_FLOW_*`, поставляемый задачей
 - `work_state` — допустимые значения: `planned`, `in-progress`, `blocked`, `completed`, `cancelled`
 - `version` — номер версии
 - `updated` — дата последнего изменения
-- `depends_on` — список предыдущих TASK, для `TASK_001` может быть пустым `[]`
+- `depends_on` — список предыдущих TASK, для [`TASK_001`](../work/tasks/task_001_arc_001.md) может быть пустым `[]`
 - `next_actor` — кто выполнит следующий шаг, допустимые значения: `agent`, `owner`, `automation`
 - `owner_action` — если `next_actor: owner`, то здесь одно конкретное действие или `none`
 - `allowed_paths` — список путей, которые может менять эта задача
-- `traces_to` — список этапов (например `m01`, `m02`), к которым относится задача
+- `traces_to` — список этапов (например [`m01`](../milestones.md#m01), [`m02`](../milestones.md#m02)), к которым относится задача
 - `implements` — включает собственный `component`; остальные связи допустимы только внутри его транзитивной цепочки требований
 
 Опциональные поля:
@@ -238,7 +238,7 @@ implements:
 
 Опциональные поля:
 - `execution` — как запускается тест, допустимые значения: `automated`, `owner`, `manual` (по умолчанию `owner`)
-- `accepts` — список этапов (например `m01`), которые этот тест подтверждает
+- `accepts` — список этапов (например [`m01`](../milestones.md#m01)), которые этот тест подтверждает
 - `traces_to` — список TASK, на которые ссылается тест
 - `verifies` — список требований (SYS, SEC_CTL), которые проверяет тест
 

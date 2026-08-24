@@ -36,7 +36,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `INF_CMP_001` в [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md#inf_cmp_001)
+1. Изучить спецификацию `INF_CMP_001`
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence
@@ -82,3 +82,7 @@ implements:
 ## 9. Что будет дальше
 
 [`TASK_009`](task_009_inf_002.md) реализует Сеть и контролируемый исходящий трафик ([`INF_CMP_002`](../../specifications/infrastructure_baseline.md#inf_cmp_002)) — правила того, что вычислительной среде из этой TASK разрешено делать в сети.
+
+## 10. Что это даёт владельцу
+
+Функционал появится после завершения этой TASK.

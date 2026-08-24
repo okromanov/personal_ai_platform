@@ -16,7 +16,7 @@ version: 1.0
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.0` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.3` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -29,7 +29,7 @@ version: 1.0
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.3` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.1` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
-| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.6` | Процедуры изменений и публикации |
+| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.7` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
@@ -37,7 +37,7 @@ version: 1.0
 | [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.2` | Матрица зависимостей обновления файлов |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.0` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
-| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.0` | Pre-commit Hook Setup |
+| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.1` | Pre-commit Hook Setup |
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.2` | Диаграммы состояний и переходы |
 | [`operations/templates/adr_template.md`](../operations/templates/adr_template.md) | `template_adr` | `document_template` | `document_state` | `current` | `1.0` | Шаблон ADR |
 | [`operations/templates/business_requirement_template.md`](../operations/templates/business_requirement_template.md) | `template_business_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон BR |
@@ -56,9 +56,9 @@ version: 1.0
 | [`specifications/architecture_baseline.md`](../specifications/architecture_baseline.md) | `architecture_baseline` | `architecture` | `document_state` | `current` | `1.0` | Базовая логическая архитектура personal_ai_platform |
 | [`specifications/business_requirements.md`](../specifications/business_requirements.md) | `business_requirements` | `business_requirements` | `document_state` | `current` | `1.0` | Бизнес-требования personal_ai_platform |
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
-| [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
-| [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
-| [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.9` | TASK_001 — Реализация ARC_CMP_001 |
+| [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.1` | Системная спецификация personal_ai_platform |
+| [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.1` | Модель угроз personal_ai_platform |
+| [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.10` | TASK_001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `in-progress` | `1.2` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `planned` | `1.3` | TASK_003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_004_arc_004.md`](../work/tasks/task_004_arc_004.md) | `TASK_004` | `task` | `work_state` | `planned` | `1.3` | TASK_004 — Реализация ARC_CMP_004 |

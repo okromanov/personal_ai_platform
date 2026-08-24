@@ -26,7 +26,7 @@ implements:
 
 ## 2. Результат
 
-Компонент, предоставляющий логическое состояние планировщика и работоспособности поверх состояния отдельных задач (`TASK_006`). Физическая топология, средства наблюдения и механизм развёртывания сюда не входят — они принадлежат инфраструктуре (`INF_CMP_007`, `INF_CMP_008`, реализуются позже в `TASK_012`, `TASK_013`) и ADR.
+Компонент, предоставляющий логическое состояние планировщика и работоспособности поверх состояния отдельных задач ([`TASK_006`](task_006_arc_007.md)). Физическая топология, средства наблюдения и механизм развёртывания сюда не входят — они принадлежат инфраструктуре ([`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007), [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008), реализуются позже в [`TASK_012`](task_012_inf_007.md), [`TASK_013`](task_013_inf_008.md)) и ADR.
 
 ## 3. Где мы сейчас
 
@@ -36,7 +36,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `ARC_CMP_009` в [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md#arc_cmp_009)
+1. Изучить спецификацию `ARC_CMP_009`
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence
@@ -84,3 +84,7 @@ implements:
 ## 9. Что будет дальше
 
 Этим завершается блок архитектурных компонентов ([`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001)–[`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009), кроме [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002), [`ARC_CMP_006`](../../specifications/architecture_baseline.md#arc_cmp_006), [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008), которые не входят в текущую очередь TASK). [`TASK_008`](task_008_inf_001.md) начинает блок инфраструктурных компонентов с Вычислительной среды выполнения ([`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)) — физической или виртуальной основы, на которой запускаются уже реализованные сервисы.
+
+## 10. Что это даёт владельцу
+
+Функционал появится после завершения этой TASK.

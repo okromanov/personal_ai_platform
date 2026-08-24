@@ -914,6 +914,18 @@ def check_tasks(root: Path) -> CheckResult:
                     "шаблонной заглушкой auto_generate_tasks.py — опишите, что реально "
                     "поставлено (конкретные модули, ограничения, что НЕ сделано)"
                 )
+            owner_capability = _markdown_section(body, "Что это даёт владельцу")
+            if not owner_capability:
+                errors.append(
+                    f"{relative}: завершённая TASK должна содержать раздел "
+                    "'Что это даёт владельцу' — 1-3 предложения на бытовом языке о новой "
+                    "возможности для владельца"
+                )
+            elif owner_capability == "Функционал появится после завершения этой TASK.":
+                errors.append(
+                    f"{relative}: раздел 'Что это даёт владельцу' завершённой TASK не может "
+                    "оставаться шаблонной заглушкой auto_generate_tasks.py"
+                )
         if str(task["work_state"]) in {"planned", "in-progress", "blocked"} and actor == "none":
             errors.append(
                 f"{relative}: незавершённая TASK должна иметь одного следующего исполнителя"

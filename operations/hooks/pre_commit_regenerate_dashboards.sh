@@ -1,6 +1,7 @@
 #!/bin/bash
-# Pre-commit hook: regenerate dashboards if task files changed
-# Triggered before commit to ensure project_status.md and tasks.md stay in sync
+# Pre-commit hook: regenerate dashboards if any tracked Markdown doc changed
+# Triggered before commit to ensure project_status.md, tasks.md and
+# generated/* stay in sync
 #
 # This hook is intentionally non-blocking (a failure here must not stop a
 # commit), but non-blocking must never mean invisible: every failure is
@@ -31,8 +32,8 @@ PYTHON="$(find_python || true)"
 # from what generate.py would produce on the very next run. Deleted files have
 # nothing to version-bump or re-add, so exclude them (git diff --cached lists
 # them too).
+modified_md=()
 if [ -n "$PYTHON" ]; then
-    modified_md=()
     while IFS= read -r path; do
         [ -f "$path" ] && modified_md+=("$path")
     done < <(git diff --cached --name-only -- '*.md' 2>/dev/null)
@@ -46,9 +47,14 @@ else
     echo "⚠️  No Python 3.12+ interpreter found — version bump and dashboard regeneration skipped" >&2
 fi
 
-# Check if any task or test files were staged
-if git diff --cached --name-only 2>/dev/null | grep -qE "^work/(tasks|tests|m[0-9]+)/"; then
-    echo "📊 Detected changes in task/test files, regenerating dashboards..."
+# Regenerate whenever any staged Markdown doc changed. generated/*
+# (document_index.md, repository_structure.md, traceability_matrix.md,
+# test_catalog.md) reflect every tracked .md's frontmatter (id/type/version/
+# state), not just work/tasks|tests|mXX — a version bump on e.g. AGENTS.md or
+# an ADR drifts them exactly the same way a TASK/TEST change does, so scoping
+# this to work/* alone left those cases unregenerated until CI caught them.
+if [ "${#modified_md[@]}" -gt 0 ]; then
+    echo "📊 Detected changes in tracked Markdown docs, regenerating dashboards..."
 
     if [ -n "$PYTHON" ]; then
         # documents/generate.py --all is the single entry point that rebuilds

@@ -9,7 +9,7 @@ All Markdown documents must have valid YAML front matter (between `---` markers)
 ```yaml
 ---
 title: Document Title
-updated: 2026-08-23
+updated: 2026-08-24
 version: 1.0
 type: specification | procedure | authority | dashboard
 traces_to: m01, m02  # Milestone IDs this document traces to
@@ -84,7 +84,7 @@ isn't parsed as a real link to a nonexistent path):
 - Milestone states like `complete` and `completed` (inconsistent naming)
 - Incomplete category coverage (some items unclassified)
 
-**Exception:** Root `m01` milestone allowed without `traces_to` field (foundational)
+**Exception:** Root [`m01`](../../milestones.md#m01) milestone allowed without `traces_to` field (foundational)
 
 ## Consistency Rules
 
@@ -145,7 +145,7 @@ isn't parsed as a real link to a nonexistent path):
 ### Requirement → ADR → Code Mapping
 
 **Valid traces_to values:**
-- Milestone IDs: `m01`, `m02`, `m03`, etc.
+- Milestone IDs: [`m01`](../../milestones.md#m01), [`m02`](../../milestones.md#m02), [`m03`](../../milestones.md#m03), etc.
 - ADR IDs: `adr-001`, `adr-002`, etc. (optional, creates bidirectional link)
 
 **Violations:**

@@ -92,6 +92,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Проектные задачи текущего этапа",
             "Шаги текущей работы",
             "Файлы, созданные в рамках задач",
+            "Что уже умеет решение",
             "выполнено",
             "осталось",
             "[x]",
@@ -131,21 +132,42 @@ class OwnerUsabilityTests(unittest.TestCase):
         # A directory entry (src/channels/) is not an individually describable
         # file and must not get its own row.
         self.assertNotIn("[`src/channels/`](src/channels/)", section)
-        # allowed_paths carries no per-file description (see AskUserQuestion
-        # decision to drop that convention): every non-markdown source file
-        # of TASK_001 falls back to the same shared "Результат" text, so they
-        # collapse into one row rather than repeating it once per file.
-        base_row = next(line for line in section.splitlines() if "src/channels/base.py" in line)
-        telegram_row = next(
-            line for line in section.splitlines() if "src/channels/telegram.py" in line
+        # Every deliverable now gets its own row (no more grouping several
+        # files behind one <br>-joined cell), even when their description
+        # is the same shared TASK "Результат" text — allowed_paths still
+        # carries no per-file description (see AskUserQuestion decision to
+        # drop that convention), so base.py and telegram.py share text but
+        # are two distinct table rows.
+        base_row = next(
+            line for line in section.splitlines() if line.startswith("| [`src/channels/base.py`]")
         )
-        self.assertEqual(base_row, telegram_row)
+        telegram_row = next(
+            line
+            for line in section.splitlines()
+            if line.startswith("| [`src/channels/telegram.py`]")
+        )
+        self.assertNotEqual(base_row, telegram_row)
         self.assertIn("Стабильный контракт", base_row)
+        self.assertIn("Стабильный контракт", telegram_row)
         self.assertNotIn("abstraction", section)
         self.assertNotIn("implementation", section)
         # work/tests/test_007.md still describes itself, via its own "Назначение",
         # since that section is already Russian and file-specific.
         self.assertIn("Доказать, что компонент ARC_CMP_001", section)
+
+    def test_capabilities_section_lists_only_completed_tasks_real_capability_text(
+        self,
+    ) -> None:
+        rendered = render_repository_project_status(self.root)
+        section = rendered[rendered.index("## Что уже умеет решение") :]
+        # TASK_001 is completed and has a real (non-placeholder) capability
+        # statement; every other TASK is still planned/in-progress and must
+        # not appear here at all.
+        self.assertIn("[`TASK_001`](work/tasks/task_001_arc_001.md)", section)
+        self.assertIn("Реализовано единое правило приёма и ответа", section)
+        for task_id in [f"TASK_{n:03d}" for n in range(2, 14)]:
+            self.assertNotIn(f"`{task_id}`](work/tasks/", section)
+        self.assertNotIn("Функционал появится после завершения этой TASK.", section)
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
