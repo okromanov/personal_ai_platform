@@ -5,13 +5,17 @@ title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
 version: 1.6
-updated: 2026-08-23
+updated: 2026-08-24
 next_actor: none
 owner_action: none
 depends_on:
 allowed_paths:
   - work/tasks/task_001_arc_001.md
   - src/channels/
+  - src/channels/__init__.py
+  - src/channels/base.py
+  - src/channels/telegram.py
+  - src/__init__.py
   - work/tests/test_007.md
 traces_to:
   - m02
