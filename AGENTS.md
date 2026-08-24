@@ -2,7 +2,7 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 1.9
+version: 2.0
 updated: 2026-08-24
 depends_on:
   - project_rules
@@ -48,7 +48,7 @@ depends_on:
 ### Чек-лист перед публикацией PR
 
 - [ ] `run_suite.py full` и `pre_commit_hook.sh` зелёные локально
-- [ ] `generated/*`, [`project_status.md`](project_status.md), [`owner_dashboard.md`](owner_dashboard.md), [`tasks.md`](tasks.md) не требуют повторной регенерации (drift-check пройден)
+- [ ] `generated/*`, [`project_status.md`](project_status.md), [`tasks.md`](tasks.md) не требуют повторной регенерации (drift-check пройден)
 - [ ] TASK/TEST карточки отражают фактический `work_state`/`spec_state`, `updated` совпадает с датой последнего изменения
 - [ ] Diff понятен без дополнительных объяснений; ничего не изменено вне `allowed_paths`
 - [ ] Нет TODO/FIXME/заглушек и нестабильных тестов (см. §5.1)

@@ -5,7 +5,7 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.6
+version: 1.7
 updated: 2026-08-24
 accepts:
   - m02
@@ -123,8 +123,8 @@ operations/tests/product/
 
 ## 9. Доказательства
 
-- **Исходный код**: `src/channels/*` — стабильный контракт и Telegram реализация
-- **Тесты**: 16 юнит-тестов в `operations/tests/product/test_channels.py`, часть обязательного gate `Quality skills`
+- **Исходный код**: [`src/channels/`](../../src/channels/) — стабильный контракт и Telegram реализация
+- **Тесты**: 16 юнит-тестов в [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`
 - **Отсутствие регрессий**: Запуск `check.py --all` прошел успешно
 
 ## 10. Готово когда

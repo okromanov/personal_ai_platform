@@ -2,7 +2,7 @@
 id: document_frontmatter_standard
 type: guide
 document_state: current
-version: 1.2
+version: 1.3
 updated: 2026-08-24
 depends_on:
   - project_rules
@@ -171,7 +171,7 @@ implements:
 - `work_state`: `planned`, `in-progress`, `blocked`, `completed`, `cancelled`
 - `next_actor`: `agent` или `owner` или `none`
 - `owner_action`: описание требуемого действия владельца
-- `allowed_paths`: список путей, которые эта задача может изменять. Запись для конкретного файла (не маска, не каталог) может нести собственное краткое описание на русском через ` — `: `src/channels/base.py — Базовый контракт канала: приём и отправка сообщений без логики платформы.` — используется в [`project_status.md`](../project_status.md) (см. [`operations/procedures/file_update_dependencies.md`](procedures/file_update_dependencies.md))
+- `allowed_paths`: список путей, которые эта задача может изменять — только сам путь (маска, каталог или файл), без дополнительного текста. Что представляет собой конкретный файл, описывается в разделе «6. Состав» карточки, а не в самом списке путей.
 - `implements`: собственный component и только семантически связанные элементы его цепочки требований
 
 ### 2.12 test

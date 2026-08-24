@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.4
+version: 1.5
 updated: 2026-08-24
 depends_on:
   - operations_change_process
@@ -172,8 +172,8 @@ AGENTS.md раздел 2 (с чего начинать)
 - **`updated:` во фронтматтере** обязан совпадать с датой фактического последнего изменения
   файла по git-истории — иначе падает проверка честности метаданных.
 - **Не редактировать вручную** `generated/*`, [`project_status.md`](../project_status.md),
-  [`owner_dashboard.md`](../owner_dashboard.md), [`tasks.md`](../tasks.md) — все они
-  регенерируются `python operations/scripts/documents/generate.py --all`; ручная правка
+  [`tasks.md`](../tasks.md) — все они регенерируются
+  `python operations/scripts/documents/generate.py --all`; ручная правка
   разойдётся с генератором и провалит `generated drift` в CI.
 - **Пути — только `lower_snake_case`** (кроме [`AGENTS.md`](../AGENTS.md) и dot-файлов).
 - **Ссылки на элементы трассируемости** — каждое упоминание `BR_XXX`/`SYS_XXX`/`ARC_CMP_XXX`/

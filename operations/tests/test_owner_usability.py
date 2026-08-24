@@ -34,7 +34,6 @@ def _task_item(
         "implements": [],
         "component": "",
         "allowed_paths": [],
-        "file_descriptions": {},
         "blocker": "",
         "tests": [],
         "next_actor": "agent",
@@ -132,16 +131,16 @@ class OwnerUsabilityTests(unittest.TestCase):
         # A directory entry (src/channels/) is not an individually describable
         # file and must not get its own row.
         self.assertNotIn("[`src/channels/`](src/channels/)", section)
-        # Each source file has its own, distinct, Russian description written
-        # once in TASK_001's allowed_paths — not an English docstring, and not
-        # a single description shared across every file the TASK shipped.
+        # allowed_paths carries no per-file description (see AskUserQuestion
+        # decision to drop that convention): every non-markdown source file
+        # of TASK_001 falls back to the same shared "Результат" text, so they
+        # collapse into one row rather than repeating it once per file.
         base_row = next(line for line in section.splitlines() if "src/channels/base.py" in line)
         telegram_row = next(
             line for line in section.splitlines() if "src/channels/telegram.py" in line
         )
-        self.assertNotEqual(base_row, telegram_row)
-        self.assertIn("Базовый контракт канала", base_row)
-        self.assertIn("Реализация канала для Telegram", telegram_row)
+        self.assertEqual(base_row, telegram_row)
+        self.assertIn("Стабильный контракт", base_row)
         self.assertNotIn("abstraction", section)
         self.assertNotIn("implementation", section)
         # work/tests/test_007.md still describes itself, via its own "Назначение",

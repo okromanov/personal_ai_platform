@@ -6,16 +6,13 @@ import os
 import re
 import subprocess
 import sys
-import time
 import tomllib
 from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from operations.scripts.common.project import atomic_write, find_project_root
-
-STEP_TIMINGS_PATH = "runtime/step_timings.json"
+from operations.scripts.common.project import find_project_root
 
 
 class QualityFailure(RuntimeError):
@@ -113,22 +110,6 @@ def validate_python_permissions(root: Path) -> None:
         raise QualityFailure("Python files must not be executable: " + ", ".join(executable))
 
 
-def _record_step_timing(root: Path, name: str, duration_seconds: float) -> None:
-    """Persist how long `name` took, for owner_dashboard.py's repository stats.
-
-    Best-effort: a write failure here must not fail the quality suite itself.
-    """
-    path = root / STEP_TIMINGS_PATH
-    try:
-        timings = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
-        if not isinstance(timings, dict):
-            timings = {}
-    except (OSError, ValueError):
-        timings = {}
-    timings[name] = round(duration_seconds, 3)
-    atomic_write(path, json.dumps(timings, ensure_ascii=False, indent=2))
-
-
 def run_step(
     root: Path,
     name: str,
@@ -137,7 +118,6 @@ def run_step(
     artifact: str | None = None,
 ) -> None:
     print(f"\n== {name} ==")
-    start = time.perf_counter()
     completed = subprocess.run(
         command,
         cwd=root,
@@ -148,7 +128,6 @@ def run_step(
         stderr=subprocess.STDOUT,
         check=False,
     )
-    _record_step_timing(root, name, time.perf_counter() - start)
     output = completed.stdout
     if output:
         print(output, end="" if output.endswith("\n") else "\n")

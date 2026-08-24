@@ -16,7 +16,7 @@ version: 1.0
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `1.9` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.0` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -29,26 +29,26 @@ version: 1.0
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.3` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.1` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
-| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.5` | Процедуры изменений и публикации |
-| [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.2` | Стандарт frontmatter для документов |
+| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.6` | Процедуры изменений и публикации |
+| [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
-| [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.4` | Карта операционных процедур |
-| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.0` | Матрица зависимостей обновления файлов |
+| [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.5` | Карта операционных процедур |
+| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.2` | Матрица зависимостей обновления файлов |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.0` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
 | [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.0` | Pre-commit Hook Setup |
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.2` | Диаграммы состояний и переходы |
 | [`operations/templates/adr_template.md`](../operations/templates/adr_template.md) | `template_adr` | `document_template` | `document_state` | `current` | `1.0` | Шаблон ADR |
 | [`operations/templates/business_requirement_template.md`](../operations/templates/business_requirement_template.md) | `template_business_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон BR |
-| [`operations/templates/generated_files_template.md`](../operations/templates/generated_files_template.md) | `template_generated_files` | `document_template` | `document_state` | `current` | `1.0` | Шаблон генерируемых файлов |
+| [`operations/templates/generated_files_template.md`](../operations/templates/generated_files_template.md) | `template_generated_files` | `document_template` | `document_state` | `current` | `1.1` | Шаблон генерируемых файлов |
 | [`operations/templates/infrastructure_component_template.md`](../operations/templates/infrastructure_component_template.md) | `template_infrastructure_component` | `document_template` | `document_state` | `current` | `1.0` | Шаблон INF_CMP |
 | [`operations/templates/infrastructure_flow_template.md`](../operations/templates/infrastructure_flow_template.md) | `template_infrastructure_flow` | `document_template` | `document_state` | `current` | `1.0` | Шаблон INF_FLOW |
 | [`operations/templates/infrastructure_requirement_template.md`](../operations/templates/infrastructure_requirement_template.md) | `template_infrastructure_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон INF_REQ |
 | [`operations/templates/milestone_template.md`](../operations/templates/milestone_template.md) | `template_milestone` | `document_template` | `document_state` | `current` | `1.0` | Шаблон этапа |
 | [`operations/templates/security_control_template.md`](../operations/templates/security_control_template.md) | `template_security_control` | `document_template` | `document_state` | `current` | `1.0` | Шаблон SEC_CTL |
 | [`operations/templates/system_requirement_template.md`](../operations/templates/system_requirement_template.md) | `template_system_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон SYS |
-| [`operations/templates/task_template.md`](../operations/templates/task_template.md) | `template_task` | `document_template` | `document_state` | `current` | `1.3` | Шаблон TASK |
+| [`operations/templates/task_template.md`](../operations/templates/task_template.md) | `template_task` | `document_template` | `document_state` | `current` | `1.4` | Шаблон TASK |
 | [`operations/templates/test_template.md`](../operations/templates/test_template.md) | `template_test` | `document_template` | `document_state` | `current` | `1.3` | Шаблон TEST |
 | [`operations/templates/threat_template.md`](../operations/templates/threat_template.md) | `template_threat` | `document_template` | `document_state` | `current` | `1.0` | Шаблон THR |
 | [`operations/threat_review_triggers.md`](../operations/threat_review_triggers.md) | `threat_review_triggers` | `guide` | `document_state` | `current` | `1.0` | Триггеры и процедуры угроз |
@@ -58,7 +58,7 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
-| [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.8` | TASK_001 — Реализация ARC_CMP_001 |
+| [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.9` | TASK_001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `in-progress` | `1.2` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `planned` | `1.3` | TASK_003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_004_arc_004.md`](../work/tasks/task_004_arc_004.md) | `TASK_004` | `task` | `work_state` | `planned` | `1.3` | TASK_004 — Реализация ARC_CMP_004 |
@@ -77,4 +77,4 @@ version: 1.0
 | [`work/tests/test_004.md`](../work/tests/test_004.md) | `TEST_004` | `test` | `spec_state` | `current` | `1.2` | TEST_004 — Контроль владельца и аварийное отключение |
 | [`work/tests/test_005.md`](../work/tests/test_005.md) | `TEST_005` | `test` | `spec_state` | `current` | `1.2` | TEST_005 — Сквозной сценарий Telegram и перезапуск |
 | [`work/tests/test_006.md`](../work/tests/test_006.md) | `TEST_006` | `test` | `spec_state` | `current` | `1.2` | TEST_006 — Инфраструктурный контур первого живого помощника |
-| [`work/tests/test_007.md`](../work/tests/test_007.md) | `TEST_007` | `test` | `spec_state` | `current` | `1.6` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |
+| [`work/tests/test_007.md`](../work/tests/test_007.md) | `TEST_007` | `test` | `spec_state` | `current` | `1.7` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |

@@ -52,8 +52,8 @@ if git diff --cached --name-only 2>/dev/null | grep -qE "^work/(tasks|tests|m[0-
 
     if [ -n "$PYTHON" ]; then
         # documents/generate.py --all is the single entry point that rebuilds
-        # project_status.md, tasks.md, owner_dashboard.md and generated/*;
-        # there's nothing further to call.
+        # project_status.md, tasks.md and generated/*; there's nothing
+        # further to call.
         if ! "$PYTHON" operations/scripts/documents/generate.py --all; then
             echo "⚠️  documents/generate.py --all failed (see output above) — generated/ may be stale" >&2
         fi
@@ -61,10 +61,9 @@ if git diff --cached --name-only 2>/dev/null | grep -qE "^work/(tasks|tests|m[0-
         # Auto-add regenerated files if they changed
         if ! git diff --quiet project_status.md 2>/dev/null || \
            ! git diff --quiet tasks.md 2>/dev/null || \
-           ! git diff --quiet owner_dashboard.md 2>/dev/null || \
            ! git diff --quiet generated/ 2>/dev/null; then
             echo "⚡ Dashboard changes detected, adding to commit..."
-            git add project_status.md tasks.md owner_dashboard.md generated/
+            git add project_status.md tasks.md generated/
         fi
     fi
 fi
