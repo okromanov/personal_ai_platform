@@ -2,7 +2,7 @@
 id: system_specification
 type: system_specification
 document_state: current
-version: 1.0
+version: 1.1
 updated: 2026-08-24
 depends_on:
   - business_requirements

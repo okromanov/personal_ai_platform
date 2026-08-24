@@ -29,7 +29,7 @@ version: 1.0
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.3` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.1` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
-| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.6` | Процедуры изменений и публикации |
+| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.7` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
@@ -56,8 +56,8 @@ version: 1.0
 | [`specifications/architecture_baseline.md`](../specifications/architecture_baseline.md) | `architecture_baseline` | `architecture` | `document_state` | `current` | `1.0` | Базовая логическая архитектура personal_ai_platform |
 | [`specifications/business_requirements.md`](../specifications/business_requirements.md) | `business_requirements` | `business_requirements` | `document_state` | `current` | `1.0` | Бизнес-требования personal_ai_platform |
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
-| [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.0` | Системная спецификация personal_ai_platform |
-| [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.0` | Модель угроз personal_ai_platform |
+| [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.1` | Системная спецификация personal_ai_platform |
+| [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.1` | Модель угроз personal_ai_platform |
 | [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.10` | TASK_001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `in-progress` | `1.2` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `planned` | `1.3` | TASK_003 — Реализация ARC_CMP_003 |
