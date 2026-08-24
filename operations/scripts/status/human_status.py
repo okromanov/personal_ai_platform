@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
@@ -57,39 +58,88 @@ def _deliverable_paths(task: TaskItem) -> list[str]:
     return [path for path in task.get("allowed_paths", []) if path != own_path]
 
 
-def _test_purpose(root: Path, test_path: str) -> str:
-    """First line of a TEST doc's '## 1. Назначение' section, or "" if unavailable."""
-    full_path = root / test_path
+def _python_docstring_summary(path: Path) -> str:
+    """First line of a Python file's own module docstring, or "" if absent."""
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return ""
+    docstring = ast.get_docstring(tree)
+    return docstring.strip().splitlines()[0].strip() if docstring else ""
+
+
+def _markdown_document_purpose(root: Path, relative_path: str) -> str:
+    """First line of a TEST/TASK document's own "Назначение"/"Результат"
+    section, read from the file itself rather than borrowed from a
+    different document (a shared TEST purpose used to be copied onto every
+    file a TASK delivered, which described why the TEST exists, not what
+    each individual file is)."""
+    full_path = root / relative_path
     if not full_path.is_file():
         return ""
     try:
         body = load_document(full_path).body
     except ValueError:
         return ""
-    purpose = _section(body, "Назначение")
-    first_line = purpose.splitlines()[0].strip() if purpose else ""
-    return first_line
+    for title in ("Назначение", "Результат"):
+        section = _section(body, title)
+        if section:
+            return section.splitlines()[0].strip()
+    return ""
+
+
+def _file_description(root: Path, relative_path: str) -> str:
+    """What the file itself is about, sourced only from its own real
+    content: a Python module's own docstring, a TEST/TASK document's own
+    purpose/result section, or (for a directory entry) its own
+    `__init__.py` docstring — never invented and never borrowed from a
+    sibling file's documentation."""
+    if relative_path.endswith("/"):
+        init_path = f"{relative_path}__init__.py"
+        return _python_docstring_summary(root / init_path) if (root / init_path).is_file() else ""
+    suffix = Path(relative_path).suffix
+    if suffix == ".py":
+        return _python_docstring_summary(root / relative_path)
+    if suffix == ".md":
+        return _markdown_document_purpose(root, relative_path)
+    return ""
 
 
 def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
-    """One table row per delivered file: name+link, owning TASK, and a real
-    description sourced from that TASK's TEST "Назначение" section (never
-    invented — if the TEST has no such section, the row says so plainly)."""
-    rows: list[str] = []
+    """One table row per distinct description: name+link, owning TASK, and
+    a real description of what the file itself is (never invented — a file
+    with no docstring or purpose/result section says so plainly). Files
+    from the same TASK that end up with the identical description (e.g. a
+    directory entry and its own `__init__.py`, or several files with no
+    docstring at all) collapse into a single row instead of repeating the
+    same text once per file."""
+    entries: list[tuple[str, str, str]] = []
     for task in tasks:
         paths = _deliverable_paths(task)
         if not paths:
             continue
-        purpose = ""
-        test_refs = task.get("tests", [])
-        if test_refs:
-            purpose = _test_purpose(root, test_refs[0]["path"])
-        description = purpose or "_Описание не задано (у TEST нет раздела «Назначение»)._"
         task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
         for path in paths:
-            rows.append(f"| [`{path}`]({path}) | {task_link} | {description} |")
-    if not rows:
+            description = _file_description(root, path) or (
+                "_Описание не задано (нет docstring или раздела «Назначение»/«Результат»)._"
+            )
+            entries.append((path, task_link, description))
+    if not entries:
         return "Ни одна TASK ещё не поставила файлы за пределами собственной карточки."
+
+    grouped: dict[tuple[str, str], list[str]] = {}
+    order: list[tuple[str, str]] = []
+    for path, task_link, description in entries:
+        key = (task_link, description)
+        if key not in grouped:
+            grouped[key] = []
+            order.append(key)
+        grouped[key].append(path)
+
+    rows = [
+        f"| {'<br>'.join(f'[`{path}`]({path})' for path in grouped[key])} | {key[0]} | {key[1]} |"
+        for key in order
+    ]
     return "\n".join(["| Файл | Задача | Описание |", "|---|---|---|", *rows])
 
 
