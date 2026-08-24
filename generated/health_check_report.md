@@ -12,7 +12,7 @@ updated: 2026-08-24
 
 **Дата проверки:** 24 August 2026
 **Ветка:** claude/combine-branches-pr-hc9wq3
-**Общее состояние:** ✅ HEALTHY
+**Общее состояние:** ⚠️ NEEDS ATTENTION
 
 ---
 
@@ -20,13 +20,13 @@ updated: 2026-08-24
 
 | Метрика | Значение | Статус |
 |---------|---------|--------|
-| **Всего коммитов** | 93 | ✅ |
-| **Размер репозитория (.git)** | 1193 KB | ✅ |
-| **Размер проекта** | 24.2 MB | ✅ |
-| **Python файлов** | 109 | ✅ |
-| **Строк кода** | 18,920 | ✅ |
-| **Тесты (пройдено/всего)** | 295 passed | ✅ |
-| **Ветки** | 10 | ✅ |
+| **Всего коммитов** | 102 | ✅ |
+| **Размер репозитория (.git)** | 1353 KB | ✅ |
+| **Размер проекта** | 26.8 MB | ✅ |
+| **Python файлов** | 107 | ✅ |
+| **Строк кода** | 18,531 | ✅ |
+| **Тесты (пройдено/всего)** | 289 passed | ✅ |
+| **Ветки** | 11 | ✅ |
 
 ---
 
@@ -34,9 +34,9 @@ updated: 2026-08-24
 
 ### 1. **Тестирование**
 - **Статус:** ✅ PASSED
-- **Пройдено/Провалено:** 295/295
-- **Время выполнения:** 20.98s
-- **Охват:** 82.3%
+- **Пройдено/Провалено:** 289/289
+- **Время выполнения:** 19.21s
+- **Охват:** 81.8%
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** ✅ SUCCESS (0 issues)
@@ -48,17 +48,17 @@ updated: 2026-08-24
 - **Статус:** Все файлы соответствуют формату
 
 ### 4. **Git Статус**
-- **Рабочая копия:** ✅ Чистая
+- **Рабочая копия:** ❌ Имеются изменения
 - **Remote URL:** https://github.com/okromanov/personal_ai_platform
-- **Коммитов:** 93
+- **Коммитов:** 102
 
 ### 5. **Недавние коммиты**
 ```
-9bca6ab Remove per-file description convention from allowed_paths; link real file paths mentioned in TASK_001/TEST_007
-edaa7d1 Merge pull request #20 from okromanov/claude/combine-branches-pr-hc9wq3
-d803bee Fix stale updated: dates on test_001.md and test_007.md
-10c6abc Rebuild task_001's body (was still template text after merge) and auto-link traceability-matrix elements across all TASK/TEST cards
-1462c9c Merge pull request #19 from okromanov/claude/combine-branches-pr-hc9wq3
+b02c42a Fix health_check ruff/mypy metrics to match canonical CI gates
+6162c01 Merge pull request #21 from okromanov/claude/fix-allowed-paths-and-links-576680
+60dddce Fix owner_dashboard.md reference reintroduced by main-branch merge; bump AGENTS.md version
+e9859b5 Merge remote-tracking branch 'origin/main' into claude/fix-allowed-paths-and-links-576680
+19c8fbb Bump version/updated on docs edited for the owner_dashboard.md removal
 ```
 
 ---
@@ -69,28 +69,28 @@ d803bee Fix stale updated: dates on test_001.md and test_007.md
 | Аспект | Статус | Комментарий |
 |--------|--------|-----------|
 | Type Safety | ✅ | MyPy: 0 issues |
-| Linting | ❌ | Ruff: 222 issues |
+| Linting | ✅ | Ruff: compliant |
 | Formatting | ✅ | All files compliant |
-| Tests | ✅ | 295 passed |
-| Coverage | ✅ | 82.3% coverage |
+| Tests | ✅ | 289 passed |
+| Coverage | ✅ | 81.8% coverage |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
 |--------|--------|----------|
-| Size | ✅ | 1193 KB (.git), 24.2 MB (total) |
-| Branches | ✅ | 10 branches |
+| Size | ✅ | 1353 KB (.git), 26.8 MB (total) |
+| Branches | ✅ | 11 branches |
 | Remote | ✅ | https://github.com/okromanov/personal_ai_platform |
-| Working Tree | ✅ | Clean |
-| Commits | ✅ | 93 commits |
+| Working Tree | ❌ | Has changes |
+| Commits | ✅ | 102 commits |
 
 ---
 
 ## ✨ Сильные стороны
 
-- ✅ Comprehensive Python codebase (109 files, 18,920 LOC)
-- ✅ Test coverage at 82.3%
+- ✅ Comprehensive Python codebase (107 files, 18,531 LOC)
+- ✅ Test coverage at 81.8%
 - ✅ Type-safe codebase (MyPy: 0 issues)
-- ✅ Clean git history (93 commits)
+- ✅ Clean git history (102 commits)
 - ✅ Formatted according to standards
 - ✅ Regular commits and clean working tree
 
@@ -117,11 +117,11 @@ d803bee Fix stale updated: dates on test_001.md and test_007.md
 
 ## 📝 Заключение
 
-**Статус репозитория: ✅ HEALTHY**
+**Статус репозитория: ⚠️ NEEDS ATTENTION**
 
 Репозиторий находится в отличном состоянии с точки зрения:
 - ✅ Качества кода (type safety, linting)
-- ✅ Тестирования (295 passed)
+- ✅ Тестирования (289 passed)
 - ✅ Форматирования
 - ✅ Управления (git hygiene, commits)
 
@@ -131,4 +131,4 @@ d803bee Fix stale updated: dates on test_001.md and test_007.md
 
 **Сгенерировано:** Claude Code
 **Версия отчета:** 1.0
-**Время проверки:** 2026-08-24T13:33:49.584593Z
+**Время проверки:** 2026-08-24T15:17:43.803234Z
