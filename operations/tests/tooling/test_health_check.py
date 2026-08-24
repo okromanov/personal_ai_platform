@@ -61,12 +61,32 @@ class CollectGitMetricsTests(unittest.TestCase):
 
 
 class CollectCodeQualityMetricsTests(unittest.TestCase):
-    def test_counts_ruff_issue_lines_and_flags_noncompliant_formatting(self) -> None:
+    def test_counts_ruff_issues_from_summary_line_and_flags_noncompliant_formatting(
+        self,
+    ) -> None:
         def fake_run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[str]:
             if cmd[0] == "mypy":
-                return subprocess.CompletedProcess(cmd, 0, stdout="Success: no issues found\n")
+                # Real mypy --show-error-codes output: one "error:" line per
+                # finding, each ending in a bracketed error code.
+                stdout = (
+                    "operations/scripts/a.py:1: error: bad type [arg-type]\n"
+                    "operations/scripts/a.py:2: error: also bad [assignment]\n"
+                )
+                return subprocess.CompletedProcess(cmd, 1, stdout=stdout, stderr="")
             if cmd[:2] == ["ruff", "check"]:
-                stdout = "src/a.py:1:1: F401 unused import\nsrc/b.py:2:1: E741 ambiguous name\n"
+                # Real ruff output is multi-line per finding (code context,
+                # "-->" locations, "|" gutters, each containing ":") with a
+                # trailing "Found N error(s)." summary - only that summary
+                # line is the real count.
+                stdout = (
+                    "src/a.py:1:1: F401 [*] `os` imported but unused\n"
+                    "  |\n"
+                    "1 | import os\n"
+                    "  |        ^^\n"
+                    "  |\n\n"
+                    "Found 1 error.\n"
+                    "[*] 1 fixable with the `--fix` option.\n"
+                )
                 return subprocess.CompletedProcess(cmd, 1, stdout=stdout)
             if cmd[:2] == ["ruff", "format"]:
                 return subprocess.CompletedProcess(cmd, 1, stdout="")
@@ -75,9 +95,28 @@ class CollectCodeQualityMetricsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, patch("subprocess.run", side_effect=fake_run):
             quality = collect_code_quality_metrics(Path(tmp))
 
-        self.assertTrue(quality.type_safe)
-        self.assertEqual(quality.ruff_issues, 2)
+        self.assertFalse(quality.type_safe)
+        self.assertEqual(quality.mypy_issues, 2)
+        self.assertEqual(quality.ruff_issues, 1)
         self.assertFalse(quality.formatting_compliant)
+
+    def test_ruff_output_with_no_findings_counts_zero(self) -> None:
+        def fake_run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+            if cmd[0] == "mypy":
+                return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+            if cmd[:2] == ["ruff", "check"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="All checks passed!\n")
+            if cmd[:2] == ["ruff", "format"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="3 files already formatted\n")
+            raise AssertionError(f"unexpected command: {cmd}")
+
+        with tempfile.TemporaryDirectory() as tmp, patch("subprocess.run", side_effect=fake_run):
+            quality = collect_code_quality_metrics(Path(tmp))
+
+        self.assertTrue(quality.type_safe)
+        self.assertEqual(quality.mypy_issues, 0)
+        self.assertEqual(quality.ruff_issues, 0)
+        self.assertTrue(quality.formatting_compliant)
 
     def test_missing_tools_leave_safe_defaults(self) -> None:
         with (

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -121,8 +122,6 @@ def collect_git_metrics(root: Path) -> RepositoryMetrics:
 
 def collect_test_metrics(root: Path) -> TestMetrics:
     """Collect test execution metrics."""
-    import re
-
     passed = failed = 0
     exec_time = 0.0
 
@@ -172,7 +171,14 @@ def collect_test_metrics(root: Path) -> TestMetrics:
 
 
 def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
-    """Collect code quality metrics."""
+    """Collect code quality metrics.
+
+    Scope and rules deliberately mirror the canonical CI gates
+    (run_suite.py / run_mypy_baseline.py) rather than an independently
+    chosen path list or ruff rule set: a health check that disagrees with
+    the gate that actually blocks CI is worse than no health check, since
+    it trains readers to distrust (or ignore) whichever one is "wrong".
+    """
     mypy_issues = 0
     ruff_issues = 0
     formatting_compliant = True
@@ -180,36 +186,52 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
 
     try:
         result = subprocess.run(
-            ["mypy", "src", "operations/scripts", "--ignore-missing-imports"],
+            [
+                "mypy",
+                "operations/scripts",
+                "operations/tests",
+                "src",
+                "--show-error-codes",
+                "--no-error-summary",
+            ],
             cwd=root,
             capture_output=True,
             text=True,
             timeout=60,
         )
-        mypy_issues = result.stdout.count("error:")
-        type_safe = result.returncode == 0
+        output = result.stdout + result.stderr
+        mypy_issues = len(
+            re.findall(r"^.+:\d+(?::\d+)?: error:.*\[[^\]]+\]$", output, re.MULTILINE)
+        )
+        type_safe = mypy_issues == 0
+
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+    try:
+        # No --select override: this must see the same pyproject.toml
+        # [tool.ruff.lint] select/ignore (e.g. E501 is intentionally
+        # ignored project-wide) that the canonical "Ruff lint" step does,
+        # or the two will disagree on what counts as an issue.
+        result = subprocess.run(
+            ["ruff", "check", "operations/scripts", "operations/tests"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        # Ruff's default output is multi-line per finding (code context,
+        # "-->" locations, "|" gutters); counting lines containing ":"
+        # overcounts wildly. Its own summary line is the real count.
+        found = re.search(r"^Found (\d+) error", result.stdout, re.MULTILINE)
+        ruff_issues = int(found.group(1)) if found else 0
 
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
 
     try:
         result = subprocess.run(
-            ["ruff", "check", "src", "operations", "--select=E,F,W"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-        ruff_issues = len(
-            [line for line in result.stdout.split("\n") if line.strip() and ":" in line]
-        )
-
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
-
-    try:
-        result = subprocess.run(
-            ["ruff", "format", "--check", "src", "operations"],
+            ["ruff", "format", "--check", "operations/scripts", "operations/tests"],
             cwd=root,
             capture_output=True,
             text=True,
