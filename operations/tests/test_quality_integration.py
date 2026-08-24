@@ -43,10 +43,14 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn("gitleaks", workflow)
         self.assertIn("pip_audit", workflow)
 
-    def test_quality_record_requires_exact_sha_and_nonempty_artifacts(self) -> None:
+    def test_quality_record_requires_exact_sha_and_present_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "ruff.txt").write_text("passed\n", encoding="utf-8")
+            # A tool that finds nothing to report (e.g. Vulture on a clean
+            # tree) legitimately writes an empty file; build_record() must
+            # accept that rather than treating "empty" the same as "missing".
+            (root / "dead_code.txt").write_text("", encoding="utf-8")
             source: dict[str, object] = {
                 "repository": "owner/repo",
                 "workflow": "Project check",
@@ -54,11 +58,14 @@ class QualityIntegrationTests(unittest.TestCase):
                 "run_url": "https://github.com/owner/repo/actions/runs/123",
                 "event_sha": "a" * 40,
             }
-            record = build_record(root, "a" * 40, ["ruff.txt"], server_source=source)
+            record = build_record(
+                root, "a" * 40, ["ruff.txt", "dead_code.txt"], server_source=source
+            )
             self.assertEqual(record["result"], "passed")
             self.assertEqual(record["git_sha"], "a" * 40)
             artifacts = cast(list[dict[str, object]], record["artifacts"])
             self.assertEqual(artifacts[0]["path"], "ruff.txt")
+            self.assertEqual(artifacts[1]["bytes"], 0)
             with self.assertRaisesRegex(ValueError, "40-"):
                 build_record(root, "short", ["ruff.txt"], server_source=source)
             with self.assertRaisesRegex(ValueError, "отсутствует"):

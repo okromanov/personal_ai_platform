@@ -35,8 +35,11 @@ def build_record(
             relative = candidate.relative_to(root.resolve())
         except ValueError as exc:
             raise ValueError(f"Артефакт вне репозитория: {value}") from exc
-        if not candidate.is_file() or candidate.stat().st_size == 0:
-            raise ValueError(f"Артефакт отсутствует или пуст: {value}")
+        if not candidate.is_file():
+            raise ValueError(f"Артефакт отсутствует: {value}")
+        # Existence, not size: a tool that finds nothing to report (Vulture on
+        # a clean tree, for one) legitimately writes a zero-byte file — that
+        # is a valid "passed, no findings" result, not a broken pipeline step.
         checked.append(
             {
                 "path": relative.as_posix(),
