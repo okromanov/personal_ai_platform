@@ -102,7 +102,7 @@ dae9f9b Use Russian sources for file descriptions in project_status.md (#14)
 ### Уровень 1: Сделать (Low Priority)
 - Monitor code quality metrics regularly
 - Keep dependencies up to date
-- Maintain test coverage above 75%
+- Maintain test coverage above 85%
 
 ### Уровень 2: Рассмотреть (Medium Priority)
 - Review any failing tests

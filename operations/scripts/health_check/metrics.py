@@ -128,7 +128,7 @@ def collect_test_metrics(root: Path) -> TestMetrics:
 
     try:
         result = subprocess.run(
-            ["python", "-m", "pytest", "operations/tests/", "-q", "--tb=no"],
+            ["python", "-m", "coverage", "run", "-m", "pytest", "operations/tests/", "-q", "--tb=no"],
             cwd=root,
             capture_output=True,
             text=True,
