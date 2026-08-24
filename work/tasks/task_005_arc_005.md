@@ -30,7 +30,7 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005) определяет требования (`SYS_020`, `SYS_021`, `SEC_CTL_003`, `SEC_CTL_007`, `SEC_CTL_008`, `SEC_CTL_009`). Реализации нет. Зависит от `TASK_004` (шлюз моделей) — оба шлюза формируют полный набор внешних контрактов, которыми пользуется оркестратор.
+Спецификация [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005) определяет требования ([`SYS_020`](../../specifications/system_specification.md#sys_020), [`SYS_021`](../../specifications/system_specification.md#sys_021), [`SEC_CTL_003`](../../specifications/system_specification.md#sec_ctl_003), [`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007), [`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008), [`SEC_CTL_009`](../../specifications/system_specification.md#sec_ctl_009)). Реализации нет. Зависит от [`TASK_004`](task_004_arc_004.md) (шлюз моделей) — оба шлюза формируют полный набор внешних контрактов, которыми пользуется оркестратор.
 
 ## 4. Что делать сейчас
 
@@ -83,4 +83,4 @@ implements:
 
 ## 9. Что будет дальше
 
-`TASK_006` реализует Состояние задач (`ARC_CMP_007`) — компонент, который отслеживает жизненный цикл задачи, пока оркестратор вызывает модель (`TASK_004`) и инструменты (`TASK_005`). Три компонента вместе образуют рабочий цикл выполнения задачи.
+[`TASK_006`](task_006_arc_007.md) реализует Состояние задач ([`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007)) — компонент, который отслеживает жизненный цикл задачи, пока оркестратор вызывает модель ([`TASK_004`](task_004_arc_004.md)) и инструменты (`TASK_005`). Три компонента вместе образуют рабочий цикл выполнения задачи.

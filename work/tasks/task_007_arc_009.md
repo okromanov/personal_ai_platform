@@ -30,7 +30,7 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009) определяет требования (`SYS_013`, `SYS_024`, `SYS_025`, `SYS_026`, `SYS_027`, `SYS_030`). Реализации нет. Зависит от `TASK_006` (состояние задач) — эксплуатационные функции агрегируют состояние отдельных задач в общесистемную картину.
+Спецификация [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009) определяет требования ([`SYS_013`](../../specifications/system_specification.md#sys_013), [`SYS_024`](../../specifications/system_specification.md#sys_024), [`SYS_025`](../../specifications/system_specification.md#sys_025), [`SYS_026`](../../specifications/system_specification.md#sys_026), [`SYS_027`](../../specifications/system_specification.md#sys_027), [`SYS_030`](../../specifications/system_specification.md#sys_030)). Реализации нет. Зависит от [`TASK_006`](task_006_arc_007.md) (состояние задач) — эксплуатационные функции агрегируют состояние отдельных задач в общесистемную картину.
 
 ## 4. Что делать сейчас
 
@@ -72,7 +72,7 @@ implements:
 **Ручные (code review):**
 1. Компонент не дублирует физическую инфраструктуру (наблюдаемость, развёртывание)
 2. Действия восстановления явно ограничены и не дают полного административного доступа
-3. Состояние планировщика согласовано с состоянием отдельных задач (`TASK_006`)
+3. Состояние планировщика согласовано с состоянием отдельных задач ([`TASK_006`](task_006_arc_007.md))
 
 ## 8. Готово когда
 
@@ -83,4 +83,4 @@ implements:
 
 ## 9. Что будет дальше
 
-Этим завершается блок архитектурных компонентов (`ARC_CMP_001`–`ARC_CMP_009`, кроме `ARC_CMP_002`, `ARC_CMP_006`, `ARC_CMP_008`, которые не входят в текущую очередь TASK). `TASK_008` начинает блок инфраструктурных компонентов с Вычислительной среды выполнения (`INF_CMP_001`) — физической или виртуальной основы, на которой запускаются уже реализованные сервисы.
+Этим завершается блок архитектурных компонентов ([`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001)–[`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009), кроме [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002), [`ARC_CMP_006`](../../specifications/architecture_baseline.md#arc_cmp_006), [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008), которые не входят в текущую очередь TASK). [`TASK_008`](task_008_inf_001.md) начинает блок инфраструктурных компонентов с Вычислительной среды выполнения ([`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)) — физической или виртуальной основы, на которой запускаются уже реализованные сервисы.

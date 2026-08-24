@@ -5,8 +5,8 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.5
-updated: 2026-08-23
+version: 1.6
+updated: 2026-08-24
 accepts:
   - m02
 traces_to:
@@ -35,10 +35,10 @@ depends_on: []
 
 Требования:
 
-- **SYS_001**: Единый жизненный цикл задачи в основном канале (Telegram)
-- **SYS_005**: Веб-интерфейс как общий клиент (базовая подготовка)
-- **SYS_006**: Командный интерфейс (подготовка)
-- **SYS_007**: Голосовой канал (подготовка архитектуры)
+- **[`SYS_001`](../../specifications/system_specification.md#sys_001)**: Единый жизненный цикл задачи в основном канале (Telegram)
+- **[`SYS_005`](../../specifications/system_specification.md#sys_005)**: Веб-интерфейс как общий клиент (базовая подготовка)
+- **[`SYS_006`](../../specifications/system_specification.md#sys_006)**: Командный интерфейс (подготовка)
+- **[`SYS_007`](../../specifications/system_specification.md#sys_007)**: Голосовой канал (подготовка архитектуры)
 
 ## 3. Автоматический запуск
 
@@ -116,10 +116,10 @@ operations/tests/product/
 
 | Требование | Статус | Примечание |
 |---|---|---|
-| SYS_001: Жизненный цикл задачи | ✅ | Реализовано с TaskState и наблюдаемыми переходами |
-| SYS_005: Веб-интерфейс | 🔄 | Архитектура готова, реализация на m02.step5 |
-| SYS_006: Админский интерфейс | 🔄 | Архитектура готова, реализация на m02.step6 |
-| SYS_007: Голосовой канал | 🔄 | Архитектура готова, реализация на m03+ |
+| [`SYS_001`](../../specifications/system_specification.md#sys_001): Жизненный цикл задачи | ✅ | Реализовано с TaskState и наблюдаемыми переходами |
+| [`SYS_005`](../../specifications/system_specification.md#sys_005): Веб-интерфейс | 🔄 | Архитектура готова, реализация на m02.step5 |
+| [`SYS_006`](../../specifications/system_specification.md#sys_006): Админский интерфейс | 🔄 | Архитектура готова, реализация на m02.step6 |
+| [`SYS_007`](../../specifications/system_specification.md#sys_007): Голосовой канал | 🔄 | Архитектура готова, реализация на m03+ |
 
 ## 9. Доказательства
 
@@ -134,13 +134,13 @@ operations/tests/product/
 - ✅ TelegramChannel реализован для базового сценария
 - ✅ TaskMessage нормализует ввод с метаданными
 - ✅ Наблюдаемое состояние отслеживается
-- ✅ Структура готова для интеграции в ARC_CMP_003 (Оркестрация)
+- ✅ Структура готова для интеграции в [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) (Оркестрация)
 
 ## 11. Что будет дальше
 
-1. TASK_002: Реализация ARC_CMP_002 (Контроль владельца)
-2. TASK_003: Реализация ARC_CMP_003 (Оркестрация и RuntimePort)
-3. TASK_004: Реализация ARC_CMP_004 (Шлюз моделей)
+1. [`TASK_002`](../tasks/task_002_arc_002.md): Реализация [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) (Контроль владельца)
+2. [`TASK_003`](../tasks/task_003_arc_003.md): Реализация [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) (Оркестрация и RuntimePort)
+3. [`TASK_004`](../tasks/task_004_arc_004.md): Реализация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) (Шлюз моделей)
 4. Затем интеграция: Telegram → Каналы → Контроль → Оркестрация → Модель
 
 ## 12. Примечания для разработчика
@@ -148,7 +148,7 @@ operations/tests/product/
 - Telegram интеграция упрощена для m02: используется очередь вместо реального Bot API
 - Production реализация будет использовать `python-telegram-bot` и webhook/polling
 - Контракт Channel стабилен и позволяет заменять реализацию без изменения остального кода
-- Стабильность по SYS_003: замена TelegramChannel на MockChannel или WebChannel не требует изменений выше уровня Channel
+- Стабильность по [`SYS_003`](../../specifications/system_specification.md#sys_003): замена TelegramChannel на MockChannel или WebChannel не требует изменений выше уровня Channel
 
 ## 13. История версий
 
