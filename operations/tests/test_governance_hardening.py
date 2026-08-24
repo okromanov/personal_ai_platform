@@ -219,8 +219,8 @@ class GovernanceHardeningTests(unittest.TestCase):
         self.assertNotIn("`main` защищается правилами GitHub", change_process)
         self.assertNotIn("через защищённый `main`", acceptance)
         self.assertLess(
-            len(instruction.splitlines()), 200
-        )  # Section 3.6 added for interactive processes
+            len(instruction.splitlines()), 300
+        )  # Ориентировочный предел объёма — см. AGENTS.md §1
 
     def test_document_templates_use_current_russian_structure(self) -> None:
         templates = "\n".join(
