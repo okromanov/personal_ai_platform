@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `310` |
+| Всего тестов | `320` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
-| Tooling (quality scripts, registries, traceability) | `153` |
+| Tooling (quality scripts, registries, traceability) | `163` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -166,6 +166,8 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_change_scope.py` | `ChangeScopeTests` | `test_repository_maintenance_does_not_require_project_task` | Служебное изменение репозитория не требует проектной TASK. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_change_scope.py` | `DocumentMetadataHonestyTests` | `test_current_branch_is_honest` | Определение текущей ветки честно отражает реальное состояние git. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_change_scope.py` | `DocumentMetadataHonestyTests` | `test_metadata_validation_runs_without_hardcoded_commits` | Валидация метаданных работает по доступной истории git, без зашитых в код коммитов. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_code_analyzer.py` | `UnusedImportDetectionTests` | `test_future_annotations_import_is_not_flagged_as_unused` | Future annotations import is not flagged as unused |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_code_analyzer.py` | `UnusedImportDetectionTests` | `test_genuinely_unused_import_is_still_flagged` | Genuinely unused import is still flagged |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_coverage_policy.py` | `CoveragePolicyTests` | `test_changed_lines_fails_closed_when_git_diff_fails` | Определение изменённых строк отказывает при сбое git diff. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_coverage_policy.py` | `CoveragePolicyTests` | `test_evaluate_fails_missing_schema_modules_and_uncovered_diff` | Оценка покрытия падает при отсутствующих в схеме модулях и непокрытом diff. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_coverage_policy.py` | `CoveragePolicyTests` | `test_evaluate_passes_aggregate_module_and_diff_thresholds` | Оценка покрытия проходит при соблюдении общего, модульного и diff-порогов. |
@@ -178,16 +180,24 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_missing_decomposition_architecture_infrastructure_and_evidence_are_rejected` | Отсутствующая декомпозиция на архитектуру, инфраструктуру и evidence отклоняется. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_repository_has_complete_v1_chains_and_test_evidence` | В репозитории есть полные цепочки трассировки V1 и evidence по тестам. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_healthy_when_everything_clean` | Репозиторий считается здоровым, когда всё чисто. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_coverage_policy_fails` | Needs attention when coverage policy fails |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_tests_fail` | Репозиторий требует внимания при падающих тестах. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_working_tree_dirty` | Репозиторий требует внимания при незакоммиченных изменениях. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_counts_ruff_issues_from_summary_line_and_flags_noncompliant_formatting` | Подсчёт замечаний ruff по итоговой строке и флаг несоответствия форматированию. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_missing_tools_leave_safe_defaults` | Отсутствующие инструменты дают безопасные значения по умолчанию. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_ruff_output_with_no_findings_counts_zero` | Вывод ruff без замечаний даёт ноль в счётчике. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCoveragePolicyTests` | `test_fails_when_a_critical_module_is_below_its_own_higher_floor` | Fails when a critical module is below its own higher floor |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCoveragePolicyTests` | `test_missing_coverage_json_is_reported_as_not_passed` | Missing coverage json is reported as not passed |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCoveragePolicyTests` | `test_passes_when_overall_coverage_meets_the_configured_floor` | Passes when overall coverage meets the configured floor |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_current_branch_name_has_no_git_marker_prefix` | Current branch name has no git marker prefix |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_dirty_working_tree_is_reported_as_not_clean` | Незакоммиченное рабочее дерево отмечается как «не чистое». |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_reports_real_commit_and_branch_metadata` | Отчёт содержит реальные метаданные коммита и ветки. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_parses_pytest_summary_line` | Итоговая строка pytest корректно разбирается. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_reads_coverage_percent_from_runtime_coverage_json` | Процент покрытия читается из runtime/coverage.json. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_runs_pytest_under_the_current_interpreter` | Runs pytest under the current interpreter |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_flags_real_problems_in_recommendations` | Generate report flags real problems in recommendations |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_includes_key_metrics` | Сгенерированный отчёт включает ключевые метрики. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_recommends_nothing_critical_when_healthy` | Generate report recommends nothing critical when healthy |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_print_summary_writes_key_lines_to_stdout` | Краткая сводка выводит ключевые строки в stdout. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_bare_mention_once_target_exists` | Fixes bare mention once target exists |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_clickable_document_reference` | Fixes clickable document reference |

@@ -13,6 +13,7 @@ from operations.scripts.health_check.metrics import (
     RepositoryHealth,
     assess_health,
     collect_code_quality_metrics,
+    collect_coverage_policy,
     collect_git_metrics,
     collect_test_metrics,
 )
@@ -56,10 +57,14 @@ def main() -> int:
         print("🔍 Collecting code quality metrics...", file=sys.stderr)
         quality_metrics = collect_code_quality_metrics(root)
 
+        print("📈 Evaluating coverage policy...", file=sys.stderr)
+        coverage_policy = collect_coverage_policy(root)
+
         health = RepositoryHealth(
             repository=repo_metrics,
             tests=test_metrics,
             code_quality=quality_metrics,
+            coverage_policy=coverage_policy,
             overall_status="",
         )
         health.overall_status = assess_health(health)
@@ -96,6 +101,11 @@ def main() -> int:
                     "ruff_issues": health.code_quality.ruff_issues,
                     "formatting_compliant": health.code_quality.formatting_compliant,
                     "type_safe": health.code_quality.type_safe,
+                },
+                "coverage_policy": {
+                    "passed": health.coverage_policy.passed,
+                    "rows": health.coverage_policy.rows,
+                    "errors": health.coverage_policy.errors,
                 },
                 "overall_status": health.overall_status,
             }

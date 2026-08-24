@@ -1,7 +1,7 @@
 ---
 id: health_check_module
 type: documentation
-version: 1.0
+version: 1.2
 document_state: current
 updated: 2026-08-24
 depends_on: []
@@ -167,11 +167,31 @@ def assess_health(health: RepositoryHealth) -> str:
 
 ## ✅ Требования
 
-- Python 3.12+
+- Python 3.12+ ([`ADR_001`](../../../adr/adr_001_language_and_runtime.md))
 - Git
 - pytest (для тестирования)
 - mypy (для проверки типов)
 - ruff (для линтинга)
+
+### Bootstrap окружения
+
+`collect_test_metrics()` и `run_suite.py` требуют, чтобы `pytest`/`coverage`
+были установлены именно для интерпретатора, которым запускается скрипт
+(проверяется через `sys.executable`, а не голый `python` из PATH). Если
+локально `python`/`python3` указывает на версию < 3.12 или на интерпретатор
+без [`operations/quality/requirements_dev.txt`](../../quality/requirements_dev.txt), соберите отдельное окружение:
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/pip install -r operations/quality/requirements_dev.txt
+.venv/bin/python operations/scripts/quality/run_suite.py full
+```
+
+Без этого `run_suite.py` либо падает на шаге "Regenerate derived documents"
+с сообщением `Требуется Python 3.12+ по ADR_001`, либо (если версия
+интерпретатора формально проходит, но нужные пакеты не установлены)
+[`health_check_report.md`](../../../generated/health_check_report.md) молча
+покажет `0 passed`.
 
 ## 🤝 Разработка
 
