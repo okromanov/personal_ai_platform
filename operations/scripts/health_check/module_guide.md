@@ -3,6 +3,7 @@ id: health_check_module
 type: documentation
 version: 1.0
 document_state: current
+updated: 2026-08-24
 depends_on: []
 ---
 
@@ -123,14 +124,14 @@ from operations.scripts.health_check.metrics import (
     collect_test_metrics,
     collect_code_quality_metrics,
     assess_health,
-    RepositoryHealth
+    RepositoryHealth,
 )
 
 health = RepositoryHealth(
     repository=collect_git_metrics(root),
     tests=collect_test_metrics(root),
     code_quality=collect_code_quality_metrics(root),
-    overall_status=""
+    overall_status="",
 )
 health.overall_status = assess_health(health)
 ```
@@ -143,6 +144,7 @@ health.overall_status = assess_health(health)
 @dataclass
 class NewMetrics:
     value: int
+
 
 def collect_new_metrics(root: Path) -> NewMetrics:
     """Collect new metrics."""

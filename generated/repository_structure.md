@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `207` |
+| Всего файлов | `208` |
 
 ```text
 personal_ai_platform/
@@ -89,6 +89,7 @@ personal_ai_platform/
 - operations/scripts/health_check/__init__.py
 - operations/scripts/health_check/generate.py
 - operations/scripts/health_check/metrics.py
+- operations/scripts/health_check/module_guide.md
 - operations/scripts/health_check/reporter.py
 - operations/scripts/milestones/__init__.py
 - operations/scripts/milestones/init_milestone.py
