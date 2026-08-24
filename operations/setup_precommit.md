@@ -2,7 +2,7 @@
 id: setup_precommit
 type: guide
 document_state: current
-version: 1.1
+version: 1.2
 updated: 2026-08-22
 depends_on:
   - operations_change_process
@@ -69,7 +69,7 @@ The server `full` profile adds formatting, mypy, aggregate/per-module/diff cover
 ### 4. Dashboard Regeneration
 
 - Runs after the suite passes (`operations/hooks/pre_commit_regenerate_dashboards.sh`), non-blocking.
-- Triggers on **any** staged `.md` file, not only `work/tasks|tests|mXX/` — every tracked document's frontmatter (`id`/`type`/`version`/state) feeds [`generated/document_index.md`](../generated/document_index.md), [`generated/repository_structure.md`](../generated/repository_structure.md), [`generated/traceability_matrix.md`](../generated/traceability_matrix.md) and [`generated/test_catalog.md`](../generated/test_catalog.md), so a version bump anywhere (e.g. an ADR or [AGENTS.md](../AGENTS.md)) drifts them the same way a TASK/TEST change does.
+- Triggers on **any** staged `.md` file, not only `work/tasks|tests|mXX/` — every tracked document's frontmatter (`id`/`type`/`version`/state) feeds [`generated/markdown_index.md`](../generated/markdown_index.md), [`generated/repository_structure.md`](../generated/repository_structure.md), [`generated/traceability_matrix.md`](../generated/traceability_matrix.md) and [`generated/test_catalog.md`](../generated/test_catalog.md), so a version bump anywhere (e.g. an ADR or [AGENTS.md](../AGENTS.md)) drifts them the same way a TASK/TEST change does.
 - Bumps versions of the staged `.md` files, regenerates [`project_status.md`](../project_status.md), [`tasks.md`](../tasks.md) and `generated/*`, then re-stages whatever changed.
 
 ## Python Version Requirements

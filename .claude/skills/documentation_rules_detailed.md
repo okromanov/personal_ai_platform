@@ -10,7 +10,7 @@ All Markdown documents must have valid YAML front matter (between `---` markers)
 ---
 title: Document Title
 updated: 2026-08-24
-version: 1.0
+version: 1.1
 type: specification | procedure | authority | dashboard
 traces_to: m01, m02  # Milestone IDs this document traces to
 ---
@@ -132,7 +132,8 @@ isn't parsed as a real link to a nonexistent path):
 **Current generated files:**
 - [`project_status.md`](../../project_status.md) - Auto-generated from status script
 - [`tasks.md`](../../tasks.md) - Auto-generated from task registry
-- [`generated/document_index.md`](../../generated/document_index.md) - Index of all docs
+- [`generated/markdown_index.md`](../../generated/markdown_index.md) - Index of all Markdown docs
+- [`generated/non_markdown_index.md`](../../generated/non_markdown_index.md) - Index of all non-Markdown files
 - [`generated/repository_structure.md`](../../generated/repository_structure.md) - Directory tree
 - [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) - Requirement traceability
 

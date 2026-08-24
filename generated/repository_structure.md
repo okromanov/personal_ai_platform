@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `208` |
+| Всего файлов | `209` |
 
 ```text
 personal_ai_platform/
@@ -41,8 +41,8 @@ personal_ai_platform/
 - adr/adr_007_cloud_provider_selection.md
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
-- generated/document_index.md
 - generated/health_check_report.md
+- generated/markdown_index.md
 - generated/non_markdown_index.md
 - generated/repository_structure.md
 - generated/test_catalog.md
@@ -170,6 +170,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_full_traceability.py
 - operations/tests/tooling/test_health_check.py
 - operations/tests/tooling/test_links.py
+- operations/tests/tooling/test_markdown_index.py
 - operations/tests/tooling/test_metadata_parsing.py
 - operations/tests/tooling/test_milestone_lifecycle.py
 - operations/tests/tooling/test_milestone_start_and_task_semantics.py

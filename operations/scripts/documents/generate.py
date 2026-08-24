@@ -42,7 +42,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     outputs = [
         (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
-        (root / "generated" / "document_index.md", render_index(root, date)),
+        (root / "generated" / "markdown_index.md", render_index(root, date)),
         (root / "generated" / "non_markdown_index.md", render_non_markdown_index(root, date)),
         (root / "generated" / "traceability_matrix.md", render_traceability(root, date)),
         (root / "generated" / "test_catalog.md", render_test_catalog(root, date)),

@@ -6,6 +6,7 @@ from pathlib import Path
 from operations.scripts.common.project import iter_files, relative_posix
 from operations.scripts.documents.non_markdown_index import (
     NO_DESCRIPTION,
+    _file_description,
     render_non_markdown_index,
 )
 from operations.scripts.documents.repository_tree import GENERATED_HEADER
@@ -57,7 +58,7 @@ class NonMarkdownIndexTests(unittest.TestCase):
         )
         self.assertIn("| — |", row)
 
-    def test_distinct_python_modules_get_their_own_real_docstring_description(self) -> None:
+    def test_distinct_python_modules_get_their_own_real_description(self) -> None:
         base_row = next(
             line
             for line in self.rendered.splitlines()
@@ -69,19 +70,32 @@ class NonMarkdownIndexTests(unittest.TestCase):
             if line.startswith("| [`src/channels/telegram.py`]")
         )
         self.assertNotEqual(base_row, telegram_row)
-        self.assertIn("Base channel abstraction", base_row)
-        self.assertIn("Telegram channel implementation", telegram_row)
+        self.assertIn("Базовый контракт канала", base_row)
+        self.assertIn("Реализация канала Telegram", telegram_row)
 
-    def test_file_with_no_description_source_says_so_honestly(self) -> None:
-        row = next(
-            line for line in self.rendered.splitlines() if line.startswith("| [`pyproject.toml`]")
+    def test_descriptions_are_russian_and_simple(self) -> None:
+        table_start = self.rendered.index("| Файл | Задача | Описание |")
+        for line in self.rendered[table_start:].splitlines()[2:]:
+            cells = line.split("|")
+            description = cells[3].strip()
+            self.assertNotIn("\n\n", description)
+            self.assertFalse(description.startswith("_Описание не задано"))
+
+    def test_file_with_no_registered_description_falls_back_to_dash(self) -> None:
+        path = ROOT / "pyproject.toml"
+        self.assertEqual(_file_description(path, "some/unregistered/path.json"), NO_DESCRIPTION)
+
+    def test_empty_init_file_gets_the_honest_package_marker(self) -> None:
+        path = ROOT / "operations" / "__init__.py"
+        self.assertEqual(
+            _file_description(path, "operations/__init__.py"),
+            "Пустой файл-маркер Python-пакета.",
         )
-        self.assertIn(NO_DESCRIPTION, row)
 
-    def test_shell_script_description_comes_from_its_own_header_comment(self) -> None:
+    def test_shell_script_description_is_russian(self) -> None:
         row = next(
             line
             for line in self.rendered.splitlines()
             if line.startswith("| [`.claude/skills/pre_commit_hook.sh`]")
         )
-        self.assertIn("Canonical pre-commit hook", row)
+        self.assertIn("Канонический pre-commit hook", row)

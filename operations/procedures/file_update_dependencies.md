@@ -2,7 +2,7 @@
 id: file_update_dependencies
 type: procedure_reference
 document_state: current
-version: 1.3
+version: 1.4
 created: 2026-08-23
 updated: 2026-08-24
 ---
@@ -51,11 +51,17 @@ updated: 2026-08-24
 
   `allowed_paths` содержит только сами пути (маски, каталоги, файлы), без дополнительного текста — что представляет собой конкретный файл, описывается в разделе «6. Состав» карточки TASK, а не в самом списке путей.
 
+### generated/markdown_index.md
+- **Зависит от:** каждый отслеживаемый `.md` файл репозитория (его YAML-фронтматтер), кроме файлов внутри `generated/`
+- **Генерируется:** render_index() в operations/scripts/documents/index.py
+- **Проверка:** check.py: generated (drift check)
+- Одна строка на каждый `.md` файл репозитория (включая [`project_status.md`](../../project_status.md), [`tasks.md`](../../tasks.md)) с его `id`/`type`/состоянием/версией/названием — без фильтрации по «первичности» документа.
+
 ### generated/non_markdown_index.md
-- **Зависит от:** каждый отслеживаемый не-`.md` файл репозитория (его собственный docstring/заголовочный комментарий), `work/tasks/*` (`allowed_paths`)
+- **Зависит от:** каждый отслеживаемый не-`.md` файл репозитория, `work/tasks/*` (`allowed_paths`)
 - **Генерируется:** render_non_markdown_index() в operations/scripts/documents/non_markdown_index.py
 - **Проверка:** check.py: generated (drift check)
-- Одна строка на файл: путь, TASK (только если файл входит в `allowed_paths` какой-то TASK за пределами её собственной карточки — `_deliverable_task_map()`; иначе `—`), описание. Описание берётся из собственного источника файла и никогда не выдумывается: docstring модуля для `.py` (`_python_description()`), заголовочный `#`-комментарий после shebang для `.sh` (`_shell_description()`); для остальных типов файлов — честная пометка `NO_DESCRIPTION` об отсутствии источника. Markdown-файлы сюда не входят — они уже перечислены в [`generated/document_index.md`](../../generated/document_index.md).
+- Одна строка на файл: путь, TASK (только если файл входит в `allowed_paths` какой-то TASK за пределами её собственной карточки — `_deliverable_task_map()`; иначе `—`), описание. Описание — рукописный, честный русский текст на файл (реестр `DESCRIPTIONS` в модуле), а не автоперевод; для файла без записи в реестре — прочерк (`NO_DESCRIPTION`), а не выдумка. Markdown-файлы сюда не входят — они уже перечислены в [`generated/markdown_index.md`](../../generated/markdown_index.md).
 
 ## Процедура обновления при завершении milestone
 

@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `298` |
+| Всего тестов | `304` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
-| Tooling (quality scripts, registries, traceability) | `141` |
+| Tooling (quality scripts, registries, traceability) | `147` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -195,6 +195,10 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_link_from_document_to_itself` | Rejects link from document to itself |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_unlinked_existing_markdown_reference` | Rejects unlinked existing markdown reference |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_runtime_artifact_does_not_change_document_check` | Runtime artifact does not change document check |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_generated_directory_is_excluded` | Generated directory is excluded |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_lists_every_tracked_markdown_file_exactly_once` | Lists every tracked markdown file exactly once |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_no_longer_filters_by_primary_document_status` | No longer filters by primary document status |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_starts_with_generated_marker_and_frontmatter` | Starts with generated marker and frontmatter |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_metadata_parsing.py` | `FrontMatterParsingTests` | `test_duplicate_key_is_rejected_instead_of_silently_overwritten` | Duplicate key is rejected instead of silently overwritten |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_metadata_parsing.py` | `FrontMatterParsingTests` | `test_duplicate_list_key_is_rejected` | Duplicate list key is rejected |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_metadata_parsing.py` | `FrontMatterParsingTests` | `test_empty_inline_list_still_parses` | Empty inline list still parses |
@@ -216,12 +220,14 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_milestone_start_and_task_semantics.py` | `MilestoneStartAndTaskSemanticsTests` | `test_preflight_and_transition_report_each_atomic_start_blocker` | Preflight and transition report each atomic start blocker |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_milestone_start_and_task_semantics.py` | `MilestoneStartAndTaskSemanticsTests` | `test_semantic_closure_and_valid_preflight_cover_transitive_business_scope` | Semantic closure and valid preflight cover transitive business scope |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_milestone_start_and_task_semantics.py` | `MilestoneStartAndTaskSemanticsTests` | `test_unrelated_component_claim_and_missing_test_fail_closed` | Unrelated component claim and missing test fail closed |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_distinct_python_modules_get_their_own_real_docstring_description` | Distinct python modules get their own real docstring description |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_descriptions_are_russian_and_simple` | Descriptions are russian and simple |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_distinct_python_modules_get_their_own_real_description` | Distinct python modules get their own real description |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_does_not_list_any_markdown_document` | Does not list any markdown document |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_file_with_no_description_source_says_so_honestly` | File with no description source says so honestly |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_empty_init_file_gets_the_honest_package_marker` | Empty init file gets the honest package marker |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_file_with_no_owning_task_shows_no_link` | File with no owning task shows no link |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_file_with_no_registered_description_falls_back_to_dash` | File with no registered description falls back to dash |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_lists_every_tracked_non_markdown_file_exactly_once` | Lists every tracked non markdown file exactly once |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_shell_script_description_comes_from_its_own_header_comment` | Shell script description comes from its own header comment |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_shell_script_description_is_russian` | Shell script description is russian |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_starts_with_generated_marker_and_frontmatter` | Starts with generated marker and frontmatter |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_non_markdown_index.py` | `NonMarkdownIndexTests` | `test_task_001_deliverables_link_to_their_task` | Task 001 deliverables link to their task |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_project_common.py` | `GitInfoTests` | `test_repository_with_a_commit_reports_full_sha` | Repository with a commit reports full sha |
