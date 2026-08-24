@@ -315,16 +315,12 @@ def render_final_report(root: Path, milestone_id: str) -> str:
     else:
         lines.append(f"### Новые файлы ({len(added)})")
         lines.append("")
-        lines.extend(
-            (f"- {_path_reference(root, path)}" for path in added) if added else ["—"]
-        )
+        lines.extend((f"- {_path_reference(root, path)}" for path in added) if added else ["—"])
         lines.append("")
         lines.append(f"### Изменённые файлы ({len(modified)})")
         lines.append("")
         lines.extend(
-            (f"- {_path_reference(root, path)}" for path in modified)
-            if modified
-            else ["—"]
+            (f"- {_path_reference(root, path)}" for path in modified) if modified else ["—"]
         )
         lines.append("")
     lines.append("## 4. Задачи и тесты этапа")
@@ -336,10 +332,7 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         lines.append("|---|---|---|---|")
         for task in milestone_tasks:
             tests = (
-                ", ".join(
-                    f"[`{t['id']}`]({_link(str(t['path']))})"
-                    for t in task.get("tests", [])
-                )
+                ", ".join(f"[`{t['id']}`]({_link(str(t['path']))})" for t in task.get("tests", []))
                 or "—"
             )
             task_link = _link(str(task["path"]))

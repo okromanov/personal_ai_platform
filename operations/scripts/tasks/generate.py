@@ -191,6 +191,13 @@ def select_current_task(items: list[TaskItem], milestone_id: str | None = None) 
     return candidates[0] if candidates else None
 
 
+# TASK/TEST/ADR records are identified by front-matter `id:`, not by a
+# heading matching that ID, so their `anchor` (used by heading-based
+# families like ARC_CMP/BR/SYS) does not exist in the file: link to the
+# document itself rather than to a fragment GitHub would never generate.
+_DOCUMENT_ID_FAMILIES = {"TASK", "TEST", "ADR"}
+
+
 def _linked_ids(records: dict[str, dict[str, object]], values: list[str]) -> str:
     """Markdown link for each value found in the traceability registry
     (plain code for anything unresolved, e.g. a milestone not yet in
@@ -207,7 +214,11 @@ def _linked_ids(records: dict[str, dict[str, object]], values: list[str]) -> str
         if record is None:
             rendered.append(f"`{value}`")
             continue
-        rendered.append(f"[`{value}`]({record['path']}#{record['anchor']})")
+        if record["family"] in _DOCUMENT_ID_FAMILIES:
+            target = str(record["path"])
+        else:
+            target = f"{record['path']}#{record['anchor']}"
+        rendered.append(f"[`{value}`]({target})")
     return "<br>".join(rendered)
 
 

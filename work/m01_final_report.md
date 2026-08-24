@@ -4,7 +4,7 @@ type: milestone_completion_report
 completion_state: completed
 version: 1.0
 created: 2026-08-22
-updated: 2026-08-23
+updated: 2026-08-24
 milestone: m01
 ---
 
@@ -20,7 +20,7 @@ milestone: m01
 
 ## 2. Что реализовано функционально
 
-**Цель этапа (из [`milestones.md`](../../milestones.md)):** непротиворечивая базовая редакция документов, трассировки, шаблонов и автоматических проверок до начала основного продуктового кода. Номер версии отдельного документа отражает его собственную историю и не обязан равняться `1.0`.
+**Цель этапа (из [`milestones.md`](../milestones.md)):** непротиворечивая базовая редакция документов, трассировки, шаблонов и автоматических проверок до начала основного продуктового кода. Номер версии отдельного документа отражает его собственную историю и не обязан равняться `1.0`.
 
 Пока ни одна TASK этого этапа не завершена.
 
@@ -28,7 +28,7 @@ milestone: m01
 
 ### Новые файлы (15)
 
-- [`work/acceptance/m01.json`](../acceptance/m01.json)
+- [`work/acceptance/m01.json`](acceptance/m01.json)
 - `work/m01/semantic_review.json` (путь изменился или файл удалён позже)
 - `work/tasks/task_0001_arc_001.md` (путь изменился или файл удалён позже)
 - `work/tasks/task_0002_arc_002.md` (путь изменился или файл удалён позже)
@@ -46,11 +46,11 @@ milestone: m01
 
 ### Изменённые файлы (5)
 
-- [`.github/workflows/project_check.yml`](../../.github/workflows/project_check.yml)
-- [`milestones.md`](../../milestones.md)
-- [`operations/quality_registry.json`](../../operations/quality_registry.json)
-- [`project_status.md`](../../project_status.md)
-- [`tasks.md`](../../tasks.md)
+- [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml)
+- [`milestones.md`](../milestones.md)
+- [`operations/quality_registry.json`](../operations/quality_registry.json)
+- [`project_status.md`](../project_status.md)
+- [`tasks.md`](../tasks.md)
 
 ## 4. Задачи и тесты этапа
 

@@ -35,6 +35,7 @@ def _write_if_absent(path: Path, content: str) -> None:
     a final report that already carries decisions.
     """
     if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
 
 

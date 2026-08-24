@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `204` |
+| Всего файлов | `202` |
 
 ```text
 personal_ai_platform/
@@ -193,10 +193,8 @@ personal_ai_platform/
 - tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
-- work/m01/final_report.md
-- work/m01/semantic_review.md
-- work/m02/final_report.md
-- work/m02/owner_checklist.md
+- work/m01_final_report.md
+- work/m02_final_report.md
 - work/tasks/.gitkeep
 - work/tasks/task_001_arc_001.md
 - work/tasks/task_002_arc_002.md
