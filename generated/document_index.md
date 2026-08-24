@@ -34,7 +34,7 @@ version: 1.0
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
 | [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.5` | Карта операционных процедур |
-| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.2` | Матрица зависимостей обновления файлов |
+| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.3` | Матрица зависимостей обновления файлов |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.0` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
 | [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.1` | Pre-commit Hook Setup |

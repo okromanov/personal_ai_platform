@@ -100,18 +100,6 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 
 TASK_003 реализует Scheduler (выбирает задачу для выполнения), TASK_004 - Executor (запускает). Оба зависят от этого хранилища как источника истины. После TASK_002 три компонента образуют минимальный работающий цикл: получить задачу (Channel) → сохранить (Storage) → выбрать (Scheduler) → выполнить (Executor).
 
-## Файлы, созданные в рамках задач
-
-| Файл | Задача | Описание |
-|---|---|---|
-| [`src/channels/__init__.py`](src/channels/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
-| [`src/channels/base.py`](src/channels/base.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
-| [`src/channels/telegram.py`](src/channels/telegram.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
-| [`src/__init__.py`](src/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
-| [`operations/tests/product/__init__.py`](operations/tests/product/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
-| [`operations/tests/product/test_channels.py`](operations/tests/product/test_channels.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
-| [`work/tests/test_007.md`](work/tests/test_007.md) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Доказать, что компонент ARC_CMP_001 (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям SYS_001. |
-
 ## Что уже умеет решение
 
 > Раздел пополняется по мере завершения проектных TASK: одна запись на каждую TASK, которая добавила владельцу новую возможность. Ничего не удаляется — это накопительная история того, что уже доступно.

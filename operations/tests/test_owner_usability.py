@@ -91,7 +91,6 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Этапы V1",
             "Проектные задачи текущего этапа",
             "Шаги текущей работы",
-            "Файлы, созданные в рамках задач",
             "Что уже умеет решение",
             "выполнено",
             "осталось",
@@ -117,43 +116,10 @@ class OwnerUsabilityTests(unittest.TestCase):
             "evidence bundle",
         ]:
             self.assertNotIn(internal, rendered)
-
-    def test_task_files_section_lists_real_deliverables_with_russian_descriptions(
-        self,
-    ) -> None:
-        rendered = render_repository_project_status(self.root)
-        section = rendered[rendered.index("## Файлы, созданные в рамках задач") :]
-        # TASK_001 expanded allowed_paths beyond its own card and shipped real files;
-        # TASK_002+ have not (their allowed_paths is still just their own card), so
-        # only TASK_001 should appear here.
-        self.assertIn("| Файл | Задача | Описание |", section)
-        self.assertIn("TASK_001", section)
-        self.assertNotIn("TASK_002", section)
-        # A directory entry (src/channels/) is not an individually describable
-        # file and must not get its own row.
-        self.assertNotIn("[`src/channels/`](src/channels/)", section)
-        # Every deliverable now gets its own row (no more grouping several
-        # files behind one <br>-joined cell), even when their description
-        # is the same shared TASK "Результат" text — allowed_paths still
-        # carries no per-file description (see AskUserQuestion decision to
-        # drop that convention), so base.py and telegram.py share text but
-        # are two distinct table rows.
-        base_row = next(
-            line for line in section.splitlines() if line.startswith("| [`src/channels/base.py`]")
-        )
-        telegram_row = next(
-            line
-            for line in section.splitlines()
-            if line.startswith("| [`src/channels/telegram.py`]")
-        )
-        self.assertNotEqual(base_row, telegram_row)
-        self.assertIn("Стабильный контракт", base_row)
-        self.assertIn("Стабильный контракт", telegram_row)
-        self.assertNotIn("abstraction", section)
-        self.assertNotIn("implementation", section)
-        # work/tests/test_007.md still describes itself, via its own "Назначение",
-        # since that section is already Russian and file-specific.
-        self.assertIn("Доказать, что компонент ARC_CMP_001", section)
+        # Per-file deliverables moved to generated/non_markdown_index.md
+        # (non-Markdown files only, with real per-file descriptions) —
+        # project_status.md no longer carries this table at all.
+        self.assertNotIn("Файлы, созданные в рамках задач", rendered)
 
     def test_capabilities_section_lists_only_completed_tasks_real_capability_text(
         self,

@@ -5,7 +5,6 @@ from pathlib import Path
 
 from operations.scripts.common.project import atomic_write
 from operations.scripts.common.status_types import TaskItem
-from operations.scripts.documents.metadata import load_document
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -49,76 +48,6 @@ def _task_context(tasks: list[TaskItem], milestone_id: str) -> TaskItem | None:
 
 def _checkbox(done: bool) -> str:
     return "[x]" if done else "[ ]"
-
-
-def _deliverable_paths(task: TaskItem) -> list[str]:
-    """`allowed_paths` minus the task's own card and any directory entries
-    (a directory isn't an individually describable file): the files it
-    actually ships."""
-    own_path = str(task["path"])
-    return [
-        path
-        for path in task.get("allowed_paths", [])
-        if path != own_path and not path.endswith("/")
-    ]
-
-
-def _first_paragraph(section: str) -> str:
-    """First paragraph of a section, with any wrapped lines joined into
-    one — a markdown table cell cannot contain a raw newline."""
-    return " ".join(section.split("\n\n", 1)[0].split())
-
-
-def _markdown_document_purpose(root: Path, relative_path: str) -> str:
-    """A TEST/TASK document's own "Назначение"/"Результат" section, read
-    from the file itself rather than borrowed from a different document."""
-    full_path = root / relative_path
-    if not full_path.is_file():
-        return ""
-    try:
-        body = load_document(full_path).body
-    except ValueError:
-        return ""
-    for title in ("Назначение", "Результат"):
-        section = _section(body, title)
-        if section:
-            return _first_paragraph(section)
-    return ""
-
-
-def _file_description(root: Path, relative_path: str, task: TaskItem) -> str:
-    """What the file itself is about, in Russian: a TEST/TASK markdown
-    deliverable's own "Назначение"/"Результат" section when one exists;
-    otherwise the owning TASK's own "Результат". Never an untranslated
-    English docstring, and never invented."""
-    if Path(relative_path).suffix == ".md":
-        purpose = _markdown_document_purpose(root, relative_path)
-        if purpose:
-            return purpose
-    section = _section(str(task.get("body", "")), "Результат")
-    return _first_paragraph(section) if section else ""
-
-
-def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
-    """One table row per file: name+link, owning TASK, and a real, Russian
-    description of what that specific file is (its own docstring/purpose
-    section when it has one, never invented — a file with no description of
-    its own and a TASK with no "Результат" section says so plainly)."""
-    rows = []
-    for task in tasks:
-        paths = _deliverable_paths(task)
-        if not paths:
-            continue
-        task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
-        for path in paths:
-            description = _file_description(root, path, task) or (
-                "_Описание не задано (у файла нет docstring/purpose, а у TASK — раздела «Результат»)._"
-            )
-            rows.append(f"| [`{path}`]({path}) | {task_link} | {description} |")
-    if not rows:
-        return "Ни одна TASK ещё не поставила файлы за пределами собственной карточки."
-
-    return "\n".join(["| Файл | Задача | Описание |", "|---|---|---|", *rows])
 
 
 _CAPABILITY_PLACEHOLDER = "Функционал появится после завершения этой TASK."
@@ -407,10 +336,6 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 ## Что будет дальше
 
 {next_text}
-
-## Файлы, созданные в рамках задач
-
-{_task_file_rows(root, tasks)}
 
 ## Что уже умеет решение
 
