@@ -319,6 +319,12 @@ def run_full(root: Path, python: str, base: str | None) -> None:
         "Generated drift",
         ["git", "diff", "--exit-code", "--", "project_status.md", "tasks.md", "generated"],
     )
+    run_step(
+        root,
+        "Repository health check",
+        [python, "operations/scripts/health_check/generate.py", "--json", "runtime/health_check.json"],
+        artifact="runtime/health_check_report.md",
+    )
 
 
 def main() -> int:
