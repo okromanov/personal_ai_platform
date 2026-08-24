@@ -1,21 +1,33 @@
 <!-- generated file: do not edit manually -->
 ---
-id: generated_document_index
+id: generated_markdown_index
 type: generated_document
 generation_state: generated
 version: 1.0
 ---
 
-# Индекс документов
+# Индекс Markdown-документов
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `62` |
+| Всего документов | `77` |
 
-> В список входят первичные Markdown-документы. Производные и периодические представления исключены.
+> Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
+| [`.claude/skills/code_quality_check.md`](../.claude/skills/code_quality_check.md) | `` | `` | `document_state` | `` | `` | Code Quality Check Skill |
+| [`.claude/skills/dead_code_audit.md`](../.claude/skills/dead_code_audit.md) | `` | `` | `document_state` | `` | `` | Dead Code and Duplication Audit |
+| [`.claude/skills/documentation_audit.md`](../.claude/skills/documentation_audit.md) | `` | `` | `document_state` | `` | `` | Documentation Audit Skill |
+| [`.claude/skills/documentation_rules_detailed.md`](../.claude/skills/documentation_rules_detailed.md) | `` | `` | `document_state` | `` | `` | Documentation Audit Rules - Detailed Reference |
+| [`.claude/skills/integration_tests.md`](../.claude/skills/integration_tests.md) | `` | `` | `document_state` | `` | `` | Integration Tests Playbook |
+| [`.claude/skills/pre_commit_validation.md`](../.claude/skills/pre_commit_validation.md) | `` | `` | `document_state` | `` | `` | Pre-Commit Validation |
+| [`.claude/skills/pre_push_validation.md`](../.claude/skills/pre_push_validation.md) | `` | `` | `document_state` | `` | `` | Pre-Push Validation |
+| [`.claude/skills/python_lint_check.md`](../.claude/skills/python_lint_check.md) | `` | `` | `document_state` | `` | `` | Python Lint Check Skill |
+| [`.claude/skills/python_type_check.md`](../.claude/skills/python_type_check.md) | `` | `` | `document_state` | `` | `` | Python Type Regression Check |
+| [`.claude/skills/readme.md`](../.claude/skills/readme.md) | `` | `` | `document_state` | `` | `` | Repository Quality Playbooks |
+| [`.claude/skills/security_audit.md`](../.claude/skills/security_audit.md) | `` | `` | `document_state` | `` | `` | Security Code Audit Skill |
+| [`.claude/skills/unit_tests.md`](../.claude/skills/unit_tests.md) | `` | `` | `document_state` | `` | `` | Unit Tests and Coverage Check |
 | [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.3` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
@@ -34,10 +46,10 @@ version: 1.0
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
 | [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.5` | Карта операционных процедур |
-| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.2` | Матрица зависимостей обновления файлов |
+| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.4` | Матрица зависимостей обновления файлов |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.0` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
-| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.1` | Pre-commit Hook Setup |
+| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.2` | Pre-commit Hook Setup |
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.2` | Диаграммы состояний и переходы |
 | [`operations/templates/adr_template.md`](../operations/templates/adr_template.md) | `template_adr` | `document_template` | `document_state` | `current` | `1.0` | Шаблон ADR |
 | [`operations/templates/business_requirement_template.md`](../operations/templates/business_requirement_template.md) | `template_business_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон BR |
@@ -53,11 +65,14 @@ version: 1.0
 | [`operations/templates/threat_template.md`](../operations/templates/threat_template.md) | `template_threat` | `document_template` | `document_state` | `current` | `1.0` | Шаблон THR |
 | [`operations/threat_review_triggers.md`](../operations/threat_review_triggers.md) | `threat_review_triggers` | `guide` | `document_state` | `current` | `1.0` | Триггеры и процедуры угроз |
 | [`project_rules.md`](../project_rules.md) | `project_rules` | `project_rules` | `document_state` | `current` | `1.0` | Правила развития personal_ai_platform |
+| [`project_status.md`](../project_status.md) | `` | `` | `document_state` | `` | `` | Состояние проекта |
 | [`specifications/architecture_baseline.md`](../specifications/architecture_baseline.md) | `architecture_baseline` | `architecture` | `document_state` | `current` | `1.0` | Базовая логическая архитектура personal_ai_platform |
 | [`specifications/business_requirements.md`](../specifications/business_requirements.md) | `business_requirements` | `business_requirements` | `document_state` | `current` | `1.0` | Бизнес-требования personal_ai_platform |
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.0` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.1` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.1` | Модель угроз personal_ai_platform |
+| [`tasks.md`](../tasks.md) | `` | `` | `document_state` | `` | `` | Проектные задачи |
+| [`work/m01_final_report.md`](../work/m01_final_report.md) | `m01_final_report` | `milestone_completion_report` | `document_state` | `` | `1.0` | M01 — Итоговый отчёт |
 | [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.10` | TASK_001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `in-progress` | `1.2` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `planned` | `1.3` | TASK_003 — Реализация ARC_CMP_003 |

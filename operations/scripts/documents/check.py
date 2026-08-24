@@ -28,6 +28,7 @@ from operations.scripts.documents.metadata import (
     load_document,
     metadata_list,
 )
+from operations.scripts.documents.non_markdown_index import render_non_markdown_index
 from operations.scripts.documents.repository_tree import (
     GENERATED_HEADER,
     render_repository_structure,
@@ -1248,7 +1249,8 @@ def check_generated(root: Path) -> CheckResult:
     required = [
         root / "project_status.md",
         root / "tasks.md",
-        root / "generated/document_index.md",
+        root / "generated/markdown_index.md",
+        root / "generated/non_markdown_index.md",
         root / "generated/repository_structure.md",
         root / "generated/traceability_matrix.md",
         root / "generated/test_catalog.md",
@@ -1263,7 +1265,8 @@ def check_generated(root: Path) -> CheckResult:
     expected = {
         root / "project_status.md": render_repository_project_status(root),
         root / "tasks.md": render_task_index(root, "2000-01-01"),
-        root / "generated/document_index.md": render_index(root, "2000-01-01"),
+        root / "generated/markdown_index.md": render_index(root, "2000-01-01"),
+        root / "generated/non_markdown_index.md": render_non_markdown_index(root, "2000-01-01"),
         root / "generated/repository_structure.md": render_repository_structure(root, "2000-01-01"),
         root / "generated/traceability_matrix.md": render_traceability(root, "2000-01-01"),
         root / "generated/test_catalog.md": render_test_catalog(root, "2000-01-01"),

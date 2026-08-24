@@ -15,6 +15,7 @@ from operations.scripts.common.project import (
 )
 from operations.scripts.documents.auto_generate_tasks import auto_generate_tasks
 from operations.scripts.documents.index import render_index
+from operations.scripts.documents.non_markdown_index import render_non_markdown_index
 from operations.scripts.documents.repository_tree import render_repository_structure
 from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import render_traceability
@@ -41,7 +42,8 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     outputs = [
         (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
-        (root / "generated" / "document_index.md", render_index(root, date)),
+        (root / "generated" / "markdown_index.md", render_index(root, date)),
+        (root / "generated" / "non_markdown_index.md", render_non_markdown_index(root, date)),
         (root / "generated" / "traceability_matrix.md", render_traceability(root, date)),
         (root / "generated" / "test_catalog.md", render_test_catalog(root, date)),
     ]

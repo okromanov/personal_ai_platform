@@ -33,8 +33,6 @@ def render_index(root, generated_date: str | None = None) -> str:
     rows = []
     for path in iter_files(root, suffixes={".md"}, include_generated=False):
         relative = relative_posix(path, root)
-        if not is_primary_markdown(relative):
-            continue
         doc = load_document(path)
         state_field, state = typed_state(doc.metadata, relative)
         rows.append(
@@ -53,19 +51,19 @@ def render_index(root, generated_date: str | None = None) -> str:
     lines = [
         GENERATED_HEADER,
         "---",
-        "id: generated_document_index",
+        "id: generated_markdown_index",
         "type: generated_document",
         "generation_state: generated",
         "version: 1.0",
         "---",
         "",
-        "# Индекс документов",
+        "# Индекс Markdown-документов",
         "",
         "| Параметр | Значение |",
         "|---|---|",
         f"| Всего документов | `{total_docs}` |",
         "",
-        "> В список входят первичные Markdown-документы. Производные и периодические представления исключены.",
+        "> Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).",
         "",
         "| Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |",
         "|---|---|---|---|---|---|---|",
