@@ -339,7 +339,7 @@ def render_non_markdown_index(root: Path, generated_date: str | None = None) -> 
         "|---|---|",
         f"| Всего файлов | `{total}` |",
         "",
-        "> Не-.md файлы репозитория. Markdown-документы — в [`markdown_index.md`](markdown_index.md).",
+        "> Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).",
         "",
         "| Файл | Задача | Описание |",
         "|---|---|---|",

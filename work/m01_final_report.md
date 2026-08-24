@@ -2,7 +2,7 @@
 id: m01_final_report
 type: milestone_completion_report
 completion_state: completed
-version: 1.1
+version: 1.0
 created: 2026-08-22
 updated: 2026-08-24
 milestone: m01

@@ -6,13 +6,13 @@ generation_state: generated
 version: 1.0
 ---
 
-# Индекс документов
+# Индекс Markdown-документов
 
 | Параметр | Значение |
 |---|---|
 | Всего документов | `77` |
 
-> Все Markdown-документы репозитория. Файлы внутри `generated/` исключены — это производные представления, а не первичные документы.
+> Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
@@ -72,7 +72,7 @@ version: 1.0
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.1` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.1` | Модель угроз personal_ai_platform |
 | [`tasks.md`](../tasks.md) | `` | `` | `document_state` | `` | `` | Проектные задачи |
-| [`work/m01_final_report.md`](../work/m01_final_report.md) | `m01_final_report` | `milestone_completion_report` | `document_state` | `` | `1.1` | M01 — Итоговый отчёт |
+| [`work/m01_final_report.md`](../work/m01_final_report.md) | `m01_final_report` | `milestone_completion_report` | `document_state` | `` | `1.0` | M01 — Итоговый отчёт |
 | [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `1.10` | TASK_001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `in-progress` | `1.2` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `planned` | `1.3` | TASK_003 — Реализация ARC_CMP_003 |
