@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Initialize milestone folder and files on transition.
+Initialize milestone files on transition.
 
 When milestone state changes (planned → in-progress), creates:
-- work/m0X/final_report.md, rendered by render_final_report() (the same
+- work/m0X_final_report.md, rendered by render_final_report() (the same
   function operations/scripts/milestones/update_completion_report.py uses to
   regenerate it after acceptance) so the initial and final report are always
   the same format, never two hand-kept templates drifting apart.
@@ -11,12 +11,10 @@ When milestone state changes (planned → in-progress), creates:
 owner_checklist.md and semantic_review.md are deliberately not generated:
 the acceptance checklist and the semantic-review procedure are already
 fully specified in operations/acceptance.md and operations/semantic_review.md
-respectively, and a per-milestone stub that just restates them (as m01's
-owner_checklist.md and m02's semantic_review.md did, before they were
-removed) never accumulates milestone-specific content worth keeping. A
-milestone that genuinely needs a written record beyond the canonical
-procedure (as m01/semantic_review.md does, once a real review happened)
-gets one created deliberately, not auto-generated as an empty shell.
+respectively, and a per-milestone stub that just restates them never
+accumulates milestone-specific content worth keeping. A milestone that
+genuinely needs a written record beyond the canonical procedure gets one
+created deliberately, not auto-generated as an empty shell.
 
 Usage: python3 operations/scripts/milestones/init_milestone.py m02
 """
@@ -41,18 +39,16 @@ def _write_if_absent(path: Path, content: str) -> None:
 
 
 def init_milestone(milestone_id: str, root: Path | None = None) -> bool:
-    """Initialize milestone folder structure."""
+    """Initialize milestone files."""
     if root is None:
         root = Path.cwd()
 
     try:
-        milestone_dir = root / "work" / milestone_id
-        milestone_dir.mkdir(parents=True, exist_ok=True)
-
         # The initial (pending) final_report.md is rendered by the same
         # function that regenerates it after acceptance, so the two never
         # drift into two different report formats.
-        _write_if_absent(milestone_dir / "final_report.md", render_final_report(root, milestone_id))
+        report_path = root / "work" / f"{milestone_id}_final_report.md"
+        _write_if_absent(report_path, render_final_report(root, milestone_id))
 
         return True
     except Exception as e:
@@ -67,7 +63,7 @@ if __name__ == "__main__":
 
     milestone_id = sys.argv[1]
     if init_milestone(milestone_id):
-        print(f"✓ Initialized {milestone_id} folder structure")
+        print(f"✓ Initialized {milestone_id} final_report")
         sys.exit(0)
     else:
         print(f"✗ Failed to initialize {milestone_id}")

@@ -11,6 +11,7 @@ from operations.scripts.documents.metadata import (
     metadata_list,
     require_unique_identifier,
 )
+from operations.scripts.documents.traceability import collect_traceable_elements
 
 GENERATED_HEADER = "<!-- generated file: do not edit manually -->"
 TASK_ID_PATTERN = re.compile(r"^TASK_\d{3}$")
@@ -190,12 +191,29 @@ def select_current_task(items: list[TaskItem], milestone_id: str | None = None) 
     return candidates[0] if candidates else None
 
 
-def _ids(values: list[str]) -> str:
-    return "<br>".join(f"`{value}`" for value in values) if values else "—"
+def _linked_ids(records: dict[str, dict[str, object]], values: list[str]) -> str:
+    """Markdown link for each value found in the traceability registry
+    (plain code for anything unresolved, e.g. a milestone not yet in
+    milestones.md), so every cross-reference to a TASK/milestone/component
+    is clickable rather than a bare code-span the reader has to search for."""
+    if not values:
+        return "—"
+    rendered = []
+    for value in values:
+        # Milestone IDs are keyed lowercase in the registry (m01), everything
+        # else uppercase (TASK_001, ARC_CMP_001) — try both rather than
+        # importing traceability.py's private normalization rule.
+        record = records.get(value.upper()) or records.get(value.lower())
+        if record is None:
+            rendered.append(f"`{value}`")
+            continue
+        rendered.append(f"[`{value}`]({record['path']}#{record['anchor']})")
+    return "<br>".join(rendered)
 
 
 def render_task_index(root: Path, generated_date: str | None = None) -> str:
     state = collect_tasks(root)
+    records = collect_traceable_elements(root)
     current = select_current_task(state["tasks"])
     if current:
         current_position = next(
@@ -240,9 +258,9 @@ def render_task_index(root: Path, generated_date: str | None = None) -> str:
             f"{ACTOR_LABELS.get(str(item['next_actor']), str(item['next_actor']))} |"
         )
         relation_rows.append(
-            f"| `{item['id']}` | {_ids(item['depends_on'])} | "
-            f"{_ids([x for x in item['traces_to'] if x.lower().startswith('m')])} | "
-            f"{_ids(item['implements'])} | {evidence} |"
+            f"| `{item['id']}` | {_linked_ids(records, item['depends_on'])} | "
+            f"{_linked_ids(records, [x for x in item['traces_to'] if x.lower().startswith('m')])} | "
+            f"{_linked_ids(records, item['implements'])} | {evidence} |"
         )
     if queue_rows:
         queue = f"""| № | Задача | Состояние | Выполнено шагов | Следующий исполнитель |

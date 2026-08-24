@@ -15,7 +15,7 @@ DERIVED_PATH_PATTERNS = (
     "project_status.md",
     "tasks.md",
     "owner_dashboard.md",
-    "work/m*/final_report.md",
+    "work/m*_final_report.md",
 )
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")

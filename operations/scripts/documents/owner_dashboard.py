@@ -228,7 +228,7 @@ def render_owner_dashboard(root: Path, date: str | None = None) -> str:
             result = str(milestone.get("result", ""))
             lines.append(result or "_Цель этапа не задана строкой «результат» в milestones.md._")
             lines.append("")
-            report_path = f"work/{milestone_id}/final_report.md"
+            report_path = f"work/{milestone_id}_final_report.md"
             if (root / report_path).exists():
                 lines.append(f"[Итоговый отчёт этапа]({report_path})")
                 lines.append("")

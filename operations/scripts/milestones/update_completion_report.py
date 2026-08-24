@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Render and update work/m0X/final_report.md from real repository state.
+Render and update work/m0X_final_report.md from real repository state.
 
 Unlike a hand-filled template, every section here is computed: which files
 were actually added/changed since the milestone started, which TASK/TEST
 cards belong to it and what each delivered, which requirements it covers,
 and how much calendar time elapsed. "Известные ограничения" and
 "Рекомендации" are the only sections requiring an owner/agent's own
-judgment and stay as placeholders until filled in by hand.
+judgment: they stay as placeholders until filled in by hand, and once
+filled in are preserved verbatim across every later regeneration.
 
 Usage: python3 operations/scripts/milestones/update_completion_report.py m01
 """
@@ -33,15 +34,15 @@ RESULT_SECTION = re.compile(r"(?ms)^##\s+(?:\d+\.\s*)?Результат\s*$\n(.
 EXCLUDED_DIFF_PREFIXES = ("generated/",)
 
 
-def _link(milestone_id: str, target_path: str) -> str:
+def _link(target_path: str) -> str:
     """Repo-root-relative path (optionally with a #anchor) rewritten relative
-    to work/{milestone_id}/, where final_report.md itself lives."""
+    to work/, where final_report.md itself lives."""
     path_part, sep, anchor = target_path.partition("#")
-    relative = posixpath.relpath(path_part, start=f"work/{milestone_id}")
+    relative = posixpath.relpath(path_part, start="work")
     return f"{relative}{sep}{anchor}"
 
 
-def _path_reference(root: Path, milestone_id: str, path: str) -> str:
+def _path_reference(root: Path, path: str) -> str:
     """Markdown link for `path` if it still exists at HEAD, else plain code.
 
     A historical git diff can name a file that was later renamed or removed
@@ -49,7 +50,7 @@ def _path_reference(root: Path, milestone_id: str, path: str) -> str:
     path that no longer exists on disk would just be a broken link.
     """
     if (root / path).exists():
-        return f"[`{path}`]({_link(milestone_id, path)})"
+        return f"[`{path}`]({_link(path)})"
     return f"`{path}` (путь изменился или файл удалён позже)"
 
 
@@ -85,17 +86,20 @@ def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
 
     Returns None both when no such commit is found and when the only match is
     a shallow-clone boundary commit — in the latter case the file may really
-    have been added earlier, before the point history was cut off.
+    have been added earlier, before the point history was cut off. `--follow`
+    keeps this pointed at the true creation commit across the file's later
+    rename from work/{id}/final_report.md to work/{id}_final_report.md.
     """
     result = run_command(
         [
             "git",
             "log",
+            "--follow",
             "--diff-filter=A",
             "--format=%H %ad",
             "--date=short",
             "--",
-            f"work/{milestone_id}/final_report.md",
+            f"work/{milestone_id}_final_report.md",
         ],
         cwd=root,
     )
@@ -178,7 +182,7 @@ def _result_section(body: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _requirement_links(root: Path, milestone_id: str, scope: list[str]) -> list[str]:
+def _requirement_links(root: Path, scope: list[str]) -> list[str]:
     records = collect_traceable_elements(root)
     links = []
     for identifier in scope:
@@ -186,9 +190,34 @@ def _requirement_links(root: Path, milestone_id: str, scope: list[str]) -> list[
         if record is None:
             links.append(f"`{identifier}`")
             continue
-        target = _link(milestone_id, f"{record['path']}#{record['anchor']}")
+        target = _link(f"{record['path']}#{record['anchor']}")
         links.append(f"[`{identifier}`]({target})")
     return links
+
+
+_LIMITATIONS_HEADING = "6. Известные ограничения"
+_RECOMMENDATIONS_HEADING = "7. Рекомендации для следующего этапа"
+_UNFILLED_PLACEHOLDER = "(заполняется при завершении этапа)"
+
+
+def _existing_section(text: str, heading: str) -> str:
+    pattern = re.compile(rf"(?ms)^##\s+{re.escape(heading)}\s*$\n(.*?)(?=^##\s|\Z)")
+    match = pattern.search(text)
+    return match.group(1).strip() if match else ""
+
+
+def _preserved_or_placeholder(root: Path, milestone_id: str, heading: str) -> str:
+    """A hand-filled "Известные ограничения"/"Рекомендации" section must
+    survive every regeneration verbatim: these two are the only sections
+    render_final_report cannot compute from repository state, so once an
+    owner/agent has filled them in, re-running this function must not
+    silently wipe that judgment back to the placeholder.
+    """
+    path = root / "work" / f"{milestone_id}_final_report.md"
+    if not path.is_file():
+        return _UNFILLED_PLACEHOLDER
+    existing = _existing_section(path.read_text(encoding="utf-8"), heading)
+    return existing if existing and existing != _UNFILLED_PLACEHOLDER else _UNFILLED_PLACEHOLDER
 
 
 def _time_span(start: str, end: str) -> str:
@@ -261,7 +290,7 @@ def render_final_report(root: Path, milestone_id: str) -> str:
     ]
     result_text = milestone["result"]
     if result_text:
-        milestones_link = _link(milestone_id, "milestones.md")
+        milestones_link = _link("milestones.md")
         lines.append(f"**Цель этапа (из [`milestones.md`]({milestones_link})):** {result_text}")
         lines.append("")
     if not completed_tasks:
@@ -287,13 +316,13 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         lines.append(f"### Новые файлы ({len(added)})")
         lines.append("")
         lines.extend(
-            (f"- {_path_reference(root, milestone_id, path)}" for path in added) if added else ["—"]
+            (f"- {_path_reference(root, path)}" for path in added) if added else ["—"]
         )
         lines.append("")
         lines.append(f"### Изменённые файлы ({len(modified)})")
         lines.append("")
         lines.extend(
-            (f"- {_path_reference(root, milestone_id, path)}" for path in modified)
+            (f"- {_path_reference(root, path)}" for path in modified)
             if modified
             else ["—"]
         )
@@ -308,12 +337,12 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         for task in milestone_tasks:
             tests = (
                 ", ".join(
-                    f"[`{t['id']}`]({_link(milestone_id, str(t['path']))})"
+                    f"[`{t['id']}`]({_link(str(t['path']))})"
                     for t in task.get("tests", [])
                 )
                 or "—"
             )
-            task_link = _link(milestone_id, str(task["path"]))
+            task_link = _link(str(task["path"]))
             lines.append(
                 f"| [`{task['id']}`]({task_link}) | `{task.get('component', '') or '—'}` "
                 f"| {task['work_state']} | {tests} |"
@@ -322,25 +351,25 @@ def render_final_report(root: Path, milestone_id: str) -> str:
     lines.append("## 5. Связанные требования")
     lines.append("")
     scope = milestone.get("scope", [])
-    lines.append(", ".join(_requirement_links(root, milestone_id, scope)) if scope else "—")
+    lines.append(", ".join(_requirement_links(root, scope)) if scope else "—")
     lines.append("")
-    lines.append("## 6. Известные ограничения")
+    lines.append(f"## {_LIMITATIONS_HEADING}")
     lines.append("")
-    lines.append("(заполняется при завершении этапа)")
+    lines.append(_preserved_or_placeholder(root, milestone_id, _LIMITATIONS_HEADING))
     lines.append("")
-    lines.append("## 7. Рекомендации для следующего этапа")
+    lines.append(f"## {_RECOMMENDATIONS_HEADING}")
     lines.append("")
-    lines.append("(заполняется при завершении этапа)")
+    lines.append(_preserved_or_placeholder(root, milestone_id, _RECOMMENDATIONS_HEADING))
     lines.append("")
     return "\n".join(lines)
 
 
 def update_completion_report(milestone_id: str, root: Path | None = None) -> bool:
-    """Regenerate work/m0X/final_report.md from current repository state."""
+    """Regenerate work/m0X_final_report.md from current repository state."""
     if root is None:
         root = Path.cwd()
 
-    report_path = root / "work" / milestone_id / "final_report.md"
+    report_path = root / "work" / f"{milestone_id}_final_report.md"
     if not report_path.exists():
         return False
 
