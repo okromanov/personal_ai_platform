@@ -117,7 +117,7 @@ class OwnerUsabilityTests(unittest.TestCase):
         ]:
             self.assertNotIn(internal, rendered)
 
-    def test_task_files_section_lists_real_deliverables_with_own_descriptions(
+    def test_task_files_section_lists_real_deliverables_with_russian_descriptions(
         self,
     ) -> None:
         rendered = render_repository_project_status(self.root)
@@ -128,20 +128,20 @@ class OwnerUsabilityTests(unittest.TestCase):
         self.assertIn("| Файл | Задача | Описание |", section)
         self.assertIn("TASK_001", section)
         self.assertNotIn("TASK_002", section)
-        # Each file's description comes from its own docstring/purpose section,
-        # not a single TEST's purpose copied onto every delivered file.
-        self.assertIn("[`src/channels/base.py`](src/channels/base.py)", section)
-        self.assertIn("Base channel abstraction (ARC_CMP_001).", section)
-        self.assertIn("[`src/channels/telegram.py`](src/channels/telegram.py)", section)
-        self.assertIn("Telegram channel implementation (ARC_CMP_001).", section)
-        # work/tests/test_007.md still describes itself, via its own "Назначение".
+        # Product source files have English docstrings, which would read as
+        # foreign text in this Russian-language table; they fall back to the
+        # owning TASK's own (Russian) "Результат" instead, and since every
+        # source file of TASK_001 shares that same fallback, they all collapse
+        # into a single row rather than repeating the same text per file.
+        source_row = next(line for line in section.splitlines() if "src/channels/base.py" in line)
+        self.assertIn("[`src/channels/`](src/channels/)", source_row)
+        self.assertIn("[`src/channels/telegram.py`](src/channels/telegram.py)", source_row)
+        self.assertIn("[`src/__init__.py`](src/__init__.py)", source_row)
+        self.assertIn("Стабильный контракт `Channel`", source_row)
+        self.assertNotIn("abstraction", source_row)
+        # work/tests/test_007.md still describes itself, via its own "Назначение",
+        # since that section is already Russian and file-specific.
         self.assertIn("Доказать, что компонент ARC_CMP_001", section)
-        # src/channels/ (a directory entry) shares its __init__.py's docstring,
-        # so the two collapse into a single row instead of repeating the text.
-        directory_row = next(
-            line for line in section.splitlines() if "src/channels/__init__.py" in line
-        )
-        self.assertIn("[`src/channels/`](src/channels/)", directory_row)
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
