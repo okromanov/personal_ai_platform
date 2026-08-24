@@ -16,7 +16,10 @@ from operations.scripts.status.generate_project_status import (
     collect_milestones,
     render_progress_sections,
 )
-from operations.scripts.status.human_status import render_repository_project_status
+from operations.scripts.status.human_status import (
+    _rebase_relative_links,
+    render_repository_project_status,
+)
 from operations.scripts.tasks.generate import collect_tasks, select_current_task
 
 
@@ -330,6 +333,27 @@ class OwnerUsabilityTests(unittest.TestCase):
                 owner_steps = doc.body.split("## 3. Действия владельца", 1)[1].split("## 4.", 1)[0]
                 for forbidden in [" git ", "powershell", "pwsh", "operations/scripts", ".ps1"]:
                     self.assertNotIn(forbidden, owner_steps.lower())
+
+
+class RebaseRelativeLinksTests(unittest.TestCase):
+    def test_leaves_external_and_anchor_only_links_unchanged(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source_dir = root / "work" / "tasks"
+            source_dir.mkdir(parents=True)
+            text = (
+                "[внешняя](https://example.com/x) [почта](mailto:a@b.c) [якорь](#раздел) [пусто]()"
+            )
+            self.assertEqual(_rebase_relative_links(text, source_dir, root), text)
+
+    def test_leaves_link_escaping_repository_root_unchanged(self) -> None:
+        with TemporaryDirectory() as outer:
+            outer_path = Path(outer)
+            root = outer_path / "repo"
+            source_dir = root / "work" / "tasks"
+            source_dir.mkdir(parents=True)
+            text = "[вне репозитория](../../../outside.md)"
+            self.assertEqual(_rebase_relative_links(text, source_dir, root), text)
 
 
 if __name__ == "__main__":

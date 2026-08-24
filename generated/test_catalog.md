@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `320` |
-| Core logic (acceptance, governance, lifecycle) | `125` |
-| Tooling (quality scripts, registries, traceability) | `163` |
+| Всего тестов | `331` |
+| Core logic (acceptance, governance, lifecycle) | `127` |
+| Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -120,6 +120,8 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_repository_maintenance_does_not_remain_in_project_task_queue` | Служебные задачи по репозиторию не остаются в очереди проектных TASK. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_technical_status_has_one_russian_owner_action_and_real_foundation_count` | Техническая сводка содержит одно русскоязычное действие владельца и реальное число фундаментальных элементов. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_test_specs_keep_owner_steps_safe_and_only_when_manual` | Шаги владельца в TEST безопасны и присутствуют только для ручных проверок. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `RebaseRelativeLinksTests` | `test_leaves_external_and_anchor_only_links_unchanged` | Leaves external and anchor only links unchanged |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `RebaseRelativeLinksTests` | `test_leaves_link_escaping_repository_root_unchanged` | Leaves link escaping repository root unchanged |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_event_gate_covers_push_pr_and_manual` | Событийный gate покрывает push, PR и ручной запуск. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_final_report_matches_current_repository_state` | work/m01_final_report.md полностью соответствует тому, что вычисляет render_final_report(). |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_only_one_hook_contains_validation_logic` | Логика проверки находится только в одном каноническом хуке. |
@@ -199,6 +201,7 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_includes_key_metrics` | Сгенерированный отчёт включает ключевые метрики. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_recommends_nothing_critical_when_healthy` | Generate report recommends nothing critical when healthy |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_print_summary_writes_key_lines_to_stdout` | Краткая сводка выводит ключевые строки в stdout. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_backtick_wrapped_bare_mention` | Fixes backtick wrapped bare mention |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_bare_mention_once_target_exists` | Fixes bare mention once target exists |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_clickable_document_reference` | Fixes clickable document reference |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_leaves_literal_commands_unlinked` | Leaves literal commands unlinked |
@@ -211,6 +214,14 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_link_from_document_to_itself` | Ссылка документа на самого себя отклоняется. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_unlinked_existing_markdown_reference` | Упоминание существующего документа без ссылки отклоняется. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_runtime_artifact_does_not_change_document_check` | Артефакты в runtime/ не влияют на результат проверки документов. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_fix_bare_identifier_references_skips_unknown_and_out_of_range` | Fix bare identifier references skips unknown and out of range |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_fix_clickable_document_references_covers_edge_branches` | Fix clickable document references covers edge branches |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_href_for_record_self_reference` | Href for record self reference |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_is_literal_command_span_single_identifier_is_not_literal` | Is literal command span single identifier is not literal |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_own_identifiers_tolerates_malformed_frontmatter` | Own identifiers tolerates malformed frontmatter |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_resolve_document_reference_falls_back_to_rglob` | Resolve document reference falls back to rglob |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_resolve_document_reference_ignores_path_escaping_root` | Resolve document reference ignores path escaping root |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinksInternalHelpersTests` | `test_resolve_document_reference_returns_none_when_absent` | Resolve document reference returns none when absent |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_generated_directory_is_excluded` | Каталог generated/ исключён из индекса. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_lists_every_tracked_markdown_file_exactly_once` | Каждый отслеживаемый .md файл перечислен в индексе ровно один раз. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_markdown_index.py` | `MarkdownIndexTests` | `test_no_longer_filters_by_primary_document_status` | Индекс больше не фильтруется по признаку «первичности» документа. |
