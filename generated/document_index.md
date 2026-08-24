@@ -29,7 +29,7 @@ version: 1.0
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.3` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.1` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.0` | Жизненный цикл архитектурных решений (ADR) |
-| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.5` | Процедуры изменений и публикации |
+| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.6` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
@@ -41,7 +41,7 @@ version: 1.0
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.2` | Диаграммы состояний и переходы |
 | [`operations/templates/adr_template.md`](../operations/templates/adr_template.md) | `template_adr` | `document_template` | `document_state` | `current` | `1.0` | Шаблон ADR |
 | [`operations/templates/business_requirement_template.md`](../operations/templates/business_requirement_template.md) | `template_business_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон BR |
-| [`operations/templates/generated_files_template.md`](../operations/templates/generated_files_template.md) | `template_generated_files` | `document_template` | `document_state` | `current` | `1.0` | Шаблон генерируемых файлов |
+| [`operations/templates/generated_files_template.md`](../operations/templates/generated_files_template.md) | `template_generated_files` | `document_template` | `document_state` | `current` | `1.1` | Шаблон генерируемых файлов |
 | [`operations/templates/infrastructure_component_template.md`](../operations/templates/infrastructure_component_template.md) | `template_infrastructure_component` | `document_template` | `document_state` | `current` | `1.0` | Шаблон INF_CMP |
 | [`operations/templates/infrastructure_flow_template.md`](../operations/templates/infrastructure_flow_template.md) | `template_infrastructure_flow` | `document_template` | `document_state` | `current` | `1.0` | Шаблон INF_FLOW |
 | [`operations/templates/infrastructure_requirement_template.md`](../operations/templates/infrastructure_requirement_template.md) | `template_infrastructure_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон INF_REQ |

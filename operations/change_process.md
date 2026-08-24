@@ -2,8 +2,8 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.5
-updated: 2026-08-23
+version: 1.6
+updated: 2026-08-24
 depends_on:
   - project_rules
 ---

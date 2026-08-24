@@ -2,8 +2,8 @@
 id: template_generated_files
 type: document_template
 document_state: current
-version: 1.0
-updated: 2026-08-23
+version: 1.1
+updated: 2026-08-24
 depends_on: []
 ---
 
