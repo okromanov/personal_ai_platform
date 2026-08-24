@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `288` |
+| Всего тестов | `289` |
 | Core logic (acceptance, governance, lifecycle) | `124` |
-| Tooling (quality scripts, registries, traceability) | `132` |
+| Tooling (quality scripts, registries, traceability) | `133` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -179,8 +179,9 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_healthy_when_everything_clean` | Healthy when everything clean |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_tests_fail` | Needs attention when tests fail |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_working_tree_dirty` | Needs attention when working tree dirty |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_counts_ruff_issue_lines_and_flags_noncompliant_formatting` | Counts ruff issue lines and flags noncompliant formatting |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_counts_ruff_issues_from_summary_line_and_flags_noncompliant_formatting` | Counts ruff issues from summary line and flags noncompliant formatting |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_missing_tools_leave_safe_defaults` | Missing tools leave safe defaults |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_ruff_output_with_no_findings_counts_zero` | Ruff output with no findings counts zero |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_dirty_working_tree_is_reported_as_not_clean` | Dirty working tree is reported as not clean |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_reports_real_commit_and_branch_metadata` | Reports real commit and branch metadata |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_parses_pytest_summary_line` | Parses pytest summary line |
