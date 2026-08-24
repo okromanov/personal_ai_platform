@@ -4,20 +4,20 @@ type: task
 title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
-version: 1.6
-updated: 2026-08-23
+version: 1.7
+updated: 2026-08-24
 next_actor: none
 owner_action: none
 depends_on:
 allowed_paths:
   - work/tasks/task_001_arc_001.md
   - src/channels/
-  - src/channels/__init__.py
-  - src/channels/base.py
-  - src/channels/telegram.py
-  - src/__init__.py
-  - operations/tests/product/__init__.py
-  - operations/tests/product/test_channels.py
+  - src/channels/__init__.py — Точка входа пакета `channels`: собирает и экспортирует `Channel`, `TelegramChannel` и связанные типы.
+  - src/channels/base.py — Базовый контракт канала `Channel`: единый интерфейс приёма/отправки сообщений и нормализации в `TaskMessage`, без логики конкретной платформы.
+  - src/channels/telegram.py — Реализация канала для Telegram (`TelegramChannel`): нормализует сообщения в `TaskMessage`; приём/отправка пока эмулируются через внутреннюю очередь, без подключения к реальному Bot API.
+  - src/__init__.py — Точка входа пакета исходного кода продукта, реализующего архитектурные компоненты ARC_CMP_001–ARC_CMP_009.
+  - operations/tests/product/__init__.py — Служебный файл пакета продуктовых тестов (пустой, нужен для импорта пакета).
+  - operations/tests/product/test_channels.py — Unit-тесты компонента «Каналы» (`TelegramChannel`), входят в обязательную проверку CI.
   - work/tests/test_007.md
 traces_to:
   - m02

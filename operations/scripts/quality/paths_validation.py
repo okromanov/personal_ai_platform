@@ -52,6 +52,10 @@ def validate_task_paths(root: Path) -> list[str]:
         allowed_paths = re.findall(r"-\s+(.+)", allowed_text)
 
         for allowed_path in allowed_paths:
+            # An entry may carry a trailing " — description" (a per-file
+            # Russian description written once for project_status.md);
+            # only the path itself is a real filesystem path to validate.
+            allowed_path = allowed_path.split(" — ", 1)[0]
             allowed_path = allowed_path.strip().strip('"').strip("'")
 
             # Проверить, содержит ли маски

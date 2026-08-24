@@ -36,6 +36,7 @@ class TaskItem(TypedDict):
     implements: list[str]
     component: str
     allowed_paths: list[str]
+    file_descriptions: dict[str, str]
     blocker: str
     tests: list[TestRef]
     next_actor: str
