@@ -1,3 +1,12 @@
+---
+id: health_check_module
+type: documentation
+version: 1.0
+document_state: current
+updated: 2026-08-24
+depends_on: []
+---
+
 # Repository Health Check Module
 
 Система автоматической проверки здоровья репозитория проекта `personal_ai_platform`.
@@ -20,7 +29,7 @@ python operations/scripts/health_check/generate.py --summary
 python operations/scripts/health_check/generate.py
 ```
 
-Сгенерирует: `generated/health_check_report.md`
+Сгенерирует: [`generated/health_check_report.md`](../../../generated/health_check_report.md)
 
 ### Экспорт метрик в JSON
 ```bash
@@ -115,14 +124,14 @@ from operations.scripts.health_check.metrics import (
     collect_test_metrics,
     collect_code_quality_metrics,
     assess_health,
-    RepositoryHealth
+    RepositoryHealth,
 )
 
 health = RepositoryHealth(
     repository=collect_git_metrics(root),
     tests=collect_test_metrics(root),
     code_quality=collect_code_quality_metrics(root),
-    overall_status=""
+    overall_status="",
 )
 health.overall_status = assess_health(health)
 ```
@@ -135,6 +144,7 @@ health.overall_status = assess_health(health)
 @dataclass
 class NewMetrics:
     value: int
+
 
 def collect_new_metrics(root: Path) -> NewMetrics:
     """Collect new metrics."""
@@ -151,8 +161,8 @@ def assess_health(health: RepositoryHealth) -> str:
 
 ## 📚 Документация
 
-- `README.md` - этот файл
-- `../health_check_report.md` - пример отчёта
+- Этот файл (module_guide.md)
+- [`health_check_report.md`](../../../generated/health_check_report.md) - пример отчёта
 - Встроенная документация в коде (docstrings)
 
 ## ✅ Требования

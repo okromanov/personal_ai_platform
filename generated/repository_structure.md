@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `202` |
+| Всего файлов | `208` |
 
 ```text
 personal_ai_platform/
@@ -42,6 +42,7 @@ personal_ai_platform/
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
 - generated/document_index.md
+- generated/health_check_report.md
 - generated/repository_structure.md
 - generated/test_catalog.md
 - generated/traceability_matrix.md
@@ -85,6 +86,11 @@ personal_ai_platform/
 - operations/scripts/evidence/record.py
 - operations/scripts/github/__init__.py
 - operations/scripts/github/post_pr_comment.py
+- operations/scripts/health_check/__init__.py
+- operations/scripts/health_check/generate.py
+- operations/scripts/health_check/metrics.py
+- operations/scripts/health_check/module_guide.md
+- operations/scripts/health_check/reporter.py
 - operations/scripts/milestones/__init__.py
 - operations/scripts/milestones/init_milestone.py
 - operations/scripts/milestones/start.py
@@ -161,6 +167,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_coverage_policy.py
 - operations/tests/tooling/test_evidence_record.py
 - operations/tests/tooling/test_full_traceability.py
+- operations/tests/tooling/test_health_check.py
 - operations/tests/tooling/test_links.py
 - operations/tests/tooling/test_metadata_parsing.py
 - operations/tests/tooling/test_milestone_lifecycle.py
@@ -194,7 +201,6 @@ personal_ai_platform/
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
 - work/m01_final_report.md
-- work/m02_final_report.md
 - work/tasks/.gitkeep
 - work/tasks/task_001_arc_001.md
 - work/tasks/task_002_arc_002.md

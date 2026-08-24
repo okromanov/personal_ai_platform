@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `284` |
+| Всего тестов | `295` |
 | Core logic (acceptance, governance, lifecycle) | `124` |
-| Tooling (quality scripts, registries, traceability) | `128` |
+| Tooling (quality scripts, registries, traceability) | `139` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -176,6 +176,17 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_core_requirement_without_system_decomposition_is_rejected` | Core requirement without system decomposition is rejected |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_missing_decomposition_architecture_infrastructure_and_evidence_are_rejected` | Missing decomposition architecture infrastructure and evidence are rejected |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_repository_has_complete_v1_chains_and_test_evidence` | Repository has complete v1 chains and test evidence |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_healthy_when_everything_clean` | Healthy when everything clean |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_tests_fail` | Needs attention when tests fail |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_working_tree_dirty` | Needs attention when working tree dirty |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_counts_ruff_issue_lines_and_flags_noncompliant_formatting` | Counts ruff issue lines and flags noncompliant formatting |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_missing_tools_leave_safe_defaults` | Missing tools leave safe defaults |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_dirty_working_tree_is_reported_as_not_clean` | Dirty working tree is reported as not clean |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectGitMetricsTests` | `test_reports_real_commit_and_branch_metadata` | Reports real commit and branch metadata |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_parses_pytest_summary_line` | Parses pytest summary line |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_reads_coverage_percent_from_runtime_coverage_json` | Reads coverage percent from runtime coverage json |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_includes_key_metrics` | Generate report includes key metrics |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_print_summary_writes_key_lines_to_stdout` | Print summary writes key lines to stdout |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_clickable_markdown_reference` | Accepts clickable markdown reference |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_internal_anchor_without_repeating_filename` | Accepts internal anchor without repeating filename |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_ignores_code_blocks_and_future_filename_examples` | Ignores code blocks and future filename examples |
