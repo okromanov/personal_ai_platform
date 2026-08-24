@@ -2,8 +2,8 @@
 id: template_task
 type: document_template
 document_state: current
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-08-24
 depends_on: []
 ---
 
@@ -79,3 +79,5 @@ implements:
 Если следующий шаг должен выполнить владелец, `next_actor` меняется на `owner`, `owner_action` получает одно конкретное действие, а подраздел `### Агенту` заменяется на `### Владельцу`. При `owner_action: none` подраздел владельца запрещён.
 
 Завершённая TASK имеет `work_state: completed` сразу после выполнения работы и проверок. Принятие этапа не удерживает TASK в промежуточном состоянии.
+
+Каждое упоминание в тексте карточки элемента из [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) (`BR_XXX`, `SYS_XXX`, `THR_XXX`, `SEC_CTL_XXX`, `ARC_CMP_XXX`, `ARC_FLOW_XXX`, `INF_REQ_XXX`, `INF_CMP_XXX`, `INF_FLOW_XXX`, `ADR_XXX`, другой `TASK_XXX`/`TEST_XXX`, этап `mXX`) оформляется как код-спан и ссылка на исходный документ — `` [`SYS_001`](../../specifications/system_specification.md#sys_001) `` для элемента спецификации, `` [`TASK_002`](../../work/tasks/task_002_arc_002.md) `` для другой карточки. Исключение: разделы «2. Результат» и подраздел «### Агенту»/«### Владельцу» раздела «4. Что делать сейчас» цитируются целиком в [`project_status.md`](../../project_status.md)/[`owner_dashboard.md`](../../owner_dashboard.md) на уровне корня репозитория — относительная ссылка, посчитанная для `work/tasks/`, там ведёт мимо проекта, поэтому в этих двух местах элементы оставляют без ссылки (обычным код-спаном).

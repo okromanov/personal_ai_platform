@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.3
+version: 1.4
 updated: 2026-08-24
 depends_on:
   - operations_change_process
@@ -176,3 +176,9 @@ AGENTS.md раздел 2 (с чего начинать)
   регенерируются `python operations/scripts/documents/generate.py --all`; ручная правка
   разойдётся с генератором и провалит `generated drift` в CI.
 - **Пути — только `lower_snake_case`** (кроме [`AGENTS.md`](../AGENTS.md) и dot-файлов).
+- **Ссылки на элементы трассируемости** — каждое упоминание `BR_XXX`/`SYS_XXX`/`ARC_CMP_XXX`/
+  `TASK_XXX`/`TEST_XXX`/`mXX` и т. д. из [`generated/traceability_matrix.md`](../generated/traceability_matrix.md)
+  в тексте TASK/TEST оформляется код-спаном со ссылкой на исходный документ, а не голым
+  текстом. Правило и его исключения (разделы, цитируемые целиком в [`project_status.md`](../project_status.md))
+  — в [`operations/templates/task_template.md`](templates/task_template.md) и
+  [`operations/templates/test_template.md`](templates/test_template.md).
