@@ -54,8 +54,10 @@ def changed_lines(root: Path, base: str) -> dict[str, set[int]]:
             "--diff-filter=ACMR",
             f"{base}..HEAD",
             "--",
-            "operations/scripts",
-            "src",
+            "operations/scripts/*.py",
+            "operations/scripts/**/*.py",
+            "src/*.py",
+            "src/**/*.py",
         ],
         cwd=root,
     )

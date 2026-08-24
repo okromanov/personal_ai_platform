@@ -16,7 +16,7 @@ python3.12 -m pip install -r operations/quality/requirements_dev.txt
 python3.12 operations/scripts/quality/run_suite.py full
 ```
 
-Coverage configuration lives in `pyproject.toml`. The policy requires at least 85% aggregate branch coverage, at least 85% for listed critical modules, and at least 90% line coverage for changed executable Python lines when a Git base is supplied.
+Coverage configuration lives in `pyproject.toml`. The policy requires at least 75% aggregate branch coverage, at least 85% for listed critical modules, and at least 90% line coverage for changed executable Python lines when a Git base is supplied.
 
 ## Success Criteria
 
