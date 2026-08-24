@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `295` |
+| Всего тестов | `288` |
 | Core logic (acceptance, governance, lifecycle) | `124` |
-| Tooling (quality scripts, registries, traceability) | `139` |
+| Tooling (quality scripts, registries, traceability) | `132` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -214,12 +214,6 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_milestone_start_and_task_semantics.py` | `MilestoneStartAndTaskSemanticsTests` | `test_preflight_and_transition_report_each_atomic_start_blocker` | Preflight and transition report each atomic start blocker |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_milestone_start_and_task_semantics.py` | `MilestoneStartAndTaskSemanticsTests` | `test_semantic_closure_and_valid_preflight_cover_transitive_business_scope` | Semantic closure and valid preflight cover transitive business scope |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_milestone_start_and_task_semantics.py` | `MilestoneStartAndTaskSemanticsTests` | `test_unrelated_component_claim_and_missing_test_fail_closed` | Unrelated component claim and missing test fail closed |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_owner_dashboard.py` | `OwnerDashboardRenderTests` | `test_document_statistics_are_positive_not_hardcoded_placeholders` | Document statistics are positive not hardcoded placeholders |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_owner_dashboard.py` | `OwnerDashboardRenderTests` | `test_render_matches_tracked_file_and_covers_real_completed_task` | Render matches tracked file and covers real completed task |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_owner_dashboard.py` | `OwnerDashboardStatTests` | `test_coverage_stat_reads_percent_and_timestamp_or_returns_none` | Coverage stat reads percent and timestamp or returns none |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_owner_dashboard.py` | `OwnerDashboardStatTests` | `test_document_family_counts_matches_headings_in_a_synthetic_repo` | Document family counts matches headings in a synthetic repo |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_owner_dashboard.py` | `OwnerDashboardStatTests` | `test_lines_of_code_counts_only_files_under_the_given_directory` | Lines of code counts only files under the given directory |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_owner_dashboard.py` | `OwnerDashboardStatTests` | `test_step_timings_tolerates_missing_or_malformed_file` | Step timings tolerates missing or malformed file |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_project_common.py` | `GitInfoTests` | `test_repository_with_a_commit_reports_full_sha` | Repository with a commit reports full sha |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_project_common.py` | `GitInfoTests` | `test_repository_with_no_commits_reports_none_not_head` | Repository with no commits reports none not head |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_project_common.py` | `ReadTextTests` | `test_invalid_utf8_raises_with_path_in_message` | Invalid utf8 raises with path in message |
@@ -237,7 +231,6 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_configuration_and_permission_checks_fail_closed` | Configuration and permission checks fail closed |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_fast_and_full_profiles_use_canonical_nonduplicated_steps` | Fast and full profiles use canonical nonduplicated steps |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_main_routes_profiles_and_reports_failures` | Main routes profiles and reports failures |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_run_step_records_and_accumulates_step_timings` | owner_dashboard.py sources its test/scan runtime stats from this file. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_run_step_records_combined_output_and_propagates_failure` | Run step records combined output and propagates failure |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_quality_runner.py` | `QualityRunnerTests` | `test_run_step_writes_placeholder_for_empty_but_successful_output` | A clean tool run (e.g. Vulture finding no dead code) produces empty |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `ApplyRequirementsTests` | `test_apply_wizard_result_reports_the_complete_operation` | Apply wizard result reports the complete operation |

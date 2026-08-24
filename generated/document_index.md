@@ -33,8 +33,8 @@ version: 1.0
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
-| [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.4` | Карта операционных процедур |
-| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.1` | Матрица зависимостей обновления файлов |
+| [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.5` | Карта операционных процедур |
+| [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.2` | Матрица зависимостей обновления файлов |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.0` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
 | [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.0` | Pre-commit Hook Setup |
@@ -48,7 +48,7 @@ version: 1.0
 | [`operations/templates/milestone_template.md`](../operations/templates/milestone_template.md) | `template_milestone` | `document_template` | `document_state` | `current` | `1.0` | Шаблон этапа |
 | [`operations/templates/security_control_template.md`](../operations/templates/security_control_template.md) | `template_security_control` | `document_template` | `document_state` | `current` | `1.0` | Шаблон SEC_CTL |
 | [`operations/templates/system_requirement_template.md`](../operations/templates/system_requirement_template.md) | `template_system_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон SYS |
-| [`operations/templates/task_template.md`](../operations/templates/task_template.md) | `template_task` | `document_template` | `document_state` | `current` | `1.3` | Шаблон TASK |
+| [`operations/templates/task_template.md`](../operations/templates/task_template.md) | `template_task` | `document_template` | `document_state` | `current` | `1.4` | Шаблон TASK |
 | [`operations/templates/test_template.md`](../operations/templates/test_template.md) | `template_test` | `document_template` | `document_state` | `current` | `1.3` | Шаблон TEST |
 | [`operations/templates/threat_template.md`](../operations/templates/threat_template.md) | `template_threat` | `document_template` | `document_state` | `current` | `1.0` | Шаблон THR |
 | [`operations/threat_review_triggers.md`](../operations/threat_review_triggers.md) | `threat_review_triggers` | `guide` | `document_state` | `current` | `1.0` | Триггеры и процедуры угроз |

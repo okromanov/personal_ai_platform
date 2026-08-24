@@ -314,8 +314,6 @@ depends_on:
 - `version` — версия схемы генератора, стартует с `1.0`
 - Поля `updated`, `depends_on`, `created` не используются — генерируемые файлы обновляются при каждом прогоне
 
-[`owner_dashboard.md`](../owner_dashboard.md) тоже помечен маркером `<!-- generated file: do not edit manually -->` и пересобирается `generate.py --all`, но намеренно сохраняет обычную схему первичного документа (`type: operations_guide`, `document_state`, `version: X.Y`, `depends_on`) вместо схемы выше: в отличие от project_status.md/tasks.md/generated/*, он не участвует в побайтовой проверке дрейфа (`run_suite.py`'s "Generated drift" шаг), потому что часть его содержимого — реальное время прогона тестов и проверок с этой машины, а не воспроизводимая функция состояния репозитория.
-
 Пример:
 ```yaml
 ---

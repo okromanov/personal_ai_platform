@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `208` |
+| Всего файлов | `205` |
 
 ```text
 personal_ai_platform/
@@ -77,7 +77,6 @@ personal_ai_platform/
 - operations/scripts/documents/index.py
 - operations/scripts/documents/links.py
 - operations/scripts/documents/metadata.py
-- operations/scripts/documents/owner_dashboard.py
 - operations/scripts/documents/repository_tree.py
 - operations/scripts/documents/test_catalog.py
 - operations/scripts/documents/traceability.py
@@ -172,7 +171,6 @@ personal_ai_platform/
 - operations/tests/tooling/test_metadata_parsing.py
 - operations/tests/tooling/test_milestone_lifecycle.py
 - operations/tests/tooling/test_milestone_start_and_task_semantics.py
-- operations/tests/tooling/test_owner_dashboard.py
 - operations/tests/tooling/test_project_common.py
 - operations/tests/tooling/test_quality_baseline.py
 - operations/tests/tooling/test_quality_registry.py
@@ -184,7 +182,6 @@ personal_ai_platform/
 - operations/tests/tooling/test_traceability.py
 - operations/tests/tooling/test_versioning.py
 - operations/threat_review_triggers.md
-- owner_dashboard.md
 - project_rules.md
 - project_status.md
 - pyproject.toml

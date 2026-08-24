@@ -2,7 +2,7 @@
 id: file_update_dependencies
 type: procedure_reference
 document_state: current
-version: 1.1
+version: 1.2
 created: 2026-08-23
 updated: 2026-08-24
 ---
@@ -22,7 +22,6 @@ updated: 2026-08-24
 | work/m0X_final_report.md | - | Создаётся init_milestone.py | автомат (событие) | git добавляется |
 | milestones.md | work_state | Меняется на `in-progress` | владелец вручную | check.py: milestones |
 | project_status.md | текущий этап, файлы задач | Обновляется | автомат (generate.py) | check.py: generated |
-| owner_dashboard.md | статистика документов/репозитория | Пересчитывается | автомат (render_owner_dashboard) | check.py: generated |
 
 ## Когда milestone переходит из in-progress → completed
 
@@ -31,7 +30,6 @@ updated: 2026-08-24
 | work/m0X_final_report.md | весь файл | Перегенерируется целиком из состояния репозитория (изменённые файлы, TASK/TEST, требования); разделы 6-7 сохраняются дословно из ранее записанного файла | update_completion_report.py, запускается **после** коммита с `work_state: completed` | check.py: metadata |
 | milestones.md | work_state | Меняется на `completed` | владелец вручную | check.py: milestones |
 | project_status.md | Прогресс | Обновляется | автомат (generate.py) | check.py: generated |
-| owner_dashboard.md | "Что уже реализовано" | Добавляется раздел завершённой TASK | автомат (render_owner_dashboard) | check.py: tasks (запрет заглушки в "Результат") |
 
 ## Зависимости по типам файлов
 
@@ -53,15 +51,6 @@ updated: 2026-08-24
 
   `allowed_paths` содержит только сами пути (маски, каталоги, файлы), без дополнительного текста — что представляет собой конкретный файл, описывается в разделе «6. Состав» карточки TASK, а не в самом списке путей.
 
-### owner_dashboard.md
-- **Зависит от:** весь трассируемый граф документов (для статистики по семействам), work/tasks/*, work/tests/*, локально записанные `runtime/coverage.json` и `runtime/step_timings.json` (не хранятся в git)
-- **Генерируется:** render_owner_dashboard() в operations/scripts/documents/owner_dashboard.py
-- **Разделы:**
-  - "Статистика репозитория" — файлы/строки кода/тесты считаются вживую при каждой генерации (`iter_files`, построчный подсчёт, `unittest` discovery без запуска); покрытие и время прогона читаются из `runtime/*.json`, если они есть локально, иначе — явная пометка "нет данных"
-  - "Статистика документов" — реальные счётчики через `collect_traceable_elements()` по семействам (BR/SYS/THR/SEC_CTL/INF_REQ/ADR) плюс `collect_tasks()`/`collect_test_specs()` для TASK/TEST; никогда не хардкодится
-  - "Что уже реализовано" — для каждой `work_state: completed` TASK дословно показывает её раздел "Результат"; `check.py` (`check_tasks`) отдельно запрещает оставлять здесь автосгенерированную заглушку у завершённой TASK, поэтому текст в этом разделе не бывает пустым шаблоном
-  - Не дублирует статус этапа/ворота/действие владельца — это зона project_status.md и milestones.md
-
 ## Процедура обновления при завершении milestone
 
 1. **Владелец:** Вносит команду `ПРИНИМАЮ m0X` в project_status.md
@@ -69,7 +58,7 @@ updated: 2026-08-24
    - Меняет work_state в milestones.md на `completed`
 3. **Агент (после коммита принятия, до открытия запроса на слияние — см. [`operations/acceptance.md`](../acceptance.md#4-после-выполнения)):**
    - update_completion_report.py: пересобирает work/m0X_final_report.md из состояния репозитория на этот момент
-   - generate.py: перегенерирует project_status.md и owner_dashboard.md
+   - generate.py: перегенерирует project_status.md
    - increment_file_version.py: обновляет версии изменённых файлов
 4. **check.py:** Валидирует что:
    - completion_state соответствует work_state
