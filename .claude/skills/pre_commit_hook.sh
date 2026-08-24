@@ -22,7 +22,16 @@ find_python() {
 PYTHON="$(find_python)"
 echo "Running pre-commit validation with $PYTHON"
 
-echo "  [1/3] Authority document versions"
+echo "  [1/5] Auto-fix cross-references"
+mapfile -t staged_md < <(git diff --cached --name-only --diff-filter=ACM -- '*.md')
+if [ "${#staged_md[@]}" -gt 0 ]; then
+    if ! "$PYTHON" -m operations.scripts.documents.links "${staged_md[@]}"; then
+        echo "⚠️  Some cross-references could not be auto-linked (see output above) — fix them manually" >&2
+    fi
+    git add "${staged_md[@]}"
+fi
+
+echo "  [2/5] Authority document versions"
 AUTHORITY_DOCS=(
   "project_rules.md"
   "AGENTS.md"
@@ -50,16 +59,16 @@ for doc in "${AUTHORITY_DOCS[@]}"; do
     fi
 done
 
-echo "  [2/3] Development tools"
+echo "  [3/5] Development tools"
 if ! "$PYTHON" -m ruff --version >/dev/null 2>&1; then
     echo "ERROR: install development tools: $PYTHON -m pip install -r operations/quality/requirements_dev.txt" >&2
     exit 1
 fi
 
-echo "  [3/3] Canonical fast quality suite"
+echo "  [4/5] Canonical fast quality suite"
 "$PYTHON" operations/scripts/quality/run_suite.py fast
 
-echo "  [4/4] Auto-regenerate dashboards and increment versions"
+echo "  [5/5] Auto-regenerate dashboards and increment versions"
 bash operations/hooks/pre_commit_regenerate_dashboards.sh || true
 
 echo "Pre-commit validation passed."

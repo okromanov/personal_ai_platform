@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `307` |
+| Всего тестов | `310` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
-| Tooling (quality scripts, registries, traceability) | `150` |
+| Tooling (quality scripts, registries, traceability) | `153` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -189,6 +189,9 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_reads_coverage_percent_from_runtime_coverage_json` | Процент покрытия читается из runtime/coverage.json. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_includes_key_metrics` | Сгенерированный отчёт включает ключевые метрики. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_print_summary_writes_key_lines_to_stdout` | Краткая сводка выводит ключевые строки в stdout. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_bare_mention_once_target_exists` | Fixes bare mention once target exists |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_fixes_clickable_document_reference` | Fixes clickable document reference |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `FixLinksTests` | `test_leaves_literal_commands_unlinked` | Leaves literal commands unlinked |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_clickable_markdown_reference` | Кликабельная markdown-ссылка принимается. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_internal_anchor_without_repeating_filename` | Внутренний якорь без повтора имени файла принимается. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_linked_identifier_mention` | Accepts linked identifier mention |

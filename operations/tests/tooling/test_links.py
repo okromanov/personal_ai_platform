@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from operations.scripts.documents.links import check_markdown_links
+from operations.scripts.documents.links import check_markdown_links, fix_markdown_links
 
 
 class LinkTests(unittest.TestCase):
@@ -110,6 +110,58 @@ class LinkTests(unittest.TestCase):
 
             self.assertEqual(errors_before, [])
             self.assertEqual(errors_after, errors_before)
+
+
+class FixLinksTests(unittest.TestCase):
+    def test_fixes_bare_mention_once_target_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "work" / "tasks").mkdir(parents=True)
+            (root / "work" / "tests").mkdir(parents=True)
+            task_path = root / "work" / "tasks" / "task_002_arc_002.md"
+            task_path.write_text(
+                "---\nid: TASK_002\ntype: task\nversion: 1.0\n---\n\n"
+                "# TASK_002\n\nТест TEST_008 проверяет всё.\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
+            (root / "work" / "tests" / "test_008.md").write_text(
+                "---\nid: TEST_008\ntype: test\nversion: 1.0\n---\n\n# TEST_008\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(check_markdown_links(root))
+
+            fixed = fix_markdown_links(root)
+            self.assertEqual(fixed, ["work/tasks/task_002_arc_002.md"])
+            self.assertIn(
+                "[`TEST_008`](../tests/test_008.md)", task_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
+    def test_fixes_clickable_document_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.md").write_text("# Target\n", encoding="utf-8")
+            source = root / "source.md"
+            source.write_text("См. `target.md`.\n", encoding="utf-8")
+
+            fixed = fix_markdown_links(root)
+            self.assertEqual(fixed, ["source.md"])
+            self.assertIn("[`target.md`](target.md)", source.read_text(encoding="utf-8"))
+            self.assertEqual(check_markdown_links(root), [])
+
+    def test_leaves_literal_commands_unlinked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "milestones.md").write_text(
+                "# Вехи\n\n<a id=\"m01\"></a>\n## m01 — Основа\n\n"
+                "Команда: `ПРОДОЛЖАЙ m01`.\n",
+                encoding="utf-8",
+            )
+            fixed = fix_markdown_links(root)
+            self.assertEqual(fixed, [])
+            self.assertEqual(check_markdown_links(root), [])
 
 
 if __name__ == "__main__":
