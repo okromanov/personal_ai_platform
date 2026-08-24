@@ -322,7 +322,12 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     run_step(
         root,
         "Repository health check",
-        [python, "operations/scripts/health_check/generate.py", "--json", "runtime/health_check.json"],
+        [
+            python,
+            "operations/scripts/health_check/generate.py",
+            "--json",
+            "runtime/health_check.json",
+        ],
         artifact="runtime/health_check_report.md",
     )
 
