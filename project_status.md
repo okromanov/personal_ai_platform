@@ -111,3 +111,9 @@ TASK_003 реализует Scheduler (выбирает задачу для вы
 | [`operations/tests/product/__init__.py`](operations/tests/product/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
 | [`operations/tests/product/test_channels.py`](operations/tests/product/test_channels.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
 | [`work/tests/test_007.md`](work/tests/test_007.md) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Доказать, что компонент ARC_CMP_001 (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям SYS_001. |
+
+## Что уже умеет решение
+
+> Раздел пополняется по мере завершения проектных TASK: одна запись на каждую TASK, которая добавила владельцу новую возможность. Ничего не удаляется — это накопительная история того, что уже доступно.
+
+- [`TASK_001`](work/tasks/task_001_arc_001.md) — Пока напрямую ничего не доступно: это внутренняя основа, а не готовый к использованию канал. Реализовано единое правило приёма и ответа для сообщений из Telegram и других интерфейсов — сообщение всегда превращается в задачу с понятным статусом (ожидает → выполняется → готово/ошибка/отменено), а не теряется и не повисает без ответа. Подключение к боевому Telegram и реальная доставка сообщений появятся позже, когда будут готовы хранилище и исполнение задач.

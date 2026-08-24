@@ -182,6 +182,51 @@ class CheckerNegativePathTests(unittest.TestCase):
             filled_result = check_tasks(Path("."))
         self.assertNotIn("шаблонной заглушкой", "\n".join(filled_result.errors))
 
+    def test_completed_task_requires_real_owner_capability_section(self) -> None:
+        def _task(body: str) -> dict[str, Any]:
+            return {
+                "id": "TASK_001",
+                "path": "work/tasks/task_001.md",
+                "body": body,
+                "next_actor": "none",
+                "owner_action": "none",
+                "work_state": "completed",
+                "component": "ARC_CMP_001",
+                "checklist": [],
+                "steps_remaining": 0,
+                "allowed_paths": [],
+                "blocker": "",
+            }
+
+        base_body = "## 2. Результат\n\nСтабильный контракт Channel.\n\n## 3. Где мы сейчас\n"
+
+        def _run(body: str) -> str:
+            with (
+                patch(
+                    "operations.scripts.documents.check.collect_tasks",
+                    return_value={"tasks": [_task(body)]},
+                ),
+                patch("operations.scripts.documents.check.render_task_index", return_value="index"),
+                patch("operations.scripts.documents.check.read_text", return_value="index"),
+                patch.object(Path, "exists", return_value=True),
+            ):
+                return "\n".join(check_tasks(Path(".")).errors)
+
+        missing_result = _run(base_body)
+        self.assertIn("должна содержать раздел", missing_result)
+
+        placeholder_result = _run(
+            base_body + "## 10. Что это даёт владельцу\n\n"
+            "Функционал появится после завершения этой TASK.\n"
+        )
+        self.assertIn("не может оставаться шаблонной заглушкой", placeholder_result)
+
+        filled_result = _run(
+            base_body + "## 10. Что это даёт владельцу\n\n"
+            "Можно написать боту и получить отслеживаемую задачу.\n"
+        )
+        self.assertNotIn("Что это даёт владельцу", filled_result)
+
     def test_test_spec_policy_rejects_unsafe_and_unlinked_tests(self) -> None:
         automated: dict[str, Any] = {
             "id": "TEST_001",

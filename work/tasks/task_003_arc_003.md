@@ -84,3 +84,7 @@ implements:
 ## 9. Что будет дальше
 
 [`TASK_004`](task_004_arc_004.md) реализует Шлюз моделей ([`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)) — нормализованный доступ к LLM, который оркестратор будет вызывать в цикле выполнения задачи. [`TASK_005`](task_005_arc_005.md) реализует Шлюз инструментов ([`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)), необходимый оркестратору для авторизованных вызовов инструментов. См. [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) для полного списка требований, реализуемых [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003).
+
+## 10. Что это даёт владельцу
+
+Функционал появится после завершения этой TASK.

@@ -3,7 +3,7 @@ id: system_specification
 type: system_specification
 document_state: current
 version: 1.0
-updated: 2026-08-22
+updated: 2026-08-24
 depends_on:
   - business_requirements
   - threat_model

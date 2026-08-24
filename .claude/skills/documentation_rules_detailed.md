@@ -9,7 +9,7 @@ All Markdown documents must have valid YAML front matter (between `---` markers)
 ```yaml
 ---
 title: Document Title
-updated: 2026-08-23
+updated: 2026-08-24
 version: 1.0
 type: specification | procedure | authority | dashboard
 traces_to: m01, m02  # Milestone IDs this document traces to

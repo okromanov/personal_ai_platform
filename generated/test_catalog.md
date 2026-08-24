@@ -10,8 +10,8 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `289` |
-| Core logic (acceptance, governance, lifecycle) | `124` |
+| Всего тестов | `291` |
+| Core logic (acceptance, governance, lifecycle) | `126` |
 | Tooling (quality scripts, registries, traceability) | `133` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
@@ -73,6 +73,7 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_authority_graph_rejects_lower_layer_dependency_and_m01_scope` | Authority graph rejects lower layer dependency and m01 scope |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_automation_policy_rejects_bypasses_and_mutating_workflows` | Automation policy rejects bypasses and mutating workflows |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_completed_task_rejects_unfilled_auto_generated_result_placeholder` | Completed task rejects unfilled auto generated result placeholder |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_completed_task_requires_real_owner_capability_section` | Completed task requires real owner capability section |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_document_and_requirement_policies_fail_closed` | Document and requirement policies fail closed |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_metadata_rejects_status_and_duplicate_identifiers` | Metadata rejects status and duplicate identifiers |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_checker_negative_paths.py` | `CheckerNegativePathTests` | `test_task_policy_reports_conflicting_lifecycle_fields` | Task policy reports conflicting lifecycle fields |
@@ -111,6 +112,7 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_publication_and_acceptance_rules_are_consistent` | Publication and acceptance rules are consistent |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_workflow_block_scalar_break_is_detected` | Продолжение многострочного скрипта на нулевом отступе молча закрывает |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_lifecycle_matrix.py` | `LifecycleMatrixTests` | `test_m01_accept_m02_start_premature_reject_and_m02_accept` | M01 accept m02 start premature reject and m02 accept |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_lists_only_completed_tasks_real_capability_text` | Capabilities section lists only completed tasks real capability text |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_first_unfinished_task_is_selected_by_queue_order` | First unfinished task is selected by queue order |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_detailed_without_artificial_percentages` | Project status is detailed without artificial percentages |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_the_only_owner_entrypoint` | Project status is the only owner entrypoint |

@@ -121,6 +121,28 @@ def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
     return "\n".join(["| Файл | Задача | Описание |", "|---|---|---|", *rows])
 
 
+_CAPABILITY_PLACEHOLDER = "Функционал появится после завершения этой TASK."
+
+
+def _capability_rows(tasks: list[TaskItem]) -> str:
+    """One entry per completed TASK with a real (non-placeholder) "Что это
+    даёт владельцу" section, in TASK id order — an accumulating, owner-facing
+    changelog of what the solution can already do, built only from what each
+    TASK itself claims, never invented here."""
+    entries = []
+    for task in sorted(tasks, key=lambda item: str(item["id"])):
+        if str(task["work_state"]) != "completed":
+            continue
+        capability = _section(str(task.get("body", "")), "Что это даёт владельцу")
+        if not capability or capability == _CAPABILITY_PLACEHOLDER:
+            continue
+        task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
+        entries.append(f"- {task_link} — {capability}")
+    if not entries:
+        return "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
+    return "\n".join(entries)
+
+
 def render_repository_project_status(root: Path) -> str:
     milestone_state = collect_milestones(root)
     tasks = collect_tasks(root)["tasks"]
@@ -389,6 +411,12 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 ## Файлы, созданные в рамках задач
 
 {_task_file_rows(root, tasks)}
+
+## Что уже умеет решение
+
+> Раздел пополняется по мере завершения проектных TASK: одна запись на каждую TASK, которая добавила владельцу новую возможность. Ничего не удаляется — это накопительная история того, что уже доступно.
+
+{_capability_rows(tasks)}
 """
 
 

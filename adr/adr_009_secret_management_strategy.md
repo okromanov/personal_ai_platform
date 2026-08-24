@@ -3,7 +3,7 @@ id: ADR_009
 type: adr
 decision_state: proposed
 version: 1.0
-updated: 2026-08-22
+updated: 2026-08-24
 traces_to:
   - m02
   - BR_033
