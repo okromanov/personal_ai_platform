@@ -100,6 +100,13 @@ class UnusedDetector(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        # `from __future__ import annotations` (and other future features)
+        # is a compiler directive, not a runtime name that a Name/Attribute
+        # visit could ever mark used - counting it as an unused import is a
+        # false positive on a pattern nearly every file in this repo uses.
+        if node.module == "__future__":
+            self.generic_visit(node)
+            return
         for alias in node.names:
             if alias.name != "*":
                 name = alias.asname or alias.name

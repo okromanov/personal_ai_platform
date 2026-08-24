@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -9,13 +10,94 @@ if __package__ in {None, ""}:
 
 from operations.scripts.health_check.metrics import RepositoryHealth
 
+_COVERAGE_ROW = re.compile(r"^(?P<label>.+): (?P<actual>[\d.]+)% \(minimum (?P<floor>[\d.]+)%\)$")
+
+
+def _near_floor_modules(rows: list[str], margin: float = 3.0) -> list[str]:
+    """Rows within `margin` points of their configured coverage floor.
+
+    Passing today isn't the same as safe: a module sitting 0.8 points
+    above its floor will fail on the next PR that trims a single branch,
+    so it is worth flagging before that happens rather than after.
+    """
+    near = []
+    for row in rows:
+        match = _COVERAGE_ROW.match(row)
+        if not match:
+            continue
+        actual = float(match.group("actual"))
+        floor = float(match.group("floor"))
+        if 0 <= actual - floor < margin:
+            near.append(f"{match.group('label')}: {actual:.1f}% (порог {floor:.0f}%)")
+    return near
+
+
+def _build_recommendations(health: RepositoryHealth) -> str:
+    """Derive recommendations from this run's actual findings.
+
+    A fixed boilerplate list reads the same whether the repo is on fire or
+    spotless, which trains readers to skip it. Grounding it in the metrics
+    already collected this run means it only says something when there is
+    something to say.
+    """
+    tests = health.tests
+    quality = health.code_quality
+    coverage = health.coverage_policy
+    repo = health.repository
+
+    critical: list[str] = []
+    if tests.total_failed > 0:
+        critical.append(f"Исправить {tests.total_failed} падающих тестов перед мержем.")
+    if not quality.type_safe:
+        critical.append(f"Устранить ошибки типов MyPy ({quality.mypy_issues}).")
+    if quality.ruff_issues > 0:
+        critical.append(f"Устранить замечания Ruff lint ({quality.ruff_issues}).")
+    if not quality.formatting_compliant:
+        critical.append("Прогнать `ruff format` — найдены неотформатированные файлы.")
+    if not coverage.passed:
+        critical.extend(f"Покрытие: {error}" for error in coverage.errors)
+
+    watch: list[str] = []
+    if not repo.working_tree_clean:
+        watch.append(
+            "В рабочем дереве есть незакоммиченные изменения — отчёт снят на грязном дереве."
+        )
+    watch.extend(
+        f"Близко к порогу покрытия — {item}." for item in _near_floor_modules(coverage.rows)
+    )
+
+    monitor = [
+        "Следить за ростом размера репозитория и `.git`.",
+        "Поддерживать актуальность зависимостей (operations/quality/requirements_dev.txt).",
+        "Отслеживать время выполнения тестов на предмет роста.",
+    ]
+
+    lines = ["## 🎓 Рекомендации", "", "### Уровень 1: Критично (High Priority)"]
+    if critical:
+        lines.extend(f"- {item}" for item in critical)
+    else:
+        lines.append("- Критичных проблем не обнаружено.")
+
+    lines.extend(["", "### Уровень 2: Рассмотреть (Medium Priority)"])
+    if watch:
+        lines.extend(f"- {item}" for item in watch)
+    else:
+        lines.append("- Ничего не требует внимания сейчас.")
+
+    lines.extend(["", "### Уровень 3: Наблюдать (Low Priority)"])
+    lines.extend(f"- {item}" for item in monitor)
+
+    return "\n".join(lines)
+
 
 def generate_report(health: RepositoryHealth) -> str:
     """Generate a markdown health check report."""
     repo = health.repository
     tests = health.tests
     quality = health.code_quality
+    coverage = health.coverage_policy
     status = health.overall_status
+    recommendations = _build_recommendations(health)
 
     timestamp = datetime.now().isoformat() + "Z"
     timestamp = timestamp.replace("+00:00", "")
@@ -79,6 +161,13 @@ updated: {datetime.now().strftime("%Y-%m-%d")}
 {chr(10).join(repo.last_commits[:5]) if repo.last_commits else "No commits"}
 ```
 
+### 6. **Политика покрытия (pyproject.toml)**
+- **Статус:** {"✅ PASSED" if coverage.passed else "❌ FAILED"}
+```
+{chr(10).join(coverage.rows) if coverage.rows else "Нет данных (runtime/coverage.json недоступен)"}
+```
+{("Нарушения:" + chr(10) + chr(10).join(f"- {error}" for error in coverage.errors)) if coverage.errors else ""}
+
 ---
 
 ## 🎯 Результаты по категориям
@@ -90,7 +179,7 @@ updated: {datetime.now().strftime("%Y-%m-%d")}
 | Linting | {"✅" if quality.ruff_issues == 0 else "❌"} | {f"Ruff: {quality.ruff_issues} issues" if quality.ruff_issues > 0 else "Ruff: compliant"} |
 | Formatting | {"✅" if quality.formatting_compliant else "❌"} | {"All files compliant" if quality.formatting_compliant else "Issues found"} |
 | Tests | {"✅" if tests.total_failed == 0 else "❌"} | {f"{tests.total_passed} passed" + (f", {tests.total_failed} failed" if tests.total_failed > 0 else "")} |
-| Coverage | {"✅" if tests.coverage_percent >= 75 else "⚠️"} | {tests.coverage_percent}% coverage |
+| Coverage policy | {"✅" if coverage.passed else "❌"} | {tests.coverage_percent}% overall — {"policy passed" if coverage.passed else "policy FAILED (see §6)"} |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
@@ -114,22 +203,7 @@ updated: {datetime.now().strftime("%Y-%m-%d")}
 
 ---
 
-## 🎓 Рекомендации
-
-### Уровень 1: Сделать (Low Priority)
-- Monitor code quality metrics regularly
-- Keep dependencies up to date
-- Maintain test coverage above 75%
-
-### Уровень 2: Рассмотреть (Medium Priority)
-- Review any failing tests
-- Address type safety issues if any
-- Update formatting if needed
-
-### Уровень 3: Наблюдать (Low Priority)
-- Monitor repository size growth
-- Track test execution time
-- Review CI/CD pipeline status
+{recommendations}
 
 ---
 
@@ -137,13 +211,14 @@ updated: {datetime.now().strftime("%Y-%m-%d")}
 
 **Статус репозитория: {status}**
 
-Репозиторий находится в {"отличном" if tests.total_failed == 0 else "приемлемом"} состоянии с точки зрения:
+Репозиторий находится в {"отличном" if status == "✅ HEALTHY" else "требующем внимания"} состоянии с точки зрения:
 - {"✅" if quality.type_safe else "❌"} Качества кода (type safety, linting)
 - {"✅" if tests.total_failed == 0 else "❌"} Тестирования ({tests.total_passed} passed{f", {tests.total_failed} failed" if tests.total_failed > 0 else ""})
 - {"✅" if quality.formatting_compliant else "❌"} Форматирования
-- ✅ Управления (git hygiene, commits)
+- {"✅" if coverage.passed else "❌"} Политики покрытия (pyproject.toml: overall/critical modules)
+- {"✅" if repo.working_tree_clean else "❌"} Управления (git hygiene, commits)
 
-**Рекомендация:** ✅ Проект готов к продолжению разработки.
+**Рекомендация:** {"✅ Проект готов к продолжению разработки." if status == "✅ HEALTHY" else "⚠️ Устраните пункты из раздела «Рекомендации» перед продолжением."}
 
 ---
 
@@ -160,6 +235,7 @@ def print_summary(health: RepositoryHealth) -> None:
     repo = health.repository
     tests = health.tests
     quality = health.code_quality
+    coverage = health.coverage_policy
 
     print("\n" + "=" * 70)
     print("🏥 REPOSITORY HEALTH CHECK SUMMARY")
@@ -177,6 +253,7 @@ def print_summary(health: RepositoryHealth) -> None:
     print(f"  Passed: {tests.total_passed}")
     print(f"  Failed: {tests.total_failed}")
     print(f"  Coverage: {tests.coverage_percent}%")
+    print(f"  Coverage policy: {'✅ Passed' if coverage.passed else '❌ FAILED'}")
     print(f"  Execution time: {tests.execution_time_sec:.2f}s")
 
     print("\nCode Quality:")

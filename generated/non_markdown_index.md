@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `126` |
+| Всего файлов | `127` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -114,6 +114,7 @@ version: 1.0
 | [`operations/tests/tooling/__init__.py`](../operations/tests/tooling/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/tooling/test_auxiliary_quality_tools.py`](../operations/tests/tooling/test_auxiliary_quality_tools.py) | — | Тесты вспомогательных инструментов: авто-создание TASK, авто-связывание трассировки. |
 | [`operations/tests/tooling/test_change_scope.py`](../operations/tests/tooling/test_change_scope.py) | — | Тесты проверки scope изменений и честности метаданных документов. |
+| [`operations/tests/tooling/test_code_analyzer.py`](../operations/tests/tooling/test_code_analyzer.py) | — | — |
 | [`operations/tests/tooling/test_coverage_policy.py`](../operations/tests/tooling/test_coverage_policy.py) | — | Тесты политики покрытия тестами: общее, по модулям, diff. |
 | [`operations/tests/tooling/test_evidence_record.py`](../operations/tests/tooling/test_evidence_record.py) | — | Тесты сборки evidence bundle по результатам проверок. |
 | [`operations/tests/tooling/test_full_traceability.py`](../operations/tests/tooling/test_full_traceability.py) | — | Тесты сквозных инвариантов трассируемости. |

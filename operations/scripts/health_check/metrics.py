@@ -10,6 +10,8 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from operations.scripts.quality.check_coverage import evaluate_coverage, load_policy
+
 
 @dataclass
 class RepositoryMetrics:
@@ -47,12 +49,28 @@ class CodeQualityMetrics:
 
 
 @dataclass
+class CoveragePolicyMetrics:
+    """Compliance with the tiered coverage gate defined in pyproject.toml.
+
+    Mirrors check_coverage.py's own evaluate_coverage() rather than
+    re-implementing the overall/critical-module thresholds, so this can
+    never silently diverge from the gate that actually blocks CI (unlike a
+    hardcoded percentage floor).
+    """
+
+    rows: list[str]
+    errors: list[str]
+    passed: bool
+
+
+@dataclass
 class RepositoryHealth:
     """Overall repository health status."""
 
     repository: RepositoryMetrics
     tests: TestMetrics
     code_quality: CodeQualityMetrics
+    coverage_policy: CoveragePolicyMetrics
     overall_status: str
 
 
@@ -84,7 +102,9 @@ def collect_git_metrics(root: Path) -> RepositoryMetrics:
             text=True,
             timeout=10,
         )
-        branches = [b.strip() for b in result.stdout.split("\n") if b.strip()]
+        branches = [
+            b.strip().removeprefix("* ").strip() for b in result.stdout.split("\n") if b.strip()
+        ]
 
         result = subprocess.run(
             ["git", "config", "--get", "remote.origin.url"],
@@ -124,11 +144,12 @@ def collect_test_metrics(root: Path) -> TestMetrics:
     """Collect test execution metrics."""
     passed = failed = 0
     exec_time = 0.0
+    coverage_percent = 0.0
 
     try:
         result = subprocess.run(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "coverage",
                 "run",
@@ -157,6 +178,18 @@ def collect_test_metrics(root: Path) -> TestMetrics:
         if time_match:
             exec_time = float(time_match.group(1))
 
+        # Export a fresh runtime/coverage.json from the run above instead of
+        # trusting whatever (possibly stale, possibly absent) file happens
+        # to already be on disk - collect_coverage_policy() depends on this
+        # reflecting the coverage this exact invocation just measured.
+        (root / "runtime").mkdir(parents=True, exist_ok=True)
+        subprocess.run(
+            [sys.executable, "-m", "coverage", "json", "-o", "runtime/coverage.json"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
         coverage_percent = _get_coverage_percent(root)
 
     except subprocess.TimeoutExpired:
@@ -300,6 +333,30 @@ def _get_coverage_percent(root: Path) -> float:
     return 0.0
 
 
+def collect_coverage_policy(root: Path) -> CoveragePolicyMetrics:
+    """Evaluate the real tiered coverage gate (overall + critical modules).
+
+    reporter.py used to render coverage against a hardcoded 75% regardless
+    of what pyproject.toml actually requires - e.g. it would show a plain
+    "82.0% coverage ✅" even if one of the five modules that must stay at
+    85% had dropped below its floor. Reading runtime/coverage.json through
+    the same evaluate_coverage() the canonical "Coverage policy" CI step
+    uses keeps this in lockstep with that gate instead.
+    """
+    coverage_json = root / "runtime" / "coverage.json"
+    if not coverage_json.exists():
+        return CoveragePolicyMetrics(
+            rows=[], errors=["runtime/coverage.json отсутствует"], passed=False
+        )
+    try:
+        report = json.loads(coverage_json.read_text())
+        policy = load_policy(root)
+        errors, rows = evaluate_coverage(report, policy)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        return CoveragePolicyMetrics(rows=[], errors=[str(exc)], passed=False)
+    return CoveragePolicyMetrics(rows=rows, errors=errors, passed=not errors)
+
+
 def assess_health(health: RepositoryHealth) -> str:
     """Assess overall repository health status."""
     issues = []
@@ -312,6 +369,8 @@ def assess_health(health: RepositoryHealth) -> str:
         issues.append("Code formatting issues detected")
     if not health.repository.working_tree_clean:
         issues.append("Working tree has uncommitted changes")
+    if not health.coverage_policy.passed:
+        issues.append("Coverage policy violations detected")
 
     if issues:
         return "⚠️ NEEDS ATTENTION"
