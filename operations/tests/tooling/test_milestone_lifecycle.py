@@ -35,10 +35,10 @@ class InitMilestoneTests(unittest.TestCase):
             _write_milestone_section(root, "m09", "in-progress")
             self.assertTrue(init_milestone("m09", root=root))
 
-            milestone_dir = root / "work" / "m09"
-            self.assertTrue((milestone_dir / "final_report.md").exists())
-            self.assertFalse((milestone_dir / "owner_checklist.md").exists())
-            self.assertFalse((milestone_dir / "semantic_review.md").exists())
+            report_path = root / "work" / "m09_final_report.md"
+            self.assertTrue(report_path.exists())
+            self.assertFalse((root / "work" / "m09" / "owner_checklist.md").exists())
+            self.assertFalse((root / "work" / "m09" / "semantic_review.md").exists())
 
     def test_final_report_frontmatter_references_milestone(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -46,7 +46,7 @@ class InitMilestoneTests(unittest.TestCase):
             _write_milestone_section(root, "m03", "in-progress")
             init_milestone("m03", root=root)
 
-            report = (root / "work" / "m03" / "final_report.md").read_text(encoding="utf-8")
+            report = (root / "work" / "m03_final_report.md").read_text(encoding="utf-8")
             self.assertIn("id: m03_final_report", report)
             self.assertIn("milestone: m03", report)
 
@@ -56,7 +56,7 @@ class InitMilestoneTests(unittest.TestCase):
             _write_milestone_section(root, "m04", "in-progress")
             init_milestone("m04", root=root)
 
-            report = (root / "work" / "m04" / "final_report.md").read_text(encoding="utf-8")
+            report = (root / "work" / "m04_final_report.md").read_text(encoding="utf-8")
             self.assertIn("completion_state: pending", report)
             self.assertIn("не применимо (TASK для этапа не создаются)", report)
 
@@ -65,7 +65,7 @@ class InitMilestoneTests(unittest.TestCase):
             root = Path(tmp)
             _write_milestone_section(root, "m05", "in-progress")
             init_milestone("m05", root=root)
-            report_path = root / "work" / "m05" / "final_report.md"
+            report_path = root / "work" / "m05_final_report.md"
             report_path.write_text("custom content", encoding="utf-8")
 
             init_milestone("m05", root=root)
@@ -79,7 +79,7 @@ class InitMilestoneTests(unittest.TestCase):
                 "## m01 — Другой этап\n\n- work_state: `completed`\n", encoding="utf-8"
             )
             self.assertFalse(init_milestone("m20", root=root))
-            self.assertFalse((root / "work" / "m20" / "final_report.md").exists())
+            self.assertFalse((root / "work" / "m20_final_report.md").exists())
 
 
 def _run_git(root: Path, *args: str) -> None:
@@ -139,7 +139,7 @@ class UpdateCompletionReportTests(unittest.TestCase):
 
         self.assertTrue(update_completion_report("m06", root=root))
 
-        content = (root / "work" / "m06" / "final_report.md").read_text(encoding="utf-8")
+        content = (root / "work" / "m06_final_report.md").read_text(encoding="utf-8")
         self.assertIn("completion_state: completed", content)
         self.assertIn("- Статус: завершено", content)
         self.assertNotIn("Дата завершения: —", content)
@@ -149,7 +149,7 @@ class UpdateCompletionReportTests(unittest.TestCase):
         like nothing existed before it — the completion commit might really
         be earlier than local history reaches. render_final_report() must
         raise rather than silently trust that illusion (this is exactly what
-        broke CI: work/m01/final_report.md rendered with a fraction of its
+        broke CI: work/m01_final_report.md rendered with a fraction of its
         real content because a shallow checkout's boundary commit already
         showed m01 as completed)."""
         root = self._make_repo("m06")
@@ -167,8 +167,7 @@ class UpdateCompletionReportTests(unittest.TestCase):
         section: render_final_report() raises, and update_completion_report()
         must report failure rather than write a broken file."""
         root = self._make_repo("m06")
-        report_path = root / "work" / "m10" / "final_report.md"
-        report_path.parent.mkdir(parents=True)
+        report_path = root / "work" / "m10_final_report.md"
         report_path.write_text("placeholder", encoding="utf-8")
 
         self.assertFalse(update_completion_report("m10", root=root))

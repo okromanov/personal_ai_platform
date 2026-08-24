@@ -89,7 +89,7 @@ jobs:
             git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=100 origin $env:GITHUB_SHA $env:BASE_SHA
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
-          # work/mXX/final_report.md is regenerated from real git history; a
+          # work/mXX_final_report.md is regenerated from real git history; a
           # shallow clone makes the graft commit look like it "just created"
           # every file it contains (see render_final_report()'s shallow-repo
           # guard in operations/scripts/milestones/update_completion_report.py).
@@ -192,7 +192,7 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
             git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags --depth=100 origin "$GITHUB_SHA" "$BASE_SHA"
           fi
-          # work/mXX/final_report.md is regenerated from real git history
+          # work/mXX_final_report.md is regenerated from real git history
           # (operations/scripts/milestones/update_completion_report.py walks
           # git log/git show across arbitrary past commits). A shallow clone
           # makes the graft commit look like it "just created" every file it

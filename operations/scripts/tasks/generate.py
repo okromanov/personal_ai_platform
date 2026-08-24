@@ -11,6 +11,7 @@ from operations.scripts.documents.metadata import (
     metadata_list,
     require_unique_identifier,
 )
+from operations.scripts.documents.traceability import collect_traceable_elements
 
 GENERATED_HEADER = "<!-- generated file: do not edit manually -->"
 TASK_ID_PATTERN = re.compile(r"^TASK_\d{3}$")
@@ -190,12 +191,40 @@ def select_current_task(items: list[TaskItem], milestone_id: str | None = None) 
     return candidates[0] if candidates else None
 
 
-def _ids(values: list[str]) -> str:
-    return "<br>".join(f"`{value}`" for value in values) if values else "—"
+# TASK/TEST/ADR records are identified by front-matter `id:`, not by a
+# heading matching that ID, so their `anchor` (used by heading-based
+# families like ARC_CMP/BR/SYS) does not exist in the file: link to the
+# document itself rather than to a fragment GitHub would never generate.
+_DOCUMENT_ID_FAMILIES = {"TASK", "TEST", "ADR"}
+
+
+def _linked_ids(records: dict[str, dict[str, object]], values: list[str]) -> str:
+    """Markdown link for each value found in the traceability registry
+    (plain code for anything unresolved, e.g. a milestone not yet in
+    milestones.md), so every cross-reference to a TASK/milestone/component
+    is clickable rather than a bare code-span the reader has to search for."""
+    if not values:
+        return "—"
+    rendered = []
+    for value in values:
+        # Milestone IDs are keyed lowercase in the registry (m01), everything
+        # else uppercase (TASK_001, ARC_CMP_001) — try both rather than
+        # importing traceability.py's private normalization rule.
+        record = records.get(value.upper()) or records.get(value.lower())
+        if record is None:
+            rendered.append(f"`{value}`")
+            continue
+        if record["family"] in _DOCUMENT_ID_FAMILIES:
+            target = str(record["path"])
+        else:
+            target = f"{record['path']}#{record['anchor']}"
+        rendered.append(f"[`{value}`]({target})")
+    return "<br>".join(rendered)
 
 
 def render_task_index(root: Path, generated_date: str | None = None) -> str:
     state = collect_tasks(root)
+    records = collect_traceable_elements(root)
     current = select_current_task(state["tasks"])
     if current:
         current_position = next(
@@ -240,9 +269,9 @@ def render_task_index(root: Path, generated_date: str | None = None) -> str:
             f"{ACTOR_LABELS.get(str(item['next_actor']), str(item['next_actor']))} |"
         )
         relation_rows.append(
-            f"| `{item['id']}` | {_ids(item['depends_on'])} | "
-            f"{_ids([x for x in item['traces_to'] if x.lower().startswith('m')])} | "
-            f"{_ids(item['implements'])} | {evidence} |"
+            f"| `{item['id']}` | {_linked_ids(records, item['depends_on'])} | "
+            f"{_linked_ids(records, [x for x in item['traces_to'] if x.lower().startswith('m')])} | "
+            f"{_linked_ids(records, item['implements'])} | {evidence} |"
         )
     if queue_rows:
         queue = f"""| № | Задача | Состояние | Выполнено шагов | Следующий исполнитель |
