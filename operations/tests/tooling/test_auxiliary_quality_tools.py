@@ -285,9 +285,13 @@ class QualityUtilityTests(unittest.TestCase):
             tasks.mkdir(parents=True)
             (root / "existing.txt").write_text("ok", encoding="utf-8")
             (tasks / "task_001.md").write_text(
-                "allowed_paths:\n  - missing.txt\n  - src/**\n  - existing.txt\n", encoding="utf-8"
+                "allowed_paths:\n  - missing.txt\n  - src/**\n  - existing.txt\n"
+                "  - existing.txt — Реальный файл с описанием того, что он делает.\n",
+                encoding="utf-8",
             )
             errors = validate_task_paths(root)
+            # A trailing " — description" is a per-file description, not part of
+            # the path: it must not make an otherwise-real path look missing.
             self.assertEqual(len(errors), 2)
             self.assertTrue(any("missing.txt" in error for error in errors))
             self.assertTrue(any("src/**" in error for error in errors))

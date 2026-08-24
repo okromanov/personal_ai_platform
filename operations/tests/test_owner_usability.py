@@ -34,6 +34,7 @@ def _task_item(
         "implements": [],
         "component": "",
         "allowed_paths": [],
+        "file_descriptions": {},
         "blocker": "",
         "tests": [],
         "next_actor": "agent",
@@ -128,17 +129,21 @@ class OwnerUsabilityTests(unittest.TestCase):
         self.assertIn("| Файл | Задача | Описание |", section)
         self.assertIn("TASK_001", section)
         self.assertNotIn("TASK_002", section)
-        # Product source files have English docstrings, which would read as
-        # foreign text in this Russian-language table; they fall back to the
-        # owning TASK's own (Russian) "Результат" instead, and since every
-        # source file of TASK_001 shares that same fallback, they all collapse
-        # into a single row rather than repeating the same text per file.
-        source_row = next(line for line in section.splitlines() if "src/channels/base.py" in line)
-        self.assertIn("[`src/channels/`](src/channels/)", source_row)
-        self.assertIn("[`src/channels/telegram.py`](src/channels/telegram.py)", source_row)
-        self.assertIn("[`src/__init__.py`](src/__init__.py)", source_row)
-        self.assertIn("Стабильный контракт `Channel`", source_row)
-        self.assertNotIn("abstraction", source_row)
+        # A directory entry (src/channels/) is not an individually describable
+        # file and must not get its own row.
+        self.assertNotIn("[`src/channels/`](src/channels/)", section)
+        # Each source file has its own, distinct, Russian description written
+        # once in TASK_001's allowed_paths — not an English docstring, and not
+        # a single description shared across every file the TASK shipped.
+        base_row = next(line for line in section.splitlines() if "src/channels/base.py" in line)
+        telegram_row = next(
+            line for line in section.splitlines() if "src/channels/telegram.py" in line
+        )
+        self.assertNotEqual(base_row, telegram_row)
+        self.assertIn("Базовый контракт канала", base_row)
+        self.assertIn("Реализация канала для Telegram", telegram_row)
+        self.assertNotIn("abstraction", section)
+        self.assertNotIn("implementation", section)
         # work/tests/test_007.md still describes itself, via its own "Назначение",
         # since that section is already Russian and file-specific.
         self.assertIn("Доказать, что компонент ARC_CMP_001", section)

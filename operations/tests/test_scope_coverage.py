@@ -51,6 +51,7 @@ def _task(task_id: str, implements: list[str]) -> TaskItem:
         "implements": implements,
         "component": "",
         "allowed_paths": [],
+        "file_descriptions": {},
         "blocker": "",
         "tests": [],
         "next_actor": "agent",

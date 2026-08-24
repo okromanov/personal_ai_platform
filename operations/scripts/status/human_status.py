@@ -52,9 +52,15 @@ def _checkbox(done: bool) -> str:
 
 
 def _deliverable_paths(task: TaskItem) -> list[str]:
-    """`allowed_paths` minus the task's own card: the files it actually ships."""
+    """`allowed_paths` minus the task's own card and any directory entries
+    (a directory isn't an individually describable file): the files it
+    actually ships."""
     own_path = str(task["path"])
-    return [path for path in task.get("allowed_paths", []) if path != own_path]
+    return [
+        path
+        for path in task.get("allowed_paths", [])
+        if path != own_path and not path.endswith("/")
+    ]
 
 
 def _first_paragraph(section: str) -> str:
@@ -80,39 +86,40 @@ def _markdown_document_purpose(root: Path, relative_path: str) -> str:
     return ""
 
 
-def _file_description(root: Path, relative_path: str, task_body: str) -> str:
-    """What the file itself is about, in Russian, matching the rest of
-    this document: a TEST/TASK markdown deliverable describes itself via
-    its own "Назначение"/"Результат" section; everything else (product
-    source code, whose module docstrings are in English) falls back to the
-    owning TASK's own "Результат" — what it actually built — rather than
-    an untranslated English docstring that would read as foreign text
-    here. Never invented either way."""
-    if not relative_path.endswith("/") and Path(relative_path).suffix == ".md":
+def _file_description(root: Path, relative_path: str, task: TaskItem) -> str:
+    """What the file itself is about, in Russian: the TASK's own per-file
+    description — written once, by whoever created the TASK, as an
+    `allowed_paths` entry's " — description" suffix — when one exists;
+    otherwise a TEST/TASK markdown deliverable's own "Назначение"/
+    "Результат" section; otherwise the owning TASK's own "Результат".
+    Never an untranslated English docstring, and never invented."""
+    own_description = task.get("file_descriptions", {}).get(relative_path)
+    if own_description:
+        return own_description
+    if Path(relative_path).suffix == ".md":
         purpose = _markdown_document_purpose(root, relative_path)
         if purpose:
             return purpose
-    section = _section(task_body, "Результат")
+    section = _section(str(task.get("body", "")), "Результат")
     return _first_paragraph(section) if section else ""
 
 
 def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
     """One table row per distinct description: name+link, owning TASK, and
     a real, Russian description of what the file itself is (never invented
-    — a TASK with no "Результат" section says so plainly). Files from the
-    same TASK that end up with the identical description (most of a TASK's
-    source files, which all fall back to that TASK's own "Результат")
-    collapse into a single row instead of repeating the same text once per
-    file."""
+    — a TASK with no per-file description or "Результат" section says so
+    plainly). Files that end up with the identical description (a TASK's
+    source files with no per-file description of their own, all falling
+    back to that TASK's shared "Результат") collapse into a single row
+    instead of repeating the same text once per file."""
     entries: list[tuple[str, str, str]] = []
     for task in tasks:
         paths = _deliverable_paths(task)
         if not paths:
             continue
         task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
-        task_body = str(task.get("body", ""))
         for path in paths:
-            description = _file_description(root, path, task_body) or (
+            description = _file_description(root, path, task) or (
                 "_Описание не задано (у TASK нет раздела «Результат»)._"
             )
             entries.append((path, task_link, description))
