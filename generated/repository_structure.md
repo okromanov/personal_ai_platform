@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `202` |
+| Всего файлов | `208` |
 
 ```text
 personal_ai_platform/
@@ -42,6 +42,7 @@ personal_ai_platform/
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
 - generated/document_index.md
+- generated/health_check_report.md
 - generated/repository_structure.md
 - generated/test_catalog.md
 - generated/traceability_matrix.md
@@ -85,6 +86,11 @@ personal_ai_platform/
 - operations/scripts/evidence/record.py
 - operations/scripts/github/__init__.py
 - operations/scripts/github/post_pr_comment.py
+- operations/scripts/health_check/__init__.py
+- operations/scripts/health_check/generate.py
+- operations/scripts/health_check/metrics.py
+- operations/scripts/health_check/module_guide.md
+- operations/scripts/health_check/reporter.py
 - operations/scripts/milestones/__init__.py
 - operations/scripts/milestones/init_milestone.py
 - operations/scripts/milestones/start.py

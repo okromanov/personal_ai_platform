@@ -22,7 +22,7 @@ source = ["operations/scripts", "src"]
 branch = true
 
 [tool.coverage.report]
-fail_under = 75
+fail_under = 85
 skip_covered = true
 show_missing = true
 exclude_also = [
@@ -30,7 +30,7 @@ exclude_also = [
 ]
 
 [tool.personal_ai_platform.coverage]
-overall = 75
+overall = 85
 diff = 90
 
 [tool.personal_ai_platform.coverage.modules]

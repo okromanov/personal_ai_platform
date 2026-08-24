@@ -167,19 +167,19 @@ def print_summary(health: RepositoryHealth) -> None:
 
     print(f"\nRepository: {repo.remote_url}")
     print(f"Status: {health.overall_status}")
-    print(f"\nMetrics:")
+    print("\nMetrics:")
     print(f"  Commits: {repo.total_commits}")
     print(f"  Python files: {repo.python_files}")
     print(f"  Lines of code: {repo.lines_of_code:,}")
     print(f"  Size: {repo.project_size_mb} MB")
 
-    print(f"\nTests:")
+    print("\nTests:")
     print(f"  Passed: {tests.total_passed}")
     print(f"  Failed: {tests.total_failed}")
     print(f"  Coverage: {tests.coverage_percent}%")
     print(f"  Execution time: {tests.execution_time_sec:.2f}s")
 
-    print(f"\nCode Quality:")
+    print("\nCode Quality:")
     print(f"  Type safe: {'✅ Yes' if quality.type_safe else '❌ No'}")
     print(f"  Formatting: {'✅ Compliant' if quality.formatting_compliant else '❌ Issues'}")
     print(f"  Linting issues: {quality.ruff_issues}")

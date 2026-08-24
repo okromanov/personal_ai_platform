@@ -1,3 +1,11 @@
+---
+id: health_check_module
+type: documentation
+version: 1.0
+document_state: current
+depends_on: []
+---
+
 # Repository Health Check Module
 
 Система автоматической проверки здоровья репозитория проекта `personal_ai_platform`.
@@ -20,7 +28,7 @@ python operations/scripts/health_check/generate.py --summary
 python operations/scripts/health_check/generate.py
 ```
 
-Сгенерирует: `generated/health_check_report.md`
+Сгенерирует: [`generated/health_check_report.md`](../../../generated/health_check_report.md)
 
 ### Экспорт метрик в JSON
 ```bash
@@ -151,8 +159,8 @@ def assess_health(health: RepositoryHealth) -> str:
 
 ## 📚 Документация
 
-- `README.md` - этот файл
-- `../health_check_report.md` - пример отчёта
+- Этот файл (module_guide.md)
+- [`health_check_report.md`](../../../generated/health_check_report.md) - пример отчёта
 - Встроенная документация в коде (docstrings)
 
 ## ✅ Требования
