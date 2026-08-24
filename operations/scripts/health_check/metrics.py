@@ -5,12 +5,9 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
-from operations.scripts.common.project import find_project_root
 
 
 @dataclass
@@ -193,7 +190,9 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
             text=True,
             timeout=60,
         )
-        ruff_issues = len([l for l in result.stdout.split("\n") if l.strip() and ":" in l])
+        ruff_issues = len(
+            [line for line in result.stdout.split("\n") if line.strip() and ":" in line]
+        )
 
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass

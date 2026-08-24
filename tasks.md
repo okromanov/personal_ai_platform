@@ -45,18 +45,18 @@ version: 1.0
 
 ## Технические связи
 
-| Задача | Предыдущая задача | Этап | Реализует | Проверки |
-|---|---|---|---|---|
-| `TASK_001` | — | [`m02`](milestones.md#m02) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | [`TEST_007`](work/tests/test_007.md) |
-| `TASK_002` | [`TASK_001`](work/tasks/task_001_arc_001.md) | [`m02`](milestones.md#m02) | [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002) | — |
-| `TASK_003` | [`TASK_002`](work/tasks/task_002_arc_002.md) | [`m02`](milestones.md#m02) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — |
-| `TASK_004` | [`TASK_003`](work/tasks/task_003_arc_003.md) | [`m02`](milestones.md#m02) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — |
-| `TASK_005` | [`TASK_004`](work/tasks/task_004_arc_004.md) | [`m02`](milestones.md#m02) | [`ARC_CMP_005`](specifications/architecture_baseline.md#arc_cmp_005) | — |
-| `TASK_006` | [`TASK_005`](work/tasks/task_005_arc_005.md) | [`m02`](milestones.md#m02) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | — |
-| `TASK_007` | [`TASK_006`](work/tasks/task_006_arc_007.md) | [`m02`](milestones.md#m02) | [`ARC_CMP_009`](specifications/architecture_baseline.md#arc_cmp_009) | — |
-| `TASK_008` | [`TASK_007`](work/tasks/task_007_arc_009.md) | [`m02`](milestones.md#m02) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#inf_cmp_001) | — |
-| `TASK_009` | [`TASK_008`](work/tasks/task_008_inf_001.md) | [`m02`](milestones.md#m02) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#inf_cmp_002) | — |
-| `TASK_010` | [`TASK_009`](work/tasks/task_009_inf_002.md) | [`m02`](milestones.md#m02) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003) | — |
-| `TASK_011` | [`TASK_010`](work/tasks/task_010_inf_003.md) | [`m02`](milestones.md#m02) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | — |
-| `TASK_012` | [`TASK_011`](work/tasks/task_011_inf_005.md) | [`m02`](milestones.md#m02) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | — |
-| `TASK_013` | [`TASK_012`](work/tasks/task_012_inf_007.md) | [`m02`](milestones.md#m02) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — |
+| Задача | Этап | Реализует | Проверки |
+|---|---|---|---|
+| `TASK_001` | [`m02`](milestones.md#m02) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | [`TEST_007`](work/tests/test_007.md) |
+| `TASK_002` | [`m02`](milestones.md#m02) | [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002) | — |
+| `TASK_003` | [`m02`](milestones.md#m02) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — |
+| `TASK_004` | [`m02`](milestones.md#m02) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — |
+| `TASK_005` | [`m02`](milestones.md#m02) | [`ARC_CMP_005`](specifications/architecture_baseline.md#arc_cmp_005) | — |
+| `TASK_006` | [`m02`](milestones.md#m02) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | — |
+| `TASK_007` | [`m02`](milestones.md#m02) | [`ARC_CMP_009`](specifications/architecture_baseline.md#arc_cmp_009) | — |
+| `TASK_008` | [`m02`](milestones.md#m02) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#inf_cmp_001) | — |
+| `TASK_009` | [`m02`](milestones.md#m02) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#inf_cmp_002) | — |
+| `TASK_010` | [`m02`](milestones.md#m02) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003) | — |
+| `TASK_011` | [`m02`](milestones.md#m02) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | — |
+| `TASK_012` | [`m02`](milestones.md#m02) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | — |
+| `TASK_013` | [`m02`](milestones.md#m02) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — |

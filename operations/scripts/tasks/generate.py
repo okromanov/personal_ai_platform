@@ -293,7 +293,7 @@ def render_task_index(root: Path, generated_date: str | None = None) -> str:
             f"{ACTOR_LABELS.get(str(item['next_actor']), str(item['next_actor']))} |"
         )
         relation_rows.append(
-            f"| `{item['id']}` | {_linked_ids(records, item['depends_on'])} | "
+            f"| `{item['id']}` | "
             f"{_linked_ids(records, [x for x in item['traces_to'] if x.lower().startswith('m')])} | "
             f"{_linked_ids(records, item['implements'])} | {evidence} |"
         )
@@ -304,8 +304,8 @@ def render_task_index(root: Path, generated_date: str | None = None) -> str:
 
 ## Технические связи
 
-| Задача | Предыдущая задача | Этап | Реализует | Проверки |
-|---|---|---|---|---|
+| Задача | Этап | Реализует | Проверки |
+|---|---|---|---|
 {chr(10).join(relation_rows)}"""
     else:
         queue = (

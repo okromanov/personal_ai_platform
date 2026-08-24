@@ -2,8 +2,8 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 1.7
-updated: 2026-08-23
+version: 1.8
+updated: 2026-08-24
 depends_on:
   - project_rules
   - project_milestones
@@ -196,4 +196,4 @@ Hook проверит структуру документов, целостно�
 
 ## 6. Утилиты и процедуры
 
-Детальные процедуры, wizard и примеры в [`operations/procedure_map.md`](operations/procedure_map.md). Дополнительно: [`operations/change_process.md`](operations/change_process.md), [`operations/acceptance.md`](operations/acceptance.md), [`operations/semantic_review.md`](operations/semantic_review.md).
+Детальные процедуры, wizard и примеры в [`operations/procedure_map.md`](operations/procedure_map.md) (там же — частые ошибки агента, §7). Дополнительно: [`operations/change_process.md`](operations/change_process.md), [`operations/acceptance.md`](operations/acceptance.md), [`operations/semantic_review.md`](operations/semantic_review.md).
