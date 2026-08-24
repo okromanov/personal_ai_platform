@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `206` |
+| Всего файлов | `207` |
 
 ```text
 personal_ai_platform/
@@ -166,6 +166,7 @@ personal_ai_platform/
 - operations/tests/tooling/test_coverage_policy.py
 - operations/tests/tooling/test_evidence_record.py
 - operations/tests/tooling/test_full_traceability.py
+- operations/tests/tooling/test_health_check.py
 - operations/tests/tooling/test_links.py
 - operations/tests/tooling/test_metadata_parsing.py
 - operations/tests/tooling/test_milestone_lifecycle.py
