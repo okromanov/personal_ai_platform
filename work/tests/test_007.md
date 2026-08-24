@@ -5,8 +5,8 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.5
-updated: 2026-08-23
+version: 1.6
+updated: 2026-08-24
 accepts:
   - m02
 traces_to:

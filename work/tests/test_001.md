@@ -5,8 +5,8 @@ title: Проверка модели документов и трассиров�
 spec_state: current
 execution: automated
 automated_evidence: project_checks
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-08-24
 accepts:
   - m01
 ---

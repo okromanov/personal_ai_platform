@@ -71,10 +71,10 @@ version: 1.0
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `planned` | `1.3` | TASK_011 — Реализация INF_CMP_005 |
 | [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `planned` | `1.3` | TASK_012 — Реализация INF_CMP_007 |
 | [`work/tasks/task_013_inf_008.md`](../work/tasks/task_013_inf_008.md) | `TASK_013` | `task` | `work_state` | `planned` | `1.3` | TASK_013 — Реализация INF_CMP_008 |
-| [`work/tests/test_001.md`](../work/tests/test_001.md) | `TEST_001` | `test` | `spec_state` | `current` | `1.2` | TEST_001 — Проверка модели документов и трассировки |
+| [`work/tests/test_001.md`](../work/tests/test_001.md) | `TEST_001` | `test` | `spec_state` | `current` | `1.3` | TEST_001 — Проверка модели документов и трассировки |
 | [`work/tests/test_002.md`](../work/tests/test_002.md) | `TEST_002` | `test` | `spec_state` | `current` | `1.2` | TEST_002 — Проверка качества, доказательств и автоматизации принятия |
 | [`work/tests/test_003.md`](../work/tests/test_003.md) | `TEST_003` | `test` | `spec_state` | `current` | `1.2` | TEST_003 — Контракты среды агента и поставщика модели |
 | [`work/tests/test_004.md`](../work/tests/test_004.md) | `TEST_004` | `test` | `spec_state` | `current` | `1.2` | TEST_004 — Контроль владельца и аварийное отключение |
 | [`work/tests/test_005.md`](../work/tests/test_005.md) | `TEST_005` | `test` | `spec_state` | `current` | `1.2` | TEST_005 — Сквозной сценарий Telegram и перезапуск |
 | [`work/tests/test_006.md`](../work/tests/test_006.md) | `TEST_006` | `test` | `spec_state` | `current` | `1.2` | TEST_006 — Инфраструктурный контур первого живого помощника |
-| [`work/tests/test_007.md`](../work/tests/test_007.md) | `TEST_007` | `test` | `spec_state` | `current` | `1.5` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |
+| [`work/tests/test_007.md`](../work/tests/test_007.md) | `TEST_007` | `test` | `spec_state` | `current` | `1.6` | TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram |
