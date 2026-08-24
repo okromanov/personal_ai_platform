@@ -38,7 +38,7 @@ version: 1.0
 | [`adr/adr_007_cloud_provider_selection.md`](../adr/adr_007_cloud_provider_selection.md) | `ADR_007` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_007 — Выбор облачного провайдера |
 | [`adr/adr_008_data_storage_schema.md`](../adr/adr_008_data_storage_schema.md) | `ADR_008` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_008 — Выбор схемы хранилища данных |
 | [`adr/adr_009_secret_management_strategy.md`](../adr/adr_009_secret_management_strategy.md) | `ADR_009` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_009 — Стратегия управления секретами и ключами |
-| [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.4` | Этапы развития personal_ai_platform |
+| [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.5` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.2` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.1` | Жизненный цикл архитектурных решений (ADR) |
 | [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.7` | Процедуры изменений и публикации |

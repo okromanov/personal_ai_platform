@@ -10,7 +10,6 @@ from operations.scripts.documents.traceability import (
     ELEMENT_HEADING_PATTERN,
     REFERENCE_PATTERN,
     RELATION_LINE_PATTERN,
-    SCOPE_LINE_PATTERN,
     _normalize_id,
     collect_traceable_elements,
 )
@@ -158,7 +157,7 @@ def _check_bare_identifier_references(
         # уже являются каноническим представлением связи, а не прозой.
         if HEADING_PATTERN.match(line) or stripped.startswith("|"):
             continue
-        if RELATION_LINE_PATTERN.match(line) or SCOPE_LINE_PATTERN.match(line):
+        if RELATION_LINE_PATTERN.match(line):
             continue
         # Строки-якоря (`<a id="...">`) определяют идентификатор, а не
         # упоминают его — сам якорь не должен становиться ссылкой на себя.

@@ -6,7 +6,7 @@ spec_state: current
 execution: automated
 automated_evidence: m02_security_tests
 version: 1.3
-updated: 2026-08-23
+updated: 2026-08-24
 accepts:
   - m02
 verifies:

@@ -3,7 +3,7 @@ id: operations_adr_lifecycle
 type: operations
 document_state: current
 version: 1.1
-updated: 2026-08-23
+updated: 2026-08-24
 depends_on:
   - operations_change_process
 ---
