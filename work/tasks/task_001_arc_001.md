@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
-version: 1.8
+version: 1.9
 updated: 2026-08-24
 next_actor: none
 owner_action: none
@@ -12,12 +12,12 @@ depends_on:
 allowed_paths:
   - work/tasks/task_001_arc_001.md
   - src/channels/
-  - src/channels/__init__.py — Точка входа пакета `channels`: собирает и экспортирует `Channel`, `TelegramChannel` и связанные типы.
-  - src/channels/base.py — Базовый контракт канала `Channel`: единый интерфейс приёма/отправки сообщений и нормализации в `TaskMessage`, без логики конкретной платформы.
-  - src/channels/telegram.py — Реализация канала для Telegram (`TelegramChannel`): нормализует сообщения в `TaskMessage`; приём/отправка пока эмулируются через внутреннюю очередь, без подключения к реальному Bot API.
-  - src/__init__.py — Точка входа пакета исходного кода продукта, реализующего архитектурные компоненты ARC_CMP_001–ARC_CMP_009.
-  - operations/tests/product/__init__.py — Служебный файл пакета продуктовых тестов (пустой, нужен для импорта пакета).
-  - operations/tests/product/test_channels.py — Unit-тесты компонента «Каналы» (`TelegramChannel`), входят в обязательную проверку CI.
+  - src/channels/__init__.py
+  - src/channels/base.py
+  - src/channels/telegram.py
+  - src/__init__.py
+  - operations/tests/product/__init__.py
+  - operations/tests/product/test_channels.py
   - work/tests/test_007.md
 traces_to:
   - m02
@@ -58,7 +58,7 @@ polling) нет. Живой бот не настроен и не запущен.
 
 ## 5. План выполнения
 
-- [x] Изучить требования к ARC_CMP_001
+- [x] Изучить требования к [`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001)
 - [x] Дополнить allowed_paths реальными путями
 - [x] Спроектировать реализацию
 - [x] Реализовать компонент
@@ -67,16 +67,16 @@ polling) нет. Живой бот не настроен и не запущен.
 
 ## 6. Состав
 
-`src/channels/` — стабильный контракт `Channel` и реализация `TelegramChannel`, плюс пакетный `src/__init__.py`. [`work/tests/test_007.md`](../tests/test_007.md) — описание проверок компонента. Полный список файлов и их назначение см. в `allowed_paths` выше.
+[`src/channels/`](../../src/channels/) — стабильный контракт `Channel` ([`base.py`](../../src/channels/base.py)) и реализация `TelegramChannel` ([`telegram.py`](../../src/channels/telegram.py)), плюс пакетный [`src/__init__.py`](../../src/__init__.py). [`work/tests/test_007.md`](../tests/test_007.md) — описание проверок компонента. [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py) — юнит-тесты, проверяющие компонент.
 
 ## 7. Проверки и доказательства
 
-Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_007`](../tests/test_007.md): 16 юнит-тестов `operations/tests/product/test_channels.py`, часть обязательного gate `Quality skills`.
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_007`](../tests/test_007.md): 16 юнит-тестов [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`.
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны (operations/tests/product/test_channels.py: 16/16 тестов прошли, часть CI gate)
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py): 16/16 тестов прошли, часть CI gate)
 - ✅ Pre-commit валидация успешна
 - ✅ CI успешен
 - ✅ Код review (смысловая проверка) пройден

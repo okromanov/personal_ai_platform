@@ -109,28 +109,6 @@ def _validate_task_sequence(items: list[TaskItem]) -> None:
             raise ValueError(f"{task_id}: активная TASK не может находиться после запланированной")
 
 
-ALLOWED_PATH_DESCRIPTION_SEPARATOR = " — "
-
-
-def _parse_allowed_paths(raw_values: list[str]) -> tuple[list[str], dict[str, str]]:
-    """Split each `allowed_paths` entry into its path and an optional
-    trailing " — description": a real, per-file Russian description
-    written once by whoever created the TASK (what this specific file is),
-    used verbatim rather than inferred from a docstring or borrowed from a
-    sibling file."""
-    paths: list[str] = []
-    descriptions: dict[str, str] = {}
-    for entry in raw_values:
-        path, separator, description = entry.partition(ALLOWED_PATH_DESCRIPTION_SEPARATOR)
-        path = path.strip()
-        if not path:
-            continue
-        paths.append(path)
-        if separator and description.strip():
-            descriptions[path] = description.strip()
-    return paths, descriptions
-
-
 def collect_tasks(root: Path) -> TasksReport:
     tests = _test_map(root)
     items: list[TaskItem] = []
@@ -160,9 +138,6 @@ def collect_tasks(root: Path) -> TasksReport:
         owner_action = (
             "none" if raw_owner_action is None else (str(raw_owner_action).strip() or "none")
         )
-        allowed_paths, file_descriptions = _parse_allowed_paths(
-            [x.strip() for x in metadata_list(doc.metadata, "allowed_paths") if x.strip()]
-        )
         items.append(
             {
                 "id": task_id,
@@ -174,8 +149,9 @@ def collect_tasks(root: Path) -> TasksReport:
                 "traces_to": [x.strip() for x in metadata_list(doc.metadata, "traces_to")],
                 "implements": [x.strip() for x in metadata_list(doc.metadata, "implements")],
                 "component": str(doc.metadata.get("component", "")).strip().upper(),
-                "allowed_paths": allowed_paths,
-                "file_descriptions": file_descriptions,
+                "allowed_paths": [
+                    x.strip() for x in metadata_list(doc.metadata, "allowed_paths") if x.strip()
+                ],
                 "blocker": blocker,
                 "tests": tests.get(task_id, []),
                 "next_actor": str(doc.metadata.get("next_actor", "none")).strip().lower(),

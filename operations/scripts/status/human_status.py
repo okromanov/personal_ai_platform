@@ -87,15 +87,10 @@ def _markdown_document_purpose(root: Path, relative_path: str) -> str:
 
 
 def _file_description(root: Path, relative_path: str, task: TaskItem) -> str:
-    """What the file itself is about, in Russian: the TASK's own per-file
-    description — written once, by whoever created the TASK, as an
-    `allowed_paths` entry's " — description" suffix — when one exists;
-    otherwise a TEST/TASK markdown deliverable's own "Назначение"/
-    "Результат" section; otherwise the owning TASK's own "Результат".
-    Never an untranslated English docstring, and never invented."""
-    own_description = task.get("file_descriptions", {}).get(relative_path)
-    if own_description:
-        return own_description
+    """What the file itself is about, in Russian: a TEST/TASK markdown
+    deliverable's own "Назначение"/"Результат" section when one exists;
+    otherwise the owning TASK's own "Результат". Never an untranslated
+    English docstring, and never invented."""
     if Path(relative_path).suffix == ".md":
         purpose = _markdown_document_purpose(root, relative_path)
         if purpose:

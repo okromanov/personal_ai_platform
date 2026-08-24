@@ -53,7 +53,6 @@ def _synthetic_task_item(number: int, *, work_state: str, depends_on: list[str])
         "implements": [],
         "component": "test",
         "allowed_paths": [],
-        "file_descriptions": {},
         "blocker": "",
         "tests": [],
         "next_actor": "agent",
