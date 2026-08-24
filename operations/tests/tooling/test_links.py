@@ -155,8 +155,7 @@ class FixLinksTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "milestones.md").write_text(
-                "# Вехи\n\n<a id=\"m01\"></a>\n## m01 — Основа\n\n"
-                "Команда: `ПРОДОЛЖАЙ m01`.\n",
+                '# Вехи\n\n<a id="m01"></a>\n## m01 — Основа\n\nКоманда: `ПРОДОЛЖАЙ m01`.\n',
                 encoding="utf-8",
             )
             fixed = fix_markdown_links(root)

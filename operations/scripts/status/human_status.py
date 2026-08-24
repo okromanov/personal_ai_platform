@@ -12,7 +12,6 @@ from operations.scripts.status.generate_project_status import (
 )
 from operations.scripts.tasks.generate import ACTOR_LABELS, collect_tasks, select_current_task
 
-
 _LINK_TARGET_PATTERN = re.compile(r"(\[[^\]]*\]\()([^)]+)(\))")
 
 
@@ -184,9 +183,14 @@ def render_repository_project_status(root: Path) -> str:
         )
         steps_done = int(current_task["steps_done"])
         steps_remaining = int(current_task["steps_remaining"])
-        next_text = _rebase_relative_links(
-            _section(str(current_task.get("body", "")), "Что будет дальше"), task_source_dir, root
-        ) or "Следующий шаг будет определён после завершения текущей задачи."
+        next_text = (
+            _rebase_relative_links(
+                _section(str(current_task.get("body", "")), "Что будет дальше"),
+                task_source_dir,
+                root,
+            )
+            or "Следующий шаг будет определён после завершения текущей задачи."
+        )
     else:
         task_link = "—"
         if foundation_without_project_tasks:
