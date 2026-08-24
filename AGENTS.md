@@ -2,7 +2,7 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 2.1
+version: 2.3
 updated: 2026-08-24
 depends_on:
   - project_rules
@@ -23,6 +23,7 @@ depends_on:
 2. Открыть указанную там задачу либо этапный рубеж.
 3. Прочитать [`project_rules.md`](project_rules.md) только те разделы, которые нужны для текущей работы.
 4. Не удалять и не перезаписывать незнакомые изменения пользователя.
+5. Убедиться, что установлен канонический pre-commit hook (`ls -la .git/hooks/pre-commit`); если его нет — поставить командой из [`operations/setup_precommit.md`](operations/setup_precommit.md) прежде, чем вносить изменения. Без него `generated/*`, [`project_status.md`](project_status.md), [`tasks.md`](tasks.md) не проверяются на рассинхрон локально и расходятся с источником до первого запуска CI.
 
 Команда `ПРОДОЛЖАЙ TASK_xxx` означает выполнить оставшуюся работу по этой карточке. Команда `ПРОДОЛЖАЙ mXX` означает провести следующий рубеж текущего этапа и показать владельцу результат либо одно необходимое решение.
 

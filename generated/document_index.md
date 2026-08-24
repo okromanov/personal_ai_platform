@@ -16,7 +16,7 @@ version: 1.0
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.1` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.3` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -37,7 +37,7 @@ version: 1.0
 | [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.2` | Матрица зависимостей обновления файлов |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.0` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
-| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.0` | Pre-commit Hook Setup |
+| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.1` | Pre-commit Hook Setup |
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.2` | Диаграммы состояний и переходы |
 | [`operations/templates/adr_template.md`](../operations/templates/adr_template.md) | `template_adr` | `document_template` | `document_state` | `current` | `1.0` | Шаблон ADR |
 | [`operations/templates/business_requirement_template.md`](../operations/templates/business_requirement_template.md) | `template_business_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон BR |
