@@ -32,6 +32,7 @@ from operations.scripts.documents.repository_tree import (
     GENERATED_HEADER,
     render_repository_structure,
 )
+from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import (
     collect_traceable_elements,
     render_traceability,
@@ -1238,6 +1239,7 @@ def check_generated(root: Path) -> CheckResult:
         root / "generated/document_index.md",
         root / "generated/repository_structure.md",
         root / "generated/traceability_matrix.md",
+        root / "generated/test_catalog.md",
     ]
     for path in required:
         if not path.exists():
@@ -1252,6 +1254,7 @@ def check_generated(root: Path) -> CheckResult:
         root / "generated/document_index.md": render_index(root, "2000-01-01"),
         root / "generated/repository_structure.md": render_repository_structure(root, "2000-01-01"),
         root / "generated/traceability_matrix.md": render_traceability(root, "2000-01-01"),
+        root / "generated/test_catalog.md": render_test_catalog(root, "2000-01-01"),
     }
     for path, rendered in expected.items():
         if path.exists() and read_text(path).strip() != rendered.strip():

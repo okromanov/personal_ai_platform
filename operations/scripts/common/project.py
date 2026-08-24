@@ -6,6 +6,7 @@ import platform
 import subprocess
 import sys
 import tempfile
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -68,6 +69,25 @@ def read_text(path: Path) -> str:
         raise ValueError(f"{path}: файл не в UTF-8 ({exc})") from exc
 
 
+_REPLACE_RETRY_ATTEMPTS = 5
+_REPLACE_RETRY_DELAY_SECONDS = 0.05
+
+
+def _replace_with_retry(temp_name: str, path: Path) -> None:
+    """os.replace() onto an actively-read/written destination can raise a
+    transient PermissionError on Windows (no POSIX-style rename-over-open-
+    handle guarantee there); a brief bounded retry absorbs that without
+    changing behavior on POSIX, where the first attempt always succeeds."""
+    for attempt in range(_REPLACE_RETRY_ATTEMPTS):
+        try:
+            os.replace(temp_name, path)
+            return
+        except PermissionError:
+            if attempt == _REPLACE_RETRY_ATTEMPTS - 1:
+                raise
+            time.sleep(_REPLACE_RETRY_DELAY_SECONDS)
+
+
 def atomic_write(path: Path, content: str) -> bool:
     normalized = content.replace("\r\n", "\n").replace("\r", "\n")
     if not normalized.endswith("\n"):
@@ -83,7 +103,7 @@ def atomic_write(path: Path, content: str) -> bool:
         ) as handle:
             temp_name = handle.name
             handle.write(normalized)
-        os.replace(temp_name, path)
+        _replace_with_retry(temp_name, path)
     except BaseException:
         if temp_name is not None and os.path.exists(temp_name):
             os.unlink(temp_name)

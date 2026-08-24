@@ -155,7 +155,12 @@ def run_step(
     if artifact:
         target = root / artifact
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(output, encoding="utf-8")
+        # A tool that succeeds with nothing to report (e.g. Vulture finding
+        # no dead code) produces empty stdout. record_quality_suite.py
+        # treats a zero-byte artifact as evidence the step never actually
+        # ran, so an explicit marker keeps a clean result distinguishable
+        # from a missing one.
+        target.write_text(output or f"{name}: no output (clean run)\n", encoding="utf-8")
     if completed.returncode != 0:
         raise QualityFailure(f"{name} failed with exit code {completed.returncode}")
 
