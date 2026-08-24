@@ -2,7 +2,7 @@
 id: operations_adr_lifecycle
 type: operations
 document_state: current
-version: 1.0
+version: 1.1
 updated: 2026-08-23
 depends_on:
   - operations_change_process
@@ -61,10 +61,10 @@ python3.12 operations/scripts/documents/check.py --all
 
 ### Специальный случай: ADR для m01
 
-ADR, явно связанные с этапом m01 машинным полем `traces_to: m01`:
+ADR, явно связанные с этапом [`m01`](../milestones.md#m01) машинным полем `traces_to: m01`:
 - Остаются в `decision_state: proposed` пока находятся в ветке разработки
-- Переходят в `decision_state: accepted` **при принятии m01** через скрипт `operations/scripts/acceptance/apply.py`
-- Это исключение из обычного процесса PR-обсуждения, так как m01 охватывает установление базовых правил проекта
+- Переходят в `decision_state: accepted` **при принятии [`m01`](../milestones.md#m01)** через скрипт `operations/scripts/acceptance/apply.py`
+- Это исключение из обычного процесса PR-обсуждения, так как [`m01`](../milestones.md#m01) охватывает установление базовых правил проекта
 
 Комментарий в тексте, ссылка из другого документа или неявная зависимость не заменяют `traces_to: m01`: `apply.py` не должен угадывать намерение.
 
@@ -243,4 +243,4 @@ rejected          superseded
 - Если `superseded_by: ADR_YYY` → ADR_YYY существует?
 - `updated` соответствует дате последнего изменения?
 
-Эти проверки станут частью future проекта (m03+).
+Эти проверки станут частью future проекта ([`m03`](../milestones.md#m03)+).

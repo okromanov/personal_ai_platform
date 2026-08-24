@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
-version: 1.10
+version: 2.0
 updated: 2026-08-24
 next_actor: none
 owner_action: none
@@ -39,7 +39,7 @@ tests:
 `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage`
 с отслеживаемым состоянием (pending → running → completed/failed/cancelled).
 
-`TelegramChannel` — упрощённая реализация для m02: приём/отправка сообщений эмулируются
+`TelegramChannel` — упрощённая реализация для [`m02`](../../milestones.md#m02): приём/отправка сообщений эмулируются
 через внутреннюю `asyncio.Queue`, реального подключения к Telegram Bot API (webhook или
 polling) нет. Живой бот не настроен и не запущен. Контракт `Channel` рассчитан на замену
 этой реализации на реальный Bot API без изменений выше уровня канала — это работа

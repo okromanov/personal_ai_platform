@@ -80,7 +80,7 @@ If issues found:
 
 ## Configuration
 
-The enforced Ruff configuration is in the root `pyproject.toml`. CI and local runs must use the pinned Ruff version from `operations/quality/requirements_dev.txt`.
+The enforced Ruff configuration is in the root `pyproject.toml`. CI and local runs must use the pinned Ruff version from [`operations/quality/requirements_dev.txt`](../../operations/quality/requirements_dev.txt).
 
 Do not broaden the rule set without fixing the resulting findings in the same change. This keeps the gate green and prevents a permanently failing CI baseline.
 

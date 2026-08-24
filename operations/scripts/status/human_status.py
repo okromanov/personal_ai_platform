@@ -13,6 +13,31 @@ from operations.scripts.status.generate_project_status import (
 from operations.scripts.tasks.generate import ACTOR_LABELS, collect_tasks, select_current_task
 
 
+_LINK_TARGET_PATTERN = re.compile(r"(\[[^\]]*\]\()([^)]+)(\))")
+
+
+def _rebase_relative_links(text: str, source_dir: Path, root: Path) -> str:
+    """TASK bodies link to other repo files relative to their own directory
+    (e.g. work/tasks/); this file inlines their prose verbatim at repo root,
+    so those relative targets must be re-expressed relative to root or they
+    point at the wrong place once copied here."""
+
+    def repl(match: re.Match[str]) -> str:
+        target = match.group(2).strip()
+        if not target or target.startswith(("http://", "https://", "mailto:", "#")):
+            return match.group(0)
+        path_part, _, anchor = target.partition("#")
+        resolved = (source_dir / path_part).resolve()
+        try:
+            rebased = resolved.relative_to(root.resolve())
+        except ValueError:
+            return match.group(0)
+        new_target = rebased.as_posix() + (f"#{anchor}" if anchor else "")
+        return f"{match.group(1)}{new_target}{match.group(3)}"
+
+    return _LINK_TARGET_PATTERN.sub(repl, text)
+
+
 def _section(body: str, title: str) -> str:
     pattern = re.compile(rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(title)}\s*$\n(.*?)(?=^##\s|\Z)")
     match = pattern.search(body)
@@ -127,9 +152,12 @@ def render_repository_project_status(root: Path) -> str:
             f"[`{current_task['id']}` — {current_task['title']}]"
             f"(work/tasks/{Path(str(current_task['path'])).name})"
         )
+        task_source_dir = root / Path(str(current_task["path"])).parent
         actor_key = str(current_task["next_actor"])
         actor = ACTOR_LABELS.get(actor_key, actor_key)
-        action = _actor_action(str(current_task.get("body", "")), actor_key)
+        action = _rebase_relative_links(
+            _actor_action(str(current_task.get("body", "")), actor_key), task_source_dir, root
+        )
         if actor_key == "owner" and str(current_task["owner_action"]) != "none":
             action = f"Выбрать решение по этапу: `{current_task['owner_action']}` или вернуть его на доработку."
         elif all_tasks_completed:
@@ -148,17 +176,17 @@ def render_repository_project_status(root: Path) -> str:
             action = "Продолжить работу по карточке текущей задачи."
         step_lines = (
             "\n".join(
-                f"- {_checkbox(bool(item['done']))} {item['text']}"
+                f"- {_checkbox(bool(item['done']))} "
+                f"{_rebase_relative_links(str(item['text']), task_source_dir, root)}"
                 for item in current_task["checklist"]
             )
             or "- [ ] План шагов ещё не заполнен."
         )
         steps_done = int(current_task["steps_done"])
         steps_remaining = int(current_task["steps_remaining"])
-        next_text = (
-            _section(str(current_task.get("body", "")), "Что будет дальше")
-            or "Следующий шаг будет определён после завершения текущей задачи."
-        )
+        next_text = _rebase_relative_links(
+            _section(str(current_task.get("body", "")), "Что будет дальше"), task_source_dir, root
+        ) or "Следующий шаг будет определён после завершения текущей задачи."
     else:
         task_link = "—"
         if foundation_without_project_tasks:

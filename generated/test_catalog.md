@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `304` |
+| Всего тестов | `307` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
-| Tooling (quality scripts, registries, traceability) | `147` |
+| Tooling (quality scripts, registries, traceability) | `150` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -191,7 +191,10 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_print_summary_writes_key_lines_to_stdout` | Краткая сводка выводит ключевые строки в stdout. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_clickable_markdown_reference` | Кликабельная markdown-ссылка принимается. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_internal_anchor_without_repeating_filename` | Внутренний якорь без повтора имени файла принимается. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_accepts_linked_identifier_mention` | Accepts linked identifier mention |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_ignores_code_blocks_and_future_filename_examples` | Проверка ссылок игнорирует блоки кода и примеры будущих имён файлов. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_ignores_non_document_extension_in_clickable_check` | Ignores non document extension in clickable check |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_bare_identifier_mention_in_prose` | Rejects bare identifier mention in prose |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_link_from_document_to_itself` | Ссылка документа на самого себя отклоняется. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_rejects_unlinked_existing_markdown_reference` | Упоминание существующего документа без ссылки отклоняется. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_links.py` | `LinkTests` | `test_runtime_artifact_does_not_change_document_check` | Артефакты в runtime/ не влияют на результат проверки документов. |

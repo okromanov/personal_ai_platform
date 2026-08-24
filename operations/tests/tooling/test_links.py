@@ -54,6 +54,46 @@ class LinkTests(unittest.TestCase):
             )
             self.assertEqual(check_markdown_links(root), [])
 
+    def test_rejects_bare_identifier_mention_in_prose(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "specifications").mkdir()
+            (root / "specifications" / "business_requirements.md").write_text(
+                "### BR_001 — Пример\n\nТекст.\n", encoding="utf-8"
+            )
+            (root / "source.md").write_text(
+                "---\nid: TASK_001\ntype: task\n---\n\nСм. требование BR_001 в прозе.\n",
+                encoding="utf-8",
+            )
+            errors = check_markdown_links(root)
+            self.assertTrue(any("упоминание BR_001" in error for error in errors))
+
+    def test_accepts_linked_identifier_mention(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "specifications").mkdir()
+            (root / "specifications" / "business_requirements.md").write_text(
+                "### BR_001 — Пример\n\nТекст.\n", encoding="utf-8"
+            )
+            (root / "source.md").write_text(
+                "---\nid: TASK_001\ntype: task\n---\n\n"
+                "См. требование [`BR_001`](specifications/business_requirements.md#br_001).\n",
+                encoding="utf-8",
+            )
+            errors = check_markdown_links(root)
+            self.assertEqual([e for e in errors if "упоминание" in e], [])
+
+    def test_ignores_non_document_extension_in_clickable_check(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src").mkdir()
+            (root / "src" / "base.py").write_text("class Channel: ...\n", encoding="utf-8")
+            (root / "source.md").write_text(
+                "Контракт в `src/base.py` без ссылки — это допустимо для кода.\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
     def test_runtime_artifact_does_not_change_document_check(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

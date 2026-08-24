@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: planned
-version: 1.3
+version: 1.4
 updated: 2026-08-24
 next_actor: agent
 owner_action: none
@@ -36,7 +36,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `ARC_CMP_003`
+1. Изучить спецификацию [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence
@@ -45,7 +45,7 @@ implements:
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к ARC_CMP_003
+- [ ] Изучить требования к [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Спроектировать реализацию
 - [ ] Реализовать компонент
