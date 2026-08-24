@@ -326,9 +326,17 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         lines.append("Изменений файлов не обнаружено.")
         lines.append("")
     else:
-        lines.append(f"### Новые файлы ({len(added)})")
+        # A path git recorded as "added" back when the milestone was open can
+        # since have been renamed or removed by later, unrelated history; only
+        # what's still actually there now is worth showing as a deliverable.
+        current_added = [path for path in added if (root / path).exists()]
+        lines.append(f"### Новые файлы ({len(current_added)})")
         lines.append("")
-        lines.extend((f"- {_path_reference(root, path)}" for path in added) if added else ["—"])
+        lines.extend(
+            (f"- {_path_reference(root, path)}" for path in current_added)
+            if current_added
+            else ["—"]
+        )
         lines.append("")
         lines.append(f"### Изменённые файлы ({len(modified)})")
         lines.append("")
