@@ -81,32 +81,45 @@ def _shallow_boundary_commits(root: Path) -> set[str]:
     }
 
 
-def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
-    """(sha, date) of the commit that first created this milestone's final_report.md.
-
-    Returns None both when no such commit is found and when the only match is
-    a shallow-clone boundary commit — in the latter case the file may really
-    have been added earlier, before the point history was cut off. `--follow`
-    keeps this pointed at the true creation commit across the file's later
-    rename from work/{id}/final_report.md to work/{id}_final_report.md.
-    """
+def _earliest_add(root: Path, path: str) -> tuple[str, str] | None:
+    """(sha, date) of the earliest commit that added `path`, or None."""
     result = run_command(
-        [
-            "git",
-            "log",
-            "--follow",
-            "--diff-filter=A",
-            "--format=%H %ad",
-            "--date=short",
-            "--",
-            f"work/{milestone_id}_final_report.md",
-        ],
+        ["git", "log", "--diff-filter=A", "--format=%H %ad", "--date=short", "--", path],
         cwd=root,
     )
     lines = [line for line in result.stdout.strip().splitlines() if line]
     if not lines:
         return None
     sha, commit_date = lines[-1].split(" ", 1)
+    return sha, commit_date
+
+
+def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
+    """(sha, date) of the commit that first created this milestone's final_report.md.
+
+    Returns None both when no such commit is found and when the only match is
+    a shallow-clone boundary commit — in the latter case the file may really
+    have been added earlier, before the point history was cut off.
+
+    Checks both the current flat path and the legacy work/{id}/final_report.md
+    path (retired when reports moved to work/ directly) and keeps the earlier
+    of the two: relying on `git log --follow`'s rename-similarity heuristic
+    instead would silently break whenever the rename and a content edit land
+    in the same commit (e.g. a GitHub squash merge combining several commits
+    into one) and git no longer considers the two sides similar enough to
+    call it a rename.
+    """
+    candidates = [
+        candidate
+        for candidate in (
+            _earliest_add(root, f"work/{milestone_id}_final_report.md"),
+            _earliest_add(root, f"work/{milestone_id}/final_report.md"),
+        )
+        if candidate is not None
+    ]
+    if not candidates:
+        return None
+    sha, commit_date = min(candidates, key=lambda candidate: candidate[1])
     if sha in _shallow_boundary_commits(root):
         return None
     return sha, commit_date
