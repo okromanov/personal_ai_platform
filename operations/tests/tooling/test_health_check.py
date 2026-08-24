@@ -12,11 +12,13 @@ from unittest.mock import patch
 
 from operations.scripts.health_check.metrics import (
     CodeQualityMetrics,
+    CoveragePolicyMetrics,
     RepositoryHealth,
     RepositoryMetrics,
     TestMetrics,
     assess_health,
     collect_code_quality_metrics,
+    collect_coverage_policy,
     collect_git_metrics,
     collect_test_metrics,
 )
@@ -195,10 +197,74 @@ class CollectTestMetricsTests(unittest.TestCase):
         self.assertEqual(metrics.coverage_percent, 87.7)
 
 
+def _write_coverage_policy(
+    root: Path, overall: int = 75, modules: dict[str, int] | None = None
+) -> None:
+    module_lines = "\n".join(f'"{path}" = {floor}' for path, floor in (modules or {}).items())
+    (root / "pyproject.toml").write_text(
+        "[tool.personal_ai_platform.coverage]\n"
+        f"overall = {overall}\n"
+        "[tool.personal_ai_platform.coverage.modules]\n"
+        f"{module_lines}\n",
+        encoding="utf-8",
+    )
+
+
+class CollectCoveragePolicyTests(unittest.TestCase):
+    def test_missing_coverage_json_is_reported_as_not_passed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_coverage_policy(root)
+
+            policy = collect_coverage_policy(root)
+
+        self.assertFalse(policy.passed)
+        self.assertTrue(policy.errors)
+
+    def test_passes_when_overall_coverage_meets_the_configured_floor(self) -> None:
+        # This is the 85%-vs-75% question in practice: the report must
+        # evaluate against pyproject.toml's real policy, not a hardcoded
+        # number baked into reporter.py.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_coverage_policy(root, overall=75)
+            (root / "runtime").mkdir()
+            (root / "runtime" / "coverage.json").write_text(
+                json.dumps({"totals": {"percent_covered": 80.0}, "files": {}}),
+                encoding="utf-8",
+            )
+
+            policy = collect_coverage_policy(root)
+
+        self.assertTrue(policy.passed)
+        self.assertIn("overall: 80.00% (minimum 75.00%)", policy.rows)
+
+    def test_fails_when_a_critical_module_is_below_its_own_higher_floor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_coverage_policy(root, overall=75, modules={"pkg/critical.py": 85})
+            (root / "runtime").mkdir()
+            (root / "runtime" / "coverage.json").write_text(
+                json.dumps(
+                    {
+                        "totals": {"percent_covered": 90.0},
+                        "files": {"pkg/critical.py": {"summary": {"percent_covered": 80.0}}},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            policy = collect_coverage_policy(root)
+
+        self.assertFalse(policy.passed)
+        self.assertTrue(any("pkg/critical.py" in error for error in policy.errors))
+
+
 def _make_health(
     repo: RepositoryMetrics | None = None,
     tests: TestMetrics | None = None,
     quality: CodeQualityMetrics | None = None,
+    coverage: CoveragePolicyMetrics | None = None,
 ) -> RepositoryHealth:
     return RepositoryHealth(
         repository=repo
@@ -220,6 +286,10 @@ def _make_health(
         code_quality=quality
         or CodeQualityMetrics(
             mypy_issues=0, ruff_issues=0, formatting_compliant=True, type_safe=True
+        ),
+        coverage_policy=coverage
+        or CoveragePolicyMetrics(
+            rows=["overall: 100.00% (minimum 75.00%)"], errors=[], passed=True
         ),
         overall_status="",
     )
@@ -253,6 +323,16 @@ class AssessHealthTests(unittest.TestCase):
         health = _make_health(repo=repo)
         self.assertEqual(assess_health(health), "⚠️ NEEDS ATTENTION")
 
+    def test_needs_attention_when_coverage_policy_fails(self) -> None:
+        health = _make_health(
+            coverage=CoveragePolicyMetrics(
+                rows=["operations/scripts/critical.py: 80.00% (minimum 85.00%)"],
+                errors=["operations/scripts/critical.py: покрытие 80.00% ниже 85.00%"],
+                passed=False,
+            )
+        )
+        self.assertEqual(assess_health(health), "⚠️ NEEDS ATTENTION")
+
 
 class ReportRenderingTests(unittest.TestCase):
     def _health(self) -> RepositoryHealth:
@@ -273,8 +353,15 @@ class ReportRenderingTests(unittest.TestCase):
         quality = CodeQualityMetrics(
             mypy_issues=0, ruff_issues=0, formatting_compliant=True, type_safe=True
         )
+        coverage = CoveragePolicyMetrics(
+            rows=["overall: 80.00% (minimum 75.00%)"], errors=[], passed=True
+        )
         health = RepositoryHealth(
-            repository=repo, tests=tests, code_quality=quality, overall_status=""
+            repository=repo,
+            tests=tests,
+            code_quality=quality,
+            coverage_policy=coverage,
+            overall_status="",
         )
         health.overall_status = assess_health(health)
         return health
@@ -286,6 +373,29 @@ class ReportRenderingTests(unittest.TestCase):
         self.assertIn("okromanov/personal_ai_platform", report)
         self.assertIn("✅ HEALTHY", report)
         self.assertIn("<!-- generated file: do not edit manually -->", report)
+
+    def test_generate_report_recommends_nothing_critical_when_healthy(self) -> None:
+        report = generate_report(self._health())
+
+        self.assertIn("Критичных проблем не обнаружено", report)
+
+    def test_generate_report_flags_real_problems_in_recommendations(self) -> None:
+        health = self._health()
+        health.code_quality = CodeQualityMetrics(
+            mypy_issues=3, ruff_issues=0, formatting_compliant=True, type_safe=False
+        )
+        health.coverage_policy = CoveragePolicyMetrics(
+            rows=["operations/scripts/critical.py: 80.00% (minimum 85.00%)"],
+            errors=["operations/scripts/critical.py: покрытие 80.00% ниже 85.00%"],
+            passed=False,
+        )
+        health.overall_status = assess_health(health)
+
+        report = generate_report(health)
+
+        self.assertIn("Устранить ошибки типов MyPy (3)", report)
+        self.assertIn("покрытие 80.00% ниже 85.00%", report)
+        self.assertNotIn("Критичных проблем не обнаружено", report)
 
     def test_print_summary_writes_key_lines_to_stdout(self) -> None:
         buffer = io.StringIO()
