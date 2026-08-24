@@ -2,8 +2,8 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-08-24
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -157,3 +157,22 @@ AGENTS.md раздел 2 (с чего начинать)
 | CI красный, не знаю почему | Проверить check.py вывод → исправить → change_process.md § 3–10 |
 | Хочу быстро проверить всё локально | operations/scripts/quality/run_suite.py full |
 | Нужно правку в authority document | change_process.md § 2 (обновить версию) → change_process.md § 3–10 (всегда PR) |
+
+## 7. Частые ошибки агента (проверить перед коммитом)
+
+Каждый пункт уже ловится `check.py --all` или `run_unittests.py`, но агенты регулярно
+наступают на них заново — стоят здесь явным списком, чтобы не тратить цикл на CI:
+
+- **README где угодно в репозитории запрещён** (любой регистр, любое расширение, любой
+  каталог) — см. [`AGENTS.md`](../AGENTS.md) §1. Онбординг для агента — этот документ, не README.
+- **`allowed_paths` в TASK** — только реальные файлы поставки: не каталог целиком без
+  необходимости, не тестовые артефакты (`operations/tests/product/*`), не заранее угаданное
+  имя. Имя файла TASK совпадает с его собственным путём в `allowed_paths`
+  (`work/tasks/task_NNN_xxx.md`), а не с придуманным вариантом.
+- **`updated:` во фронтматтере** обязан совпадать с датой фактического последнего изменения
+  файла по git-истории — иначе падает проверка честности метаданных.
+- **Не редактировать вручную** `generated/*`, [`project_status.md`](../project_status.md),
+  [`owner_dashboard.md`](../owner_dashboard.md), [`tasks.md`](../tasks.md) — все они
+  регенерируются `python operations/scripts/documents/generate.py --all`; ручная правка
+  разойдётся с генератором и провалит `generated drift` в CI.
+- **Пути — только `lower_snake_case`** (кроме [`AGENTS.md`](../AGENTS.md) и dot-файлов).

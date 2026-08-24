@@ -16,7 +16,7 @@ version: 1.0
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `1.7` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `1.8` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -33,7 +33,7 @@ version: 1.0
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.2` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.0` | Локальная разработка в Windows |
-| [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.2` | Карта операционных процедур |
+| [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.3` | Карта операционных процедур |
 | [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.0` | Матрица зависимостей обновления файлов |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.0` | Смысловая проверка документов и правил |
 | [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.0` | Pre-commit Hook Setup |
