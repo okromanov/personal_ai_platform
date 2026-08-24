@@ -103,10 +103,5 @@ V1 состоит из 6 этапов (m01–m06). Фундамент (m01) го
 
 | Файл | Задача | Описание |
 |---|---|---|
-| [`src/channels/`](src/channels/)<br>[`src/channels/__init__.py`](src/channels/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Channel abstraction layer for multi-interface platform. |
-| [`src/channels/base.py`](src/channels/base.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Base channel abstraction (ARC_CMP_001). |
-| [`src/channels/telegram.py`](src/channels/telegram.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Telegram channel implementation (ARC_CMP_001). |
-| [`src/__init__.py`](src/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | personal_ai_platform source code. |
-| [`operations/tests/product/__init__.py`](operations/tests/product/__init__.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | _Описание не задано (нет docstring или раздела «Назначение»/«Результат»)._ |
-| [`operations/tests/product/test_channels.py`](operations/tests/product/test_channels.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Unit tests for the Channels component (ARC_CMP_001). |
+| [`src/channels/`](src/channels/)<br>[`src/channels/__init__.py`](src/channels/__init__.py)<br>[`src/channels/base.py`](src/channels/base.py)<br>[`src/channels/telegram.py`](src/channels/telegram.py)<br>[`src/__init__.py`](src/__init__.py)<br>[`operations/tests/product/__init__.py`](operations/tests/product/__init__.py)<br>[`operations/tests/product/test_channels.py`](operations/tests/product/test_channels.py) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Стабильный контракт `Channel` (`src/channels/base.py`) и одна конкретная реализация, `TelegramChannel` (`src/channels/telegram.py`), нормализующая ввод/вывод в `TaskMessage` с отслеживаемым состоянием (pending → running → completed/failed/cancelled). |
 | [`work/tests/test_007.md`](work/tests/test_007.md) | [`TASK_001`](work/tasks/task_001_arc_001.md) | Доказать, что компонент ARC_CMP_001 (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям SYS_001. |

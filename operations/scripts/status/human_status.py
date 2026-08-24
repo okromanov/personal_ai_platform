@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import re
 from pathlib import Path
 
@@ -58,22 +57,15 @@ def _deliverable_paths(task: TaskItem) -> list[str]:
     return [path for path in task.get("allowed_paths", []) if path != own_path]
 
 
-def _python_docstring_summary(path: Path) -> str:
-    """First line of a Python file's own module docstring, or "" if absent."""
-    try:
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-    except (OSError, SyntaxError, UnicodeDecodeError):
-        return ""
-    docstring = ast.get_docstring(tree)
-    return docstring.strip().splitlines()[0].strip() if docstring else ""
+def _first_paragraph(section: str) -> str:
+    """First paragraph of a section, with any wrapped lines joined into
+    one — a markdown table cell cannot contain a raw newline."""
+    return " ".join(section.split("\n\n", 1)[0].split())
 
 
 def _markdown_document_purpose(root: Path, relative_path: str) -> str:
-    """First line of a TEST/TASK document's own "Назначение"/"Результат"
-    section, read from the file itself rather than borrowed from a
-    different document (a shared TEST purpose used to be copied onto every
-    file a TASK delivered, which described why the TEST exists, not what
-    each individual file is)."""
+    """A TEST/TASK document's own "Назначение"/"Результат" section, read
+    from the file itself rather than borrowed from a different document."""
     full_path = root / relative_path
     if not full_path.is_file():
         return ""
@@ -84,44 +76,44 @@ def _markdown_document_purpose(root: Path, relative_path: str) -> str:
     for title in ("Назначение", "Результат"):
         section = _section(body, title)
         if section:
-            return section.splitlines()[0].strip()
+            return _first_paragraph(section)
     return ""
 
 
-def _file_description(root: Path, relative_path: str) -> str:
-    """What the file itself is about, sourced only from its own real
-    content: a Python module's own docstring, a TEST/TASK document's own
-    purpose/result section, or (for a directory entry) its own
-    `__init__.py` docstring — never invented and never borrowed from a
-    sibling file's documentation."""
-    if relative_path.endswith("/"):
-        init_path = f"{relative_path}__init__.py"
-        return _python_docstring_summary(root / init_path) if (root / init_path).is_file() else ""
-    suffix = Path(relative_path).suffix
-    if suffix == ".py":
-        return _python_docstring_summary(root / relative_path)
-    if suffix == ".md":
-        return _markdown_document_purpose(root, relative_path)
-    return ""
+def _file_description(root: Path, relative_path: str, task_body: str) -> str:
+    """What the file itself is about, in Russian, matching the rest of
+    this document: a TEST/TASK markdown deliverable describes itself via
+    its own "Назначение"/"Результат" section; everything else (product
+    source code, whose module docstrings are in English) falls back to the
+    owning TASK's own "Результат" — what it actually built — rather than
+    an untranslated English docstring that would read as foreign text
+    here. Never invented either way."""
+    if not relative_path.endswith("/") and Path(relative_path).suffix == ".md":
+        purpose = _markdown_document_purpose(root, relative_path)
+        if purpose:
+            return purpose
+    section = _section(task_body, "Результат")
+    return _first_paragraph(section) if section else ""
 
 
 def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
     """One table row per distinct description: name+link, owning TASK, and
-    a real description of what the file itself is (never invented — a file
-    with no docstring or purpose/result section says so plainly). Files
-    from the same TASK that end up with the identical description (e.g. a
-    directory entry and its own `__init__.py`, or several files with no
-    docstring at all) collapse into a single row instead of repeating the
-    same text once per file."""
+    a real, Russian description of what the file itself is (never invented
+    — a TASK with no "Результат" section says so plainly). Files from the
+    same TASK that end up with the identical description (most of a TASK's
+    source files, which all fall back to that TASK's own "Результат")
+    collapse into a single row instead of repeating the same text once per
+    file."""
     entries: list[tuple[str, str, str]] = []
     for task in tasks:
         paths = _deliverable_paths(task)
         if not paths:
             continue
         task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
+        task_body = str(task.get("body", ""))
         for path in paths:
-            description = _file_description(root, path) or (
-                "_Описание не задано (нет docstring или раздела «Назначение»/«Результат»)._"
+            description = _file_description(root, path, task_body) or (
+                "_Описание не задано (у TASK нет раздела «Результат»)._"
             )
             entries.append((path, task_link, description))
     if not entries:
