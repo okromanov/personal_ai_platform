@@ -100,14 +100,11 @@ def _file_description(root: Path, relative_path: str, task: TaskItem) -> str:
 
 
 def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
-    """One table row per distinct description: name+link, owning TASK, and
-    a real, Russian description of what the file itself is (never invented
-    — a TASK with no per-file description or "Результат" section says so
-    plainly). Files that end up with the identical description (a TASK's
-    source files with no per-file description of their own, all falling
-    back to that TASK's shared "Результат") collapse into a single row
-    instead of repeating the same text once per file."""
-    entries: list[tuple[str, str, str]] = []
+    """One table row per file: name+link, owning TASK, and a real, Russian
+    description of what that specific file is (its own docstring/purpose
+    section when it has one, never invented — a file with no description of
+    its own and a TASK with no "Результат" section says so plainly)."""
+    rows = []
     for task in tasks:
         paths = _deliverable_paths(task)
         if not paths:
@@ -115,25 +112,12 @@ def _task_file_rows(root: Path, tasks: list[TaskItem]) -> str:
         task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
         for path in paths:
             description = _file_description(root, path, task) or (
-                "_Описание не задано (у TASK нет раздела «Результат»)._"
+                "_Описание не задано (у файла нет docstring/purpose, а у TASK — раздела «Результат»)._"
             )
-            entries.append((path, task_link, description))
-    if not entries:
+            rows.append(f"| [`{path}`]({path}) | {task_link} | {description} |")
+    if not rows:
         return "Ни одна TASK ещё не поставила файлы за пределами собственной карточки."
 
-    grouped: dict[tuple[str, str], list[str]] = {}
-    order: list[tuple[str, str]] = []
-    for path, task_link, description in entries:
-        key = (task_link, description)
-        if key not in grouped:
-            grouped[key] = []
-            order.append(key)
-        grouped[key].append(path)
-
-    rows = [
-        f"| {'<br>'.join(f'[`{path}`]({path})' for path in grouped[key])} | {key[0]} | {key[1]} |"
-        for key in order
-    ]
     return "\n".join(["| Файл | Задача | Описание |", "|---|---|---|", *rows])
 
 

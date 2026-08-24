@@ -30,11 +30,11 @@ traces_to:
 ## 2. Контекст
 
 V1 требует:
-- регулярно доступный и восстанавливаемый сервис (`BR_005`);
-- наблюдаемую версию, состояние и стоимость (`SYS_024`, `INF_REQ_013`);
-- переносимое развёртывание (`SYS_027`, `INF_REQ_001`, `INF_REQ_014`);
-- устойчивое постоянное состояние (`INF_REQ_008`);
-- проверяемое резервное копирование, восстановление и откат (`SYS_025`, `INF_REQ_009`, `INF_REQ_011`).
+- регулярно доступный и восстанавливаемый сервис ([`BR_005`](../specifications/business_requirements.md#br_005));
+- наблюдаемую версию, состояние и стоимость ([`SYS_024`](../specifications/system_specification.md#sys_024), [`INF_REQ_013`](../specifications/infrastructure_baseline.md#inf_req_013));
+- переносимое развёртывание ([`SYS_027`](../specifications/system_specification.md#sys_027), [`INF_REQ_001`](../specifications/infrastructure_baseline.md#inf_req_001), [`INF_REQ_014`](../specifications/infrastructure_baseline.md#inf_req_014));
+- устойчивое постоянное состояние ([`INF_REQ_008`](../specifications/infrastructure_baseline.md#inf_req_008));
+- проверяемое резервное копирование, восстановление и откат ([`SYS_025`](../specifications/system_specification.md#sys_025), [`INF_REQ_009`](../specifications/infrastructure_baseline.md#inf_req_009), [`INF_REQ_011`](../specifications/infrastructure_baseline.md#inf_req_011)).
 
 Облачный провайдер должен обеспечить:
 - Доступ по API из Python приложения

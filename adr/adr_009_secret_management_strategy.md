@@ -34,10 +34,10 @@ traces_to:
    - SSH ключи для серверов
 
 3. **Шифровальные ключи:**
-   - ключи, которые должны оставаться вне кода и журналов (`SEC_CTL_005`, `INF_REQ_006`)
+   - ключи, которые должны оставаться вне кода и журналов ([`SEC_CTL_005`](../specifications/system_specification.md#sec_ctl_005), [`INF_REQ_006`](../specifications/infrastructure_baseline.md#inf_req_006))
    - версии ключей, необходимые для контролируемой ротации без скрытой потери доступа
 
-Требования (`SEC_CTL_005`, `INF_REQ_006`):
+Требования ([`SEC_CTL_005`](../specifications/system_specification.md#sec_ctl_005), [`INF_REQ_006`](../specifications/infrastructure_baseline.md#inf_req_006)):
 - Секреты не должны быть в коде или конфигах (git)
 - Должна быть возможность ротации без перезагрузки
 - Надо контролировать кто получает доступ к чему
@@ -82,7 +82,7 @@ traces_to:
 ## 5. Последствия
 
 **Положительные:**
-- Секреты не в коде (`SEC_CTL_005`, `INF_REQ_006`)
+- Секреты не в коде ([`SEC_CTL_005`](../specifications/system_specification.md#sec_ctl_005), [`INF_REQ_006`](../specifications/infrastructure_baseline.md#inf_req_006))
 - Ротация проверяется без ошибочной подмены контролем развёртывания
 - Аудит кто доставал что (для compliance)
 - Изоляция доступа через IAM политики

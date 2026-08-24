@@ -36,7 +36,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `ARC_CMP_005` в [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md#arc_cmp_005)
+1. Изучить спецификацию `ARC_CMP_005`
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence

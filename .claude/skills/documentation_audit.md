@@ -43,7 +43,7 @@ Checks the current set of primary documentation files (excluding generated views
 
 - ✅ `check.py --all` returns: `errors=0, warnings=0`
 - ✅ No files with metadata dishonesty (updated dates)
-- ✅ All ADR have valid `traces_to`; the explicit milestone ID `m01` is allowed only for ADR accepted atomically with the foundation
+- ✅ All ADR have valid `traces_to`; the explicit milestone ID [`m01`](../../milestones.md#m01) is allowed only for ADR accepted atomically with the foundation
 - ✅ No broken cross-references
 
 ## Output Format

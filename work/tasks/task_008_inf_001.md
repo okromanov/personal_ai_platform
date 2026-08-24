@@ -36,7 +36,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `INF_CMP_001` в [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md#inf_cmp_001)
+1. Изучить спецификацию `INF_CMP_001`
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence

@@ -131,16 +131,23 @@ class OwnerUsabilityTests(unittest.TestCase):
         # A directory entry (src/channels/) is not an individually describable
         # file and must not get its own row.
         self.assertNotIn("[`src/channels/`](src/channels/)", section)
-        # allowed_paths carries no per-file description (see AskUserQuestion
-        # decision to drop that convention): every non-markdown source file
-        # of TASK_001 falls back to the same shared "Результат" text, so they
-        # collapse into one row rather than repeating it once per file.
-        base_row = next(line for line in section.splitlines() if "src/channels/base.py" in line)
-        telegram_row = next(
-            line for line in section.splitlines() if "src/channels/telegram.py" in line
+        # Every deliverable now gets its own row (no more grouping several
+        # files behind one <br>-joined cell), even when their description
+        # is the same shared TASK "Результат" text — allowed_paths still
+        # carries no per-file description (see AskUserQuestion decision to
+        # drop that convention), so base.py and telegram.py share text but
+        # are two distinct table rows.
+        base_row = next(
+            line for line in section.splitlines() if line.startswith("| [`src/channels/base.py`]")
         )
-        self.assertEqual(base_row, telegram_row)
+        telegram_row = next(
+            line
+            for line in section.splitlines()
+            if line.startswith("| [`src/channels/telegram.py`]")
+        )
+        self.assertNotEqual(base_row, telegram_row)
         self.assertIn("Стабильный контракт", base_row)
+        self.assertIn("Стабильный контракт", telegram_row)
         self.assertNotIn("abstraction", section)
         self.assertNotIn("implementation", section)
         # work/tests/test_007.md still describes itself, via its own "Назначение",
