@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_007
 component: INF_CMP_007
 work_state: planned
-version: 1.5
+version: 1.6
 updated: 2026-08-25
 next_actor: agent
 owner_action: none
@@ -54,7 +54,7 @@ implements:
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `src/observability/`), добавит в `allowed_paths`, создаст TEST.
+**В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `src/observability/`), добавит их в `allowed_paths` и создаст связанную карточку TEST.
 
 **Ожидаемые файлы:**
 - `src/observability/logging.py` — структурированное логирование технических событий
