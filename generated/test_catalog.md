@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `333` |
+| Всего тестов | `343` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
 | Tooling (quality scripts, registries, traceability) | `157` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `35` |
+| Product | `45` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -336,6 +336,16 @@ version: 1.0
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelAsyncTests` | `test_send_without_token_raises_channel_error` | Отправка без токена вызывает ChannelError. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_channel_type_is_telegram` | Тип канала — Telegram. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_default_token_is_empty` | Токен по умолчанию пуст. |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_canned_runtime_response_is_sent_back` | Canned runtime response is sent back |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_message_is_marked_running_before_runtime_executes` | Message is marked running before runtime executes |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_successful_task_marks_completed_and_sends_output` | Successful task marks completed and sends output |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorOwnerControlTests` | `test_active_emergency_switch_cancels_without_calling_runtime` | Active emergency switch cancels without calling runtime |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorOwnerControlTests` | `test_identity_is_checked_before_emergency_switch` | Identity is checked before emergency switch |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorOwnerControlTests` | `test_unrecognized_identity_cancels_without_calling_runtime` | Unrecognized identity cancels without calling runtime |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorRuntimeFailureTests` | `test_runtime_port_error_is_a_distinct_type` | Runtime port error is a distinct type |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorRuntimeFailureTests` | `test_task_level_runtime_failure_marks_failed` | Task level runtime failure marks failed |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorRuntimeFailureTests` | `test_unavailable_environment_marks_failed_with_distinct_message` | Unavailable environment marks failed with distinct message |
+| Product | `operations/tests/product/test_orchestration.py` | `OrchestratorRuntimeSwapTests` | `test_swapping_runtime_implementation_preserves_the_contract` | SYS_003: an alternative transitional layer runs the same contract |
 | Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_activate_then_deactivate_round_trips` | Activate then deactivate round trips |
 | Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_corrupted_state_file_reads_as_inactive` | Corrupted state file reads as inactive |
 | Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_missing_state_file_reads_as_inactive` | Missing state file reads as inactive |

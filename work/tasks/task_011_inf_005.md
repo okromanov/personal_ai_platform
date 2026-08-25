@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
 work_state: planned
-version: 1.3
+version: 1.5
 updated: 2026-08-24
 next_actor: agent
 owner_action: none
@@ -80,7 +80,7 @@ implements:
 
 ## 9. Что будет дальше
 
-[`TASK_012`](task_012_inf_007.md) реализует Наблюдаемость ([`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)) — сбор сведений о работоспособности и ошибках, в том числе для только что реализованного постоянного хранилища.
+`TASK_012` реализует Наблюдаемость (`INF_CMP_007`) — сбор сведений о работоспособности и ошибках, в том числе для только что реализованного постоянного хранилища.
 
 ## 10. Что это даёт владельцу
 

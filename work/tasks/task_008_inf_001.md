@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_001
 component: INF_CMP_001
 work_state: planned
-version: 1.3
+version: 1.5
 updated: 2026-08-24
 next_actor: agent
 owner_action: none
@@ -81,7 +81,7 @@ implements:
 
 ## 9. Что будет дальше
 
-[`TASK_009`](task_009_inf_002.md) реализует Сеть и контролируемый исходящий трафик ([`INF_CMP_002`](../../specifications/infrastructure_baseline.md#inf_cmp_002)) — правила того, что вычислительной среде из этой TASK разрешено делать в сети.
+`TASK_009` реализует Сеть и контролируемый исходящий трафик (`INF_CMP_002`) — правила того, что вычислительной среде из этой TASK разрешено делать в сети.
 
 ## 10. Что это даёт владельцу
 

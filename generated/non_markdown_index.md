@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `132` |
+| Всего файлов | `137` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -95,6 +95,7 @@ version: 1.0
 | [`operations/tests/performance/test_critical_paths.py`](../operations/tests/performance/test_critical_paths.py) | — | Тесты производительности критичных, часто вызываемых функций. |
 | [`operations/tests/product/__init__.py`](../operations/tests/product/__init__.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/product/test_channels.py`](../operations/tests/product/test_channels.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Unit-тесты компонента Channels (ARC_CMP_001). |
+| [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`operations/tests/product/test_owner_control.py`](../operations/tests/product/test_owner_control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`operations/tests/stress/__init__.py`](../operations/tests/stress/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/stress/test_scalability.py`](../operations/tests/stress/test_scalability.py) | — | Стресс-тесты масштабируемости функций, перебирающих этапы, задачи или файлы. |
@@ -141,6 +142,10 @@ version: 1.0
 | [`src/channels/__init__.py`](../src/channels/__init__.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Точка входа пакета Channels: экспортирует Channel, TaskMessage и TelegramChannel. |
 | [`src/channels/base.py`](../src/channels/base.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Базовый контракт канала: нормализует ввод/вывод в TaskMessage с отслеживаемым статусом. |
 | [`src/channels/telegram.py`](../src/channels/telegram.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Реализация канала Telegram: нормализует сообщения Telegram в формат TaskMessage. |
+| [`src/orchestration/__init__.py`](../src/orchestration/__init__.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
+| [`src/orchestration/orchestrator.py`](../src/orchestration/orchestrator.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
+| [`src/orchestration/runtime_port.py`](../src/orchestration/runtime_port.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
+| [`src/orchestration/stub_runtime.py`](../src/orchestration/stub_runtime.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/owner_control/__init__.py`](../src/owner_control/__init__.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/base.py`](../src/owner_control/base.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/control.py`](../src/owner_control/control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
