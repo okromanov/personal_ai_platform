@@ -84,10 +84,7 @@ class OwnerUsabilityTests(unittest.TestCase):
         for text in [
             "Ваше действие сейчас",
             f"ПРОДОЛЖАЙ {resume_target}",
-            "Что произойдёт после вашей команды",
-            "Когда потребуется ваше участие",
             "Следующий исполнитель",
-            "Общая картина V1",
             "Этапы V1",
             "Проектные задачи текущего этапа",
             "Шаги текущей работы",
@@ -98,6 +95,12 @@ class OwnerUsabilityTests(unittest.TestCase):
             "[ ]",
         ]:
             self.assertIn(text, rendered)
+        for removed_text in [
+            "Что произойдёт после вашей команды",
+            "Когда потребуется ваше участие",
+            "Общая картина V1",
+        ]:
+            self.assertNotIn(removed_text, rendered)
         self.assertLess(
             rendered.index(f"ПРОДОЛЖАЙ {resume_target}"), rendered.index("Текущее состояние")
         )
