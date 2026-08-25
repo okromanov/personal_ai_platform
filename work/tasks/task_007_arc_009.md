@@ -60,8 +60,6 @@ tests:
 
 [`src/operations/`](../../src/operations/) — `HealthAggregator`/`HealthReport`/`DependencyStatus` ([`health.py`](../../src/operations/health.py)) и `SchedulerState`/`ScheduledIntent` ([`scheduler_state.py`](../../src/operations/scheduler_state.py)). [`work/tests/test_013.md`](../tests/test_013.md) — описание проверок компонента. [`operations/tests/product/test_operations_state.py`](../../operations/tests/product/test_operations_state.py) — юнит-тесты, проверяющие компонент.
 
-Полный прогон проверки обнаружил три доработки в [`repository_audit_system_prompt.md`](../../repository_audit_system_prompt.md) (добавлен отдельным изменением, PR #38), не относящиеся к реализации [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009): (1) 19 некликабельных упоминаний трассируемых элементов и путей документов — исправлено автоматическим линкером; (2) исходное имя файла в верхнем регистре нарушало соглашение lower_snake_case — файл переименован; (3) иллюстративный пример хардкода секретного значения в коде внутри документа ложно срабатывал на сканере секретов — значение в примере заменено на плейсхолдер, сохраняющий педагогический смысл без реального похожего на секрет значения.
-
 ## 7. Проверки и доказательства
 
 Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_013`](../tests/test_013.md): юнит-тесты [`operations/tests/product/test_operations_state.py`](../../operations/tests/product/test_operations_state.py), часть обязательного gate `Quality skills`.
