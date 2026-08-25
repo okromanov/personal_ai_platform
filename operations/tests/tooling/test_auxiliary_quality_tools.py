@@ -298,13 +298,12 @@ class QualityUtilityTests(unittest.TestCase):
             root = Path(tmp)
             (root / "project_status.md").write_text(
                 "## Ваше действие сейчас\nЗапустить python и слить PR.\n"
-                "## Когда потребуется ваше участие\n"
-                + "".join(f"{index}. Step\n" for index in range(1, 8))
-                + "\n`ПРОДОЛЖАЙ m02` `ПРОДОЛЖАЙ m03`\n",
+                "`ПРОДОЛЖАЙ m02` `ПРОДОЛЖАЙ m03`\n"
+                "## Текущее состояние\n",
                 encoding="utf-8",
             )
             errors = check_project_status(root)
-            self.assertGreaterEqual(len(errors), 4)
+            self.assertGreaterEqual(len(errors), 3)
 
     def test_requirement_coverage_detects_uncovered_and_empty_tests(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

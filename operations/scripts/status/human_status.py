@@ -43,16 +43,6 @@ def _section(body: str, title: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _actor_action(body: str, actor: str) -> str:
-    section = _section(body, "Что делать сейчас")
-    label = {"owner": "Владельцу", "agent": "Агенту", "automation": "Автоматике"}.get(actor)
-    if label:
-        match = re.search(rf"(?ms)^###\s+{label}\s*$\n(.*?)(?=^###\s|\Z)", section)
-        if match:
-            return match.group(1).strip()
-    return section
-
-
 def _linked_tasks(tasks: list[TaskItem], milestone_id: str) -> list[TaskItem]:
     return [
         item for item in tasks if milestone_id.lower() in {v.lower() for v in item["traces_to"]}
@@ -154,25 +144,8 @@ def render_repository_project_status(root: Path) -> str:
         task_source_dir = root / Path(str(current_task["path"])).parent
         actor_key = str(current_task["next_actor"])
         actor = ACTOR_LABELS.get(actor_key, actor_key)
-        action = _rebase_relative_links(
-            _actor_action(str(current_task.get("body", "")), actor_key), task_source_dir, root
-        )
-        if actor_key == "owner" and str(current_task["owner_action"]) != "none":
-            action = f"Выбрать решение по этапу: `{current_task['owner_action']}` или вернуть его на доработку."
-        elif all_tasks_completed:
+        if all_tasks_completed:
             actor = "агент после команды владельца"
-            if current_id == "m01":
-                action = (
-                    "Проверить опубликованную редакцию, провести смысловую проверку, запросить явное "
-                    "подтверждение состава V1 и затем показать выбор по этапу."
-                )
-            else:
-                action = (
-                    f"Проверить опубликованную редакцию этапа `{current_id}`, провести смысловую проверку "
-                    "и при успехе показать выбор: принять этап или вернуть его на доработку."
-                )
-        if not action:
-            action = "Продолжить работу по карточке текущей задачи."
         step_lines = (
             "\n".join(
                 f"- {_checkbox(bool(item['done']))} "
@@ -195,7 +168,6 @@ def render_repository_project_status(root: Path) -> str:
         task_link = "—"
         if foundation_without_project_tasks:
             actor = "агент после команды владельца"
-            action = "Проверить серверные доказательства и провести смысловую проверку опубликованной редакции."
             foundation_steps = [
                 (
                     True,
@@ -215,7 +187,6 @@ def render_repository_project_status(root: Path) -> str:
             )
         else:
             actor = "агент"
-            action = "Создать первую проектную задачу текущего этапа."
             step_lines = "- [ ] Создать проверяемый план первой проектной задачи."
             steps_done = 0
             steps_remaining = 1
@@ -254,11 +225,6 @@ def render_repository_project_status(root: Path) -> str:
 
 - [ ] {next_action["commands"][0]["label"]}: `{next_action["commands"][0]["value"]}`.
 - [ ] {next_action["commands"][1]["label"]}: `{next_action["commands"][1]["value"]}`."""
-        participation_text = (
-            "Условие уже наступило: все обязательные проверки завершены, "
-            "а следующим исполнителем указан **владелец**."
-        )
-        executor_action = "Ожидается одно из двух решений владельца, указанных в начале страницы."
     else:
         review_route = all_tasks_completed or foundation_without_project_tasks
         resume_target = current_id if review_route or not current_task else str(current_task["id"])
@@ -269,38 +235,7 @@ def render_repository_project_status(root: Path) -> str:
         )
         owner_guidance = f"""> **Чтобы продолжить, {next_action["instruction"].lower()}**
 >
-> `{next_action["commands"][0]["value"]}`
-
-Других действий от вас сейчас не требуется. Агент сам выполнит внутренние проверки и сообщит результат."""
-        if review_route:
-            if current_id == "m01":
-                participation_text = f"""Путь до решения по этапу:
-
-1. **Сейчас** откройте новый сеанс агента и отправьте команду `ПРОДОЛЖАЙ {current_id}`.
-2. **Затем** агент проверит серверный результат опубликованной редакции.
-3. **После этого** агент проведёт независимую смысловую проверку той же редакции.
-4. **После проверки** агент попросит подтвердить текущий состав V1 или указать, что изменить.
-5. **После подтверждения** агент покажет две точные команды: принять этап или вернуть его на доработку.
-
-Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную."""
-            else:
-                participation_text = f"""Путь до решения по этапу:
-
-1. **Сейчас** откройте новый сеанс агента и отправьте команду `ПРОДОЛЖАЙ {current_id}`.
-2. **Затем** агент проверит серверный результат опубликованной редакции.
-3. **После этого** агент проведёт независимую смысловую проверку той же редакции.
-4. **При успехе** агент покажет две точные команды: принять этап или вернуть его на доработку.
-
-Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную."""
-        else:
-            participation_text = f"""Путь до следующего результата:
-
-1. **Сейчас** отправьте команду `ПРОДОЛЖАЙ {resume_target}`.
-2. **Затем** агент выполнит оставшиеся шаги. Осталось: **{steps_remaining}**.
-3. **После проверки** агент сообщит результат и покажет следующее действие.
-
-Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную."""
-        executor_action = action
+> `{next_action["commands"][0]["value"]}`"""
 
     # Build remaining work summary
     remaining_summary = ""
@@ -323,31 +258,18 @@ version: 1.0
 
 {owner_guidance}{remaining_summary}
 
+Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную.
+
 ## Текущее состояние
 
 | Параметр | Значение |
 |---|---|
 | Текущий этап | `{current_id}` — {current["title"]} |
+| Этапы V1 | ✅ **{completed_milestones}** выполнено / ❌ **{remaining_milestones}** осталось |
 | Текущая проектная задача | {task_link} |
 | Место в очереди проекта | {queue_position} |
+| Шаги текущей задачи | **{steps_done}** из **{steps_done + steps_remaining}** |
 | Следующий исполнитель | **{actor}** |
-
-## Что произойдёт после вашей команды
-
-{executor_action}
-
-## Когда потребуется ваше участие
-
-{participation_text}
-
-## Прогресс
-
-- Этапы: ✅ **{completed_milestones}** выполнено / ❌ **{remaining_milestones}** осталось
-- Текущий этап: **{steps_done}** шагов из **{steps_done + steps_remaining}**
-
-## Общая картина V1
-
-V1 состоит из 6 этапов (m01–m06). Фундамент (m01) готовит инструменты и правила. Пять инкрементов разработки (m02–m06) добавляют функциональность от основного помощника к production-ready версии.
 
 ## Этапы V1
 
