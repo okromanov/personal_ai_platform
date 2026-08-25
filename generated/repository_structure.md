@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `222` |
+| Всего файлов | `228` |
 
 ```text
 personal_ai_platform/
@@ -146,6 +146,7 @@ personal_ai_platform/
 - operations/tests/performance/test_critical_paths.py
 - operations/tests/product/__init__.py
 - operations/tests/product/test_channels.py
+- operations/tests/product/test_model_gateway.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
 - operations/tests/stress/__init__.py
@@ -201,6 +202,10 @@ personal_ai_platform/
 - src/channels/__init__.py
 - src/channels/base.py
 - src/channels/telegram.py
+- src/models/__init__.py
+- src/models/base.py
+- src/models/runtime_adapter.py
+- src/models/stub_gateway.py
 - src/orchestration/__init__.py
 - src/orchestration/orchestrator.py
 - src/orchestration/runtime_port.py
@@ -236,4 +241,5 @@ personal_ai_platform/
 - work/tests/test_007.md
 - work/tests/test_008.md
 - work/tests/test_009.md
+- work/tests/test_010.md
 ```

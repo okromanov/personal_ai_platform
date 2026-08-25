@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Отслеживаемых элементов | `194` |
+| Отслеживаемых элементов | `195` |
 
 > Производное представление канонических исходящих связей. Входящие связи однозначно выводятся из тех же рёбер и здесь не дублируются.
 
@@ -203,6 +203,7 @@ version: 1.0
 | `TEST_007` | `TEST` | `accepts`: `m02`<br>`traces_to`: `TASK_001`, `SYS_001`, `SYS_005`, `SYS_006`, `SYS_007` | `quality_suite` |
 | `TEST_008` | `TEST` | `accepts`: `m02`<br>`traces_to`: `TASK_002`, `SYS_002`, `SYS_020`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_008`, `SEC_CTL_020` | `quality_suite` |
 | `TEST_009` | `TEST` | `accepts`: `m02`<br>`traces_to`: `TASK_003`, `SYS_001`, `SYS_036`, `SYS_003`, `BR_033` | `quality_suite` |
+| `TEST_010` | `TEST` | `accepts`: `m02`<br>`depends_on`: `TEST_009`<br>`traces_to`: `TASK_004`, `SYS_004`, `BR_034` | `quality_suite` |
 | `m01` | `MILESTONE` | — | — |
 | `m02` | `MILESTONE` | `scope`: `BR_001`, `BR_004`, `BR_005`, `BR_006`, `BR_033`, `BR_036`, `SYS_001`, `SYS_002`, `SYS_003`, `SYS_004`, `SYS_006`, `SYS_020`, `SYS_024`, `SYS_027`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_003`, `SEC_CTL_005`, `SEC_CTL_008`, `SEC_CTL_020`, `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_003`, `INF_REQ_006`, `INF_REQ_010`, `INF_REQ_012`, `INF_REQ_013`, `INF_REQ_015`, `INF_REQ_016` | — |
 | `m03` | `MILESTONE` | `scope`: `BR_003`, `BR_011`, `BR_012`, `BR_026`, `BR_027`, `BR_028`, `SYS_008`, `SYS_009`, `SYS_010`, `SYS_022`, `SYS_023`, `SEC_CTL_004`, `SEC_CTL_007`, `SEC_CTL_009`, `SEC_CTL_010`, `SEC_CTL_012`, `INF_REQ_004`, `INF_REQ_005`, `INF_REQ_007` | — |

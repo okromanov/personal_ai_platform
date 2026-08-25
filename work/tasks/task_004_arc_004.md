@@ -3,19 +3,30 @@ id: TASK_004
 type: task
 title: Реализация ARC_CMP_004
 component: ARC_CMP_004
-work_state: planned
-version: 1.5
+work_state: completed
+version: 2.0
 updated: 2026-08-25
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_003
 allowed_paths:
   - work/tasks/task_004_arc_004.md
+  - src/models/
+  - src/models/__init__.py
+  - src/models/base.py
+  - src/models/stub_gateway.py
+  - src/models/runtime_adapter.py
+  - operations/tests/product/test_model_gateway.py
+  - work/tests/test_010.md
+  - operations/scripts/status/human_status.py
+  - operations/tests/test_owner_usability.py
 traces_to:
   - m02
 implements:
   - ARC_CMP_004
+tests:
+  - TEST_010
 ---
 
 # TASK_004 — Реализация ARC_CMP_004
@@ -26,60 +37,46 @@ implements:
 
 ## 2. Результат
 
-Стабильный контракт `ModelGateway` и минимум одна конкретная реализация (например, для Anthropic Claude), нормализующая запрос/ответ/ошибку в единый формат. Оркестратор ([`TASK_003`](task_003_arc_003.md)) вызывает модель только через этот контракт — выбор поставщика не меняет контракты каналов, задач и данных и не ослабляет правила безопасности.
+Стабильный контракт `ModelGateway` (`src/models/base.py`), нормализующий запрос/ответ/ошибку/показатели использования в единый формат, и адаптер `ModelBackedRuntimePort` (`src/models/runtime_adapter.py`), позволяющий оркестратору ([`TASK_003`](task_003_arc_003.md)) вызывать модель через границу `RuntimePort` без единого изменения самого оркестратора. Конкретный поставщик модели (например, Anthropic Claude) ещё не выбран — сравнение кандидатов зафиксировано как `proposed` в [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) и не входит в эту TASK; здесь подключается тестовый переходный слой `StubModelGateway`, соответствующий контракту `ModelGateway` из [`ADR_003`](../../adr/adr_003_model_provider_interface.md).
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) определяет требования ([`SYS_004`](../../specifications/system_specification.md#sys_004), [`SYS_022`](../../specifications/system_specification.md#sys_022), [`BR_034`](../../specifications/business_requirements.md#br_034), [`SEC_CTL_015`](../../specifications/system_specification.md#sec_ctl_015)). Реализации нет. Зависит от [`TASK_003`](task_003_arc_003.md) (оркестрация) — именно оркестратор является основным потребителем шлюза моделей внутри цикла выполнения задачи.
+Спецификация и реализация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) полностью завершены и покрыты [`TEST_010`](../tests/test_010.md). Не зависит от выбора реального поставщика: как и `RuntimePort` в [`TASK_003`](task_003_arc_003.md), контракт `ModelGateway` проверен тестовым переходным слоем, а сравнение поставщиков для [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) остаётся отдельной, ещё не проведённой работой подэтапа 4 [`m02`](../../milestones.md#m02) — она требует сравнительного evidence, решения владельца и хранилища секретов ([`TASK_010`](task_010_inf_003.md), ещё не реализовано) для API-ключа поставщика.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена, следующего действия по этой TASK нет.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать реализацию
+- [x] Реализовать компонент
+- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `src/models/`), добавит в `allowed_paths`, создаст TEST.
+[`src/models/`](../../src/models/) — стабильный контракт `ModelGateway` ([`base.py`](../../src/models/base.py)), тестовый переходный слой `StubModelGateway` ([`stub_gateway.py`](../../src/models/stub_gateway.py)) и адаптер к границе `RuntimePort` `ModelBackedRuntimePort` ([`runtime_adapter.py`](../../src/models/runtime_adapter.py)). [`work/tests/test_010.md`](../tests/test_010.md) — описание проверок компонента. [`operations/tests/product/test_model_gateway.py`](../../operations/tests/product/test_model_gateway.py) — юнит-тесты, проверяющие компонент, включая полный цикл задачи через [`Orchestrator`](task_003_arc_003.md).
 
-**Ожидаемые файлы:**
-- `src/models/base.py` — контракт `ModelGateway`
-- `src/models/anthropic_gateway.py` (или иной поставщик) — конкретная реализация
-- `work/tests/test_00X.md` — описание проверок
+Шаг 6 плана («проверить интеграцию») выявил, что `_capability_rows` в [`operations/scripts/status/human_status.py`](../../operations/scripts/status/human_status.py) не перебазировал относительные ссылки из раздела «Что это даёт владельцу» при встраивании текста TASK в [`project_status.md`](../../project_status.md) у корня репозитория — та же категория ошибки, что `_rebase_relative_links` уже чинит для `step_lines`/`next_text`. Исправлено и покрыто тестом в [`operations/tests/test_owner_usability.py`](../../operations/tests/test_owner_usability.py).
 
 ## 7. Проверки и доказательства
 
-**Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Все тесты в связанном TEST проходят
-3. MyPy type check успешен
-4. Форматирование соответствует
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_010`](../tests/test_010.md): юнит-тесты [`operations/tests/product/test_model_gateway.py`](../../operations/tests/product/test_model_gateway.py), часть обязательного gate `Quality skills`.
 
-**Ручные (code review):**
-1. Контракт не содержит специфики конкретного поставщика
-2. Ошибки нормализованы в единый формат, а не проброшены как есть от SDK поставщика
-3. Секреты (API-ключи) не попадают в код, логи или evidence
+Ручная проверка при код-ревью: `ModelGateway` не содержит специфики конкретного поставщика и не импортирует SDK; ошибки нормализованы в `ModelResponse`/`ModelGatewayError`, а не проброшены как есть; секреты (API-ключи) в коде отсутствуют — реального поставщика ещё нет.
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_model_gateway.py`](../../operations/tests/product/test_model_gateway.py): 11/11 тестов прошли, часть CI gate)
+- ✅ Pre-commit валидация успешна
 - ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 
@@ -87,4 +84,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Пока напрямую ничего не доступно: контракт и тестовый переходный слой, а не реальный доступ к модели. Оркестратор теперь может завершить цикл задачи, вызвав шлюз моделей, а не только эхо-ответ, — но ответ пока детерминированный (тестовая заглушка), не от реальной языковой модели. Реальное подключение поставщика появится после сравнительного evidence и решения владельца по [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md).
