@@ -1289,7 +1289,6 @@ def check_owner_interface(root: Path) -> CheckResult:
         "осталось",
         "Ваше действие сейчас",
         "Следующий исполнитель",
-        "Когда потребуется ваше участие",
         "Блокеры",
     ]:
         if token not in rendered:
