@@ -1,3 +1,11 @@
+---
+id: unit_tests
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Unit Tests and Coverage Check
 
 **ID:** unit_tests  

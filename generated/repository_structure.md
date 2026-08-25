@@ -10,25 +10,11 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `234` |
+| Всего файлов | `232` |
 
 ```text
 personal_ai_platform/
 - .claude/settings.json
-- .claude/skills/code_quality_check.md
-- .claude/skills/dead_code_audit.md
-- .claude/skills/documentation_audit.md
-- .claude/skills/documentation_rules_detailed.md
-- .claude/skills/integration_tests.md
-- .claude/skills/pre_commit_hook.sh
-- .claude/skills/pre_commit_validation.md
-- .claude/skills/pre_push_hook.sh
-- .claude/skills/pre_push_validation.md
-- .claude/skills/python_lint_check.md
-- .claude/skills/python_type_check.md
-- .claude/skills/readme.md
-- .claude/skills/security_audit.md
-- .claude/skills/unit_tests.md
 - .github/workflows/project_check.yml
 - .gitignore
 - AGENTS.md
@@ -63,6 +49,18 @@ personal_ai_platform/
 - operations/procedure_map.md
 - operations/procedures/file_update_dependencies.md
 - operations/project_config.json
+- operations/quality/playbooks/code_quality_check.md
+- operations/quality/playbooks/dead_code_audit.md
+- operations/quality/playbooks/documentation_audit.md
+- operations/quality/playbooks/documentation_rules_detailed.md
+- operations/quality/playbooks/integration_tests.md
+- operations/quality/playbooks/pre_commit_validation.md
+- operations/quality/playbooks/pre_push_validation.md
+- operations/quality/playbooks/python_lint_check.md
+- operations/quality/playbooks/python_type_check.md
+- operations/quality/playbooks/readme.md
+- operations/quality/playbooks/security_audit.md
+- operations/quality/playbooks/unit_tests.md
 - operations/quality/requirements_dev.txt
 - operations/quality_baseline.json
 - operations/quality_registry.json

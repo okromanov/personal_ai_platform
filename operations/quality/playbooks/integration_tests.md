@@ -1,3 +1,11 @@
+---
+id: integration_tests
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Integration Tests Playbook
 
 **ID:** integration_tests  

@@ -16,19 +16,7 @@ version: 1.0
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`.claude/skills/code_quality_check.md`](../.claude/skills/code_quality_check.md) | `` | `` | `document_state` | `` | `` | Code Quality Check Skill |
-| [`.claude/skills/dead_code_audit.md`](../.claude/skills/dead_code_audit.md) | `` | `` | `document_state` | `` | `` | Dead Code and Duplication Audit |
-| [`.claude/skills/documentation_audit.md`](../.claude/skills/documentation_audit.md) | `` | `` | `document_state` | `` | `` | Documentation Audit Skill |
-| [`.claude/skills/documentation_rules_detailed.md`](../.claude/skills/documentation_rules_detailed.md) | `` | `` | `document_state` | `` | `` | Documentation Audit Rules - Detailed Reference |
-| [`.claude/skills/integration_tests.md`](../.claude/skills/integration_tests.md) | `` | `` | `document_state` | `` | `` | Integration Tests Playbook |
-| [`.claude/skills/pre_commit_validation.md`](../.claude/skills/pre_commit_validation.md) | `` | `` | `document_state` | `` | `` | Pre-Commit Validation |
-| [`.claude/skills/pre_push_validation.md`](../.claude/skills/pre_push_validation.md) | `` | `` | `document_state` | `` | `` | Pre-Push Validation |
-| [`.claude/skills/python_lint_check.md`](../.claude/skills/python_lint_check.md) | `` | `` | `document_state` | `` | `` | Python Lint Check Skill |
-| [`.claude/skills/python_type_check.md`](../.claude/skills/python_type_check.md) | `` | `` | `document_state` | `` | `` | Python Type Regression Check |
-| [`.claude/skills/readme.md`](../.claude/skills/readme.md) | `` | `` | `document_state` | `` | `` | Repository Quality Playbooks |
-| [`.claude/skills/security_audit.md`](../.claude/skills/security_audit.md) | `` | `` | `document_state` | `` | `` | Security Code Audit Skill |
-| [`.claude/skills/unit_tests.md`](../.claude/skills/unit_tests.md) | `` | `` | `document_state` | `` | `` | Unit Tests and Coverage Check |
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.4` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.5` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -48,9 +36,21 @@ version: 1.0
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.1` | Локальная разработка в Windows |
 | [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.5` | Карта операционных процедур |
 | [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.4` | Матрица зависимостей обновления файлов |
+| [`operations/quality/playbooks/code_quality_check.md`](../operations/quality/playbooks/code_quality_check.md) | `code_quality_check` | `guide` | `document_state` | `current` | `1.0` | Code Quality Check Skill |
+| [`operations/quality/playbooks/dead_code_audit.md`](../operations/quality/playbooks/dead_code_audit.md) | `dead_code_audit` | `guide` | `document_state` | `current` | `1.0` | Dead Code and Duplication Audit |
+| [`operations/quality/playbooks/documentation_audit.md`](../operations/quality/playbooks/documentation_audit.md) | `documentation_audit` | `guide` | `document_state` | `current` | `1.0` | Documentation Audit Skill |
+| [`operations/quality/playbooks/documentation_rules_detailed.md`](../operations/quality/playbooks/documentation_rules_detailed.md) | `documentation_rules_detailed` | `guide` | `document_state` | `current` | `1.0` | Documentation Audit Rules - Detailed Reference |
+| [`operations/quality/playbooks/integration_tests.md`](../operations/quality/playbooks/integration_tests.md) | `integration_tests` | `guide` | `document_state` | `current` | `1.0` | Integration Tests Playbook |
+| [`operations/quality/playbooks/pre_commit_validation.md`](../operations/quality/playbooks/pre_commit_validation.md) | `pre_commit_validation` | `guide` | `document_state` | `current` | `1.0` | Pre-Commit Validation |
+| [`operations/quality/playbooks/pre_push_validation.md`](../operations/quality/playbooks/pre_push_validation.md) | `pre_push_validation` | `guide` | `document_state` | `current` | `1.0` | Pre-Push Validation |
+| [`operations/quality/playbooks/python_lint_check.md`](../operations/quality/playbooks/python_lint_check.md) | `python_lint_check` | `guide` | `document_state` | `current` | `1.0` | Python Lint Check Skill |
+| [`operations/quality/playbooks/python_type_check.md`](../operations/quality/playbooks/python_type_check.md) | `python_type_check` | `guide` | `document_state` | `current` | `1.0` | Python Type Regression Check |
+| [`operations/quality/playbooks/readme.md`](../operations/quality/playbooks/readme.md) | `quality_playbooks_readme` | `guide` | `document_state` | `current` | `1.0` | Repository Quality Playbooks |
+| [`operations/quality/playbooks/security_audit.md`](../operations/quality/playbooks/security_audit.md) | `security_audit` | `guide` | `document_state` | `current` | `1.0` | Security Code Audit Skill |
+| [`operations/quality/playbooks/unit_tests.md`](../operations/quality/playbooks/unit_tests.md) | `unit_tests` | `guide` | `document_state` | `current` | `1.0` | Unit Tests and Coverage Check |
 | [`operations/scripts/health_check/module_guide.md`](../operations/scripts/health_check/module_guide.md) | `health_check_module` | `documentation` | `document_state` | `current` | `1.2` | Repository Health Check Module |
 | [`operations/semantic_review.md`](../operations/semantic_review.md) | `semantic_governance_review` | `operations` | `document_state` | `current` | `1.1` | Смысловая проверка документов и правил |
-| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.2` | Pre-commit Hook Setup |
+| [`operations/setup_precommit.md`](../operations/setup_precommit.md) | `setup_precommit` | `guide` | `document_state` | `current` | `1.3` | Pre-commit Hook Setup |
 | [`operations/state_machines.md`](../operations/state_machines.md) | `state_machines` | `guide` | `document_state` | `current` | `1.2` | Диаграммы состояний и переходы |
 | [`operations/templates/adr_template.md`](../operations/templates/adr_template.md) | `template_adr` | `document_template` | `document_state` | `current` | `1.0` | Шаблон ADR |
 | [`operations/templates/business_requirement_template.md`](../operations/templates/business_requirement_template.md) | `template_business_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон BR |

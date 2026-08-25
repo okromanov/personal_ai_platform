@@ -18,7 +18,7 @@
       "description": "Fast blocking checks before every commit",
       "type": "blocking_quality_check",
       "frequency": "on_every_commit",
-      "command": "bash .claude/skills/pre_commit_hook.sh",
+      "command": "bash operations/hooks/pre_commit_hook.sh",
       "framework": "llm_agnostic",
       "expected_duration_seconds": 2
     },

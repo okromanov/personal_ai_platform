@@ -1,3 +1,11 @@
+---
+id: security_audit
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Security Code Audit Skill
 
 **ID:** security_audit  

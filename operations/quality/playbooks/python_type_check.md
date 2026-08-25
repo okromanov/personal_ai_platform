@@ -1,3 +1,11 @@
+---
+id: python_type_check
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Python Type Regression Check
 
 **ID:** python_type_check  
@@ -16,7 +24,7 @@ python3.12 -m pip install -r operations/quality/requirements_dev.txt
 python3.12 operations/scripts/quality/run_mypy_baseline.py
 ```
 
-The wrapper runs mypy, prints every finding, and compares both the total and each `file + error-code` bucket with [`operations/quality_baseline.json`](../../operations/quality_baseline.json). This prevents a new category of error from being hidden by an unrelated fix elsewhere.
+The wrapper runs mypy, prints every finding, and compares both the total and each `file + error-code` bucket with [`operations/quality_baseline.json`](../../../operations/quality_baseline.json). This prevents a new category of error from being hidden by an unrelated fix elsewhere.
 
 ## Success Criteria
 
@@ -31,7 +39,7 @@ The wrapper runs mypy, prints every finding, and compares both the total and eac
 1. Inspect new errors first.
 2. Fix the new regression or improve annotations.
 3. Do not raise the budget merely to make CI green.
-4. Keep the pinned mypy version in [`operations/quality/requirements_dev.txt`](../../operations/quality/requirements_dev.txt) synchronized with intentional baseline recalculation.
+4. Keep the pinned mypy version in [`operations/quality/requirements_dev.txt`](../../../operations/quality/requirements_dev.txt) synchronized with intentional baseline recalculation.
 
 ## Output
 

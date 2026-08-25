@@ -1,3 +1,11 @@
+---
+id: pre_push_validation
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Pre-Push Validation
 
 **ID:** pre_push_validation  
@@ -13,11 +21,11 @@ Run the canonical **full** quality profile — the same one CI enforces — befo
 
 ```bash
 python3.12 -m pip install -r operations/quality/requirements_dev.txt
-cp .claude/skills/pre_push_hook.sh .git/hooks/pre-push
+cp operations/hooks/pre_push_hook.sh .git/hooks/pre-push
 chmod +x .git/hooks/pre-push
 ```
 
-`operations/hooks/pre_push_hook.sh` is only a compatibility wrapper that delegates to this canonical file. This hook is opt-in: nothing installs it automatically, and CI remains the enforced gate regardless of whether a developer has it installed locally.
+This hook is opt-in: nothing installs it automatically, and CI remains the enforced gate regardless of whether a developer has it installed locally.
 
 ## Checks
 
@@ -25,12 +33,12 @@ The hook invokes `run_suite.py full`, which runs (in order): derived-document re
 
 Changed-line diff coverage is skipped locally (no `--coverage-base` is passed, so the suite runs with `--skip-diff`) — that check only makes sense against a PR base and still runs in CI.
 
-Actionlint, ShellCheck, pip-audit and Gitleaks stay CI-only: they fetch pinned external binaries over the network with SHA-256 verification, which is heavier machinery than a local git hook should depend on. A developer who touches `.github/workflows/`, shell scripts, or [`requirements_dev.txt`](../../operations/quality/requirements_dev.txt) should still expect CI to be the first place those specific checks run.
+Actionlint, ShellCheck, pip-audit and Gitleaks stay CI-only: they fetch pinned external binaries over the network with SHA-256 verification, which is heavier machinery than a local git hook should depend on. A developer who touches `.github/workflows/`, shell scripts, or [`requirements_dev.txt`](../../../operations/quality/requirements_dev.txt) should still expect CI to be the first place those specific checks run.
 
 ## Run
 
 ```bash
-bash .claude/skills/pre_push_hook.sh
+bash operations/hooks/pre_push_hook.sh
 ```
 
 ## Success Criteria

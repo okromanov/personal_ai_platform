@@ -1,3 +1,11 @@
+---
+id: dead_code_audit
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Dead Code and Duplication Audit
 
 **ID:** dead_code_audit  
