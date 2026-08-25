@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `395` |
+| Всего тестов | `407` |
 | Core logic (acceptance, governance, lifecycle) | `129` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `78` |
+| Product | `90` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -366,6 +366,18 @@ version: 1.0
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_registered_response_is_returned` | Registered response is returned |
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_simulated_unavailable_raises_model_gateway_error` | Simulated unavailable raises model gateway error |
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_usage_metrics_are_populated_on_success` | Usage metrics are populated on success |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_a_raising_check_is_isolated_as_that_dependencys_failure` | A raising check is isolated as that dependencys failure |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_registering_the_same_name_twice_replaces_the_check` | Registering the same name twice replaces the check |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_report_is_healthy_when_every_check_is_healthy` | Report is healthy when every check is healthy |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_report_is_unhealthy_when_any_check_fails` | Report is unhealthy when any check fails |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_unhealthy_dependencies_localizes_to_the_failing_ones_only` | Unhealthy dependencies localizes to the failing ones only |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_active_task_intent_is_runnable` | Active task intent is runnable |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_cancelled_task_intent_is_not_runnable` | Cancelled task intent is not runnable |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_multiple_intents_are_filtered_independently_by_task_state` | Multiple intents are filtered independently by task state |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_new_scheduler_is_not_paused` | New scheduler is not paused |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_pause_stops_all_intents_regardless_of_task_state` | Pause stops all intents regardless of task state |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_registering_the_same_intent_id_twice_replaces_it` | Registering the same intent id twice replaces it |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_resume_restores_runnable_intents` | Resume restores runnable intents |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_canned_runtime_response_is_sent_back` | Canned runtime response is sent back |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_message_is_marked_running_before_runtime_executes` | Message is marked running before runtime executes |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_successful_task_marks_completed_and_sends_output` | Successful task marks completed and sends output |

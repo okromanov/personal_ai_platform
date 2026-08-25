@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `83` |
+| Всего документов | `85` |
 
 > Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
@@ -67,6 +67,7 @@ version: 1.0
 | [`operations/threat_review_triggers.md`](../operations/threat_review_triggers.md) | `threat_review_triggers` | `guide` | `document_state` | `current` | `1.0` | Триггеры и процедуры угроз |
 | [`project_rules.md`](../project_rules.md) | `project_rules` | `project_rules` | `document_state` | `current` | `1.0` | Правила развития personal_ai_platform |
 | [`project_status.md`](../project_status.md) | `` | `` | `document_state` | `` | `` | Состояние проекта |
+| [`repository_audit_system_prompt.md`](../repository_audit_system_prompt.md) | `` | `` | `document_state` | `` | `` | СИСТЕМА ПРОМПТ: ПОЛНЫЙ АУДИТ РЕПОЗИТОРИЯ |
 | [`specifications/architecture_baseline.md`](../specifications/architecture_baseline.md) | `architecture_baseline` | `architecture` | `document_state` | `current` | `1.2` | Базовая логическая архитектура personal_ai_platform |
 | [`specifications/business_requirements.md`](../specifications/business_requirements.md) | `business_requirements` | `business_requirements` | `document_state` | `current` | `1.0` | Бизнес-требования personal_ai_platform |
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.2` | Базовая инфраструктура personal_ai_platform |
@@ -80,7 +81,7 @@ version: 1.0
 | [`work/tasks/task_004_arc_004.md`](../work/tasks/task_004_arc_004.md) | `TASK_004` | `task` | `work_state` | `completed` | `2.0` | TASK_004 — Реализация ARC_CMP_004 |
 | [`work/tasks/task_005_arc_005.md`](../work/tasks/task_005_arc_005.md) | `TASK_005` | `task` | `work_state` | `completed` | `2.0` | TASK_005 — Реализация ARC_CMP_005 |
 | [`work/tasks/task_006_arc_007.md`](../work/tasks/task_006_arc_007.md) | `TASK_006` | `task` | `work_state` | `completed` | `2.0` | TASK_006 — Реализация ARC_CMP_007 |
-| [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `planned` | `1.6` | TASK_007 — Реализация ARC_CMP_009 |
+| [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `completed` | `2.0` | TASK_007 — Реализация ARC_CMP_009 |
 | [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `planned` | `1.5` | TASK_008 — Реализация INF_CMP_001 |
 | [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `planned` | `1.5` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `planned` | `1.5` | TASK_010 — Реализация INF_CMP_003 |
@@ -99,3 +100,4 @@ version: 1.0
 | [`work/tests/test_010.md`](../work/tests/test_010.md) | `TEST_010` | `test` | `spec_state` | `current` | `1.0` | TEST_010 — Шлюз моделей: нормализованный вызов и интеграция с RuntimePort |
 | [`work/tests/test_011.md`](../work/tests/test_011.md) | `TEST_011` | `test` | `spec_state` | `current` | `1.0` | TEST_011 — Шлюз инструментов: техническая авторизация вызова |
 | [`work/tests/test_012.md`](../work/tests/test_012.md) | `TEST_012` | `test` | `spec_state` | `current` | `1.0` | TEST_012 — Состояние задач: контрольные точки, повтор, отмена, защита от дублей |
+| [`work/tests/test_013.md`](../work/tests/test_013.md) | `TEST_013` | `test` | `spec_state` | `current` | `1.0` | TEST_013 — Эксплуатационные функции: работоспособность и логическое состояние планировщика |
