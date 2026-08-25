@@ -14,7 +14,6 @@ NO_DESCRIPTION = "—"
 # actual purpose) — never invented. A path missing here falls back to
 # NO_DESCRIPTION rather than guessing.
 DESCRIPTIONS: dict[str, str] = {
-    ".claude/settings.json": "Реестр периодических и блокирующих quality-проверок репозитория.",
     ".github/workflows/project_check.yml": (
         "CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно."
     ),

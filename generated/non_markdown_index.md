@@ -10,13 +10,12 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `144` |
+| Всего файлов | `147` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
 | Файл | Задача | Описание |
 |---|---|---|
-| [`.claude/settings.json`](../.claude/settings.json) | — | Реестр периодических и блокирующих quality-проверок репозитория. |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
@@ -96,6 +95,7 @@ version: 1.0
 | [`operations/tests/product/test_model_gateway.py`](../operations/tests/product/test_model_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`operations/tests/product/test_owner_control.py`](../operations/tests/product/test_owner_control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
+| [`operations/tests/product/test_task_state.py`](../operations/tests/product/test_task_state.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
 | [`operations/tests/product/test_tool_gateway.py`](../operations/tests/product/test_tool_gateway.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |
 | [`operations/tests/stress/__init__.py`](../operations/tests/stress/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/stress/test_scalability.py`](../operations/tests/stress/test_scalability.py) | — | Стресс-тесты масштабируемости функций, перебирающих этапы, задачи или файлы. |
@@ -154,6 +154,9 @@ version: 1.0
 | [`src/owner_control/base.py`](../src/owner_control/base.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/control.py`](../src/owner_control/control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/emergency_switch.py`](../src/owner_control/emergency_switch.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
+| [`src/task_state/__init__.py`](../src/task_state/__init__.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
+| [`src/task_state/base.py`](../src/task_state/base.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
+| [`src/task_state/store.py`](../src/task_state/store.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
 | [`src/tools/__init__.py`](../src/tools/__init__.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |
 | [`src/tools/base.py`](../src/tools/base.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |
 | [`src/tools/registry.py`](../src/tools/registry.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |

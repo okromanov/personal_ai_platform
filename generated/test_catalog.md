@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `382` |
+| Всего тестов | `395` |
 | Core logic (acceptance, governance, lifecycle) | `129` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `65` |
+| Product | `78` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -395,6 +395,19 @@ version: 1.0
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_read_action_id_is_also_rejected` | Duplicate read action id is also rejected |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_read_action_is_authorized_immediately` | Read action is authorized immediately |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_sensitive_action_without_confirmation_is_rejected` | Sensitive action without confirmation is rejected |
+| Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_checkpoint_is_retrievable` | Checkpoint is retrievable |
+| Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_checkpoint_preserves_retry_count_and_cancelled_flag` | Checkpoint preserves retry count and cancelled flag |
+| Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_new_checkpoint_replaces_the_previous_one` | New checkpoint replaces the previous one |
+| Product | `operations/tests/product/test_task_state.py` | `DuplicateProtectionTests` | `test_distinct_tasks_have_independent_state` | Distinct tasks have independent state |
+| Product | `operations/tests/product/test_task_state.py` | `DuplicateProtectionTests` | `test_has_executed_is_false_until_marked` | Has executed is false until marked |
+| Product | `operations/tests/product/test_task_state.py` | `DuplicateProtectionTests` | `test_marking_the_same_action_twice_does_not_error` | Marking the same action twice does not error |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_cancel_marks_state_cancelled` | Cancel marks state cancelled |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_cancel_preserves_checkpoint_and_retry_count` | Cancel preserves checkpoint and retry count |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_cancelling_twice_is_not_an_error` | Cancelling twice is not an error |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_increment_retry_increments_and_returns_the_new_count` | Increment retry increments and returns the new count |
+| Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_new_task_has_default_state` | New task has default state |
+| Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_saved_task_is_retrievable_by_id` | Saved task is retrievable by id |
+| Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_unknown_task_id_returns_none` | Unknown task id returns none |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_capability_effect_class_cannot_be_overridden_by_call_params` | SEC_CTL_007: the fixed, registered effect_class governs |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_resource_outside_allowlist_is_denied` | Resource outside allowlist is denied |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_unknown_capability_returns_failed_result` | Unknown capability returns failed result |
