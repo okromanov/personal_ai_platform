@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `372` |
+| Всего тестов | `381` |
 | Core logic (acceptance, governance, lifecycle) | `128` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `56` |
+| Product | `65` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -394,3 +394,12 @@ version: 1.0
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_read_action_id_is_also_rejected` | Duplicate read action id is also rejected |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_read_action_is_authorized_immediately` | Read action is authorized immediately |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_sensitive_action_without_confirmation_is_rejected` | Sensitive action without confirmation is rejected |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_capability_effect_class_cannot_be_overridden_by_call_params` | SEC_CTL_007: the fixed, registered effect_class governs |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_resource_outside_allowlist_is_denied` | Resource outside allowlist is denied |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_unknown_capability_returns_failed_result` | Unknown capability returns failed result |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayFailureTests` | `test_handler_exception_raises_tool_gateway_error` | Handler exception raises tool gateway error |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayFailureTests` | `test_tool_gateway_error_is_a_distinct_type` | Tool gateway error is a distinct type |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayReadTests` | `test_read_capability_authorized_immediately_without_confirmation` | Read capability authorized immediately without confirmation |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_duplicate_action_id_rejected_after_authorization` | Duplicate action id rejected after authorization |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_sensitive_capability_authorized_on_matching_confirmation` | Sensitive capability authorized on matching confirmation |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_sensitive_capability_requires_confirmation_first` | Sensitive capability requires confirmation first |
