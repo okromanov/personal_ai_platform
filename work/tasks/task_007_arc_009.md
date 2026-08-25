@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_009
 component: ARC_CMP_009
 work_state: planned
-version: 1.5
+version: 1.6
 updated: 2026-08-25
 next_actor: agent
 owner_action: none
@@ -83,7 +83,7 @@ implements:
 
 ## 9. Что будет дальше
 
-Этим завершается блок архитектурных компонентов ([`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001)–[`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009), кроме [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002), [`ARC_CMP_006`](../../specifications/architecture_baseline.md#arc_cmp_006), [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008), которые не входят в текущую очередь TASK). [`TASK_008`](task_008_inf_001.md) начинает блок инфраструктурных компонентов с Вычислительной среды выполнения ([`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)) — физической или виртуальной основы, на которой запускаются уже реализованные сервисы.
+Этим завершается блок архитектурных компонентов, охваченных текущей очередью TASK ([`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001), [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002), [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)–[`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005), [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007), [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009)); [`ARC_CMP_006`](../../specifications/architecture_baseline.md#arc_cmp_006) (Контекст, память и доказательства) и [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008) (Проверка качества) в неё не входят. [`TASK_008`](task_008_inf_001.md) начинает блок инфраструктурных компонентов с Вычислительной среды выполнения ([`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)) — физической или виртуальной основы, на которой запускаются уже реализованные сервисы.
 
 ## 10. Что это даёт владельцу
 
