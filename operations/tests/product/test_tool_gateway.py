@@ -1,8 +1,4 @@
-"""Unit tests for the Tool Gateway component (ARC_CMP_005).
-
-Runs under the canonical `operations/scripts/quality/run_unittests.py`
-discovery, so it is part of the enforced CI gate.
-"""
+"""Unit tests for the Tool Gateway component (ARC_CMP_005)."""
 
 from __future__ import annotations
 
@@ -14,21 +10,36 @@ from src.owner_control import ActionClass, OwnerControlGate
 from src.tools import Capability, ToolCall, ToolGatewayError, ToolGatewayImpl
 
 
-def _gate(
-    owner_subject_id: str = "owner_1",
-) -> tuple[OwnerControlGate, tempfile.TemporaryDirectory]:
+def _gate() -> tuple[OwnerControlGate, tempfile.TemporaryDirectory]:
     tmp = tempfile.TemporaryDirectory()
-    gate = OwnerControlGate(owner_subject_id=owner_subject_id, state_dir=Path(tmp.name))
+    gate = OwnerControlGate(owner_subject_id="owner_1", state_dir=Path(tmp.name))
     return gate, tmp
 
 
-async def _read_file(call: ToolCall) -> str:
-    return f"contents of {call.resource}"
+def _call(
+    *,
+    action_id: str = "a1",
+    capability_name: str = "read_file",
+    resource: str = "notes.txt",
+    subject_id: str = "owner_1",
+    params: dict[str, object] | None = None,
+    confirmed: bool = False,
+    secret_refs: frozenset[str] = frozenset(),
+    network_target: str | None = None,
+) -> ToolCall:
+    return ToolCall(
+        action_id=action_id,
+        subject_id=subject_id,
+        capability_name=capability_name,
+        resource=resource,
+        params=params or {},
+        confirmed=confirmed,
+        secret_refs=secret_refs,
+        network_target=network_target,
+    )
 
 
 class RecordingHandler:
-    """A handler that records whether it was ever invoked (testing only)."""
-
     def __init__(self, output: str = "done") -> None:
         self.calls: list[ToolCall] = []
         self._output = output
@@ -39,171 +50,260 @@ class RecordingHandler:
 
 
 async def _boom(call: ToolCall) -> str:
-    raise RuntimeError("underlying tool crashed")
+    raise RuntimeError(f"underlying tool crashed for {call.resource}")
+
+
+def _capability(
+    *,
+    name: str = "read_file",
+    effect_class: ActionClass = ActionClass.READ,
+    handler: RecordingHandler | object,
+    resources: frozenset[str] = frozenset(),
+    params: frozenset[str] = frozenset(),
+    subjects: frozenset[str] = frozenset({"owner_1"}),
+    secret_refs: frozenset[str] = frozenset(),
+    network_targets: frozenset[str] = frozenset(),
+) -> Capability:
+    return Capability(
+        name=name,
+        effect_class=effect_class,
+        handler=handler,  # type: ignore[arg-type]
+        allowed_subjects=subjects,
+        allowed_resources=resources,
+        allowed_param_names=params,
+        allowed_secret_refs=secret_refs,
+        allowed_network_targets=network_targets,
+    )
+
+
+class CapabilityPolicyTests(unittest.TestCase):
+    def test_capability_requires_an_allowed_subject(self) -> None:
+        with self.assertRaises(ValueError):
+            _capability(handler=RecordingHandler(), subjects=frozenset())
+
+    def test_sensitive_capability_requires_explicit_resources(self) -> None:
+        with self.assertRaises(ValueError):
+            _capability(
+                name="send_email",
+                effect_class=ActionClass.WRITE_EXTERNAL,
+                handler=RecordingHandler(),
+            )
 
 
 class ToolGatewayReadTests(unittest.IsolatedAsyncioTestCase):
-    async def test_read_capability_authorized_immediately_without_confirmation(self) -> None:
+    async def test_read_capability_authorized_immediately(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
-        capability = Capability(name="read_file", effect_class=ActionClass.READ, handler=_read_file)
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
-
-        result = await gateway.call(
-            ToolCall(action_id="a1", capability_name="read_file", resource="notes.txt")
-        )
-
+        handler = RecordingHandler("contents")
+        gateway = ToolGatewayImpl(gate, [_capability(handler=handler)])
+        result = await gateway.call(_call())
         self.assertTrue(result.succeeded)
-        self.assertEqual(result.output, "contents of notes.txt")
+        self.assertEqual(result.output, "contents")
+        self.assertEqual(len(handler.calls), 1)
 
-
-class ToolGatewaySensitiveActionTests(unittest.IsolatedAsyncioTestCase):
-    async def test_sensitive_capability_requires_confirmation_first(self) -> None:
+    async def test_unrecognized_subject_is_denied_before_handler(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
         handler = RecordingHandler()
-        capability = Capability(
-            name="send_email", effect_class=ActionClass.WRITE_EXTERNAL, handler=handler
-        )
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
-
-        result = await gateway.call(
-            ToolCall(
-                action_id="send-1",
-                capability_name="send_email",
-                resource="owner@example.com",
-                params={"subject": "hi"},
-            )
-        )
-
+        gateway = ToolGatewayImpl(gate, [_capability(handler=handler)])
+        result = await gateway.call(_call(subject_id="impostor"))
         self.assertFalse(result.succeeded)
         self.assertEqual(handler.calls, [])
 
-    async def test_sensitive_capability_authorized_on_matching_confirmation(self) -> None:
-        gate, tmp = _gate()
-        self.addCleanup(tmp.cleanup)
-        handler = RecordingHandler(output="sent")
-        capability = Capability(
-            name="send_email", effect_class=ActionClass.WRITE_EXTERNAL, handler=handler
-        )
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
-        call = ToolCall(
-            action_id="send-1",
-            capability_name="send_email",
-            resource="owner@example.com",
-            params={"subject": "hi"},
-        )
-        await gateway.call(call)
 
-        result = await gateway.call(
-            ToolCall(
+class ToolGatewaySensitiveActionTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self) -> None:
+        self.gate, self.tmp = _gate()
+        self.addCleanup(self.tmp.cleanup)
+        self.handler = RecordingHandler("sent")
+        self.capability = _capability(
+            name="send_email",
+            effect_class=ActionClass.WRITE_EXTERNAL,
+            handler=self.handler,
+            resources=frozenset({"a@example.com", "b@example.com"}),
+            params=frozenset({"subject"}),
+        )
+        self.gateway = ToolGatewayImpl(self.gate, [self.capability])
+
+    async def test_sensitive_capability_requires_confirmation_first(self) -> None:
+        result = await self.gateway.call(
+            _call(
                 action_id="send-1",
                 capability_name="send_email",
-                resource="owner@example.com",
+                resource="a@example.com",
+                params={"subject": "hi"},
+            )
+        )
+        self.assertFalse(result.succeeded)
+        self.assertEqual(handler_calls := self.handler.calls, [])
+        self.assertEqual(len(handler_calls), 0)
+
+    async def test_matching_confirmation_executes_once(self) -> None:
+        first = _call(
+            action_id="send-2",
+            capability_name="send_email",
+            resource="a@example.com",
+            params={"subject": "hi"},
+        )
+        await self.gateway.call(first)
+        result = await self.gateway.call(
+            _call(
+                action_id="send-2",
+                capability_name="send_email",
+                resource="a@example.com",
                 params={"subject": "hi"},
                 confirmed=True,
             )
         )
-
         self.assertTrue(result.succeeded)
         self.assertEqual(result.output, "sent")
-        self.assertEqual(len(handler.calls), 1)
+        self.assertEqual(len(self.handler.calls), 1)
 
-    async def test_duplicate_action_id_rejected_after_authorization(self) -> None:
-        gate, tmp = _gate()
-        self.addCleanup(tmp.cleanup)
-        handler = RecordingHandler()
-        capability = Capability(
-            name="send_email", effect_class=ActionClass.WRITE_EXTERNAL, handler=handler
+    async def test_confirmation_cannot_be_reused_for_another_resource(self) -> None:
+        await self.gateway.call(
+            _call(action_id="send-3", capability_name="send_email", resource="a@example.com")
         )
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
-        params = {"subject": "hi"}
-        await gateway.call(
-            ToolCall(
-                action_id="send-1",
+        result = await self.gateway.call(
+            _call(
+                action_id="send-3",
                 capability_name="send_email",
-                resource="owner@example.com",
-                params=params,
-            )
-        )
-        await gateway.call(
-            ToolCall(
-                action_id="send-1",
-                capability_name="send_email",
-                resource="owner@example.com",
-                params=params,
+                resource="b@example.com",
                 confirmed=True,
             )
         )
-
-        result = await gateway.call(
-            ToolCall(
-                action_id="send-1",
-                capability_name="send_email",
-                resource="owner@example.com",
-                params=params,
-                confirmed=True,
-            )
-        )
-
         self.assertFalse(result.succeeded)
-        self.assertEqual(len(handler.calls), 1)
+        self.assertEqual(self.handler.calls, [])
+
+    async def test_confirmation_cannot_be_reused_for_another_capability(self) -> None:
+        second = _capability(
+            name="archive_email",
+            effect_class=ActionClass.WRITE_EXTERNAL,
+            handler=self.handler,
+            resources=frozenset({"a@example.com"}),
+        )
+        gateway = ToolGatewayImpl(self.gate, [self.capability, second])
+        await gateway.call(
+            _call(action_id="send-4", capability_name="send_email", resource="a@example.com")
+        )
+        result = await gateway.call(
+            _call(
+                action_id="send-4",
+                capability_name="archive_email",
+                resource="a@example.com",
+                confirmed=True,
+            )
+        )
+        self.assertFalse(result.succeeded)
+        self.assertEqual(self.handler.calls, [])
+
+    async def test_switch_activated_before_confirmation_blocks_dispatch(self) -> None:
+        call = _call(action_id="send-5", capability_name="send_email", resource="a@example.com")
+        await self.gateway.call(call)
+        self.gate.emergency_switch.activate()
+        result = await self.gateway.call(
+            _call(
+                action_id="send-5",
+                capability_name="send_email",
+                resource="a@example.com",
+                confirmed=True,
+            )
+        )
+        self.assertFalse(result.succeeded)
+        self.assertEqual(self.handler.calls, [])
+
+    async def test_switch_activated_after_authorization_blocks_dispatch(self) -> None:
+        gate = self.gate
+        original = gate.authorize_sensitive_action
+
+        def authorize_then_stop(*args: object, **kwargs: object):
+            decision = original(*args, **kwargs)  # type: ignore[arg-type]
+            if decision.authorized:
+                gate.emergency_switch.activate()
+            return decision
+
+        gate.authorize_sensitive_action = authorize_then_stop  # type: ignore[method-assign]
+        call = _call(action_id="send-6", capability_name="send_email", resource="a@example.com")
+        await self.gateway.call(call)
+        result = await self.gateway.call(
+            _call(
+                action_id="send-6",
+                capability_name="send_email",
+                resource="a@example.com",
+                confirmed=True,
+            )
+        )
+        self.assertFalse(result.succeeded)
+        self.assertEqual(self.handler.calls, [])
+
+    async def test_duplicate_action_remains_blocked_after_restart(self) -> None:
+        call = _call(action_id="send-7", capability_name="send_email", resource="a@example.com")
+        await self.gateway.call(call)
+        await self.gateway.call(
+            _call(
+                action_id="send-7",
+                capability_name="send_email",
+                resource="a@example.com",
+                confirmed=True,
+            )
+        )
+        restarted = OwnerControlGate("owner_1", Path(self.tmp.name))
+        gateway = ToolGatewayImpl(restarted, [self.capability])
+        replay = await gateway.call(
+            _call(
+                action_id="send-7",
+                capability_name="send_email",
+                resource="a@example.com",
+                confirmed=True,
+            )
+        )
+        self.assertFalse(replay.succeeded)
+        self.assertEqual(len(self.handler.calls), 1)
 
 
-class ToolGatewayDenialTests(unittest.IsolatedAsyncioTestCase):
+class ToolGatewayPolicyDenialTests(unittest.IsolatedAsyncioTestCase):
     async def test_unknown_capability_returns_failed_result(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[])
-
-        result = await gateway.call(
-            ToolCall(action_id="a1", capability_name="does_not_exist", resource="x")
-        )
-
+        result = await ToolGatewayImpl(gate, []).call(_call(capability_name="missing"))
         self.assertFalse(result.succeeded)
-        assert result.error_message is not None
-        self.assertIn("unknown capability", result.error_message)
+        self.assertIn("unknown capability", result.error_message or "")
 
     async def test_resource_outside_allowlist_is_denied(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
         handler = RecordingHandler()
-        capability = Capability(
-            name="read_file",
-            effect_class=ActionClass.READ,
-            handler=handler,
-            allowed_resources=frozenset({"allowed.txt"}),
-        )
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
-
-        result = await gateway.call(
-            ToolCall(action_id="a1", capability_name="read_file", resource="secret.txt")
-        )
-
+        capability = _capability(handler=handler, resources=frozenset({"allowed.txt"}))
+        result = await ToolGatewayImpl(gate, [capability]).call(_call(resource="secret.txt"))
         self.assertFalse(result.succeeded)
         self.assertEqual(handler.calls, [])
 
-    async def test_capability_effect_class_cannot_be_overridden_by_call_params(self) -> None:
-        """SEC_CTL_007: the fixed, registered effect_class governs
-        authorization -- a caller cannot claim a weaker class through the
-        call's own params to skip the owner-confirmation step."""
+    async def test_unlisted_parameter_is_denied(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
         handler = RecordingHandler()
-        capability = Capability(
-            name="delete_file", effect_class=ActionClass.DESTRUCTIVE, handler=handler
-        )
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
+        gateway = ToolGatewayImpl(gate, [_capability(handler=handler)])
+        result = await gateway.call(_call(params={"unexpected": True}))
+        self.assertFalse(result.succeeded)
+        self.assertEqual(handler.calls, [])
 
-        result = await gateway.call(
-            ToolCall(
-                action_id="del-1",
-                capability_name="delete_file",
-                resource="report.txt",
-                params={"effect_class": "read"},
-            )
-        )
+    async def test_secret_and_network_target_must_be_explicitly_allowed(self) -> None:
+        gate, tmp = _gate()
+        self.addCleanup(tmp.cleanup)
+        handler = RecordingHandler()
+        capability = _capability(handler=handler)
+        gateway = ToolGatewayImpl(gate, [capability])
+        secret_result = await gateway.call(_call(secret_refs=frozenset({"mail-token"})))
+        network_result = await gateway.call(_call(action_id="a2", network_target="api.test"))
+        self.assertFalse(secret_result.succeeded)
+        self.assertFalse(network_result.succeeded)
+        self.assertEqual(handler.calls, [])
 
+    async def test_corrupt_switch_state_denies_without_handler(self) -> None:
+        gate, tmp = _gate()
+        self.addCleanup(tmp.cleanup)
+        handler = RecordingHandler()
+        gate.emergency_switch._path.write_text("partial", encoding="utf-8")
+        result = await ToolGatewayImpl(gate, [_capability(handler=handler)]).call(_call())
         self.assertFalse(result.succeeded)
         self.assertEqual(handler.calls, [])
 
@@ -212,15 +312,10 @@ class ToolGatewayFailureTests(unittest.IsolatedAsyncioTestCase):
     async def test_handler_exception_raises_tool_gateway_error(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
-        capability = Capability(name="crash", effect_class=ActionClass.READ, handler=_boom)
-        gateway = ToolGatewayImpl(owner_control=gate, capabilities=[capability])
-
+        capability = _capability(handler=_boom)
+        gateway = ToolGatewayImpl(gate, [capability])
         with self.assertRaises(ToolGatewayError):
-            await gateway.call(ToolCall(action_id="a1", capability_name="crash", resource="x"))
-
-    async def test_tool_gateway_error_is_a_distinct_type(self) -> None:
-        with self.assertRaises(ToolGatewayError):
-            raise ToolGatewayError("tool unavailable")
+            await gateway.call(_call())
 
 
 if __name__ == "__main__":
