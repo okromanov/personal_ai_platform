@@ -1,18 +1,16 @@
-"""Reference ToolGateway implementation (ARC_CMP_005).
+"""Reference ToolGateway implementation (ARC_CMP_005)."""
 
-Every call is authorized before it reaches a handler: an unknown
-capability or an unlisted resource is rejected outright, and the impact
-class registered on the capability -- never anything supplied in the
-call's own params -- is what OwnerControl checks (SEC_CTL_007). Sensitive
-classes route through `OwnerControl.authorize_sensitive_action`
-(ARC_CMP_002) for the owner's confirmation, with duplicate protection
-built into that same call (SEC_CTL_008).
-"""
+from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 
-from src.owner_control.base import ActionClass, OwnerControl
+from src.owner_control.base import (
+    ActionClass,
+    ActionDescriptor,
+    OwnerControl,
+    OwnerControlError,
+)
 
 from .base import ToolCall, ToolGateway, ToolGatewayError, ToolResult
 
@@ -21,53 +19,82 @@ ToolHandler = Callable[[ToolCall], Awaitable[str]]
 
 @dataclass(frozen=True)
 class Capability:
-    """A registered, technically authorizable tool binding (SEC_CTL_007).
-
-    Attributes:
-        name: Unique capability identifier a ToolCall requests by name.
-        effect_class: Impact classification (SEC_CTL_008) -- fixed at
-            registration time, not something a caller can influence.
-        handler: Executes an authorized call and returns its output.
-        allowed_resources: Resources this capability may act on. Empty
-            means unrestricted -- appropriate only for `ActionClass.READ`.
-    """
+    """A technically authorizable binding and its least-privilege policy."""
 
     name: str
     effect_class: ActionClass
     handler: ToolHandler
+    allowed_subjects: frozenset[str]
     allowed_resources: frozenset[str] = field(default_factory=frozenset)
+    allowed_param_names: frozenset[str] = field(default_factory=frozenset)
+    allowed_secret_refs: frozenset[str] = field(default_factory=frozenset)
+    allowed_network_targets: frozenset[str] = field(default_factory=frozenset)
+    constraints: tuple[tuple[str, str], ...] = ()
+    credential_ref: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.allowed_subjects:
+            raise ValueError("capability must name at least one allowed subject")
+        if self.effect_class is not ActionClass.READ and not self.allowed_resources:
+            raise ValueError("sensitive capability must explicitly allow resources")
 
 
 class ToolGatewayImpl(ToolGateway):
-    """Reference `ToolGateway`: technical authorization plus dispatch."""
+    """Single technical authorization point with fail-closed dispatch."""
 
     def __init__(self, owner_control: OwnerControl, capabilities: list[Capability]) -> None:
         self._owner_control = owner_control
         self._capabilities = {capability.name: capability for capability in capabilities}
 
+    @staticmethod
+    def _denied(reason: str) -> ToolResult:
+        return ToolResult(output="", succeeded=False, error_message=reason)
+
     async def call(self, tool_call: ToolCall) -> ToolResult:
+        try:
+            self._owner_control.verify_identity(tool_call.subject_id)
+            self._owner_control.check_emergency_stop()
+        except OwnerControlError as exc:
+            return self._denied(str(exc))
+
         capability = self._capabilities.get(tool_call.capability_name)
         if capability is None:
-            return ToolResult(
-                output="",
-                succeeded=False,
-                error_message=f"unknown capability: {tool_call.capability_name}",
-            )
+            return self._denied(f"unknown capability: {tool_call.capability_name}")
+        if tool_call.subject_id not in capability.allowed_subjects:
+            return self._denied("subject not authorized for capability")
         if capability.allowed_resources and tool_call.resource not in capability.allowed_resources:
-            return ToolResult(
-                output="",
-                succeeded=False,
-                error_message=f"resource not authorized for capability: {tool_call.resource}",
-            )
+            return self._denied(f"resource not authorized for capability: {tool_call.resource}")
+        if not set(tool_call.params).issubset(capability.allowed_param_names):
+            return self._denied("parameters not authorized for capability")
+        if not tool_call.secret_refs.issubset(capability.allowed_secret_refs):
+            return self._denied("secret reference not authorized for capability")
+        if tool_call.network_target is not None and (
+            tool_call.network_target not in capability.allowed_network_targets
+        ):
+            return self._denied("network target not authorized for capability")
 
-        decision = self._owner_control.authorize_sensitive_action(
-            tool_call.action_id,
-            capability.effect_class,
-            tool_call.params,
-            confirmed=tool_call.confirmed,
-        )
-        if not decision.authorized:
-            return ToolResult(output="", succeeded=False, error_message=decision.reason)
+        try:
+            action = ActionDescriptor.create(
+                subject_id=tool_call.subject_id,
+                capability_name=capability.name,
+                resource=tool_call.resource,
+                action_class=capability.effect_class,
+                params=tool_call.params,
+                secret_refs=tuple(tool_call.secret_refs),
+                network_target=tool_call.network_target,
+                constraints=capability.constraints,
+                credential_ref=capability.credential_ref,
+            )
+            decision = self._owner_control.authorize_sensitive_action(
+                tool_call.action_id,
+                action,
+                confirmed=tool_call.confirmed,
+            )
+            if not decision.authorized:
+                return self._denied(decision.reason)
+            self._owner_control.check_emergency_stop()
+        except (OwnerControlError, ValueError) as exc:
+            return self._denied(str(exc))
 
         try:
             output = await capability.handler(tool_call)
