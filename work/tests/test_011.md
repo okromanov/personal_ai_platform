@@ -5,7 +5,7 @@ title: "ARC_CMP_005 — Шлюз инструментов: техническа�
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.0
+version: 1.1
 updated: 2026-08-25
 accepts:
   - m02
@@ -31,8 +31,10 @@ depends_on:
 
 - Возможность класса `READ` авторизуется немедленно, без подтверждения владельца.
 - Возможность чувствительного класса (`WRITE_EXTERNAL`, `DESTRUCTIVE`, `ADMIN`) при первом вызове без подтверждения отклоняется, а обработчик инструмента не вызывается ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)).
-- Повторный вызов с тем же `action_id`/параметрами и `confirmed=True` авторизуется и выполняется.
-- Третий вызов с тем же `action_id` после авторизации отклоняется как дубликат — повтор не создаёт второй эффект ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)).
+- Повторный вызов с тем же полным descriptor и `confirmed=True` авторизуется и выполняется.
+- Подмена субъекта, возможности, ресурса, параметров, секрета или сети отклоняется; подтверждение не переносится на другое действие.
+- Третий вызов с тем же `action_id` после авторизации отклоняется как дубликат, в том числе после перезапуска ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)).
+- Аварийный выключатель проверяется до авторизации и непосредственно перед handler; включение в любом из этих окон не допускает внешний эффект ([`SEC_CTL_002`](../../specifications/system_specification.md#sec_ctl_002)).
 - Неизвестная возможность и ресурс вне списка разрешённых для возможности отклоняются без вызова обработчика.
 - Класс воздействия, заявленный в параметрах вызова, не может подменить зарегистрированный класс возможности — авторизация управляется только тем, что было зарегистрировано технической стороной, а не тем, что утверждает вызывающая сторона или обнаруженные метаданные инструмента ([`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007)).
 - Сбой самого обработчика инструмента поднимает отдельное, отличимое от отказа авторизации исключение `ToolGatewayError`.
@@ -53,12 +55,14 @@ python3 -m unittest operations.tests.product.test_tool_gateway -v
 
 ## 4. Критерий успеха
 
-Все 9 тестов проходят, включая сценарии:
+Все 17 тестов проходят, включая сценарии:
 
 - ✓ read_capability_authorized_immediately_without_confirmation — класс `READ` не требует подтверждения
 - ✓ sensitive_capability_requires_confirmation_first — первый вызов чувствительной возможности отклонён, обработчик не вызван
-- ✓ sensitive_capability_authorized_on_matching_confirmation — подтверждённый повтор с теми же параметрами выполняется
-- ✓ duplicate_action_id_rejected_after_authorization — повторное использование `action_id` после авторизации отклонено
+- ✓ matching_confirmation_executes_once — подтверждённый повтор с тем же descriptor выполняется один раз
+- ✓ confirmation substitution — другой resource или capability отклоняется
+- ✓ kill-switch race — включение до подтверждения или после авторизации блокирует handler
+- ✓ duplicate after restart — повторное использование `action_id` после перезапуска отклонено
 - ✓ unknown_capability_returns_failed_result — неизвестная возможность отклонена
 - ✓ resource_outside_allowlist_is_denied — ресурс вне списка разрешённых отклонён, обработчик не вызван
 - ✓ capability_effect_class_cannot_be_overridden_by_call_params — параметры вызова не подменяют зарегистрированный класс воздействия
@@ -67,7 +71,7 @@ python3 -m unittest operations.tests.product.test_tool_gateway -v
 
 ## 5. Состав доказательства
 
-`automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 9 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
+`automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 17 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
 
 ## 6. Реализованные компоненты
 
@@ -77,9 +81,9 @@ python3 -m unittest operations.tests.product.test_tool_gateway -v
 
 - `async call(tool_call: ToolCall) → ToolResult`: авторизовать и выполнить один вызов инструмента
 
-**Данные**: `ToolCall` (`action_id`, `capability_name`, `resource`, `params`, `confirmed`), `ToolResult` (`output`, `succeeded`, `error_message`), исключение `ToolGatewayError` (инструмент недоступен или упал)
+**Данные**: `ToolCall` (`action_id`, `subject_id`, `capability_name`, `resource`, `params`, `secret_refs`, `network_target`, `confirmed`), `ToolResult` и исключение `ToolGatewayError`.
 
-**Эталонная реализация**: `ToolGatewayImpl` — регистрирует список `Capability` (`name`, `effect_class`, `handler`, `allowed_resources`) и на каждом вызове: (1) проверяет существование возможности, (2) проверяет ресурс против `allowed_resources`, (3) передаёт `effect_class` возможности и параметры вызова в [`OwnerControl.authorize_sensitive_action`](../tasks/task_002_arc_002.md), (4) выполняет `handler` только при положительном решении.
+**Эталонная реализация**: `ToolGatewayImpl` регистрирует policy `Capability` и проверяет identity, emergency state, subject/resource/params/secrets/network, затем передаёт полный immutable descriptor в [`OwnerControl.authorize_sensitive_action`](../tasks/task_002_arc_002.md), повторно проверяет emergency state и только после этого вызывает handler.
 
 ## 7. Структура кода
 
@@ -105,12 +109,12 @@ operations/tests/product/
 ## 9. Доказательства
 
 - **Исходный код**: [`src/tools/`](../../src/tools/) — стабильный контракт и эталонная реализация
-- **Тесты**: 9 юнит-тестов в [`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py), часть обязательного gate `Quality skills`
+- **Тесты**: 17 юнит-тестов в [`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py), часть обязательного gate `Quality skills`
 - **Отсутствие регрессий**: Запуск `check.py --all` прошёл успешно
 
 ## 10. Готово когда
 
-- ✅ 9 тестов пройдено
+- ✅ 17 тестов пройдено
 - ✅ Контракт `ToolGateway` определён и используется
 - ✅ Авторизация чувствительного действия подтверждена через [`OwnerControl`](../tasks/task_002_arc_002.md) без дублирования его логики
 - ✅ Защита от дублей подтверждена тестом
