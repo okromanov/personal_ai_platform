@@ -35,6 +35,235 @@
 
 ---
 
+## КЛЮЧЕВЫЕ ПРИНЦИПЫ АУДИТА
+
+### 1️⃣ Документация должна быть MECE (Mutually Exclusive, Collectively Exhaustive)
+
+**MECE = Взаимоисключающие и полностью покрывающие**
+
+✅ **Взаимоисключающие (ME):**
+- Одна информация в одном месте, не повторяется в других документах
+- Элементы не перекрываются
+- Нет "полусказанного" в нескольких документах
+
+❌ **Плохо (дублирование):**
+- BR_001 описана в `business_requirements.md` И в `AGENTS.md`
+- Архитектурное решение в `ADR_005` И в `architecture_baseline.md`
+- Требование к безопасности в `threat_model.md` И в `project_rules.md`
+
+✅ **Хорошо (единственный источник):**
+- BR_001 → только в `business_requirements.md`, ссылка на неё везде
+- ADR_005 → только в `adr/adr_005_*.md`, ссылка в архитектуре
+- Угроза → только в `threat_model.md`, ссылка в других местах
+
+✅ **Полностью покрывающие (CE):**
+- Все части продукта описаны (нет "тёмных углов")
+- Все требования в requirements
+- Все компоненты в архитектуре
+- Все процессы в procedures
+- Все принципы в rules
+
+❌ **Плохо (неполнота):**
+- В `architecture_baseline.md` описаны компоненты A, B, но C "где-то в коде"
+- В `business_requirements.md` описаны требования BR_001-015, но есть BR_020+
+- Процесс слияния не описан в `change_process.md`
+
+**Проверка MECE:** каждый элемент (BR_*, SYS_*, ARC_CMP_*) должен быть:
+- Определён в одном документе (ME)
+- На него ссылаются все остальные документы (CE)
+- Нет его копий/пересказов в других местах
+
+---
+
+### 2️⃣ Тесты должны быть эффектными, не заглушками
+
+**Эффективный тест = проверяет реальное поведение**
+
+❌ **Плохие (заглушка/тривиальные) тесты:**
+```python
+def test_function_exists():
+    assert my_function is not None  # не проверяет ничего
+
+def test_returns_something():
+    result = process_data({})
+    assert result is not None  # можно что угодно вернуть
+
+def test_no_exception():
+    try:
+        my_function()
+    except:
+        pass  # не проверяет никакое поведение
+
+def test_mock_everything():
+    with patch('everything'), patch('everywhere'):
+        assert True  # логика не тестируется, только моки
+```
+
+✅ **Хорошие (эффективные) тесты:**
+```python
+def test_calculates_total_correctly():
+    result = calculate_total([10, 20, 30])
+    assert result == 60  # проверяет конкретное вычисление
+
+def test_raises_on_invalid_input():
+    with pytest.raises(ValueError):
+        process_data(None)  # проверяет конкретную ошибку
+
+def test_maintains_order():
+    items = [3, 1, 4, 1, 5, 9, 2, 6]
+    result = sort_items(items)
+    assert result == [1, 1, 2, 3, 4, 5, 6, 9]  # проверяет конкретный результат
+
+def test_handles_concurrent_writes():
+    # реально запускаются параллельные потоки
+    results = run_concurrent(write_operation, 10)
+    assert all(r.success for r in results)  # проверяет реальное поведение
+```
+
+✅ **Характеристики эффективного теста:**
+- Проверяет реальное поведение (не пустые assert)
+- Имеет конкретные ожидаемые результаты
+- Проверяет edge cases и ошибки (не только happy path)
+- Не мокирует всё подряд (мокируются только внешние зависимости)
+- Может провалиться (не всегда зелёный)
+- Проверяет одно поведение (не 5 assert в одном тесте)
+
+**Проверка эффективности:**
+- Каждый test.py должен иметь ≥3 assert на тест
+- Тесты на ошибки (try/except, timeout, invalid input) для каждой функции
+- Граничные значения (пустой список, None, очень большие числа)
+- Интеграция между модулями (не только unit-тесты)
+
+---
+
+### 3️⃣ Никакого дублирования элементов нигде
+
+**Дублирование = смерть для trust, testing и maintenance**
+
+❌ **Плохо (дублирование везде):**
+
+**В документации:**
+```
+AGENTS.md говорит: "используй паттерн X для модуля Y"
+project_rules.md ещё раз: "используй паттерн X для модуля Y"
+specifications/architecture_baseline.md ещё раз: "модуль Y использует паттерн X"
+```
+
+**В коде:**
+```python
+# src/models/handler.py
+def validate_input(data):
+    if not data: raise ValueError("empty")
+    if len(data) > 100: raise ValueError("too long")
+
+# src/tools/validator.py (копия!)
+def validate_input(data):
+    if not data: raise ValueError("empty")
+    if len(data) > 100: raise ValueError("too long")
+```
+
+**В тестах:**
+```python
+# tests/test_models.py
+def test_validate_empty():
+    with pytest.raises(ValueError):
+        validate_input(None)
+
+# tests/test_tools.py (копия!)
+def test_validate_empty():
+    with pytest.raises(ValueError):
+        validate_input(None)
+```
+
+**В требованиях:**
+```
+BR_001: User can login with email
+BR_002: User can authenticate with email
+
+(BR_002 = повтор BR_001, разные слова)
+```
+
+✅ **Хорошо (единственный источник):**
+
+**В документации:**
+- Паттерн X определён один раз в `architecture_baseline.md`
+- На него ссылаются везде (AGENTS.md, ADR и т.д.)
+- Нет пересказа в других местах
+
+**В коде:**
+```python
+# src/validation/__init__.py
+def validate_input(data):
+    if not data: raise ValueError("empty")
+    if len(data) > 100: raise ValueError("too long")
+
+# src/models/handler.py
+from validation import validate_input  # используем, не дублируем
+
+# src/tools/validator.py
+from validation import validate_input  # используем, не дублируем
+```
+
+**В тестах:**
+```python
+# tests/test_validation.py
+def test_validate_empty():
+    with pytest.raises(ValueError):
+        validate_input(None)
+
+# tests/test_models.py
+def test_handler_rejects_empty():
+    with pytest.raises(ValueError):
+        handler.process(None)  # проверяет, что handler использует validate
+```
+
+**В требованиях:**
+```
+BR_001: User can authenticate with email (specific, measurable)
+BR_002: User can authenticate with phone number (different, not duplicate)
+```
+
+**Проверка дублирования:**
+- Одна функция/класс — один файл
+- Одно требование (BR_*) — один документ
+- Одно решение (ADR_*) — один файл
+- Нет copy-paste кода в разных местах
+- Нет требований с разными словами, но смыслом
+- Процедура описана один раз, везде ссылка
+
+**Команды поиска дублирования:**
+```bash
+# Поиск копий функций в Python
+grep -rn "def " src/ | sort | uniq -d
+
+# Поиск одинаковых блоков кода (более 10 строк)
+find src -name "*.py" -exec awk '/BEGIN/,/END/ {print FILENAME":"NR":"$0}' {} \;
+
+# Поиск одинаковых требований (по смыслу)
+grep -i "user can\|user should" specifications/business_requirements.md | sort
+```
+
+---
+
+## ПРОВЕРКА ЭТИХ ПРИНЦИПОВ В АУДИТЕ
+
+**MECE (документация):**
+- Каждый элемент определён один раз?
+- Везде ссылки, а не пересказ?
+- Полностью ли всё покрыто?
+
+**Эффективность тестов:**
+- Есть ли пустые тесты (заглушки)?
+- Проверяют ли они реальное поведение?
+- Достаточно ли assertions?
+
+**Дублирование:**
+- Нет ли одной функции в двух файлах?
+- Нет ли требования описанного дважды?
+- Нет ли одного ADR/решения в двух местах?
+
+---
+
 ## СТРУКТУРА РЕПОЗИТОРИЯ
 
 ```
@@ -112,9 +341,22 @@
 - AGENTS.md соответствует descriptions в specifications/?
 - Все ли требования (BR_*) упомянуты?
 
+✅ **MECE (документация):**
+- Каждое требование (BR_*) описано в ОДНОМ месте? (не повторяется в specifications/ и AGENTS.md)
+- Информация не дублируется между документами?
+- Все части системы полностью описаны (нет пропусков)?
+
+**Проверка дублирования:**
+```bash
+# Найти требования в AGENTS.md и specifications/
+grep -n "BR_\|SYS_\|ARC_" AGENTS.md | wc -l
+grep -n "BR_\|SYS_\|ARC_" specifications/*.md | wc -l
+# Если больше чем в одном месте — дублирование!
+```
+
 **Проверка:** откройте `generated/traceability_matrix.md` — видны ли все BR в документе?
 
-**Вердикт:** "Контракт честен и актуален" / "Контракт устарел" / "Контракт противоречив"
+**Вердикт:** "Контракт честен и актуален" / "Контракт устарел" / "Контракт противоречив" / "Есть дублирование в документах"
 
 ---
 
@@ -219,6 +461,47 @@ TIMEOUT = 30                        # магическое число
 - Явно помечено (v0, draft, prototype)
 - Задокументировано в TASK как долг
 
+✅ **Дублирование кода (критично!):**
+- Нет ли одной функции в двух файлах (copy-paste)?
+- Нет ли блока логики, повторённого 3+ раза?
+- Не должно быть никакого дублирования!
+
+**Плохо (дублирование):**
+```python
+# src/models/handler.py
+def validate_input(data):
+    if not data: raise ValueError("empty")
+    return data
+
+# src/tools/processor.py (копия!)
+def validate_input(data):
+    if not data: raise ValueError("empty")
+    return data
+```
+
+**Хорошо (единый источник):**
+```python
+# src/validation/__init__.py
+def validate_input(data):
+    if not data: raise ValueError("empty")
+    return data
+
+# src/models/handler.py
+from validation import validate_input
+
+# src/tools/processor.py
+from validation import validate_input
+```
+
+**Поиск дублирования:**
+```bash
+# Найти функции с одним именем в разных файлах
+grep -rn "^def " src/ | awk -F: '{print $3}' | sort | uniq -d
+
+# Найти copy-paste блоков (более 10 строк одинакового кода)
+find src -name "*.py" -exec awk '/BEGIN/,/END/ {print}' {} \;
+```
+
 **Поиск заглушек:**
 ```bash
 grep -rn "TODO\|FIXME\|HACK\|pass\|return None" src/
@@ -236,8 +519,8 @@ detect-secrets scan src/ --all-files
 
 **Для каждой находки:**
 - Файл, строка
-- Тип (заглушка / хардкод / мусор / секрет)
-- Действие: удалить / TASK / вынести в .env
+- Тип (заглушка / хардкод / мусор / секрет / дублирование)
+- Действие: удалить / TASK / вынести в .env / рефакторить в общий модуль
 
 ---
 
@@ -259,10 +542,43 @@ pytest --cov=src --cov-report=term-missing
 - Integration-тесты (компоненты взаимодействуют)?
 - End-to-end тесты (система работает целиком)?
 
+✅ **Эффективность тестов (критично!):**
+- Тесты проверяют реальное поведение, а не пустые `assert True`?
+- Каждый тест имеет конкретное ожидаемое значение?
+- Есть ли тесты на ошибки (ValueError, TypeError, timeout)?
+- Edge cases (пустой список, None, граничные значения)?
+- Тесты могут провалиться (не всегда зелёные заглушки)?
+
+**Плохие тесты (заглушки):**
+```python
+def test_function_exists():
+    assert my_function is not None  # ❌ ничего не проверяет
+
+def test_no_error():
+    result = process()
+    assert result is not None  # ❌ слишком слабо
+```
+
+**Хорошие тесты (эффективные):**
+```python
+def test_calculates_correct_sum():
+    assert sum([1,2,3]) == 6  # ✅ конкретное значение
+
+def test_raises_on_none():
+    with pytest.raises(ValueError):
+        process(None)  # ✅ проверяет ошибку
+```
+
+**Проверка:**
+```bash
+# Найти тесты-заглушки (без assert или только assert True)
+grep -rn "assert True\|assert is not None\|pass" tests/
+```
+
 ✅ **Качество тестов:**
-- Есть ли тесты на edge cases (None, пустой вход, граничные значения)?
-- Есть ли тесты на ошибки (исключения, timeout)?
-- Или только happy path?
+- Нет ли дублирования тестов (одна логика тестируется в двух местах)?
+- Каждый тест проверяет одно поведение?
+- Достаточно ли assertions (≥3 на тест)?
 
 ✅ **Flaky тесты:**
 - Есть ли нестабильные тесты (проходят/падают случайно)?
@@ -276,8 +592,20 @@ for i in {1..3}; do pytest .; done
 ✅ **Трассируемость тестов:**
 - Каждый BR_* / TASK имеет TEST?
 - Каждый TEST ссылается на BR_* (verifies)?
+- Нет ли orphaned TEST без verifies?
 
 **Проверка:** `generated/traceability_matrix.md` → orphaned требования без TEST?
+
+✅ **Дублирование тестов:**
+- Одна функция тестируется в двух test файлах?
+- Один сценарий проверяется дважды с разными словами?
+- Нет ли copy-paste тестов?
+
+**Проверка:**
+```bash
+# Найти функции, тестируемые в двух местах
+grep -rn "def test_" tests/ | grep -o "test_[a-z_]*" | sort | uniq -d
+```
 
 ✅ **CI/CD pipeline:**
 - Запускаются ли тесты на каждый push?
@@ -473,21 +801,28 @@ for i in {1..2}; do pytest -v; done
 
 ## КРАСНЫЕ ФЛАГИ
 
-❌ КРИТИЧНО:
+❌ КРИТИЧНО (блокирует разработку):
 - `health_check_report.md` показывает ошибки
 - В src/ есть `except: pass` без TASK
 - Есть хардкодированные токены, пароли
+- **Дублирование кода** (одна функция в двух местах)
+- **Тесты-заглушки** (только `assert True` или пустые)
+- **Документация не MECE** (требование описано в двух местах)
 
-❌ ВАЖНО:
+❌ ВАЖНО (должно быть исправлено):
 - AGENTS.md не обновлялся месяц+
 - Нет pre-commit hook или не работает
 - Трассируемость разорвана (BR без TASK)
 - Покрытие < 60%
+- **Дублирование требований** (BR_001 и BR_010 — одно и то же)
+- **Дублирование тестов** (один сценарий в двух файлах)
 
-❌ ЗАМЕТНО:
+❌ ЗАМЕТНО (нужно улучшить):
 - Flaky тесты (нестабильные)
 - Мёртвый код (неиспользуемые модули)
 - Gap между контрактом и кодом
+- Тесты без edge cases (только happy path)
+- Дублирование логики (один блок 3+ раза)
 
 ---
 
