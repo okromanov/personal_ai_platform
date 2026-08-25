@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `155` |
+| Всего файлов | `156` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -162,6 +162,7 @@ version: 1.0
 | [`src/owner_control/base.py`](../src/owner_control/base.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/control.py`](../src/owner_control/control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/emergency_switch.py`](../src/owner_control/emergency_switch.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
+| [`src/owner_control/state_io.py`](../src/owner_control/state_io.py) | — | — |
 | [`src/task_state/__init__.py`](../src/task_state/__init__.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
 | [`src/task_state/base.py`](../src/task_state/base.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
 | [`src/task_state/store.py`](../src/task_state/store.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
