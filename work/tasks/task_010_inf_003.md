@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
 work_state: planned
-version: 1.3
+version: 1.4
 updated: 2026-08-24
 next_actor: agent
 owner_action: none
@@ -36,7 +36,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `INF_CMP_003`
+1. Изучить спецификацию [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003)
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence
@@ -45,7 +45,7 @@ implements:
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к INF_CMP_003
+- [ ] Изучить требования к [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Спроектировать реализацию
 - [ ] Реализовать компонент
@@ -58,7 +58,7 @@ implements:
 
 **Ожидаемые файлы:**
 - `src/secrets/base.py` — контракт получения секрета по имени
-- `src/secrets/env_provider.py` — реализация на переменных окружения (минимальная для m02)
+- `src/secrets/env_provider.py` — реализация на переменных окружения (минимальная для [`m02`](../../milestones.md#m02))
 - `work/tests/test_00X.md` — описание проверок
 
 ## 7. Проверки и доказательства

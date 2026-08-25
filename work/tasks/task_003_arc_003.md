@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: planned
-version: 1.6
+version: 1.7
 updated: 2026-08-25
 next_actor: agent
 owner_action: none
@@ -12,6 +12,15 @@ depends_on:
   - TASK_002
 allowed_paths:
   - work/tasks/task_003_arc_003.md
+  - adr/adr_005_first_model_provider_selection.md
+  - adr/adr_006_agent_environment_framework.md
+  - adr/adr_007_cloud_provider_selection.md
+  - adr/adr_008_data_storage_schema.md
+  - adr/adr_009_secret_management_strategy.md
+  - milestones.md
+  - specifications/architecture_baseline.md
+  - specifications/system_specification.md
+  - specifications/infrastructure_baseline.md
 traces_to:
   - m02
 implements:
@@ -36,7 +45,7 @@ implements:
 
 ### Агенту
 
-1. Изучить спецификацию `ARC_CMP_003`
+1. Изучить спецификацию [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
 2. Дополнить `allowed_paths` фактическими путями реализации
 3. Создать план реализации
 4. Реализовать функциональность и написать TEST с реальным evidence
@@ -45,7 +54,7 @@ implements:
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к ARC_CMP_003
+- [ ] Изучить требования к [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Спроектировать реализацию
 - [ ] Реализовать компонент
@@ -53,6 +62,8 @@ implements:
 - [ ] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
+
+[`adr/adr_005_first_model_provider_selection.md`](../../adr/adr_005_first_model_provider_selection.md)–[`adr/adr_009_secret_management_strategy.md`](../../adr/adr_009_secret_management_strategy.md), [`milestones.md`](../../milestones.md), [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md), [`specifications/system_specification.md`](../../specifications/system_specification.md) и [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md) добавлены в `allowed_paths` по прямому решению владельца отдельно от реализации [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) — они покрывают правку кликабельности ссылок на трассируемые элементы, включая упоминания внутри строк `traces_to` (см. [`work/tasks/task_001_arc_001.md`](task_001_arc_001.md)), и удаление раздела «Верхнеуровневая схема» из [`architecture_baseline.md`](../../specifications/architecture_baseline.md), а не оркестрацию задач.
 
 **При начале:** агент определит реальные файлы (вероятно `src/orchestration/` для контракта `RuntimePort` и оркестратора), добавит в `allowed_paths`, создаст TEST.
 
@@ -83,7 +94,7 @@ implements:
 
 ## 9. Что будет дальше
 
-`TASK_004` реализует Шлюз моделей (`ARC_CMP_004`) — нормализованный доступ к LLM, который оркестратор будет вызывать в цикле выполнения задачи. `TASK_005` реализует Шлюз инструментов (`ARC_CMP_005`), необходимый оркестратору для авторизованных вызовов инструментов.
+[`TASK_004`](task_004_arc_004.md) реализует Шлюз моделей ([`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)) — нормализованный доступ к LLM, который оркестратор будет вызывать в цикле выполнения задачи. [`TASK_005`](task_005_arc_005.md) реализует Шлюз инструментов ([`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)), необходимый оркестратору для авторизованных вызовов инструментов. См. [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) для полного списка требований, реализуемых [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003).
 
 ## 10. Что это даёт владельцу
 

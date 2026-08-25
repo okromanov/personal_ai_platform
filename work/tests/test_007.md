@@ -5,7 +5,7 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.7
+version: 1.8
 updated: 2026-08-24
 accepts:
   - m02
@@ -22,7 +22,7 @@ depends_on: []
 
 ## 1. Назначение
 
-Доказать, что компонент ARC_CMP_001 (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям SYS_001.
+Доказать, что компонент [`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001) (Каналы) правильно нормализует пользовательский ввод для Telegram и других поддерживаемых интерфейсов в формат `TaskMessage` согласно требованиям [`SYS_001`](../../specifications/system_specification.md#sys_001).
 
 ## 2. Что проверяется
 
@@ -145,13 +145,13 @@ operations/tests/product/
 
 ## 12. Примечания для разработчика
 
-- Telegram интеграция упрощена для m02: используется очередь вместо реального Bot API
+- Telegram интеграция упрощена для [`m02`](../../milestones.md#m02): используется очередь вместо реального Bot API
 - Production реализация будет использовать `python-telegram-bot` и webhook/polling
 - Контракт Channel стабилен и позволяет заменять реализацию без изменения остального кода
 - Стабильность по [`SYS_003`](../../specifications/system_specification.md#sys_003): замена TelegramChannel на MockChannel или WebChannel не требует изменений выше уровня Channel
 
 ## 13. История версий
 
-- **v1.0** (2026-08-22): Начальная реализация ARC_CMP_001 с поддержкой Telegram
+- **v1.0** (2026-08-22): Начальная реализация [`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001) с поддержкой Telegram
 
 Действия владельца не требуются: тест полностью автоматизирован и не требует ручного вмешательства.

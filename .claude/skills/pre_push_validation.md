@@ -25,7 +25,7 @@ The hook invokes `run_suite.py full`, which runs (in order): derived-document re
 
 Changed-line diff coverage is skipped locally (no `--coverage-base` is passed, so the suite runs with `--skip-diff`) — that check only makes sense against a PR base and still runs in CI.
 
-Actionlint, ShellCheck, pip-audit and Gitleaks stay CI-only: they fetch pinned external binaries over the network with SHA-256 verification, which is heavier machinery than a local git hook should depend on. A developer who touches `.github/workflows/`, shell scripts, or `requirements_dev.txt` should still expect CI to be the first place those specific checks run.
+Actionlint, ShellCheck, pip-audit and Gitleaks stay CI-only: they fetch pinned external binaries over the network with SHA-256 verification, which is heavier machinery than a local git hook should depend on. A developer who touches `.github/workflows/`, shell scripts, or [`requirements_dev.txt`](../../operations/quality/requirements_dev.txt) should still expect CI to be the first place those specific checks run.
 
 ## Run
 

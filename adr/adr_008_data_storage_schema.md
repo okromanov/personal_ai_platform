@@ -2,7 +2,7 @@
 id: ADR_008
 type: adr
 decision_state: proposed
-version: 1.0
+version: 1.1
 updated: 2026-08-24
 traces_to:
   - m04
@@ -29,8 +29,8 @@ traces_to:
 
 V1 требует управление несколькими типами данных:
 
-1. **Долговременная память** (BR_022): семантические встраивания + текст
-2. **История контекста** (BR_023): управляемый архив переписки
+1. **Долговременная память** ([`BR_022`](../specifications/business_requirements.md#br_022)): семантические встраивания + текст
+2. **История контекста** ([`BR_023`](../specifications/business_requirements.md#br_023)): управляемый архив переписки
 3. **Проектный контекст** ([`SYS_012`](../specifications/system_specification.md#sys_012)): решения, обязательства, риски и следующие действия
 4. **Области данных** ([`BR_024`](../specifications/business_requirements.md#br_024), [`SYS_029`](../specifications/system_specification.md#sys_029), [`SEC_CTL_006`](../specifications/system_specification.md#sec_ctl_006)): рабочий и личный контекст
 5. **Жизненный цикл памяти** ([`SEC_CTL_019`](../specifications/system_specification.md#sec_ctl_019)): исправление и удаление без возврата старой записи
@@ -39,35 +39,35 @@ V1 требует управление несколькими типами да�
 - **Структурированность:** Задачи и события имеют чёткую схему
 - **Масштабируемость:** От КБ памяти до ГБ архива истории
 - **Поиск:** По памяти нужен семантический поиск (embedding vector)
-- **Изоляция:** Разные области данных (BR_024, SEC_CTL_006)
-- **Аудит:** Кто и когда изменил что (для SEC_CTL_019)
+- **Изоляция:** Разные области данных ([`BR_024`](../specifications/business_requirements.md#br_024), [`SEC_CTL_006`](../specifications/system_specification.md#sec_ctl_006))
+- **Аудит:** Кто и когда изменил что (для [`SEC_CTL_019`](../specifications/system_specification.md#sec_ctl_019))
 
 ## 3. Предлагаемое решение
 
 В [`m04`](../milestones.md#m04) проверить **PostgreSQL** как кандидата на основное хранилище структурированных данных:
 
 1. **Таблицы основные:**
-   - `agent_memory` — встраивания (embeddings) + источник текста (BR_022)
-   - `context_history` — архив контекстов по SHA версии (BR_023)
+   - `agent_memory` — встраивания (embeddings) + источник текста ([`BR_022`](../specifications/business_requirements.md#br_022))
+   - `context_history` — архив контекстов по SHA версии ([`BR_023`](../specifications/business_requirements.md#br_023))
    - `projects` — проектный контекст ([`SYS_012`](../specifications/system_specification.md#sys_012))
    - `memory_corrections` — исправления и tombstone удаления ([`SEC_CTL_019`](../specifications/system_specification.md#sec_ctl_019))
-   - `audit_log` — кто изменил что и когда (SEC_CTL_019)
+   - `audit_log` — кто изменил что и когда ([`SEC_CTL_019`](../specifications/system_specification.md#sec_ctl_019))
 
 2. **Индексы для производительности:**
    - BTREE индекс на `created_at` для быстрой фильтрации по времени
-   - GiST/IVFFLAT индекс на `embedding` вектор для семантического поиска (BR_022)
-   - UNIQUE индекс на `context_hash` для дедупликации (BR_023)
+   - GiST/IVFFLAT индекс на `embedding` вектор для семантического поиска ([`BR_022`](../specifications/business_requirements.md#br_022))
+   - UNIQUE индекс на `context_hash` для дедупликации ([`BR_023`](../specifications/business_requirements.md#br_023))
 
 3. **Шифрование:**
    - Шифрование at-rest средствами выбранной площадки
    - TLS для транспорта
-   - Чувствительные поля шифруются ключом из выбранного хранилища секретов (ADR_009)
+   - Чувствительные поля шифруются ключом из выбранного хранилища секретов ([`ADR_009`](adr_009_secret_management_strategy.md#adr_009))
 
 4. **Разделение прав:**
-   - Применение row-level security (RLS) policies для изоляции областей (SEC_CTL_006)
+   - Применение row-level security (RLS) policies для изоляции областей ([`SEC_CTL_006`](../specifications/system_specification.md#sec_ctl_006))
    - Отдельные роли: agent (read/write), auditor (read-only), admin.
 
-Конкретная СУБД, управляемый сервис и окончательная схема принимаются после сравнения с более простым вариантом и проверки backup/restore. Ссылки на RDS являются вариантом реализации только при принятии ADR_007.
+Конкретная СУБД, управляемый сервис и окончательная схема принимаются после сравнения с более простым вариантом и проверки backup/restore. Ссылки на RDS являются вариантом реализации только при принятии [`ADR_007`](adr_007_cloud_provider_selection.md#adr_007).
 
 ## 4. Альтернативы
 
@@ -84,14 +84,14 @@ V1 требует управление несколькими типами да�
 **Положительные:**
 - Структурированные данные с чёткой схемой
 - Семантический поиск для памяти (встраивание + индекс)
-- Изоляция данных через RLS (SEC_CTL_006)
-- Полный аудит изменений (SEC_CTL_019)
+- Изоляция данных через RLS ([`SEC_CTL_006`](../specifications/system_specification.md#sec_ctl_006))
+- Полный аудит изменений ([`SEC_CTL_019`](../specifications/system_specification.md#sec_ctl_019))
 - Резервное копирование и восстановление проверяются по [`INF_REQ_009`](../specifications/infrastructure_baseline.md#inf_req_009)
 
 **Отрицательные:**
 - Нужно спроектировать и проверить схему
 - PostgreSQL требует больше ресурсов чем SQLite
-- Нужна миграционная стратегия при изменении схемы (m03+)
+- Нужна миграционная стратегия при изменении схемы ([`m03`](../milestones.md#m03)+)
 
 ## 6. Проверка
 
