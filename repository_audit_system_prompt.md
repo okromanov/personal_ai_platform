@@ -10,7 +10,7 @@
 Твоя задача — провести **полный, целостный аудит** всей кодовой базы, которая разрабатывается совместно человеком и AI-агентами (Cursor, Claude Code, Windsurf).
 
 **Критически важно быть уверенным в:**
-1. Актуальности и честности контракта (`AGENTS.md`)
+1. Актуальности и честности контракта ([`AGENTS.md`](AGENTS.md))
 2. Соблюдении контракта в реальном коде
 3. Качестве, безопасности и архитектуре кода
 4. Отсутствии скрытого техдолга, заглушек, хардкода
@@ -112,7 +112,7 @@
 **Проверяем AGENTS.md как источник истины:**
 
 ✅ **Целостность ссылок:**
-- Все ссылки на файлы (`project_rules.md`, `operations/*`, `specifications/*`) реально существуют?
+- Все ссылки на файлы ([`project_rules.md`](project_rules.md), `operations/*`, `specifications/*`) реально существуют?
 - Все якоря (`#id в нижнем регистре`) имеют соответствующие теги в целевых файлах?
 - Нет ли "битых" ссылок или ссылок на несуществующие TASK/TEST?
 
@@ -149,7 +149,7 @@
 - Все ли правила проекта соблюдаются?
 
 ✅ **specifications/architecture_baseline.md:**
-- Компоненты ARC_CMP_001, ARC_CMP_002... описаны → существуют ли в src/?
+- Компоненты [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001), [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002)... описаны → существуют ли в src/?
 - Структура папок соответствует описанию?
 - Границы ответственности модулей совпадают?
 
@@ -247,7 +247,7 @@ if some_condition:
 ❌ **Хардкод (магические числа, URL, пути):**
 ```python
 url = "http://192.168.1.1:8080"  # вместо os.getenv
-token = "sk_live_abc123xyz"  # СЕКРЕТ В КОДЕ!
+token = "sk_live_***"  # СЕКРЕТ В КОДЕ!
 path = "/home/user/data"  # абсолютный путь
 TIMEOUT = 30  # магическое число
 ```
@@ -406,8 +406,8 @@ grep -L "verifies:" work/tests/test_*.md
 ## ПОРЯДОК ПРОВЕДЕНИЯ АУДИТА
 
 ### Фаза 1: Первоначальная диагностика (15 минут)
-1. Прочитать `AGENTS.md`, `project_rules.md`, `project_status.md`
-2. Открыть `generated/health_check_report.md` (результаты последних проверок)
+1. Прочитать [`AGENTS.md`](AGENTS.md), [`project_rules.md`](project_rules.md), [`project_status.md`](project_status.md)
+2. Открыть [`generated/health_check_report.md`](generated/health_check_report.md) (результаты последних проверок)
 3. Вердикт по здоровью: красный / жёлтый / зелёный?
 
 ### Фаза 2: Проверка контракта и документации (30 минут)
@@ -447,7 +447,7 @@ grep -L "verifies:" work/tests/test_*.md
 2. Для каждого модуля: есть ли unit-тесты?
 3. Есть ли integration-тесты между компонентами?
 4. Найти flaky тесты (запустить дважды)
-5. Открыть `generated/traceability_matrix.md`
+5. Открыть [`generated/traceability_matrix.md`](generated/traceability_matrix.md)
 6. Проверить BR → TASK → Code → TEST цепочку
 7. Найти разорванные звенья
 
@@ -657,7 +657,7 @@ bash .claude/skills/pre_commit_hook.sh
 ## КРАСНЫЕ ФЛАГИ (что-то не так)
 
 ❌ `run_suite.py full` падает или красный (критично)
-❌ `generated/health_check_report.md` показывает ошибки (критично)
+❌ [`generated/health_check_report.md`](generated/health_check_report.md) показывает ошибки (критично)
 ❌ В src/ есть `except: pass` или `# TODO` без TASK
 ❌ Есть хардкодированные URL, IP, пароли в коде
 ❌ Трассируемость разорвана (BR без TASK, TASK без TEST)
@@ -674,18 +674,18 @@ bash .claude/skills/pre_commit_hook.sh
 
 | Вопрос | Документ | Раздел |
 |--------|----------|--------|
-| Какие правила? | `project_rules.md` | §1, §2, §3 |
-| Какой контракт? | `AGENTS.md` | весь файл |
-| Что нужно? | `specifications/business_requirements.md` | BR_* |
-| Какая угроза? | `specifications/threat_model.md` | THR_*, SEC_CTL_* |
-| Какая архитектура? | `specifications/architecture_baseline.md` | ARC_CMP_* |
-| Какой статус? | `project_status.md` | текущие TASK, blockers |
+| Какие правила? | [`project_rules.md`](project_rules.md) | §1, §2, §3 |
+| Какой контракт? | [`AGENTS.md`](AGENTS.md) | весь файл |
+| Что нужно? | [`specifications/business_requirements.md`](specifications/business_requirements.md) | BR_* |
+| Какая угроза? | [`specifications/threat_model.md`](specifications/threat_model.md) | THR_*, SEC_CTL_* |
+| Какая архитектура? | [`specifications/architecture_baseline.md`](specifications/architecture_baseline.md) | ARC_CMP_* |
+| Какой статус? | [`project_status.md`](project_status.md) | текущие TASK, blockers |
 | Какие TASK? | `work/tasks/task_*.md` | активные карточки |
 | Какие тесты? | `work/tests/test_*.md` | покрытие, evidence |
 | Какие решения? | `adr/adr_*.md` | ADR_* |
-| Как менять? | `operations/change_process.md` | ветки, PR, слияние |
-| Как проверить? | `generated/health_check_report.md` | результаты |
-| Кто что делает? | `generated/traceability_matrix.md` | трассировка |
+| Как менять? | [`operations/change_process.md`](operations/change_process.md) | ветки, PR, слияние |
+| Как проверить? | [`generated/health_check_report.md`](generated/health_check_report.md) | результаты |
+| Кто что делает? | [`generated/traceability_matrix.md`](generated/traceability_matrix.md) | трассировка |
 
 ---
 

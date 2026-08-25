@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `236` |
+| Всего файлов | `242` |
 
 ```text
 personal_ai_platform/
@@ -145,6 +145,7 @@ personal_ai_platform/
 - operations/tests/product/__init__.py
 - operations/tests/product/test_channels.py
 - operations/tests/product/test_model_gateway.py
+- operations/tests/product/test_operations_state.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
 - operations/tests/product/test_task_state.py
@@ -193,6 +194,7 @@ personal_ai_platform/
 - project_rules.md
 - project_status.md
 - pyproject.toml
+- repository_audit_system_prompt.md
 - specifications/architecture_baseline.md
 - specifications/business_requirements.md
 - specifications/infrastructure_baseline.md
@@ -206,6 +208,9 @@ personal_ai_platform/
 - src/models/base.py
 - src/models/runtime_adapter.py
 - src/models/stub_gateway.py
+- src/operations/__init__.py
+- src/operations/health.py
+- src/operations/scheduler_state.py
 - src/orchestration/__init__.py
 - src/orchestration/orchestrator.py
 - src/orchestration/runtime_port.py
@@ -250,4 +255,5 @@ personal_ai_platform/
 - work/tests/test_010.md
 - work/tests/test_011.md
 - work/tests/test_012.md
+- work/tests/test_013.md
 ```

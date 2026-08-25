@@ -14,7 +14,7 @@ version: 1.0
 
 > **Чтобы продолжить, отправьте агенту одну команду.**
 >
-> `ПРОДОЛЖАЙ TASK_007`
+> `ПРОДОЛЖАЙ TASK_008`
 
 **Осталось:** 6 шаг(ов) в текущей работе.
 
@@ -26,8 +26,8 @@ version: 1.0
 |---|---|
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
-| Текущая проектная задача | [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_009.md) |
-| Место в очереди проекта | **7 из 13** |
+| Текущая проектная задача | [`TASK_008` — Реализация INF_CMP_001](work/tasks/task_008_inf_001.md) |
+| Место в очереди проекта | **8 из 13** |
 | Шаги текущей задачи | **0** из **6** |
 | Следующий исполнитель | **агент** |
 
@@ -49,7 +49,7 @@ version: 1.0
 - [x] [`TASK_004` — Реализация ARC_CMP_004](work/tasks/task_004_arc_004.md)
 - [x] [`TASK_005` — Реализация ARC_CMP_005](work/tasks/task_005_arc_005.md)
 - [x] [`TASK_006` — Реализация ARC_CMP_007](work/tasks/task_006_arc_007.md)
-- [ ] [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_009.md)
+- [x] [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_009.md)
 - [ ] [`TASK_008` — Реализация INF_CMP_001](work/tasks/task_008_inf_001.md)
 - [ ] [`TASK_009` — Реализация INF_CMP_002](work/tasks/task_009_inf_002.md)
 - [ ] [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md)
@@ -59,7 +59,7 @@ version: 1.0
 
 ## Шаги текущей работы
 
-- [ ] Изучить требования к [`ARC_CMP_009`](specifications/architecture_baseline.md#arc_cmp_009)
+- [ ] Изучить требования к [`INF_CMP_001`](specifications/infrastructure_baseline.md#inf_cmp_001)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Спроектировать реализацию
 - [ ] Реализовать компонент
@@ -72,7 +72,7 @@ version: 1.0
 
 ## Что будет дальше
 
-Этим завершается блок архитектурных компонентов, охваченных текущей очередью TASK ([`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001), [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002), [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003)–[`ARC_CMP_005`](specifications/architecture_baseline.md#arc_cmp_005), [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007), [`ARC_CMP_009`](specifications/architecture_baseline.md#arc_cmp_009)); [`ARC_CMP_006`](specifications/architecture_baseline.md#arc_cmp_006) (Контекст, память и доказательства) и [`ARC_CMP_008`](specifications/architecture_baseline.md#arc_cmp_008) (Проверка качества) в неё не входят. [`TASK_008`](work/tasks/task_008_inf_001.md) начинает блок инфраструктурных компонентов с Вычислительной среды выполнения ([`INF_CMP_001`](specifications/infrastructure_baseline.md#inf_cmp_001)) — физической или виртуальной основы, на которой запускаются уже реализованные сервисы.
+[`TASK_009`](work/tasks/task_009_inf_002.md) реализует Сеть и контролируемый исходящий трафик ([`INF_CMP_002`](specifications/infrastructure_baseline.md#inf_cmp_002)) — правила того, что вычислительной среде из этой TASK разрешено делать в сети.
 
 ## Что уже умеет решение
 
