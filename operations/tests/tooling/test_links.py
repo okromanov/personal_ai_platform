@@ -233,7 +233,7 @@ class LinksInternalHelpersTests(unittest.TestCase):
             path = root / "broken.md"
             text = "---\nnot a valid frontmatter line\n---\n\n### BR_001 — Пример\n"
             path.write_text(text, encoding="utf-8")
-            self.assertIn("BR_001", _own_identifiers(path, text))
+            self.assertEqual(_own_identifiers(path, text), set())
 
     def test_href_for_record_self_reference(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

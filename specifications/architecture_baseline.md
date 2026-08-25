@@ -2,7 +2,7 @@
 id: architecture_baseline
 type: architecture
 document_state: current
-version: 1.1
+version: 1.2
 updated: 2026-08-25
 depends_on:
   - system_specification
@@ -106,7 +106,7 @@ MCP и другие протоколы являются способами ин�
 ### ARC_FLOW_001 — Обычная задача
 
 - `traces_to`: [`SYS_001`](system_specification.md#sys_001), [`SYS_036`](system_specification.md#sys_036), [`SYS_003`](system_specification.md#sys_003), [`SYS_004`](system_specification.md#sys_004), [`SYS_023`](system_specification.md#sys_023)
-- `implements`: `ARC_CMP_001`, `ARC_CMP_002`, `ARC_CMP_003`, `ARC_CMP_004`, `ARC_CMP_006`, `ARC_CMP_008`
+- `implements`: [`ARC_CMP_001`](#arc_cmp_001), [`ARC_CMP_002`](#arc_cmp_002), [`ARC_CMP_003`](#arc_cmp_003), [`ARC_CMP_004`](#arc_cmp_004), [`ARC_CMP_006`](#arc_cmp_006), [`ARC_CMP_008`](#arc_cmp_008)
 
 ```text
 ввод
@@ -123,7 +123,7 @@ MCP и другие протоколы являются способами ин�
 ### ARC_FLOW_002 — Вызов инструмента или внешнее действие
 
 - `traces_to`: [`SYS_020`](system_specification.md#sys_020), [`SYS_021`](system_specification.md#sys_021), [`SEC_CTL_007`](system_specification.md#sec_ctl_007), [`SEC_CTL_008`](system_specification.md#sec_ctl_008)
-- `implements`: `ARC_CMP_002`, `ARC_CMP_003`, `ARC_CMP_005`, `ARC_CMP_007`
+- `implements`: [`ARC_CMP_002`](#arc_cmp_002), [`ARC_CMP_003`](#arc_cmp_003), [`ARC_CMP_005`](#arc_cmp_005), [`ARC_CMP_007`](#arc_cmp_007)
 
 ```text
 планируемая возможность
@@ -140,7 +140,7 @@ MCP и другие протоколы являются способами ин�
 ### ARC_FLOW_003 — Контекст и доказательства
 
 - `traces_to`: [`SYS_008`](system_specification.md#sys_008), [`SYS_009`](system_specification.md#sys_009), [`SYS_010`](system_specification.md#sys_010), [`SYS_011`](system_specification.md#sys_011), [`SYS_029`](system_specification.md#sys_029), [`SEC_CTL_004`](system_specification.md#sec_ctl_004), [`SEC_CTL_006`](system_specification.md#sec_ctl_006)
-- `implements`: `ARC_CMP_006`
+- `implements`: [`ARC_CMP_006`](#arc_cmp_006)
 
 ```text
 источник / кандидат в память
@@ -155,7 +155,7 @@ MCP и другие протоколы являются способами ин�
 ### ARC_FLOW_004 — Плановая задача
 
 - `traces_to`: [`SYS_013`](system_specification.md#sys_013), [`SYS_030`](system_specification.md#sys_030), [`SEC_CTL_017`](system_specification.md#sec_ctl_017)
-- `implements`: `ARC_CMP_007`, `ARC_CMP_009`
+- `implements`: [`ARC_CMP_007`](#arc_cmp_007), [`ARC_CMP_009`](#arc_cmp_009)
 
 ```text
 расписание (намерение + ссылка на возможность)

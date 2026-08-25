@@ -9,6 +9,7 @@ from operations.scripts.common.project import IGNORED_DIRS, atomic_write, iter_f
 from operations.scripts.documents.metadata import load_document
 from operations.scripts.documents.traceability import (
     ELEMENT_HEADING_PATTERN,
+    MILESTONE_HEADING_PATTERN,
     REFERENCE_PATTERN,
     _normalize_id,
     collect_traceable_elements,
@@ -33,14 +34,6 @@ INLINE_CODE_PATTERN = re.compile(r"`([^`\n]+)`")
 # Клика­бельность обязательна только для ссылок на документы этих типов —
 # .py и прочий код упоминаются по имени без требования их линковать.
 CLICKABLE_EXTENSIONS = ("md", "txt", "yaml", "json")
-# `traces_to` lines are exactly as much prose as any other mention of these
-# IDs — only the other relation keys (implements, depends_on, mitigated_by,
-# ...) stay exempt as pure structural metadata.
-OTHER_RELATION_LINE_PATTERN = re.compile(
-    r"^-\s+`?(implements|mitigates|mitigated_by|implemented_by|depends_on|verifies|accepts)`?:"
-    r"\s*(.+?)\s*$",
-    re.MULTILINE,
-)
 MARKDOWN_PATH_PATTERN = re.compile(
     rf"^[A-Za-z0-9_./\\-]+\.(?:{'|'.join(CLICKABLE_EXTENSIONS)})(?:#[^\s]+)?$"
 )
@@ -158,7 +151,15 @@ def _mask_literal_code_spans(line: str) -> str:
 
 
 def _own_identifiers(path: Path, text: str) -> set[str]:
-    own_ids = {_normalize_id(match.group(1)) for match in ELEMENT_HEADING_PATTERN.finditer(text)}
+    """Идентификатор документа целиком (frontmatter `id`, например TASK_003
+    для карточки TASK) — самоссылка независимо от места в файле. Элемент,
+    определённый заголовком где-то в этом же файле (BR_*, ARC_CMP_* и т.п.),
+    сюда не входит: в файле вроде architecture_baseline.md таких элементов
+    много, и упоминание одного из них в разделе другого — это ссылка на
+    соседний элемент, а не самоссылка (см. `_current_section_id` в
+    `_check_bare_identifier_references`, которая ограничивает исключение
+    только текущим разделом)."""
+    own_ids: set[str] = set()
     try:
         doc = load_document(path)
     except ValueError:
@@ -184,6 +185,12 @@ def _check_bare_identifier_references(
     frontmatter_lines = frontmatter_match.group(0).count("\n") if frontmatter_match else 0
     in_fence = False
     fence_marker = ""
+    # Раздел (### BR_001 — ..., ## m02 — ...) определяет элемент, к которому
+    # относится текущий текст, — упоминание ЭТОГО элемента внутри его же
+    # раздела является самоссылкой и не требует ссылки. Упоминание любого
+    # другого элемента (в том числе определённого заголовком в другом месте
+    # того же файла) — обычная перекрёстная ссылка и ссылки требует.
+    current_section_id: str | None = None
     for line_number, line in enumerate(text.splitlines(), start=1):
         if line_number <= frontmatter_lines:
             continue
@@ -199,12 +206,14 @@ def _check_bare_identifier_references(
             continue
         if in_fence:
             continue
-        # Заголовки, таблицы и структурные строки связей, отличных от
-        # traces_to (`- \`implements\`: ...` и т.п.), уже являются
-        # каноническим представлением связи, а не прозой.
+        heading_match = ELEMENT_HEADING_PATTERN.match(line) or MILESTONE_HEADING_PATTERN.match(line)
+        if heading_match:
+            current_section_id = _normalize_id(heading_match.group(1))
+        # Заголовки и таблицы уже являются каноническим представлением
+        # связи, а не прозой. Строки relation-полей (`- \`traces_to\`: ...`,
+        # `- \`implements\`: ...` и т.п.) больше не исключение — упоминание
+        # там элемента требует такой же кликабельной ссылки, как и в прозе.
         if HEADING_PATTERN.match(line) or stripped.startswith("|"):
-            continue
-        if OTHER_RELATION_LINE_PATTERN.match(line):
             continue
         # Строки-якоря (`<a id="...">`) определяют идентификатор, а не
         # упоминают его — сам якорь не должен становиться ссылкой на себя.
@@ -219,7 +228,12 @@ def _check_bare_identifier_references(
             # Пример неверного формата вроде `adr_001` (не каноническое
             # написание) или заглавное "M01" в подписи — не считается
             # упоминанием элемента, только точное написание требует ссылки.
-            if raw != identifier or identifier in own_ids or identifier in seen_on_line:
+            if (
+                raw != identifier
+                or identifier in own_ids
+                or identifier == current_section_id
+                or identifier in seen_on_line
+            ):
                 continue
             record = records.get(identifier)
             if record is None:
