@@ -44,6 +44,21 @@ def _section(body: str, title: str) -> str:
     return match.group(1).strip() if match else ""
 
 
+def _open_followups(tasks: list[TaskItem]) -> list[tuple[TaskItem, str]]:
+    """Every open, non-blocking `owner_followups` entry across all TASK cards.
+
+    Independent of the current milestone/TASK in progress -- an open
+    followup on an already-`completed` TASK still needs to surface here
+    until the owner resolves it (see `operations/templates/task_template.md`).
+    """
+    return [
+        (item, str(followup["action"]))
+        for item in tasks
+        for followup in item.get("owner_followups", [])
+        if str(followup.get("status")) == "open"
+    ]
+
+
 def _linked_tasks(tasks: list[TaskItem], milestone_id: str) -> list[TaskItem]:
     return [
         item for item in tasks if milestone_id.lower() in {v.lower() for v in item["traces_to"]}
@@ -195,6 +210,15 @@ def render_repository_project_status(root: Path) -> str:
             steps_remaining = 1
             next_text = "После создания проектной задачи появится её проверяемый план."
 
+    open_followups = _open_followups(tasks)
+    if open_followups:
+        followups_text = "\n".join(
+            f"- [`{item['id']}`](work/tasks/{Path(str(item['path'])).name}): {action}"
+            for item, action in open_followups
+        )
+    else:
+        followups_text = "Нет незакрытых необязательных действий владельца."
+
     blockers = [item for item in current_tasks if str(item["work_state"]) == "blocked"]
     if blockers:
         blocker_text = "\n".join(
@@ -289,6 +313,12 @@ version: 1.0
 ## Блокеры
 
 {blocker_text}
+
+## Незакрытые действия владельца (необязательные)
+
+> Эти пункты не блокируют работу агента и не требуют немедленного ответа — они остаются здесь, пока вы их не закроете, независимо от того, что сама задача уже сдана.
+
+{followups_text}
 
 ## Что будет дальше
 

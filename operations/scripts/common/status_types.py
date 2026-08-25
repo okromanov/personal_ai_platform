@@ -25,6 +25,11 @@ class TestRef(TypedDict):
     path: str
 
 
+class OwnerFollowup(TypedDict):
+    status: str
+    action: str
+
+
 class TaskItem(TypedDict):
     id: str
     title: str
@@ -40,6 +45,7 @@ class TaskItem(TypedDict):
     tests: list[TestRef]
     next_actor: str
     owner_action: str
+    owner_followups: list[OwnerFollowup]
     checklist: list[ChecklistItem]
     steps_done: int
     steps_total: int

@@ -20,12 +20,12 @@ updated: 2026-08-25
 
 | Метрика | Значение | Статус |
 |---------|---------|--------|
-| **Всего коммитов** | 172 | ✅ |
-| **Размер репозитория (.git)** | 3065 KB | ✅ |
-| **Размер проекта** | 10.1 MB | ✅ |
-| **Python файлов** | 138 | ✅ |
-| **Строк кода** | 23,075 | ✅ |
-| **Тесты (пройдено/всего)** | 407 passed | ✅ |
+| **Всего коммитов** | 187 | ✅ |
+| **Размер репозитория (.git)** | 3394 KB | ✅ |
+| **Размер проекта** | 26.7 MB | ✅ |
+| **Python файлов** | 140 | ✅ |
+| **Строк кода** | 23,391 | ✅ |
+| **Тесты (пройдено/всего)** | 421 passed | ✅ |
 | **Ветки** | 6 | ✅ |
 
 ---
@@ -34,9 +34,9 @@ updated: 2026-08-25
 
 ### 1. **Тестирование**
 - **Статус:** ✅ PASSED
-- **Пройдено/Провалено:** 407/407
-- **Время выполнения:** 33.88s
-- **Охват:** 84.5%
+- **Пройдено/Провалено:** 421/421
+- **Время выполнения:** 55.61s
+- **Охват:** 84.8%
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** ✅ SUCCESS (0 issues)
@@ -50,21 +50,21 @@ updated: 2026-08-25
 ### 4. **Git Статус**
 - **Рабочая копия:** ✅ Чистая
 - **Remote URL:** https://github.com/okromanov/personal_ai_platform
-- **Коммитов:** 172
+- **Коммитов:** 187
 
 ### 5. **Недавние коммиты**
 ```
-ce46c6b Реализовать ARC_CMP_009: эксплуатационные функции (TASK_007)
-881cb79 Merge pull request #38 from okromanov/claude/repository-audit-agents-md-1pyqph
-f669fb7 Merge pull request #37 from okromanov/claude/missing-links-task-001-ag1wg3
-9fd19e6 Regenerate health check report
-fe0063c Добавить единый системный промпт для полного аудита репозитория
+8a15c3b Покрыть тестами новые ветки owner_followups в check.py/generate.py
+5f7c0db Добавить owner_followups: неблокирующий бэклог владельца в карточках TASK
+3ae0df4 AGENTS.md: закрепить запрет менять именование/шаблоны без согласования
+7d18c2d Обновить generated/health_check_report.md после переименования dockerfile
+4b16948 Переименовать Dockerfile в dockerfile: соблюсти lower_snake_case без исключений
 ```
 
 ### 6. **Политика покрытия (pyproject.toml)**
 - **Статус:** ✅ PASSED
 ```
-overall: 84.53% (minimum 75.00%)
+overall: 84.80% (minimum 75.00%)
 operations/scripts/acceptance/apply.py: 86.16% (minimum 85.00%)
 operations/scripts/evidence/generate_bundle.py: 87.72% (minimum 85.00%)
 operations/scripts/evidence/record.py: 94.12% (minimum 85.00%)
@@ -83,26 +83,26 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 | Type Safety | ✅ | MyPy: 0 issues |
 | Linting | ✅ | Ruff: compliant |
 | Formatting | ✅ | All files compliant |
-| Tests | ✅ | 407 passed |
-| Coverage policy | ✅ | 84.5% overall — policy passed |
+| Tests | ✅ | 421 passed |
+| Coverage policy | ✅ | 84.8% overall — policy passed |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
 |--------|--------|----------|
-| Size | ✅ | 3065 KB (.git), 10.1 MB (total) |
+| Size | ✅ | 3394 KB (.git), 26.7 MB (total) |
 | Branches | ✅ | 6 branches |
 | Remote | ✅ | https://github.com/okromanov/personal_ai_platform |
 | Working Tree | ✅ | Clean |
-| Commits | ✅ | 172 commits |
+| Commits | ✅ | 187 commits |
 
 ---
 
 ## ✨ Сильные стороны
 
-- ✅ Comprehensive Python codebase (138 files, 23,075 LOC)
-- ✅ Test coverage at 84.5%
+- ✅ Comprehensive Python codebase (140 files, 23,391 LOC)
+- ✅ Test coverage at 84.8%
 - ✅ Type-safe codebase (MyPy: 0 issues)
-- ✅ Clean git history (172 commits)
+- ✅ Clean git history (187 commits)
 - ✅ Formatted according to standards
 - ✅ Regular commits and clean working tree
 
@@ -131,7 +131,7 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 Репозиторий находится в отличном состоянии с точки зрения:
 - ✅ Качества кода (type safety, linting)
-- ✅ Тестирования (407 passed)
+- ✅ Тестирования (421 passed)
 - ✅ Форматирования
 - ✅ Политики покрытия (pyproject.toml: overall/critical modules)
 - ✅ Управления (git hygiene, commits)
@@ -142,4 +142,4 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 **Сгенерировано:** Claude Code
 **Версия отчета:** 1.0
-**Время проверки:** 2026-08-25T13:12:13.408129Z
+**Время проверки:** 2026-08-25T15:09:14.418343Z

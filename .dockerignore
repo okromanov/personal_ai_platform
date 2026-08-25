@@ -1,0 +1,15 @@
+.git
+.github
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.benchmarks
+__pycache__
+*.pyc
+runtime
+work
+adr
+specifications
+operations
+generated
+*.md

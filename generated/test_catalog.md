@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `407` |
-| Core logic (acceptance, governance, lifecycle) | `129` |
+| Всего тестов | `421` |
+| Core logic (acceptance, governance, lifecycle) | `133` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `90` |
+| Product | `100` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -114,6 +114,10 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_lifecycle_matrix.py` | `LifecycleMatrixTests` | `test_m01_accept_m02_start_premature_reject_and_m02_accept` | Полный цикл: принятие m01, старт m02, отказ при преждевременном принятии, затем принятие m02. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_falls_back_when_the_summary_file_is_missing` | Falls back when the summary file is missing |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_reads_the_current_summary_section_from_the_hand_maintained_file` | Reads the current summary section from the hand maintained file |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_absent_field_parses_to_empty_list` | Absent field parses to empty list |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_entry_missing_the_status_prefix_is_rejected` | Entry missing the status prefix is rejected |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_non_list_value_is_rejected` | Non list value is rejected |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_open_and_done_entries_parse_status_and_action` | Open and done entries parse status and action |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_embeds_the_hand_maintained_synthesis` | Capabilities section embeds the hand maintained synthesis |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_first_unfinished_task_is_selected_by_queue_order` | Первой выбирается незавершённая TASK по порядку очереди. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_detailed_without_artificial_percentages` | project_status.md подробен и не содержит искусственных процентов. |
@@ -355,6 +359,16 @@ version: 1.0
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelAsyncTests` | `test_send_without_token_raises_channel_error` | Отправка без токена вызывает ChannelError. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_channel_type_is_telegram` | Тип канала — Telegram. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_default_token_is_empty` | Токен по умолчанию пуст. |
+| Product | `operations/tests/product/test_compute_environment.py` | `DockerfileStructureTests` | `test_accepts_an_identifiable_version_build_argument` | Accepts an identifiable version build argument |
+| Product | `operations/tests/product/test_compute_environment.py` | `DockerfileStructureTests` | `test_base_image_is_pinned_to_a_supported_python_version` | Base image is pinned to a supported python version |
+| Product | `operations/tests/product/test_compute_environment.py` | `DockerfileStructureTests` | `test_declares_a_health_check` | Declares a health check |
+| Product | `operations/tests/product/test_compute_environment.py` | `DockerfileStructureTests` | `test_dockerignore_excludes_version_control_and_caches` | Dockerignore excludes version control and caches |
+| Product | `operations/tests/product/test_compute_environment.py` | `DockerfileStructureTests` | `test_runs_as_a_non_root_application_user` | Runs as a non root application user |
+| Product | `operations/tests/product/test_compute_environment.py` | `HealthCheckCliTests` | `test_build_health_aggregator_returns_an_aggregator` | Build health aggregator returns an aggregator |
+| Product | `operations/tests/product/test_compute_environment.py` | `HealthCheckCliTests` | `test_main_exits_nonzero_when_a_registered_check_is_unhealthy` | Main exits nonzero when a registered check is unhealthy |
+| Product | `operations/tests/product/test_compute_environment.py` | `HealthCheckCliTests` | `test_main_exits_zero_and_reports_healthy_with_no_registered_checks` | Main exits zero and reports healthy with no registered checks |
+| Product | `operations/tests/product/test_compute_environment.py` | `HealthCheckCliTests` | `test_main_reports_the_app_version_from_the_environment` | Main reports the app version from the environment |
+| Product | `operations/tests/product/test_compute_environment.py` | `HealthCheckCliTests` | `test_main_reports_unknown_version_when_unset` | Main reports unknown version when unset |
 | Product | `operations/tests/product/test_model_gateway.py` | `ModelBackedRuntimePortTests` | `test_failed_completion_becomes_failed_runtime_result` | Failed completion becomes failed runtime result |
 | Product | `operations/tests/product/test_model_gateway.py` | `ModelBackedRuntimePortTests` | `test_gateway_outage_raises_runtime_port_error` | Gateway outage raises runtime port error |
 | Product | `operations/tests/product/test_model_gateway.py` | `ModelBackedRuntimePortTests` | `test_successful_completion_becomes_runtime_output` | Successful completion becomes runtime output |

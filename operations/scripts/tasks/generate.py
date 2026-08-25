@@ -5,7 +5,13 @@ from collections import Counter
 from pathlib import Path
 
 from operations.scripts.common.project import atomic_write, relative_posix
-from operations.scripts.common.status_types import ChecklistItem, TaskItem, TasksReport, TestRef
+from operations.scripts.common.status_types import (
+    ChecklistItem,
+    OwnerFollowup,
+    TaskItem,
+    TasksReport,
+    TestRef,
+)
 from operations.scripts.documents.metadata import (
     load_document,
     metadata_list,
@@ -109,6 +115,38 @@ def _validate_task_sequence(items: list[TaskItem]) -> None:
             raise ValueError(f"{task_id}: активная TASK не может находиться после запланированной")
 
 
+OWNER_FOLLOWUP_STATUSES = {"open", "done"}
+OWNER_FOLLOWUP_PATTERN = re.compile(r"^\[(open|done)\]\s*(.+)$")
+
+
+def _owner_followups(raw: object, relative: str) -> list[OwnerFollowup]:
+    """Parse `owner_followups`: optional, non-blocking owner backlog items.
+
+    Independent of `next_actor`/`work_state` -- unlike `owner_action`, a
+    followup can stay listed against a `completed` TASK until the owner
+    resolves it (see AGENTS.md and the task_template.md convention).
+
+    The front matter parser (`metadata.parse_front_matter`) only supports
+    flat scalar lists, not nested mappings -- so each entry is one string
+    `"[open] <action text>"` / `"[done] <action text>"`, not a `{status,
+    action}` object.
+    """
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise ValueError(f"{relative}: owner_followups должен быть списком строк вида '[open] ...'")
+    result: list[OwnerFollowup] = []
+    for entry in raw:
+        match = OWNER_FOLLOWUP_PATTERN.match(str(entry).strip())
+        if not match:
+            raise ValueError(
+                f"{relative}: owner_followups: элемент должен иметь вид "
+                f"'[open] ...' или '[done] ...', получено: {entry!r}"
+            )
+        result.append({"status": match.group(1), "action": match.group(2).strip()})
+    return result
+
+
 def collect_tasks(root: Path) -> TasksReport:
     tests = _test_map(root)
     items: list[TaskItem] = []
@@ -138,6 +176,7 @@ def collect_tasks(root: Path) -> TasksReport:
         owner_action = (
             "none" if raw_owner_action is None else (str(raw_owner_action).strip() or "none")
         )
+        owner_followups = _owner_followups(doc.metadata.get("owner_followups"), relative)
         items.append(
             {
                 "id": task_id,
@@ -156,6 +195,7 @@ def collect_tasks(root: Path) -> TasksReport:
                 "tests": tests.get(task_id, []),
                 "next_actor": str(doc.metadata.get("next_actor", "none")).strip().lower(),
                 "owner_action": owner_action,
+                "owner_followups": owner_followups,
                 "checklist": checklist,
                 "steps_done": done,
                 "steps_total": len(checklist),

@@ -962,6 +962,40 @@ def check_tasks(root: Path) -> CheckResult:
             errors.append(f"{relative}: заблокированная TASK должна указывать причину в blocker")
         if str(task["work_state"]) != "blocked" and str(task.get("blocker", "")).strip():
             errors.append(f"{relative}: blocker допустим только при work_state=blocked")
+        open_followup_actions: list[str] = []
+        for followup in task.get("owner_followups", []):
+            status = str(followup.get("status", ""))
+            action = str(followup.get("action", ""))
+            if status not in {"open", "done"}:
+                errors.append(
+                    f"{relative}: owner_followups: status должен быть 'open' или 'done', "
+                    f"получено '{status}'"
+                )
+            if not action:
+                errors.append(f"{relative}: owner_followups: action не может быть пустым")
+            elif status == "open":
+                open_followup_actions.append(action)
+                if action not in body:
+                    errors.append(
+                        f"{relative}: owner_followups: открытое действие должно дословно "
+                        "присутствовать в разделе 'Незакрытые действия владельца'"
+                    )
+        has_followups_heading = bool(
+            re.search(
+                r"(?m)^##\s+(?:\d+\.\s*)?Незакрытые действия владельца\s*$",
+                body,
+            )
+        )
+        if open_followup_actions and not has_followups_heading:
+            errors.append(
+                f"{relative}: есть открытые owner_followups, но нет раздела "
+                "'Незакрытые действия владельца'"
+            )
+        if has_followups_heading and not open_followup_actions:
+            errors.append(
+                f"{relative}: раздел 'Незакрытые действия владельца' присутствует, "
+                "но нет ни одного открытого owner_followups"
+            )
         for heading in required_headings:
             if not re.search(
                 rf"^##\s+(?:\d+\.\s*)?{re.escape(heading)}\b", body, re.MULTILINE | re.IGNORECASE
