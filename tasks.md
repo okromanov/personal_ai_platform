@@ -10,15 +10,15 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Статус очереди | `2` из `13` |
-| Текущая задача | [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md) |
-| Состояние | выполняется |
+| Статус очереди | `3` из `13` |
+| Текущая задача | [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md) |
+| Состояние | запланирована |
 | Следующий исполнитель | агент |
 
 ## Что делать сейчас
 
-- **Текущая задача:** [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md)
-- **Положение в очереди:** `2` из `13`
+- **Текущая задача:** [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md)
+- **Положение в очереди:** `3` из `13`
 - **Сейчас действует:** агент
 - **Действие владельца:** нет
 - **Шаги:** выполнено `0`, осталось `6`
@@ -30,8 +30,8 @@ version: 1.0
 | № | Задача | Состояние | Выполнено шагов | Следующий исполнитель |
 |---|---|---|---|---|
 | `1` | [`TASK_001` — Реализация ARC_CMP_001](work/tasks/task_001_arc_001.md) | выполнена | `6` из `6` | — |
-| `2` | [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md) | выполняется — **текущая** | `0` из `6` | агент |
-| `3` | [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md) | запланирована | `0` из `6` | агент |
+| `2` | [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md) | выполнена | `6` из `6` | — |
+| `3` | [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md) | запланирована — **текущая** | `0` из `6` | агент |
 | `4` | [`TASK_004` — Реализация ARC_CMP_004](work/tasks/task_004_arc_004.md) | запланирована | `0` из `6` | агент |
 | `5` | [`TASK_005` — Реализация ARC_CMP_005](work/tasks/task_005_arc_005.md) | запланирована | `0` из `6` | агент |
 | `6` | [`TASK_006` — Реализация ARC_CMP_007](work/tasks/task_006_arc_007.md) | запланирована | `0` из `6` | агент |
@@ -48,7 +48,7 @@ version: 1.0
 | Задача | Этап | Реализует | Проверки |
 |---|---|---|---|
 | `TASK_001` | [`m02`](milestones.md#m02) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | [`TEST_007`](work/tests/test_007.md) |
-| `TASK_002` | [`m02`](milestones.md#m02) | [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002) | — |
+| `TASK_002` | [`m02`](milestones.md#m02) | [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002) | [`TEST_008`](work/tests/test_008.md) |
 | `TASK_003` | [`m02`](milestones.md#m02) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — |
 | `TASK_004` | [`m02`](milestones.md#m02) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — |
 | `TASK_005` | [`m02`](milestones.md#m02) | [`ARC_CMP_005`](specifications/architecture_baseline.md#arc_cmp_005) | — |
