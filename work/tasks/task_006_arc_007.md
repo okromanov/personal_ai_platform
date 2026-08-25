@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_007
 component: ARC_CMP_007
 work_state: planned
-version: 1.8
+version: 1.9
 updated: 2026-08-25
 next_actor: agent
 owner_action: none
@@ -12,6 +12,9 @@ depends_on:
   - TASK_005
 allowed_paths:
   - work/tasks/task_006_arc_007.md
+  - operations/capability_summary.md
+  - operations/scripts/status/human_status.py
+  - operations/tests/test_owner_usability.py
 traces_to:
   - m02
 implements:
@@ -60,6 +63,8 @@ implements:
 - `src/task_state/base.py` — контракт `TaskLifecycleStore`
 - `src/task_state/checkpoint.py` — модель контрольной точки и защита от дублей
 - `work/tests/test_00X.md` — описание проверок
+
+[`operations/capability_summary.md`](../../operations/capability_summary.md), [`operations/scripts/status/human_status.py`](../../operations/scripts/status/human_status.py) и [`operations/tests/test_owner_usability.py`](../../operations/tests/test_owner_usability.py) добавлены в `allowed_paths` по отдельному решению владельца, не относящемуся к реализации [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007): раздел «Что уже умеет решение» в [`project_status.md`](../../project_status.md) заменён с автосписка по TASK на связную сводку, вручную поддерживаемую в [`operations/capability_summary.md`](../../operations/capability_summary.md) — карточки TASK свой текст «Что это даёт владельцу» не меняют.
 
 ## 7. Проверки и доказательства
 

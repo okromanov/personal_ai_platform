@@ -5,6 +5,7 @@ from pathlib import Path
 
 from operations.scripts.common.project import atomic_write
 from operations.scripts.common.status_types import TaskItem
+from operations.scripts.documents.metadata import load_document
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -64,28 +65,28 @@ def _checkbox(done: bool) -> str:
     return "[x]" if done else "[ ]"
 
 
-_CAPABILITY_PLACEHOLDER = "Функционал появится после завершения этой TASK."
+_CAPABILITY_SUMMARY_PATH = "operations/capability_summary.md"
+_CAPABILITY_SUMMARY_FALLBACK = (
+    "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
+)
 
 
-def _capability_rows(tasks: list[TaskItem], root: Path) -> str:
-    """One entry per completed TASK with a real (non-placeholder) "Что это
-    даёт владельцу" section, in TASK id order — an accumulating, owner-facing
-    changelog of what the solution can already do, built only from what each
-    TASK itself claims, never invented here."""
-    entries = []
-    for task in sorted(tasks, key=lambda item: str(item["id"])):
-        if str(task["work_state"]) != "completed":
-            continue
-        capability = _section(str(task.get("body", "")), "Что это даёт владельцу")
-        if not capability or capability == _CAPABILITY_PLACEHOLDER:
-            continue
-        task_source_dir = root / Path(str(task["path"])).parent
-        capability = _rebase_relative_links(capability, task_source_dir, root)
-        task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
-        entries.append(f"- {task_link} — {capability}")
-    if not entries:
-        return "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
-    return "\n".join(entries)
+def _capability_summary(root: Path) -> str:
+    """A hand-maintained narrative synthesis of what completed TASKs add up
+    to, not a per-TASK list: `operations/capability_summary.md` is rewritten
+    by whoever completes a TASK when it changes the picture, and its
+    "Текущая сводка" section is inlined here verbatim. Individual TASK cards
+    keep their own "Что это даёт владельцу" text unchanged -- this
+    summarizes them, it does not replace them."""
+    path = root / _CAPABILITY_SUMMARY_PATH
+    if not path.exists():
+        return _CAPABILITY_SUMMARY_FALLBACK
+    try:
+        doc = load_document(path)
+    except ValueError:
+        return _CAPABILITY_SUMMARY_FALLBACK
+    summary = _section(doc.body, "Текущая сводка")
+    return summary or _CAPABILITY_SUMMARY_FALLBACK
 
 
 def render_repository_project_status(root: Path) -> str:
@@ -295,9 +296,9 @@ version: 1.0
 
 ## Что уже умеет решение
 
-> Раздел пополняется по мере завершения проектных TASK: одна запись на каждую TASK, которая добавила владельцу новую возможность. Ничего не удаляется — это накопительная история того, что уже доступно.
+> Связная сводка того, что уже дают вместе завершённые проектные TASK — не список по отдельным TASK. Полный текст по каждой TASK остаётся в её собственной карточке в `work/tasks/`.
 
-{_capability_rows(tasks, root)}
+{_capability_summary(root)}
 """
 
 
