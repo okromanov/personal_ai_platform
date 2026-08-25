@@ -11,7 +11,7 @@ updated: 2026-08-25
 ## `okromanov/personal_ai_platform`
 
 **Дата проверки:** 25 August 2026
-**Ветка:** claude/m02-continuation-0j1nyk
+**Ветка:** claude/missing-links-task-001-ag1wg3
 **Общее состояние:** ✅ HEALTHY
 
 ---
@@ -20,12 +20,12 @@ updated: 2026-08-25
 
 | Метрика | Значение | Статус |
 |---------|---------|--------|
-| **Всего коммитов** | 121 | ✅ |
-| **Размер репозитория (.git)** | 1497 KB | ✅ |
-| **Размер проекта** | 23.4 MB | ✅ |
+| **Всего коммитов** | 137 | ✅ |
+| **Размер репозитория (.git)** | 2221 KB | ✅ |
+| **Размер проекта** | 9.1 MB | ✅ |
 | **Python файлов** | 116 | ✅ |
-| **Строк кода** | 20,620 | ✅ |
-| **Тесты (пройдено/всего)** | 333 passed | ✅ |
+| **Строк кода** | 21,217 | ✅ |
+| **Тесты (пройдено/всего)** | 350 passed | ✅ |
 | **Ветки** | 4 | ✅ |
 
 ---
@@ -34,9 +34,9 @@ updated: 2026-08-25
 
 ### 1. **Тестирование**
 - **Статус:** ✅ PASSED
-- **Пройдено/Провалено:** 333/333
-- **Время выполнения:** 33.53s
-- **Охват:** 83.3%
+- **Пройдено/Провалено:** 350/350
+- **Время выполнения:** 21.12s
+- **Охват:** 84.0%
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** ✅ SUCCESS (0 issues)
@@ -50,21 +50,21 @@ updated: 2026-08-25
 ### 4. **Git Статус**
 - **Рабочая копия:** ✅ Чистая
 - **Remote URL:** https://github.com/okromanov/personal_ai_platform
-- **Коммитов:** 121
+- **Коммитов:** 137
 
 ### 5. **Недавние коммиты**
 ```
-14c9179 Simplify project_status.md: drop redundant sections, merge progress into state
-1827263 Regenerate health check report on clean tree after ARC_CMP_002 landed
-0573252 Implement ARC_CMP_002 (owner control) for m02, fix TASK_002 card mismatch
-b1e6412 Merge pull request #26 from okromanov/claude/repo-checks-health-analysis-iu0tb8
-9efb046 Regenerate health check report on clean tree with coverage policy wired in
+d114b32 Merge remote-tracking branch 'origin/main' into claude/missing-links-task-001-ag1wg3
+a14abb6 Regenerate health check report
+c6422e6 Merge pull request #29 from okromanov/claude/m02-continuation-0j1nyk
+91bf1be Require clickable links for implements/depends_on/etc, not just traces_to
+0a0d906 Regenerate health check report on clean tree after status simplification
 ```
 
 ### 6. **Политика покрытия (pyproject.toml)**
 - **Статус:** ✅ PASSED
 ```
-overall: 83.29% (minimum 75.00%)
+overall: 84.04% (minimum 75.00%)
 operations/scripts/acceptance/apply.py: 86.16% (minimum 85.00%)
 operations/scripts/evidence/generate_bundle.py: 87.72% (minimum 85.00%)
 operations/scripts/evidence/record.py: 94.12% (minimum 85.00%)
@@ -83,26 +83,26 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 | Type Safety | ✅ | MyPy: 0 issues |
 | Linting | ✅ | Ruff: compliant |
 | Formatting | ✅ | All files compliant |
-| Tests | ✅ | 333 passed |
-| Coverage policy | ✅ | 83.3% overall — policy passed |
+| Tests | ✅ | 350 passed |
+| Coverage policy | ✅ | 84.0% overall — policy passed |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
 |--------|--------|----------|
-| Size | ✅ | 1497 KB (.git), 23.4 MB (total) |
+| Size | ✅ | 2221 KB (.git), 9.1 MB (total) |
 | Branches | ✅ | 4 branches |
 | Remote | ✅ | https://github.com/okromanov/personal_ai_platform |
 | Working Tree | ✅ | Clean |
-| Commits | ✅ | 121 commits |
+| Commits | ✅ | 137 commits |
 
 ---
 
 ## ✨ Сильные стороны
 
-- ✅ Comprehensive Python codebase (116 files, 20,620 LOC)
-- ✅ Test coverage at 83.3%
+- ✅ Comprehensive Python codebase (116 files, 21,217 LOC)
+- ✅ Test coverage at 84.0%
 - ✅ Type-safe codebase (MyPy: 0 issues)
-- ✅ Clean git history (121 commits)
+- ✅ Clean git history (137 commits)
 - ✅ Formatted according to standards
 - ✅ Regular commits and clean working tree
 
@@ -131,7 +131,7 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 Репозиторий находится в отличном состоянии с точки зрения:
 - ✅ Качества кода (type safety, linting)
-- ✅ Тестирования (333 passed)
+- ✅ Тестирования (350 passed)
 - ✅ Форматирования
 - ✅ Политики покрытия (pyproject.toml: overall/critical modules)
 - ✅ Управления (git hygiene, commits)
@@ -142,4 +142,4 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 **Сгенерировано:** Claude Code
 **Версия отчета:** 1.0
-**Время проверки:** 2026-08-25T06:32:19.347089Z
+**Время проверки:** 2026-08-25T06:43:23.214347Z
