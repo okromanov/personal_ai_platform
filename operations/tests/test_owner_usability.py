@@ -133,7 +133,7 @@ class OwnerUsabilityTests(unittest.TestCase):
     ) -> None:
         rendered = render_repository_project_status(self.root)
         section = rendered[rendered.index("## Что уже умеет решение") :]
-        # TASK_001–TASK_004 are completed and have a real (non-placeholder)
+        # TASK_001–TASK_005 are completed and have a real (non-placeholder)
         # capability statement; every other TASK is still planned and must
         # not appear here at all.
         self.assertIn("[`TASK_001`](work/tasks/task_001_arc_001.md)", section)
@@ -144,7 +144,9 @@ class OwnerUsabilityTests(unittest.TestCase):
         self.assertIn("доводится до конца одним предсказуемым путём", section)
         self.assertIn("[`TASK_004`](work/tasks/task_004_arc_004.md)", section)
         self.assertIn("контракт и тестовый переходный слой", section)
-        for task_id in [f"TASK_{n:03d}" for n in range(5, 14)]:
+        self.assertIn("[`TASK_005`](work/tasks/task_005_arc_005.md)", section)
+        self.assertIn("точка авторизации", section)
+        for task_id in [f"TASK_{n:03d}" for n in range(6, 14)]:
             self.assertNotIn(f"`{task_id}`](work/tasks/", section)
         self.assertNotIn("Функционал появится после завершения этой TASK.", section)
 

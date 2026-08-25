@@ -3,19 +3,28 @@ id: TASK_005
 type: task
 title: Реализация ARC_CMP_005
 component: ARC_CMP_005
-work_state: planned
-version: 1.5
+work_state: completed
+version: 2.0
 updated: 2026-08-25
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_004
 allowed_paths:
   - work/tasks/task_005_arc_005.md
+  - src/tools/
+  - src/tools/__init__.py
+  - src/tools/base.py
+  - src/tools/registry.py
+  - operations/tests/product/test_tool_gateway.py
+  - work/tests/test_011.md
+  - operations/tests/test_owner_usability.py
 traces_to:
   - m02
 implements:
   - ARC_CMP_005
+tests:
+  - TEST_011
 ---
 
 # TASK_005 — Реализация ARC_CMP_005
@@ -26,60 +35,44 @@ implements:
 
 ## 2. Результат
 
-Стабильный контракт `ToolGateway`, через который проходит каждый вызов инструмента. MCP и другие протоколы интеграции остаются лишь способом подключения, а не источником полномочий — метаданные и сведения об обнаружении внешнего сервера остаются недоверенными данными и не дают прав напрямую.
+Стабильный контракт `ToolGateway` (`src/tools/base.py`) и эталонная реализация `ToolGatewayImpl` (`src/tools/registry.py`), через которую проходит каждый вызов инструмента. Класс воздействия и разрешённые ресурсы фиксируются на возможности при регистрации, а не в самом вызове; чувствительное действие авторизует [`OwnerControl`](task_002_arc_002.md) ([`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002)) — шлюз инструментов не хранит собственную копию этой логики. MCP и другие протоколы интеграции остаются лишь способом подключения, а не источником полномочий: реальных интеграций (MCP-сервер, файловая система, внешний API) в этой TASK нет — обработчики возможностей в тестах простые функции.
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005) определяет требования ([`SYS_020`](../../specifications/system_specification.md#sys_020), [`SYS_021`](../../specifications/system_specification.md#sys_021), [`SEC_CTL_003`](../../specifications/system_specification.md#sec_ctl_003), [`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007), [`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008), [`SEC_CTL_009`](../../specifications/system_specification.md#sec_ctl_009)). Реализации нет. Зависит от [`TASK_004`](task_004_arc_004.md) (шлюз моделей) — оба шлюза формируют полный набор внешних контрактов, которыми пользуется оркестратор.
+Спецификация и реализация [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005) полностью завершены и покрыты [`TEST_011`](../tests/test_011.md) в части технической авторизации ([`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007)) и контроля чувствительного действия ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)). Изолированное выполнение кода ([`SEC_CTL_009`](../../specifications/system_specification.md#sec_ctl_009)) не входит в эту TASK — оно требует рабочей области задачи ([`INF_CMP_004`](../../specifications/infrastructure_baseline.md#inf_cmp_004)), которая вне очереди [`m02`](../../milestones.md#m02).
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена, следующего действия по этой TASK нет.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать реализацию
+- [x] Реализовать компонент
+- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `src/tools/`), добавит в `allowed_paths`, создаст TEST.
-
-**Ожидаемые файлы:**
-- `src/tools/base.py` — контракт `ToolGateway` и модель возможности (capability)
-- `src/tools/registry.py` — реестр разрешённых инструментов
-- `work/tests/test_00X.md` — описание проверок
+[`src/tools/`](../../src/tools/) — стабильный контракт `ToolGateway` ([`base.py`](../../src/tools/base.py)) и эталонная реализация `ToolGatewayImpl` ([`registry.py`](../../src/tools/registry.py)), авторизующая каждый вызов через [`OwnerControl`](task_002_arc_002.md) перед выполнением. [`work/tests/test_011.md`](../tests/test_011.md) — описание проверок компонента. [`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py) — юнит-тесты, проверяющие компонент.
 
 ## 7. Проверки и доказательства
 
-**Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Все тесты в связанном TEST проходят, включая отказ в вызове неавторизованного инструмента
-3. MyPy type check успешен
-4. Форматирование соответствует
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_011`](../tests/test_011.md): юнит-тесты [`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py), часть обязательного gate `Quality skills`.
 
-**Ручные (code review):**
-1. Авторизация проверяется до выполнения вызова, а не после
-2. Метаданные обнаружения внешнего сервера (MCP) трактуются как недоверенные
-3. Защита от дублей действительно предотвращает повторное выполнение
+Ручная проверка при код-ревью: авторизация проверяется до выполнения вызова (обработчик не вызывается при отказе — подтверждено тестом); класс воздействия фиксирован на возможности и не читается из параметров вызова или метаданных обнаружения; защита от дублей делегирована [`OwnerControl.authorize_sensitive_action`](task_002_arc_002.md), а не продублирована.
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py): 9/9 тестов прошли, часть CI gate)
+- ✅ Pre-commit валидация успешна
 - ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 
@@ -87,4 +80,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Пока напрямую ничего не доступно: контракт и точка авторизации, а не подключённый реальный инструмент. Появилось единое место, через которое обязан пройти любой вызов инструмента — обнаружение через MCP или предположение модели больше не может само по себе создать право на действие, а чувствительное действие (например, отправка вовне или удаление) не выполнится без решения владельца, привязанного к точным параметрам, и не выполнится дважды по одному и тому же основанию. Реальные инструменты появятся в следующих TASK.

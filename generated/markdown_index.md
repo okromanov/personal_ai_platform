@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `80` |
+| Всего документов | `81` |
 
 > Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
@@ -77,7 +77,7 @@ version: 1.0
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `completed` | `1.5` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `completed` | `2.0` | TASK_003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_004_arc_004.md`](../work/tasks/task_004_arc_004.md) | `TASK_004` | `task` | `work_state` | `completed` | `2.0` | TASK_004 — Реализация ARC_CMP_004 |
-| [`work/tasks/task_005_arc_005.md`](../work/tasks/task_005_arc_005.md) | `TASK_005` | `task` | `work_state` | `planned` | `1.5` | TASK_005 — Реализация ARC_CMP_005 |
+| [`work/tasks/task_005_arc_005.md`](../work/tasks/task_005_arc_005.md) | `TASK_005` | `task` | `work_state` | `completed` | `2.0` | TASK_005 — Реализация ARC_CMP_005 |
 | [`work/tasks/task_006_arc_007.md`](../work/tasks/task_006_arc_007.md) | `TASK_006` | `task` | `work_state` | `planned` | `1.8` | TASK_006 — Реализация ARC_CMP_007 |
 | [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `planned` | `1.6` | TASK_007 — Реализация ARC_CMP_009 |
 | [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `planned` | `1.5` | TASK_008 — Реализация INF_CMP_001 |
@@ -96,3 +96,4 @@ version: 1.0
 | [`work/tests/test_008.md`](../work/tests/test_008.md) | `TEST_008` | `test` | `spec_state` | `current` | `1.2` | TEST_008 — Контроль владельца: личность, аварийный выключатель, чувствительные действия |
 | [`work/tests/test_009.md`](../work/tests/test_009.md) | `TEST_009` | `test` | `spec_state` | `current` | `1.2` | TEST_009 — Оркестрация и RuntimePort: обычный цикл задачи |
 | [`work/tests/test_010.md`](../work/tests/test_010.md) | `TEST_010` | `test` | `spec_state` | `current` | `1.0` | TEST_010 — Шлюз моделей: нормализованный вызов и интеграция с RuntimePort |
+| [`work/tests/test_011.md`](../work/tests/test_011.md) | `TEST_011` | `test` | `spec_state` | `current` | `1.0` | TEST_011 — Шлюз инструментов: техническая авторизация вызова |
