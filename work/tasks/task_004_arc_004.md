@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_004
 component: ARC_CMP_004
 work_state: planned
-version: 1.4
-updated: 2026-08-24
+version: 1.5
+updated: 2026-08-25
 next_actor: agent
 owner_action: none
 depends_on:

@@ -132,14 +132,16 @@ class OwnerUsabilityTests(unittest.TestCase):
     ) -> None:
         rendered = render_repository_project_status(self.root)
         section = rendered[rendered.index("## Что уже умеет решение") :]
-        # TASK_001 and TASK_002 are completed and have a real (non-placeholder)
+        # TASK_001–TASK_003 are completed and have a real (non-placeholder)
         # capability statement; every other TASK is still planned and must
         # not appear here at all.
         self.assertIn("[`TASK_001`](work/tasks/task_001_arc_001.md)", section)
         self.assertIn("Реализовано единое правило приёма и ответа", section)
         self.assertIn("[`TASK_002`](work/tasks/task_002_arc_002.md)", section)
         self.assertIn("Чужое сообщение не превращается в выполняемую задачу", section)
-        for task_id in [f"TASK_{n:03d}" for n in range(3, 14)]:
+        self.assertIn("[`TASK_003`](work/tasks/task_003_arc_003.md)", section)
+        self.assertIn("доводится до конца одним предсказуемым путём", section)
+        for task_id in [f"TASK_{n:03d}" for n in range(4, 14)]:
             self.assertNotIn(f"`{task_id}`](work/tasks/", section)
         self.assertNotIn("Функционал появится после завершения этой TASK.", section)
 

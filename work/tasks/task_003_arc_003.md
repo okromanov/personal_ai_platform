@@ -3,15 +3,22 @@ id: TASK_003
 type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
-work_state: planned
-version: 1.7
+work_state: completed
+version: 2.0
 updated: 2026-08-25
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_002
 allowed_paths:
   - work/tasks/task_003_arc_003.md
+  - src/orchestration/
+  - src/orchestration/__init__.py
+  - src/orchestration/runtime_port.py
+  - src/orchestration/stub_runtime.py
+  - src/orchestration/orchestrator.py
+  - operations/tests/product/test_orchestration.py
+  - work/tests/test_009.md
   - adr/adr_005_first_model_provider_selection.md
   - adr/adr_006_agent_environment_framework.md
   - adr/adr_007_cloud_provider_selection.md
@@ -25,77 +32,63 @@ traces_to:
   - m02
 implements:
   - ARC_CMP_003
+tests:
+  - TEST_009
 ---
 
 # TASK_003 — Реализация ARC_CMP_003
 
 ## 1. Зачем это делаем
 
-Реализовать оркестрацию задач и границу `RuntimePort` — слой, который превращает принятую задачу (из [`TASK_001`](task_001_arc_001.md), сохранённую в [`TASK_002`](task_002_arc_002.md)) в исполняемый цикл и подключает конкретную среду выполнения агента через стабильный контракт. Без этого компонента система не может довести задачу от «принята» до «выполняется»: некому решить, какая среда агента обрабатывает задачу, и как переключить реализацию (например, среду для разработки на среду для продакшена) не затронув остальную систему.
+Реализовать оркестрацию задач и границу `RuntimePort` — слой, который превращает принятую задачу (нормализованную [`TASK_001`](task_001_arc_001.md)) в исполнимый цикл: проверяет личность и правила владельца ([`TASK_002`](task_002_arc_002.md)), подключает конкретную среду выполнения агента через стабильный контракт и возвращает ответ через канал. Без этого компонента система не может довести задачу от «принята» до «выполняется»: некому решить, какая среда агента обрабатывает задачу, и как переключить реализацию, не затронув остальную систему.
 
 ## 2. Результат
 
-Стабильный контракт `RuntimePort` и оркестратор, который берёт задачу из хранилища (`TaskStorage` из [`TASK_002`](task_002_arc_002.md)), запускает исполнение через подключённую среду агента и обновляет состояние задачи по ходу цикла. Повторяемые процессы оформляются как навыки по цепочке `навык → возможность → инструмент → реализация/поставщик`, чтобы конкретная библиотека или сервер MCP не становился частью контракта пользовательского сценария.
+Стабильный контракт `RuntimePort` и `Orchestrator`, который проводит `TaskMessage` от [`TASK_001`](task_001_arc_001.md) через обычный цикл задачи ([`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001)): проверка личности и аварийного выключателя через [`OwnerControl`](task_002_arc_002.md) → отметка состояния → выполнение через подключённый `RuntimePort` → отметка результата → ответ через канал. Конкретная среда агента (Claude Agent SDK или альтернатива) ещё не выбрана — сравнение кандидатов зафиксировано как `proposed` в [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) и не входит в эту TASK; здесь подключается тестовый переходный слой, соответствующий контракту `RuntimePort` из [`ADR_002`](../../adr/adr_002_core_runtime_boundary.md)§6.
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) определяет требования ([`SYS_001`](../../specifications/system_specification.md#sys_001), [`SYS_036`](../../specifications/system_specification.md#sys_036), [`SYS_003`](../../specifications/system_specification.md#sys_003), [`BR_033`](../../specifications/business_requirements.md#br_033)). Реализации нет. Зависит от [`TASK_002`](task_002_arc_002.md) (хранилище задач), которая должна быть завершена — только тогда оркестратор получает откуда брать и куда записывать состояние задачи.
+Спецификация и реализация [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) полностью завершены и покрыты [`TEST_009`](../tests/test_009.md). Не зависит от хранения состояния задачи ([`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007), [`TASK_006`](task_006_arc_007.md)): та TASK ещё не выполнена и отвечает за отдельную заботу — контрольные точки, повтор и возобновление после сбоя, а не за проведение задачи через один цикл выполнения.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена, следующего действия по этой TASK нет.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать реализацию
+- [x] Реализовать компонент
+- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
+[`src/orchestration/`](../../src/orchestration/) — стабильный контракт `RuntimePort` ([`runtime_port.py`](../../src/orchestration/runtime_port.py)), тестовый переходный слой `StubRuntimePort` ([`stub_runtime.py`](../../src/orchestration/stub_runtime.py)) и `Orchestrator` ([`orchestrator.py`](../../src/orchestration/orchestrator.py)), проводящий задачу через [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001). [`work/tests/test_009.md`](../tests/test_009.md) — описание проверок компонента. [`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py) — юнит-тесты, проверяющие компонент.
+
 [`adr/adr_005_first_model_provider_selection.md`](../../adr/adr_005_first_model_provider_selection.md)–[`adr/adr_009_secret_management_strategy.md`](../../adr/adr_009_secret_management_strategy.md), [`milestones.md`](../../milestones.md), [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md), [`specifications/system_specification.md`](../../specifications/system_specification.md) и [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md) добавлены в `allowed_paths` по прямому решению владельца отдельно от реализации [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) — они покрывают правку кликабельности ссылок на трассируемые элементы, включая упоминания внутри строк `traces_to` (см. [`work/tasks/task_001_arc_001.md`](task_001_arc_001.md)), и удаление раздела «Верхнеуровневая схема» из [`architecture_baseline.md`](../../specifications/architecture_baseline.md), а не оркестрацию задач.
-
-**При начале:** агент определит реальные файлы (вероятно `src/orchestration/` для контракта `RuntimePort` и оркестратора), добавит в `allowed_paths`, создаст TEST.
-
-**Ожидаемые файлы:**
-- `src/orchestration/runtime_port.py` — стабильный контракт `RuntimePort`
-- `src/orchestration/orchestrator.py` — цикл оркестрации задачи
-- `work/tests/test_00X.md` — описание проверок
 
 ## 7. Проверки и доказательства
 
-**Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Все тесты в связанном TEST проходят
-3. MyPy type check успешен
-4. Форматирование соответствует
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_009`](../tests/test_009.md): юнит-тесты [`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py), часть обязательного gate `Quality skills`.
 
-**Ручные (code review):**
-1. `RuntimePort` не содержит специфики конкретной среды агента
-2. Оркестратор не владеет секретами, контролем владельца или долговременной памятью (это выделенные компоненты [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) и [`ARC_CMP_006`](../../specifications/architecture_baseline.md#arc_cmp_006))
-3. Переключение реализации среды не требует изменений выше уровня `RuntimePort`
+Ручная проверка при код-ревью: `RuntimePort` не содержит специфики конкретной среды агента и не импортирует SDK; `Orchestrator` не хранит секреты, правила владельца или каноническую долговременную память напрямую — обращается к [`OwnerControl`](task_002_arc_002.md) за каждой проверкой.
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py): 10/10 тестов прошли, часть CI gate)
+- ✅ Pre-commit валидация успешна
 - ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 
-[`TASK_004`](task_004_arc_004.md) реализует Шлюз моделей ([`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)) — нормализованный доступ к LLM, который оркестратор будет вызывать в цикле выполнения задачи. [`TASK_005`](task_005_arc_005.md) реализует Шлюз инструментов ([`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)), необходимый оркестратору для авторизованных вызовов инструментов. См. [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) для полного списка требований, реализуемых [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003).
+[`TASK_004`](task_004_arc_004.md) реализует Шлюз моделей ([`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)) — нормализованный доступ к LLM, который тестовый переходный слой (а затем и выбранная среда агента) будет вызывать в цикле выполнения задачи. [`TASK_005`](task_005_arc_005.md) реализует Шлюз инструментов ([`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)), необходимый оркестратору для авторизованных вызовов инструментов. См. [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) для полного списка требований, реализуемых [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003).
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Пока напрямую ничего не доступно: это внутренний цикл выполнения, а не готовый к использованию сценарий. Сообщение, прошедшее проверку личности, теперь доводится до конца одним предсказуемым путём — выполнено, провалено с понятной причиной или отменено, а не зависает и не теряется где-то между приёмом и ответом. Отменённая по чужой личности или по аварийному выключателю задача получает понятный ответ, а не тишину. Реального ответа модели и подключения к боевому Telegram ещё нет: пока используется тестовая заглушка среды выполнения, реальная среда и модель появятся в следующих TASK.

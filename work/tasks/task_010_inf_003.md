@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
 work_state: planned
-version: 1.4
-updated: 2026-08-24
+version: 1.5
+updated: 2026-08-25
 next_actor: agent
 owner_action: none
 depends_on:
@@ -81,7 +81,7 @@ implements:
 
 ## 9. Что будет дальше
 
-[`TASK_011`](task_011_inf_005.md) реализует Постоянное хранилище ([`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)) — компонент, который обеспечивает физическую основу для `TaskStorage` ([`TASK_002`](task_002_arc_002.md)) и `TaskLifecycleStore` ([`TASK_006`](task_006_arc_007.md)), чтобы их данные переживали перезапуск среды.
+[`TASK_011`](task_011_inf_005.md) реализует Постоянное хранилище ([`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)) — компонент, который обеспечивает физическую основу для `TaskLifecycleStore` ([`TASK_006`](task_006_arc_007.md)), чтобы его данные переживали перезапуск среды.
 
 ## 10. Что это даёт владельцу
 

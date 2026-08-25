@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
 work_state: planned
-version: 1.4
-updated: 2026-08-24
+version: 1.5
+updated: 2026-08-25
 next_actor: agent
 owner_action: none
 depends_on:
