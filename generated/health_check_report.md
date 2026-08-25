@@ -20,11 +20,11 @@ updated: 2026-08-25
 
 | Метрика | Значение | Статус |
 |---------|---------|--------|
-| **Всего коммитов** | 119 | ✅ |
-| **Размер репозитория (.git)** | 1448 KB | ✅ |
+| **Всего коммитов** | 121 | ✅ |
+| **Размер репозитория (.git)** | 1497 KB | ✅ |
 | **Размер проекта** | 23.4 MB | ✅ |
 | **Python файлов** | 116 | ✅ |
-| **Строк кода** | 20,714 | ✅ |
+| **Строк кода** | 20,620 | ✅ |
 | **Тесты (пройдено/всего)** | 333 passed | ✅ |
 | **Ветки** | 4 | ✅ |
 
@@ -35,8 +35,8 @@ updated: 2026-08-25
 ### 1. **Тестирование**
 - **Статус:** ✅ PASSED
 - **Пройдено/Провалено:** 333/333
-- **Время выполнения:** 32.09s
-- **Охват:** 83.1%
+- **Время выполнения:** 33.53s
+- **Охват:** 83.3%
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** ✅ SUCCESS (0 issues)
@@ -50,21 +50,21 @@ updated: 2026-08-25
 ### 4. **Git Статус**
 - **Рабочая копия:** ✅ Чистая
 - **Remote URL:** https://github.com/okromanov/personal_ai_platform
-- **Коммитов:** 119
+- **Коммитов:** 121
 
 ### 5. **Недавние коммиты**
 ```
+14c9179 Simplify project_status.md: drop redundant sections, merge progress into state
+1827263 Regenerate health check report on clean tree after ARC_CMP_002 landed
 0573252 Implement ARC_CMP_002 (owner control) for m02, fix TASK_002 card mismatch
 b1e6412 Merge pull request #26 from okromanov/claude/repo-checks-health-analysis-iu0tb8
 9efb046 Regenerate health check report on clean tree with coverage policy wired in
-b1bd1f0 Wire the real tiered coverage gate into the health check, fix AST false positive
-f1809f9 Regenerate health check report against the fixed metrics collector
 ```
 
 ### 6. **Политика покрытия (pyproject.toml)**
 - **Статус:** ✅ PASSED
 ```
-overall: 83.15% (minimum 75.00%)
+overall: 83.29% (minimum 75.00%)
 operations/scripts/acceptance/apply.py: 86.16% (minimum 85.00%)
 operations/scripts/evidence/generate_bundle.py: 87.72% (minimum 85.00%)
 operations/scripts/evidence/record.py: 94.12% (minimum 85.00%)
@@ -84,25 +84,25 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 | Linting | ✅ | Ruff: compliant |
 | Formatting | ✅ | All files compliant |
 | Tests | ✅ | 333 passed |
-| Coverage policy | ✅ | 83.1% overall — policy passed |
+| Coverage policy | ✅ | 83.3% overall — policy passed |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
 |--------|--------|----------|
-| Size | ✅ | 1448 KB (.git), 23.4 MB (total) |
+| Size | ✅ | 1497 KB (.git), 23.4 MB (total) |
 | Branches | ✅ | 4 branches |
 | Remote | ✅ | https://github.com/okromanov/personal_ai_platform |
 | Working Tree | ✅ | Clean |
-| Commits | ✅ | 119 commits |
+| Commits | ✅ | 121 commits |
 
 ---
 
 ## ✨ Сильные стороны
 
-- ✅ Comprehensive Python codebase (116 files, 20,714 LOC)
-- ✅ Test coverage at 83.1%
+- ✅ Comprehensive Python codebase (116 files, 20,620 LOC)
+- ✅ Test coverage at 83.3%
 - ✅ Type-safe codebase (MyPy: 0 issues)
-- ✅ Clean git history (119 commits)
+- ✅ Clean git history (121 commits)
 - ✅ Formatted according to standards
 - ✅ Regular commits and clean working tree
 
@@ -142,4 +142,4 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 **Сгенерировано:** Claude Code
 **Версия отчета:** 1.0
-**Время проверки:** 2026-08-25T05:48:51.803774Z
+**Время проверки:** 2026-08-25T06:32:19.347089Z
