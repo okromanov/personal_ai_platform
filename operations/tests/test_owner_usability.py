@@ -22,7 +22,7 @@ from operations.scripts.status.human_status import (
     _section,
     render_repository_project_status,
 )
-from operations.scripts.tasks.generate import collect_tasks, select_current_task
+from operations.scripts.tasks.generate import _owner_followups, collect_tasks, select_current_task
 
 
 def _task_item(
@@ -396,6 +396,32 @@ class CapabilitySummaryTests(unittest.TestCase):
                 summary,
                 "Пока ни одна завершённая TASK не добавила новую возможность для владельца.",
             )
+
+
+class OwnerFollowupParsingTests(unittest.TestCase):
+    def test_absent_field_parses_to_empty_list(self) -> None:
+        self.assertEqual(_owner_followups(None, "task.md"), [])
+
+    def test_open_and_done_entries_parse_status_and_action(self) -> None:
+        parsed = _owner_followups(
+            ["[open] Собрать образ", "[done]  Уже сделано  "],
+            "task.md",
+        )
+        self.assertEqual(
+            parsed,
+            [
+                {"status": "open", "action": "Собрать образ"},
+                {"status": "done", "action": "Уже сделано"},
+            ],
+        )
+
+    def test_non_list_value_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            _owner_followups("[open] not a list", "task.md")
+
+    def test_entry_missing_the_status_prefix_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            _owner_followups(["Собрать образ без префикса"], "task.md")
 
 
 if __name__ == "__main__":

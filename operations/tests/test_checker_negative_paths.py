@@ -106,9 +106,16 @@ class CheckerNegativePathTests(unittest.TestCase):
             "steps_remaining": 1,
             "allowed_paths": [],
             "blocker": "stale",
+            "owner_followups": [
+                {"status": "bogus", "action": "Do X"},
+                {"status": "open", "action": ""},
+                {"status": "open", "action": "Собрать образ"},
+            ],
         }
         planned = dict(task, id="TASK_002", next_actor="none", owner_action="none")
         planned["work_state"] = "planned"
+        planned["owner_followups"] = []
+        planned["body"] = "### Владельцу\n50%\n\n## Незакрытые действия владельца\n\nстарый текст"
         with (
             patch(
                 "operations.scripts.documents.check.collect_tasks",
@@ -127,6 +134,11 @@ class CheckerNegativePathTests(unittest.TestCase):
             "одного следующего исполнителя",
             "пустой раздел владельца",
             "искусственные проценты",
+            "status должен быть 'open' или 'done'",
+            "action не может быть пустым",
+            "открытое действие должно дословно",
+            "есть открытые owner_followups, но нет раздела",
+            "но нет ни одного открытого owner_followups",
         ):
             self.assertIn(fragment, joined)
 

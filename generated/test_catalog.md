@@ -10,8 +10,8 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `417` |
-| Core logic (acceptance, governance, lifecycle) | `129` |
+| Всего тестов | `421` |
+| Core logic (acceptance, governance, lifecycle) | `133` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
@@ -114,6 +114,10 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_lifecycle_matrix.py` | `LifecycleMatrixTests` | `test_m01_accept_m02_start_premature_reject_and_m02_accept` | Полный цикл: принятие m01, старт m02, отказ при преждевременном принятии, затем принятие m02. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_falls_back_when_the_summary_file_is_missing` | Falls back when the summary file is missing |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_reads_the_current_summary_section_from_the_hand_maintained_file` | Reads the current summary section from the hand maintained file |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_absent_field_parses_to_empty_list` | Absent field parses to empty list |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_entry_missing_the_status_prefix_is_rejected` | Entry missing the status prefix is rejected |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_non_list_value_is_rejected` | Non list value is rejected |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_open_and_done_entries_parse_status_and_action` | Open and done entries parse status and action |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_embeds_the_hand_maintained_synthesis` | Capabilities section embeds the hand maintained synthesis |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_first_unfinished_task_is_selected_by_queue_order` | Первой выбирается незавершённая TASK по порядку очереди. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_detailed_without_artificial_percentages` | project_status.md подробен и не содержит искусственных процентов. |
