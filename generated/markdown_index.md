@@ -16,7 +16,7 @@ version: 1.0
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.5` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.6` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -61,7 +61,7 @@ version: 1.0
 | [`operations/templates/milestone_template.md`](../operations/templates/milestone_template.md) | `template_milestone` | `document_template` | `document_state` | `current` | `1.0` | Шаблон этапа |
 | [`operations/templates/security_control_template.md`](../operations/templates/security_control_template.md) | `template_security_control` | `document_template` | `document_state` | `current` | `1.0` | Шаблон SEC_CTL |
 | [`operations/templates/system_requirement_template.md`](../operations/templates/system_requirement_template.md) | `template_system_requirement` | `document_template` | `document_state` | `current` | `1.0` | Шаблон SYS |
-| [`operations/templates/task_template.md`](../operations/templates/task_template.md) | `template_task` | `document_template` | `document_state` | `current` | `1.4` | Шаблон TASK |
+| [`operations/templates/task_template.md`](../operations/templates/task_template.md) | `template_task` | `document_template` | `document_state` | `current` | `1.5` | Шаблон TASK |
 | [`operations/templates/test_template.md`](../operations/templates/test_template.md) | `template_test` | `document_template` | `document_state` | `current` | `1.3` | Шаблон TEST |
 | [`operations/templates/threat_template.md`](../operations/templates/threat_template.md) | `template_threat` | `document_template` | `document_state` | `current` | `1.0` | Шаблон THR |
 | [`operations/threat_review_triggers.md`](../operations/threat_review_triggers.md) | `threat_review_triggers` | `guide` | `document_state` | `current` | `1.0` | Триггеры и процедуры угроз |

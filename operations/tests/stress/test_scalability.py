@@ -57,6 +57,7 @@ def _synthetic_task_item(number: int, *, work_state: str, depends_on: list[str])
         "tests": [],
         "next_actor": "agent",
         "owner_action": "none",
+        "owner_followups": [],
         "checklist": [],
         "steps_done": 0,
         "steps_total": 0,

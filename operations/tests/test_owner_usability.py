@@ -43,6 +43,7 @@ def _task_item(
         "tests": [],
         "next_actor": "agent",
         "owner_action": owner_action,
+        "owner_followups": [],
         "checklist": [],
         "steps_done": 0,
         "steps_total": 0,

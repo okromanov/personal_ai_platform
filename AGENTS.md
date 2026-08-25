@@ -2,7 +2,7 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 2.5
+version: 2.6
 updated: 2026-08-25
 depends_on:
   - project_rules

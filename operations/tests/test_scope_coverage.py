@@ -55,6 +55,7 @@ def _task(task_id: str, implements: list[str]) -> TaskItem:
         "tests": [],
         "next_actor": "agent",
         "owner_action": "none",
+        "owner_followups": [],
         "checklist": [],
         "steps_done": 0,
         "steps_total": 0,
