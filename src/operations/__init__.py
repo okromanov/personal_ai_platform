@@ -11,6 +11,7 @@ This module implements ARC_CMP_009 — Эксплуатационные функ
 """
 
 from .health import DependencyStatus, HealthAggregator, HealthCheck, HealthReport
+from .health_check import build_health_aggregator
 from .scheduler_state import ScheduledIntent, SchedulerState
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "HealthReport",
     "ScheduledIntent",
     "SchedulerState",
+    "build_health_aggregator",
 ]

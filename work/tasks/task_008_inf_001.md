@@ -3,19 +3,29 @@ id: TASK_008
 type: task
 title: Реализация INF_CMP_001
 component: INF_CMP_001
-work_state: planned
-version: 1.5
+work_state: completed
+version: 2.0
 updated: 2026-08-25
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_007
 allowed_paths:
   - work/tasks/task_008_inf_001.md
+  - Dockerfile
+  - .dockerignore
+  - src/operations/health_check.py
+  - src/operations/__init__.py
+  - operations/tests/product/test_compute_environment.py
+  - work/tests/test_014.md
+  - operations/scripts/documents/check.py
+  - repository_audit_system_prompt.md
 traces_to:
   - m02
 implements:
   - INF_CMP_001
+tests:
+  - TEST_014
 ---
 
 # TASK_008 — Реализация INF_CMP_001
@@ -30,54 +40,51 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001) определяет требования ([`INF_REQ_001`](../../specifications/infrastructure_baseline.md#inf_req_001), [`INF_REQ_002`](../../specifications/infrastructure_baseline.md#inf_req_002), [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_015`](../../specifications/infrastructure_baseline.md#inf_req_015)). Реализации нет. Зависит от [`TASK_007`](task_007_arc_009.md) — все архитектурные компоненты должны быть определены до фиксации требований к среде их выполнения.
+Спецификация и реализация [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001) завершены и покрыты [`TEST_014`](../tests/test_014.md): корневой [`Dockerfile`](../../Dockerfile) определяет воспроизводимую вычислительную среду (образ на Python 3.12, непривилегированный пользователь приложения, идентифицируемая версия сборки, цикл проверки работоспособности через [`HealthAggregator`](../../src/operations/health.py) из [`TASK_007`](task_007_arc_009.md)). Выбор конкретного облачного провайдера ([`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), `proposed`) и среды агента ([`ADR_006`](../../adr/adr_006_agent_environment_framework.md), `proposed`) остаются открытыми — эта TASK не привязывается ни к одному из них: образ переносим и не содержит специфики облачного провайдера или SDK среды агента.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена, следующего действия по этой TASK нет.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать реализацию
+- [x] Реализовать компонент
+- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `infrastructure/` или корневой `Dockerfile`), добавит в `allowed_paths`, создаст TEST.
+[`Dockerfile`](../../Dockerfile) — воспроизводимая вычислительная среда: закреплённый базовый образ `python:3.12-slim` ([`INF_REQ_001`](../../specifications/infrastructure_baseline.md#inf_req_001)), непривилегированный пользователь `app` без административных прав ([`INF_REQ_002`](../../specifications/infrastructure_baseline.md#inf_req_002)), аргумент сборки `APP_VERSION`, встроенный в образ как идентифицируемая версия развёртывания ([`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010)), и `HEALTHCHECK`, вызывающий [`src/operations/health_check.py`](../../src/operations/health_check.py) — тонкий CLI поверх [`HealthAggregator`](../../src/operations/health.py) ([`TASK_007`](task_007_arc_009.md)). [`.dockerignore`](../../.dockerignore) исключает служебные и документные пути из образа. [`work/tests/test_014.md`](../tests/test_014.md) — описание проверок компонента. [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py) — юнит-тесты CLI и статическая проверка структуры `Dockerfile`.
 
-**Ожидаемые файлы:**
-- `infrastructure/runtime/` или `Dockerfile` — описание вычислительной среды
-- Обновление CI-конфигурации при необходимости
-- `work/tests/test_00X.md` — описание проверок
+Разделение сред разработки и рабочего контура ([`INF_REQ_015`](../../specifications/infrastructure_baseline.md#inf_req_015)) задокументировано прямо в `Dockerfile`: успешный локальный прогон `run_suite.py` (среда разработчика) не подтверждает эту рабочую среду — только собранный, версионированный образ является собственным доказательством рабочего контура.
+
+Проверка структуры документов ([`check.py`](../../operations/scripts/documents/check.py)) требует английский `lower_snake_case` для всех путей — за одним уже существующим исключением, [`AGENTS.md`](../../AGENTS.md) (внешнее соглашение GitHub Copilot/агентских инструментов). `Dockerfile` — такое же внешнее соглашение: Docker собирает его под этим именем по умолчанию, переименование сломало бы стандартный `docker build`. Добавлено то же исключение рядом с [`AGENTS.md`](../../AGENTS.md).
+
+Полный прогон проверки также обнаружил, что [`repository_audit_system_prompt.md`](../../repository_audit_system_prompt.md) (переписан отдельным PR #40 уже после [`TASK_007`](task_007_arc_009.md)) снова содержит те же два пре-существующих класса проблем, что и в [`TASK_007`](task_007_arc_009.md#6-состав): некликабельные упоминания трассируемых элементов и путей документов, и тот же иллюстративный пример хардкода секрета — оба исправлены тем же способом (автоматический линкер; замена значения примера на плейсхолдер). Не относится к реализации [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001).
 
 ## 7. Проверки и доказательства
 
-**Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Сборка/развёртывание среды воспроизводится детерминированно
-3. Существующий CI (Windows + Ubuntu) продолжает проходить
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_014`](../tests/test_014.md): юнит-тесты [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py), часть обязательного gate `Quality skills`.
+
+Реальная сборка образа (`docker build`) не может быть выполнена в этой изолированной среде разработки — здесь нет запущенного демона Docker, а CI сейчас не запускается автоматически (минуты GitHub Actions исчерпаны). Автоматический тест покрывает то, что проверяемо без демона: поведение CLI `health_check.py` и статическую структуру `Dockerfile` (закреплённый образ, непривилегированный пользователь, `HEALTHCHECK`, аргумент версии). Реальную сборку образа должен проверить владелец или следующий прогон CI на Ubuntu-раннере (там демон Docker есть по умолчанию) — до этого момента детерминированная воспроизводимость сборки остаётся не подтверждённой практическим запуском, только структурой.
 
 **Ручные (code review):**
-1. Описание среды не содержит секретов или конкретных учётных данных
-2. Требуемые ресурсы (CPU/память) явно указаны и обоснованы
+1. `Dockerfile` не содержит секретов или конкретных учётных данных — подтверждено сканером секретов ([`check.py`](../../operations/scripts/documents/check.py))
+2. Образ не привязывается к конкретному облачному провайдеру или SDK среды агента — не использует специфичные для провайдера базовые образы или SDK
+3. Ресурсы (CPU/память) для этого минимального образа не указываются явно: конкретные лимиты — решение развёртывания в конкретной инфраструктуре ([`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)), не свойство самого образа
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
-- ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py): 10/10 тестов прошли, часть CI gate)
+- ✅ Pre-commit валидация успешна
+- ⚠️ Реальная сборка Docker-образа не проверена в этой среде (нет демона) — ожидает проверки владельцем или CI на Ubuntu-раннере
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 
@@ -85,4 +92,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Пока напрямую ничего не доступно: платформа ещё не запущена как постоянно работающий процесс (канал и шлюзы моделей/инструментов ещё не соединены в единый цикл). Появилось воспроизводимое, версионируемое и непривилегированное описание того, где и как сервисы платформы будут запускаться, перезапускаться и проверяться на работоспособность, когда это произойдёт.

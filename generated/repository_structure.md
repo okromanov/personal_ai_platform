@@ -10,13 +10,15 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `242` |
+| Всего файлов | `247` |
 
 ```text
 personal_ai_platform/
+- .dockerignore
 - .github/workflows/project_check.yml
 - .gitignore
 - AGENTS.md
+- Dockerfile
 - adr/adr_001_language_and_runtime.md
 - adr/adr_002_core_runtime_boundary.md
 - adr/adr_003_model_provider_interface.md
@@ -144,6 +146,7 @@ personal_ai_platform/
 - operations/tests/performance/test_critical_paths.py
 - operations/tests/product/__init__.py
 - operations/tests/product/test_channels.py
+- operations/tests/product/test_compute_environment.py
 - operations/tests/product/test_model_gateway.py
 - operations/tests/product/test_operations_state.py
 - operations/tests/product/test_orchestration.py
@@ -210,6 +213,7 @@ personal_ai_platform/
 - src/models/stub_gateway.py
 - src/operations/__init__.py
 - src/operations/health.py
+- src/operations/health_check.py
 - src/operations/scheduler_state.py
 - src/orchestration/__init__.py
 - src/orchestration/orchestrator.py
@@ -256,4 +260,5 @@ personal_ai_platform/
 - work/tests/test_011.md
 - work/tests/test_012.md
 - work/tests/test_013.md
+- work/tests/test_014.md
 ```

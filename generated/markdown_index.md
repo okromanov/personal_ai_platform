@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `85` |
+| Всего документов | `86` |
 
 > Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
@@ -29,7 +29,7 @@ version: 1.0
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.5` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.2` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.1` | Жизненный цикл архитектурных решений (ADR) |
-| [`operations/capability_summary.md`](../operations/capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `1.1` | Итог того, что уже умеет решение |
+| [`operations/capability_summary.md`](../operations/capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `1.2` | Итог того, что уже умеет решение |
 | [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.7` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
@@ -82,7 +82,7 @@ version: 1.0
 | [`work/tasks/task_005_arc_005.md`](../work/tasks/task_005_arc_005.md) | `TASK_005` | `task` | `work_state` | `completed` | `2.0` | TASK_005 — Реализация ARC_CMP_005 |
 | [`work/tasks/task_006_arc_007.md`](../work/tasks/task_006_arc_007.md) | `TASK_006` | `task` | `work_state` | `completed` | `2.0` | TASK_006 — Реализация ARC_CMP_007 |
 | [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `completed` | `2.0` | TASK_007 — Реализация ARC_CMP_009 |
-| [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `planned` | `1.5` | TASK_008 — Реализация INF_CMP_001 |
+| [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.0` | TASK_008 — Реализация INF_CMP_001 |
 | [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `planned` | `1.5` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `planned` | `1.5` | TASK_010 — Реализация INF_CMP_003 |
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `planned` | `1.6` | TASK_011 — Реализация INF_CMP_005 |
@@ -101,3 +101,4 @@ version: 1.0
 | [`work/tests/test_011.md`](../work/tests/test_011.md) | `TEST_011` | `test` | `spec_state` | `current` | `1.0` | TEST_011 — Шлюз инструментов: техническая авторизация вызова |
 | [`work/tests/test_012.md`](../work/tests/test_012.md) | `TEST_012` | `test` | `spec_state` | `current` | `1.0` | TEST_012 — Состояние задач: контрольные точки, повтор, отмена, защита от дублей |
 | [`work/tests/test_013.md`](../work/tests/test_013.md) | `TEST_013` | `test` | `spec_state` | `current` | `1.0` | TEST_013 — Эксплуатационные функции: работоспособность и логическое состояние планировщика |
+| [`work/tests/test_014.md`](../work/tests/test_014.md) | `TEST_014` | `test` | `spec_state` | `current` | `1.0` | TEST_014 — Вычислительная среда выполнения: health-check CLI и структура образа |

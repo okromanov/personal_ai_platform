@@ -156,7 +156,7 @@ def _result(name: str, errors: list[str], warnings: list[str] | None = None) -> 
 
 
 def _path_part_uses_snake_case(part: str) -> bool:
-    if part == "AGENTS.md" or part.startswith("."):
+    if part in {"AGENTS.md", "Dockerfile"} or part.startswith("."):
         return True
     return part.isascii() and part == part.lower() and "-" not in part
 

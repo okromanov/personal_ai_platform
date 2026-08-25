@@ -2,7 +2,7 @@
 id: capability_summary
 type: guide
 document_state: current
-version: 1.1
+version: 1.2
 updated: 2026-08-25
 depends_on:
   - TASK_001
@@ -11,6 +11,8 @@ depends_on:
   - TASK_004
   - TASK_005
   - TASK_006
+  - TASK_007
+  - TASK_008
 ---
 
 # Итог того, что уже умеет решение

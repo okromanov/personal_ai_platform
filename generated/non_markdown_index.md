@@ -10,14 +10,16 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `151` |
+| Всего файлов | `155` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
 | Файл | Задача | Описание |
 |---|---|---|
+| [`.dockerignore`](../.dockerignore) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
+| [`Dockerfile`](../Dockerfile) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/hooks/__init__.py`](../operations/hooks/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/hooks/pre_commit_hook.sh`](../operations/hooks/pre_commit_hook.sh) | — | Канонический pre-commit hook: версии authority-документов, dev-инструменты, быстрый набор проверок, регенерация дашбордов. |
@@ -35,7 +37,7 @@ version: 1.0
 | [`operations/scripts/common/status_types.py`](../operations/scripts/common/status_types.py) | — | Общие типы данных для milestone/TASK/TEST, которыми обмениваются модули status и tasks. |
 | [`operations/scripts/documents/__init__.py`](../operations/scripts/documents/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/scripts/documents/auto_generate_tasks.py`](../operations/scripts/documents/auto_generate_tasks.py) | — | Автоматическое создание TASK документов для новых архитектурных компонентов. |
-| [`operations/scripts/documents/check.py`](../operations/scripts/documents/check.py) | — | Главный проверяющий скрипт репозитория: запускает все структурные и смысловые проверки. |
+| [`operations/scripts/documents/check.py`](../operations/scripts/documents/check.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | Главный проверяющий скрипт репозитория: запускает все структурные и смысловые проверки. |
 | [`operations/scripts/documents/generate.py`](../operations/scripts/documents/generate.py) | — | Главный генератор: пересобирает все производные файлы из состояния репозитория. |
 | [`operations/scripts/documents/index.py`](../operations/scripts/documents/index.py) | — | Строит generated/markdown_index.md — перечень всех Markdown-документов репозитория. |
 | [`operations/scripts/documents/links.py`](../operations/scripts/documents/links.py) | — | Проверяет, что ссылки и якоря в Markdown-документах ведут на существующие файлы и разделы. |
@@ -92,6 +94,7 @@ version: 1.0
 | [`operations/tests/performance/test_critical_paths.py`](../operations/tests/performance/test_critical_paths.py) | — | Тесты производительности критичных, часто вызываемых функций. |
 | [`operations/tests/product/__init__.py`](../operations/tests/product/__init__.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/product/test_channels.py`](../operations/tests/product/test_channels.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Unit-тесты компонента Channels (ARC_CMP_001). |
+| [`operations/tests/product/test_compute_environment.py`](../operations/tests/product/test_compute_environment.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`operations/tests/product/test_model_gateway.py`](../operations/tests/product/test_model_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`operations/tests/product/test_operations_state.py`](../operations/tests/product/test_operations_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
@@ -149,6 +152,7 @@ version: 1.0
 | [`src/models/stub_gateway.py`](../src/models/stub_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`src/operations/__init__.py`](../src/operations/__init__.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/operations/health.py`](../src/operations/health.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
+| [`src/operations/health_check.py`](../src/operations/health_check.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`src/operations/scheduler_state.py`](../src/operations/scheduler_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/orchestration/__init__.py`](../src/orchestration/__init__.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/orchestration/orchestrator.py`](../src/orchestration/orchestrator.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |

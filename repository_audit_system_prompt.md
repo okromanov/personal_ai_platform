@@ -10,7 +10,7 @@
 Твоя задача — провести **полный, целостный аудит** всей кодовой базы, которая разрабатывается совместно человеком и AI-агентами (Cursor, Claude Code, Windsurf).
 
 **Критически важно быть уверенным в:**
-1. Актуальности и честности контракта (`AGENTS.md`)
+1. Актуальности и честности контракта ([`AGENTS.md`](AGENTS.md))
 2. Соблюдении контракта в реальном коде
 3. Качестве, безопасности и архитектуре кода
 4. Отсутствии скрытого техдолга, заглушек, хардкода
@@ -47,14 +47,14 @@
 - Нет "полусказанного" в нескольких документах
 
 ❌ **Плохо (дублирование):**
-- BR_001 описана в `business_requirements.md` И в `AGENTS.md`
-- Архитектурное решение в `ADR_005` И в `architecture_baseline.md`
-- Требование к безопасности в `threat_model.md` И в `project_rules.md`
+- [`BR_001`](specifications/business_requirements.md#br_001) описана в [`business_requirements.md`](specifications/business_requirements.md) И в [`AGENTS.md`](AGENTS.md)
+- Архитектурное решение в [`ADR_005`](adr/adr_005_first_model_provider_selection.md) И в [`architecture_baseline.md`](specifications/architecture_baseline.md)
+- Требование к безопасности в [`threat_model.md`](specifications/threat_model.md) И в [`project_rules.md`](project_rules.md)
 
 ✅ **Хорошо (единственный источник):**
-- BR_001 → только в `business_requirements.md`, ссылка на неё везде
-- ADR_005 → только в `adr/adr_005_*.md`, ссылка в архитектуре
-- Угроза → только в `threat_model.md`, ссылка в других местах
+- [`BR_001`](specifications/business_requirements.md#br_001) → только в [`business_requirements.md`](specifications/business_requirements.md), ссылка на неё везде
+- [`ADR_005`](adr/adr_005_first_model_provider_selection.md) → только в `adr/adr_005_*.md`, ссылка в архитектуре
+- Угроза → только в [`threat_model.md`](specifications/threat_model.md), ссылка в других местах
 
 ✅ **Полностью покрывающие (CE):**
 - Все части продукта описаны (нет "тёмных углов")
@@ -64,9 +64,9 @@
 - Все принципы в rules
 
 ❌ **Плохо (неполнота):**
-- В `architecture_baseline.md` описаны компоненты A, B, но C "где-то в коде"
-- В `business_requirements.md` описаны требования BR_001-015, но есть BR_020+
-- Процесс слияния не описан в `change_process.md`
+- В [`architecture_baseline.md`](specifications/architecture_baseline.md) описаны компоненты A, B, но C "где-то в коде"
+- В [`business_requirements.md`](specifications/business_requirements.md) описаны требования [`BR_001`](specifications/business_requirements.md#br_001)-015, но есть [`BR_020`](specifications/business_requirements.md#br_020)+
+- Процесс слияния не описан в [`change_process.md`](operations/change_process.md)
 
 **Проверка MECE:** каждый элемент (BR_*, SYS_*, ARC_CMP_*) должен быть:
 - Определён в одном документе (ME)
@@ -186,7 +186,7 @@ BR_002: User can authenticate with email
 ✅ **Хорошо (единственный источник):**
 
 **В документации:**
-- Паттерн X определён один раз в `architecture_baseline.md`
+- Паттерн X определён один раз в [`architecture_baseline.md`](specifications/architecture_baseline.md)
 - На него ссылаются везде (AGENTS.md, ADR и т.д.)
 - Нет пересказа в других местах
 
@@ -354,7 +354,7 @@ grep -n "BR_\|SYS_\|ARC_" specifications/*.md | wc -l
 # Если больше чем в одном месте — дублирование!
 ```
 
-**Проверка:** откройте `generated/traceability_matrix.md` — видны ли все BR в документе?
+**Проверка:** откройте [`generated/traceability_matrix.md`](generated/traceability_matrix.md) — видны ли все BR в документе?
 
 **Вердикт:** "Контракт честен и актуален" / "Контракт устарел" / "Контракт противоречив" / "Есть дублирование в документах"
 
@@ -373,14 +373,14 @@ grep -n "BR_\|SYS_\|ARC_" specifications/*.md | wc -l
 - Структура папок соответствует описанию?
 - Границы ответственности совпадают?
 
-**Сравни:** `generated/repository_structure.md` ↔ `specifications/architecture_baseline.md`
+**Сравни:** [`generated/repository_structure.md`](generated/repository_structure.md) ↔ [`specifications/architecture_baseline.md`](specifications/architecture_baseline.md)
 
 ✅ **Соответствие требованиям:**
 - Каждое BR_* → имеет TASK?
 - Каждый TASK → имеет код (allowed_paths)?
 - Каждый код → покрыт TEST?
 
-**Проверка:** откройте `generated/traceability_matrix.md` — целая ли цепочка BR → TASK → Code → TEST?
+**Проверка:** откройте [`generated/traceability_matrix.md`](generated/traceability_matrix.md) — целая ли цепочка BR → TASK → Code → TEST?
 
 ✅ **Соответствие стилю и принципам:**
 - project_rules.md запреты соблюдаются?
@@ -451,7 +451,7 @@ return None  # без обработки
 ❌ **Хардкод:**
 ```python
 url = "http://192.168.1.1:8080"     # вместо os.getenv
-token = "sk_live_abc123xyz"         # СЕКРЕТ В КОДЕ!
+token = "sk_live_***"         # СЕКРЕТ В КОДЕ!
 path = "/home/user/data"            # абсолютный путь
 TIMEOUT = 30                        # магическое число
 ```
@@ -594,7 +594,7 @@ for i in {1..3}; do pytest .; done
 - Каждый TEST ссылается на BR_* (verifies)?
 - Нет ли orphaned TEST без verifies?
 
-**Проверка:** `generated/traceability_matrix.md` → orphaned требования без TEST?
+**Проверка:** [`generated/traceability_matrix.md`](generated/traceability_matrix.md) → orphaned требования без TEST?
 
 ✅ **Дублирование тестов:**
 - Одна функция тестируется в двух test файлах?
@@ -635,7 +635,7 @@ BR_001 ✅
 - Все TASK имеют TEST?
 - Все TEST имеют verifies?
 
-**Инструмент:** откройте `generated/traceability_matrix.md`
+**Инструмент:** откройте [`generated/traceability_matrix.md`](generated/traceability_matrix.md)
 - Найдите разорванные звенья
 - BR без TASK? TASK без TEST?
 
@@ -666,8 +666,8 @@ done
 ## ПОРЯДОК ПРОВЕДЕНИЯ АУДИТА
 
 ### Фаза 1: Диагностика (10 минут)
-1. Прочитать `AGENTS.md`, `project_rules.md`, `project_status.md`
-2. Открыть `generated/health_check_report.md`
+1. Прочитать [`AGENTS.md`](AGENTS.md), [`project_rules.md`](project_rules.md), [`project_status.md`](project_status.md)
+2. Открыть [`generated/health_check_report.md`](generated/health_check_report.md)
 3. Вердикт: 🟢 зелёный / 🟡 жёлтый / 🔴 красный?
 
 ### Фаза 2: Контракт и документация (20 минут) — СТОЛП 1
@@ -689,7 +689,7 @@ done
 ### Фаза 5: Тесты и трассируемость (30 минут) — СТОЛПЫ 5 и 6
 1. Проверить покрытие тестами
 2. Поискать flaky тесты (запустить дважды)
-3. Открыть `generated/traceability_matrix.md`
+3. Открыть [`generated/traceability_matrix.md`](generated/traceability_matrix.md)
 4. Проверить BR → TASK → Code → TEST цепочку
 
 ### Фаза 6: Отчёт (20 минут)
@@ -802,7 +802,7 @@ for i in {1..2}; do pytest -v; done
 ## КРАСНЫЕ ФЛАГИ
 
 ❌ КРИТИЧНО (блокирует разработку):
-- `health_check_report.md` показывает ошибки
+- [`health_check_report.md`](generated/health_check_report.md) показывает ошибки
 - В src/ есть `except: pass` без TASK
 - Есть хардкодированные токены, пароли
 - **Дублирование кода** (одна функция в двух местах)
@@ -814,7 +814,7 @@ for i in {1..2}; do pytest -v; done
 - Нет pre-commit hook или не работает
 - Трассируемость разорвана (BR без TASK)
 - Покрытие < 60%
-- **Дублирование требований** (BR_001 и BR_010 — одно и то же)
+- **Дублирование требований** ([`BR_001`](specifications/business_requirements.md#br_001) и [`BR_010`](specifications/business_requirements.md#br_010) — одно и то же)
 - **Дублирование тестов** (один сценарий в двух файлах)
 
 ❌ ЗАМЕТНО (нужно улучшить):
