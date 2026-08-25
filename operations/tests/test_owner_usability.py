@@ -17,6 +17,7 @@ from operations.scripts.status.generate_project_status import (
     render_progress_sections,
 )
 from operations.scripts.status.human_status import (
+    _capability_rows,
     _rebase_relative_links,
     render_repository_project_status,
 )
@@ -132,7 +133,7 @@ class OwnerUsabilityTests(unittest.TestCase):
     ) -> None:
         rendered = render_repository_project_status(self.root)
         section = rendered[rendered.index("## Что уже умеет решение") :]
-        # TASK_001–TASK_003 are completed and have a real (non-placeholder)
+        # TASK_001–TASK_004 are completed and have a real (non-placeholder)
         # capability statement; every other TASK is still planned and must
         # not appear here at all.
         self.assertIn("[`TASK_001`](work/tasks/task_001_arc_001.md)", section)
@@ -141,7 +142,9 @@ class OwnerUsabilityTests(unittest.TestCase):
         self.assertIn("Чужое сообщение не превращается в выполняемую задачу", section)
         self.assertIn("[`TASK_003`](work/tasks/task_003_arc_003.md)", section)
         self.assertIn("доводится до конца одним предсказуемым путём", section)
-        for task_id in [f"TASK_{n:03d}" for n in range(4, 14)]:
+        self.assertIn("[`TASK_004`](work/tasks/task_004_arc_004.md)", section)
+        self.assertIn("контракт и тестовый переходный слой", section)
+        for task_id in [f"TASK_{n:03d}" for n in range(5, 14)]:
             self.assertNotIn(f"`{task_id}`](work/tasks/", section)
         self.assertNotIn("Функционал появится после завершения этой TASK.", section)
 
@@ -361,6 +364,25 @@ class RebaseRelativeLinksTests(unittest.TestCase):
             source_dir.mkdir(parents=True)
             text = "[вне репозитория](../../../outside.md)"
             self.assertEqual(_rebase_relative_links(text, source_dir, root), text)
+
+
+class CapabilityRowsTests(unittest.TestCase):
+    def test_rebases_relative_links_from_task_body_when_inlined_at_root(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            body = (
+                "## 10. Что это даёт владельцу\n\n"
+                "Решение зафиксировано в [`ADR_005`](../../adr/adr_005.md).\n"
+            )
+            task = _task_item("TASK_099", "completed", traces_to=["m02"], owner_action="none")
+            task["body"] = body
+            task["path"] = "work/tasks/task_099.md"
+
+            rows = _capability_rows([task], root)
+
+            self.assertIn("](adr/adr_005.md)", rows)
+            self.assertNotIn("](../../adr/adr_005.md)", rows)
 
 
 if __name__ == "__main__":

@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `360` |
-| Core logic (acceptance, governance, lifecycle) | `127` |
+| Всего тестов | `372` |
+| Core logic (acceptance, governance, lifecycle) | `128` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `45` |
+| Product | `56` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -112,6 +112,7 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_publication_and_acceptance_rules_are_consistent` | Правила публикации и принятия этапа согласованы между собой. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_workflow_block_scalar_break_is_detected` | Обнаруживается многострочный блок workflow, закрывающийся молча из-за нулевого отступа. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_lifecycle_matrix.py` | `LifecycleMatrixTests` | `test_m01_accept_m02_start_premature_reject_and_m02_accept` | Полный цикл: принятие m01, старт m02, отказ при преждевременном принятии, затем принятие m02. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilityRowsTests` | `test_rebases_relative_links_from_task_body_when_inlined_at_root` | Rebases relative links from task body when inlined at root |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_lists_only_completed_tasks_real_capability_text` | Раздел возможностей показывает только завершённые TASK с реальным текстом возможности. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_first_unfinished_task_is_selected_by_queue_order` | Первой выбирается незавершённая TASK по порядку очереди. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_detailed_without_artificial_percentages` | project_status.md подробен и не содержит искусственных процентов. |
@@ -353,6 +354,17 @@ version: 1.0
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelAsyncTests` | `test_send_without_token_raises_channel_error` | Отправка без токена вызывает ChannelError. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_channel_type_is_telegram` | Тип канала — Telegram. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_default_token_is_empty` | Токен по умолчанию пуст. |
+| Product | `operations/tests/product/test_model_gateway.py` | `ModelBackedRuntimePortTests` | `test_failed_completion_becomes_failed_runtime_result` | Failed completion becomes failed runtime result |
+| Product | `operations/tests/product/test_model_gateway.py` | `ModelBackedRuntimePortTests` | `test_gateway_outage_raises_runtime_port_error` | Gateway outage raises runtime port error |
+| Product | `operations/tests/product/test_model_gateway.py` | `ModelBackedRuntimePortTests` | `test_successful_completion_becomes_runtime_output` | Successful completion becomes runtime output |
+| Product | `operations/tests/product/test_model_gateway.py` | `OrchestratorWithModelBackedRuntimeTests` | `test_full_cycle_completes_task_via_model_gateway` | Full cycle completes task via model gateway |
+| Product | `operations/tests/product/test_model_gateway.py` | `OrchestratorWithModelBackedRuntimeTests` | `test_model_failure_marks_task_failed_through_full_cycle` | Model failure marks task failed through full cycle |
+| Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_default_response_echoes_prompt` | Default response echoes prompt |
+| Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_model_gateway_error_is_a_distinct_type` | Model gateway error is a distinct type |
+| Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_registered_failure_normalizes_to_failed_response` | Registered failure normalizes to failed response |
+| Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_registered_response_is_returned` | Registered response is returned |
+| Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_simulated_unavailable_raises_model_gateway_error` | Simulated unavailable raises model gateway error |
+| Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_usage_metrics_are_populated_on_success` | Usage metrics are populated on success |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_canned_runtime_response_is_sent_back` | Canned runtime response is sent back |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_message_is_marked_running_before_runtime_executes` | Message is marked running before runtime executes |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_successful_task_marks_completed_and_sends_output` | Successful task marks completed and sends output |

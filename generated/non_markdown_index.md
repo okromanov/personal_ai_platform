@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `137` |
+| Всего файлов | `142` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -77,7 +77,7 @@ version: 1.0
 | [`operations/scripts/requirements/stage_planning_wizard.py`](../operations/scripts/requirements/stage_planning_wizard.py) | — | Интерактивный wizard для планирования следующего этапа проекта. |
 | [`operations/scripts/status/__init__.py`](../operations/scripts/status/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/scripts/status/generate_project_status.py`](../operations/scripts/status/generate_project_status.py) | — | Собирает данные для project_status.md: этапы, задачи, прогресс, действие владельца. |
-| [`operations/scripts/status/human_status.py`](../operations/scripts/status/human_status.py) | — | Рендерит project_status.md — сводку для владельца без внутренних технических деталей. |
+| [`operations/scripts/status/human_status.py`](../operations/scripts/status/human_status.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | Рендерит project_status.md — сводку для владельца без внутренних технических деталей. |
 | [`operations/scripts/status/technical_status.py`](../operations/scripts/status/technical_status.py) | — | Формирует техническую сводку состояния репозитория для отладки, не для владельца. |
 | [`operations/scripts/tasks/__init__.py`](../operations/scripts/tasks/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/scripts/tasks/check_change_scope.py`](../operations/scripts/tasks/check_change_scope.py) | — | Проверка покрытия путей поставки проекта карточками TASK. |
@@ -95,6 +95,7 @@ version: 1.0
 | [`operations/tests/performance/test_critical_paths.py`](../operations/tests/performance/test_critical_paths.py) | — | Тесты производительности критичных, часто вызываемых функций. |
 | [`operations/tests/product/__init__.py`](../operations/tests/product/__init__.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/product/test_channels.py`](../operations/tests/product/test_channels.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Unit-тесты компонента Channels (ARC_CMP_001). |
+| [`operations/tests/product/test_model_gateway.py`](../operations/tests/product/test_model_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`operations/tests/product/test_owner_control.py`](../operations/tests/product/test_owner_control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`operations/tests/stress/__init__.py`](../operations/tests/stress/__init__.py) | — | Пустой файл-маркер Python-пакета. |
@@ -109,7 +110,7 @@ version: 1.0
 | [`operations/tests/test_generation_safety.py`](../operations/tests/test_generation_safety.py) | — | Тесты безопасности генераторов производных файлов. |
 | [`operations/tests/test_governance_hardening.py`](../operations/tests/test_governance_hardening.py) | — | Тесты, закрепляющие правила управления репозиторием. |
 | [`operations/tests/test_lifecycle_matrix.py`](../operations/tests/test_lifecycle_matrix.py) | — | Тесты матрицы состояний жизненного цикла TASK/TEST/этапов. |
-| [`operations/tests/test_owner_usability.py`](../operations/tests/test_owner_usability.py) | — | Тесты удобства project_status.md для владельца: обязательные элементы, без внутренних деталей. |
+| [`operations/tests/test_owner_usability.py`](../operations/tests/test_owner_usability.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | Тесты удобства project_status.md для владельца: обязательные элементы, без внутренних деталей. |
 | [`operations/tests/test_quality_integration.py`](../operations/tests/test_quality_integration.py) | — | Интеграционные тесты сквозного прогона quality suite. |
 | [`operations/tests/test_scope_coverage.py`](../operations/tests/test_scope_coverage.py) | — | Тесты покрытия путей поставки карточками TASK. |
 | [`operations/tests/test_security_extended.py`](../operations/tests/test_security_extended.py) | — | Тесты безопасности сверх governance-проверок: секреты, права доступа. |
@@ -142,6 +143,10 @@ version: 1.0
 | [`src/channels/__init__.py`](../src/channels/__init__.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Точка входа пакета Channels: экспортирует Channel, TaskMessage и TelegramChannel. |
 | [`src/channels/base.py`](../src/channels/base.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Базовый контракт канала: нормализует ввод/вывод в TaskMessage с отслеживаемым статусом. |
 | [`src/channels/telegram.py`](../src/channels/telegram.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Реализация канала Telegram: нормализует сообщения Telegram в формат TaskMessage. |
+| [`src/models/__init__.py`](../src/models/__init__.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
+| [`src/models/base.py`](../src/models/base.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
+| [`src/models/runtime_adapter.py`](../src/models/runtime_adapter.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
+| [`src/models/stub_gateway.py`](../src/models/stub_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`src/orchestration/__init__.py`](../src/orchestration/__init__.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/orchestration/orchestrator.py`](../src/orchestration/orchestrator.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/orchestration/runtime_port.py`](../src/orchestration/runtime_port.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |

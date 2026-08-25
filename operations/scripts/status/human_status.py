@@ -67,7 +67,7 @@ def _checkbox(done: bool) -> str:
 _CAPABILITY_PLACEHOLDER = "Функционал появится после завершения этой TASK."
 
 
-def _capability_rows(tasks: list[TaskItem]) -> str:
+def _capability_rows(tasks: list[TaskItem], root: Path) -> str:
     """One entry per completed TASK with a real (non-placeholder) "Что это
     даёт владельцу" section, in TASK id order — an accumulating, owner-facing
     changelog of what the solution can already do, built only from what each
@@ -79,6 +79,8 @@ def _capability_rows(tasks: list[TaskItem]) -> str:
         capability = _section(str(task.get("body", "")), "Что это даёт владельцу")
         if not capability or capability == _CAPABILITY_PLACEHOLDER:
             continue
+        task_source_dir = root / Path(str(task["path"])).parent
+        capability = _rebase_relative_links(capability, task_source_dir, root)
         task_link = f"[`{task['id']}`](work/tasks/{Path(task['path']).name})"
         entries.append(f"- {task_link} — {capability}")
     if not entries:
@@ -295,7 +297,7 @@ version: 1.0
 
 > Раздел пополняется по мере завершения проектных TASK: одна запись на каждую TASK, которая добавила владельцу новую возможность. Ничего не удаляется — это накопительная история того, что уже доступно.
 
-{_capability_rows(tasks)}
+{_capability_rows(tasks, root)}
 """
 
 
