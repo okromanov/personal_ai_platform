@@ -17,8 +17,9 @@ from operations.scripts.status.generate_project_status import (
     render_progress_sections,
 )
 from operations.scripts.status.human_status import (
-    _capability_rows,
+    _capability_summary,
     _rebase_relative_links,
+    _section,
     render_repository_project_status,
 )
 from operations.scripts.tasks.generate import collect_tasks, select_current_task
@@ -128,27 +129,18 @@ class OwnerUsabilityTests(unittest.TestCase):
         # project_status.md no longer carries this table at all.
         self.assertNotIn("Файлы, созданные в рамках задач", rendered)
 
-    def test_capabilities_section_lists_only_completed_tasks_real_capability_text(
+    def test_capabilities_section_embeds_the_hand_maintained_synthesis(
         self,
     ) -> None:
         rendered = render_repository_project_status(self.root)
         section = rendered[rendered.index("## Что уже умеет решение") :]
-        # TASK_001–TASK_005 are completed and have a real (non-placeholder)
-        # capability statement; every other TASK is still planned and must
-        # not appear here at all.
-        self.assertIn("[`TASK_001`](work/tasks/task_001_arc_001.md)", section)
-        self.assertIn("Реализовано единое правило приёма и ответа", section)
-        self.assertIn("[`TASK_002`](work/tasks/task_002_arc_002.md)", section)
-        self.assertIn("Чужое сообщение не превращается в выполняемую задачу", section)
-        self.assertIn("[`TASK_003`](work/tasks/task_003_arc_003.md)", section)
-        self.assertIn("доводится до конца одним предсказуемым путём", section)
-        self.assertIn("[`TASK_004`](work/tasks/task_004_arc_004.md)", section)
-        self.assertIn("контракт и тестовый переходный слой", section)
-        self.assertIn("[`TASK_005`](work/tasks/task_005_arc_005.md)", section)
-        self.assertIn("точка авторизации", section)
-        for task_id in [f"TASK_{n:03d}" for n in range(6, 14)]:
+        summary_doc = load_document(self.root / "operations/capability_summary.md")
+        expected = _section(summary_doc.body, "Текущая сводка")
+        self.assertTrue(expected)
+        self.assertIn(expected, section)
+        # This is a synthesis, not a per-TASK list: it must not name TASKs.
+        for task_id in [f"TASK_{n:03d}" for n in range(1, 14)]:
             self.assertNotIn(f"`{task_id}`](work/tasks/", section)
-        self.assertNotIn("Функционал появится после завершения этой TASK.", section)
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
@@ -368,23 +360,41 @@ class RebaseRelativeLinksTests(unittest.TestCase):
             self.assertEqual(_rebase_relative_links(text, source_dir, root), text)
 
 
-class CapabilityRowsTests(unittest.TestCase):
-    def test_rebases_relative_links_from_task_body_when_inlined_at_root(self) -> None:
+class CapabilitySummaryTests(unittest.TestCase):
+    def test_reads_the_current_summary_section_from_the_hand_maintained_file(self) -> None:
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "adr").mkdir()
-            body = (
-                "## 10. Что это даёт владельцу\n\n"
-                "Решение зафиксировано в [`ADR_005`](../../adr/adr_005.md).\n"
+            (root / "operations").mkdir()
+            (root / "operations" / "capability_summary.md").write_text(
+                "---\n"
+                "id: capability_summary\n"
+                "type: guide\n"
+                "document_state: current\n"
+                "version: 1.0\n"
+                "updated: 2026-08-25\n"
+                "---\n\n"
+                "# Итог\n\n"
+                "## Текущая сводка\n\n"
+                "Синтезированный текст возможностей.\n\n"
+                "## Как обновлять\n\n"
+                "Не должно попасть в результат.\n",
+                encoding="utf-8",
             )
-            task = _task_item("TASK_099", "completed", traces_to=["m02"], owner_action="none")
-            task["body"] = body
-            task["path"] = "work/tasks/task_099.md"
 
-            rows = _capability_rows([task], root)
+            summary = _capability_summary(root)
 
-            self.assertIn("](adr/adr_005.md)", rows)
-            self.assertNotIn("](../../adr/adr_005.md)", rows)
+            self.assertEqual(summary, "Синтезированный текст возможностей.")
+
+    def test_falls_back_when_the_summary_file_is_missing(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            summary = _capability_summary(root)
+
+            self.assertEqual(
+                summary,
+                "Пока ни одна завершённая TASK не добавила новую возможность для владельца.",
+            )
 
 
 if __name__ == "__main__":

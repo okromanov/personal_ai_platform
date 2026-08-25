@@ -10,8 +10,8 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `381` |
-| Core logic (acceptance, governance, lifecycle) | `128` |
+| Всего тестов | `382` |
+| Core logic (acceptance, governance, lifecycle) | `129` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
@@ -112,8 +112,9 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_publication_and_acceptance_rules_are_consistent` | Правила публикации и принятия этапа согласованы между собой. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_workflow_block_scalar_break_is_detected` | Обнаруживается многострочный блок workflow, закрывающийся молча из-за нулевого отступа. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_lifecycle_matrix.py` | `LifecycleMatrixTests` | `test_m01_accept_m02_start_premature_reject_and_m02_accept` | Полный цикл: принятие m01, старт m02, отказ при преждевременном принятии, затем принятие m02. |
-| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilityRowsTests` | `test_rebases_relative_links_from_task_body_when_inlined_at_root` | Rebases relative links from task body when inlined at root |
-| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_lists_only_completed_tasks_real_capability_text` | Раздел возможностей показывает только завершённые TASK с реальным текстом возможности. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_falls_back_when_the_summary_file_is_missing` | Falls back when the summary file is missing |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_reads_the_current_summary_section_from_the_hand_maintained_file` | Reads the current summary section from the hand maintained file |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_embeds_the_hand_maintained_synthesis` | Capabilities section embeds the hand maintained synthesis |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_first_unfinished_task_is_selected_by_queue_order` | Первой выбирается незавершённая TASK по порядку очереди. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_detailed_without_artificial_percentages` | project_status.md подробен и не содержит искусственных процентов. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_the_only_owner_entrypoint` | project_status.md — единственная точка входа для владельца. |
