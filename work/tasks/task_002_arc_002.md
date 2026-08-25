@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_002
 component: ARC_CMP_002
 work_state: completed
-version: 1.5
+version: 1.6
 updated: 2026-08-25
 next_actor: none
 owner_action: none
@@ -40,15 +40,15 @@ tests:
 Стабильный контракт `OwnerControl` (`src/owner_control/base.py`) и рабочая реализация `OwnerControlGate` (`src/owner_control/control.py`):
 
 - **Проверка личности** ([`SEC_CTL_001`](../../specifications/system_specification.md#sec_ctl_001)): субъект, не входящий в список владельца, отклоняется до вызова модели или инструмента; личность не выводится из текста сообщения.
-- **Независимый аварийный выключатель** ([`SEC_CTL_002`](../../specifications/system_specification.md#sec_ctl_002)): состояние хранится в файле вне процесса модели и сменной среды агента (`EmergencySwitch`, `src/owner_control/emergency_switch.py`), переживает перезапуск и имеет приоритет над любым решением о запуске или продолжении задачи.
-- **Контроль чувствительного внешнего действия** ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)): действия классов `write_external`, `destructive`, `admin` требуют явного решения владельца, привязанного к конкретным параметрам действия, и защищены от повторного дублирующего исполнения одного и того же `action_id`.
+- **Независимый аварийный выключатель** ([`SEC_CTL_002`](../../specifications/system_specification.md#sec_ctl_002)): состояние атомарно хранится в файле вне процесса модели и сменной среды агента, переживает перезапуск, а повреждённое или нечитаемое состояние приводит к безопасной остановке.
+- **Контроль чувствительного внешнего действия** ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)): действия классов `write_external`, `destructive`, `admin` требуют явного решения владельца, привязанного к неизменяемому полному описанию действия; ожидающие и уже авторизованные `action_id` сохраняются между перезапусками.
 - **Защита административной идентичности** ([`SEC_CTL_020`](../../specifications/system_specification.md#sec_ctl_020)): административный путь проверяется тем же контрактом `verify_identity`, без отдельного более слабого правила для `admin`-класса действий; фактическая многофакторная аутентификация на GitHub/площадке — операционная практика вне кода этого компонента (см. §12 в [`TEST_008`](../tests/test_008.md)).
 
 Реализация упрощена для [`m02`](../../milestones.md#m02): список владельца и аварийный выключатель используют локальный файл вместо внешнего секрет-хранилища; полноценный административный командный интерфейс ([`SYS_006`](../../specifications/system_specification.md#sys_006)) появится при сквозной интеграции подэтапа 5 [`m02`](../../milestones.md#m02), а не в этой TASK.
 
 ## 3. Где мы сейчас
 
-Спецификация и реализация [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) полностью завершены и покрыты [`TEST_008`](../tests/test_008.md).
+Спецификация и реализация [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) завершены и покрыты [`TEST_008`](../tests/test_008.md), включая отрицательные сценарии повреждения состояния, подмены ресурса и повторного исполнения после перезапуска.
 
 ## 4. Что делать сейчас
 
@@ -76,7 +76,7 @@ tests:
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны ([`operations/tests/product/test_owner_control.py`](../../operations/tests/product/test_owner_control.py): 19/19 тестов прошли, часть CI gate)
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_owner_control.py`](../../operations/tests/product/test_owner_control.py): 27/27 тестов прошли, часть CI gate)
 - ✅ Pre-commit валидация успешна
 - ✅ CI успешен
 - ✅ Код review (смысловая проверка) пройден
