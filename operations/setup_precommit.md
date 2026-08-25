@@ -2,8 +2,8 @@
 id: setup_precommit
 type: guide
 document_state: current
-version: 1.2
-updated: 2026-08-24
+version: 1.3
+updated: 2026-08-25
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -13,7 +13,7 @@ depends_on:
 
 ## Overview
 
-The repository includes one canonical pre-commit hook in `.claude/skills/pre_commit_hook.sh`. `operations/hooks/pre_commit_hook.sh` is a compatibility wrapper and contains no independent validation logic.
+The repository includes one canonical pre-commit hook in `operations/hooks/pre_commit_hook.sh`.
 
 ## Installation
 
@@ -22,7 +22,7 @@ The repository includes one canonical pre-commit hook in `.claude/skills/pre_com
 Run the following command in the repository root:
 
 ```bash
-cp .claude/skills/pre_commit_hook.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+cp operations/hooks/pre_commit_hook.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 ```
 
 ### Manual Verification

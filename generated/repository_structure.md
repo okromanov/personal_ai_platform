@@ -10,25 +10,10 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `234` |
+| Всего файлов | `242` |
 
 ```text
 personal_ai_platform/
-- .claude/settings.json
-- .claude/skills/code_quality_check.md
-- .claude/skills/dead_code_audit.md
-- .claude/skills/documentation_audit.md
-- .claude/skills/documentation_rules_detailed.md
-- .claude/skills/integration_tests.md
-- .claude/skills/pre_commit_hook.sh
-- .claude/skills/pre_commit_validation.md
-- .claude/skills/pre_push_hook.sh
-- .claude/skills/pre_push_validation.md
-- .claude/skills/python_lint_check.md
-- .claude/skills/python_type_check.md
-- .claude/skills/readme.md
-- .claude/skills/security_audit.md
-- .claude/skills/unit_tests.md
 - .github/workflows/project_check.yml
 - .gitignore
 - AGENTS.md
@@ -63,6 +48,18 @@ personal_ai_platform/
 - operations/procedure_map.md
 - operations/procedures/file_update_dependencies.md
 - operations/project_config.json
+- operations/quality/playbooks/code_quality_check.md
+- operations/quality/playbooks/dead_code_audit.md
+- operations/quality/playbooks/documentation_audit.md
+- operations/quality/playbooks/documentation_rules_detailed.md
+- operations/quality/playbooks/integration_tests.md
+- operations/quality/playbooks/pre_commit_validation.md
+- operations/quality/playbooks/pre_push_validation.md
+- operations/quality/playbooks/python_lint_check.md
+- operations/quality/playbooks/python_type_check.md
+- operations/quality/playbooks/readme.md
+- operations/quality/playbooks/security_audit.md
+- operations/quality/playbooks/unit_tests.md
 - operations/quality/requirements_dev.txt
 - operations/quality_baseline.json
 - operations/quality_registry.json
@@ -148,8 +145,10 @@ personal_ai_platform/
 - operations/tests/product/__init__.py
 - operations/tests/product/test_channels.py
 - operations/tests/product/test_model_gateway.py
+- operations/tests/product/test_operations_state.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
+- operations/tests/product/test_task_state.py
 - operations/tests/product/test_tool_gateway.py
 - operations/tests/stress/__init__.py
 - operations/tests/stress/test_scalability.py
@@ -195,6 +194,7 @@ personal_ai_platform/
 - project_rules.md
 - project_status.md
 - pyproject.toml
+- repository_audit_system_prompt.md
 - specifications/architecture_baseline.md
 - specifications/business_requirements.md
 - specifications/infrastructure_baseline.md
@@ -208,6 +208,9 @@ personal_ai_platform/
 - src/models/base.py
 - src/models/runtime_adapter.py
 - src/models/stub_gateway.py
+- src/operations/__init__.py
+- src/operations/health.py
+- src/operations/scheduler_state.py
 - src/orchestration/__init__.py
 - src/orchestration/orchestrator.py
 - src/orchestration/runtime_port.py
@@ -216,6 +219,9 @@ personal_ai_platform/
 - src/owner_control/base.py
 - src/owner_control/control.py
 - src/owner_control/emergency_switch.py
+- src/task_state/__init__.py
+- src/task_state/base.py
+- src/task_state/store.py
 - src/tools/__init__.py
 - src/tools/base.py
 - src/tools/registry.py
@@ -248,4 +254,6 @@ personal_ai_platform/
 - work/tests/test_009.md
 - work/tests/test_010.md
 - work/tests/test_011.md
+- work/tests/test_012.md
+- work/tests/test_013.md
 ```

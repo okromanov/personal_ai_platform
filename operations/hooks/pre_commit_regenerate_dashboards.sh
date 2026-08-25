@@ -12,7 +12,7 @@ set -uo pipefail
 # ADR_001 requires Python 3.12+; a bare `python3` can resolve to an older
 # system interpreter (e.g. 3.11), under which documents/generate.py's own
 # require_supported_python() refuses to run. Resolve the same way
-# .claude/skills/pre_commit_hook.sh does so this step isn't silently skipped
+# operations/hooks/pre_commit_hook.sh does so this step isn't silently skipped
 # just because the environment's default `python3` is too old.
 find_python() {
     for candidate in python3.14 python3.13 python3.12 python3 python; do

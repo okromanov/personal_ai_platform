@@ -71,12 +71,9 @@ class QualityIntegrationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "отсутствует"):
                 build_record(root, "a" * 40, ["missing.txt"], server_source=source)
 
-    def test_only_one_hook_contains_validation_logic(self) -> None:
-        canonical = (ROOT / ".claude/skills/pre_commit_hook.sh").read_text(encoding="utf-8")
-        wrapper = (ROOT / "operations/hooks/pre_commit_hook.sh").read_text(encoding="utf-8")
+    def test_pre_commit_hook_contains_validation_logic(self) -> None:
+        canonical = (ROOT / "operations/hooks/pre_commit_hook.sh").read_text(encoding="utf-8")
         self.assertIn("operations/scripts/quality/run_suite.py fast", canonical)
-        self.assertIn(".claude/skills/pre_commit_hook.sh", wrapper)
-        self.assertNotIn("documents/check.py", wrapper)
 
     def test_final_report_matches_current_repository_state(self) -> None:
         """work/m01_final_report.md is fully computed by render_final_report()
@@ -99,11 +96,9 @@ class QualityIntegrationTests(unittest.TestCase):
         for stale_claim in ("70/70", "21/21", "38 требований", "100%", "evidence_state:"):
             self.assertNotIn(stale_claim, report)
 
-    def test_pre_push_hook_wrapper_delegates_to_canonical_full_profile(self) -> None:
-        canonical = (ROOT / ".claude/skills/pre_push_hook.sh").read_text(encoding="utf-8")
-        wrapper = (ROOT / "operations/hooks/pre_push_hook.sh").read_text(encoding="utf-8")
+    def test_pre_push_hook_runs_the_canonical_full_profile(self) -> None:
+        canonical = (ROOT / "operations/hooks/pre_push_hook.sh").read_text(encoding="utf-8")
         self.assertIn("operations/scripts/quality/run_suite.py full", canonical)
-        self.assertIn(".claude/skills/pre_push_hook.sh", wrapper)
         # Network-fetched, pinned-binary checks stay CI-only, not invoked from
         # this local hook (mentioning them in the explanatory comment is fine).
         for ci_only_invocation in ("actionlint ", "gitleaks dir", "-m pip_audit"):
@@ -112,9 +107,7 @@ class QualityIntegrationTests(unittest.TestCase):
     def test_shellcheck_covers_both_pre_commit_and_pre_push_hooks(self) -> None:
         workflow = (ROOT / ".github/workflows/project_check.yml").read_text(encoding="utf-8")
         for hook_path in (
-            ".claude/skills/pre_commit_hook.sh",
             "operations/hooks/pre_commit_hook.sh",
-            ".claude/skills/pre_push_hook.sh",
             "operations/hooks/pre_push_hook.sh",
         ):
             self.assertIn(hook_path, workflow)

@@ -3,19 +3,28 @@ id: TASK_007
 type: task
 title: Реализация ARC_CMP_009
 component: ARC_CMP_009
-work_state: planned
-version: 1.6
+work_state: completed
+version: 2.0
 updated: 2026-08-25
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_006
 allowed_paths:
   - work/tasks/task_007_arc_009.md
+  - src/operations/
+  - src/operations/__init__.py
+  - src/operations/health.py
+  - src/operations/scheduler_state.py
+  - operations/tests/product/test_operations_state.py
+  - work/tests/test_013.md
+  - repository_audit_system_prompt.md
 traces_to:
   - m02
 implements:
   - ARC_CMP_009
+tests:
+  - TEST_013
 ---
 
 # TASK_007 — Реализация ARC_CMP_009
@@ -26,60 +35,49 @@ implements:
 
 ## 2. Результат
 
-Компонент, предоставляющий логическое состояние планировщика и работоспособности поверх состояния отдельных задач ([`TASK_006`](task_006_arc_007.md)). Физическая топология, средства наблюдения и механизм развёртывания сюда не входят — они принадлежат инфраструктуре ([`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007), [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008), реализуются позже в [`TASK_012`](task_012_inf_007.md), [`TASK_013`](task_013_inf_008.md)) и ADR.
+Компонент, предоставляющий логическое состояние планировщика (`SchedulerState`) и работоспособности (`HealthAggregator`) поверх состояния отдельных задач ([`TaskLifecycleStore`](../../src/task_state/base.py), [`TASK_006`](task_006_arc_007.md)). Физическая топология, средства наблюдения и механизм развёртывания сюда не входят — они принадлежат инфраструктуре ([`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007), [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008), реализуются позже в [`TASK_012`](task_012_inf_007.md), [`TASK_013`](task_013_inf_008.md)) и ADR.
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009) определяет требования ([`SYS_013`](../../specifications/system_specification.md#sys_013), [`SYS_024`](../../specifications/system_specification.md#sys_024), [`SYS_025`](../../specifications/system_specification.md#sys_025), [`SYS_026`](../../specifications/system_specification.md#sys_026), [`SYS_027`](../../specifications/system_specification.md#sys_027), [`SYS_030`](../../specifications/system_specification.md#sys_030)). Реализации нет. Зависит от [`TASK_006`](task_006_arc_007.md) (состояние задач) — эксплуатационные функции агрегируют состояние отдельных задач в общесистемную картину.
+Спецификация и реализация [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009) завершены и покрыты [`TEST_013`](../tests/test_013.md) в части работоспособности ([`SYS_024`](../../specifications/system_specification.md#sys_024)) и логической формы расписания. Плановые и регулярные задачи ([`SYS_013`](../../specifications/system_specification.md#sys_013)) вне очереди [`m02`](../../milestones.md#m02) (подэтап [`m05`](../../milestones.md#m05)) — `SchedulerState` даёт форму намерения без таймера и исполнения. Восстановление после сбоя, контролируемое обновление/откат и переносимое развёртывание ([`SYS_025`](../../specifications/system_specification.md#sys_025), [`SYS_026`](../../specifications/system_specification.md#sys_026), [`SYS_027`](../../specifications/system_specification.md#sys_027)) принадлежат физической инфраструктуре ([`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008), [`TASK_013`](task_013_inf_008.md)) — эта TASK не дублирует их.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена, следующего действия по этой TASK нет.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать реализацию
+- [x] Реализовать компонент
+- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `src/operations/`), добавит в `allowed_paths`, создаст TEST.
+[`src/operations/`](../../src/operations/) — `HealthAggregator`/`HealthReport`/`DependencyStatus` ([`health.py`](../../src/operations/health.py)) и `SchedulerState`/`ScheduledIntent` ([`scheduler_state.py`](../../src/operations/scheduler_state.py)). [`work/tests/test_013.md`](../tests/test_013.md) — описание проверок компонента. [`operations/tests/product/test_operations_state.py`](../../operations/tests/product/test_operations_state.py) — юнит-тесты, проверяющие компонент.
 
-**Ожидаемые файлы:**
-- `src/operations/health.py` — агрегированное состояние работоспособности
-- `src/operations/scheduler_state.py` — логическое состояние планировщика
-- `work/tests/test_00X.md` — описание проверок
+Полный прогон проверки обнаружил три доработки в [`repository_audit_system_prompt.md`](../../repository_audit_system_prompt.md) (добавлен отдельным изменением, PR #38), не относящиеся к реализации [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009): (1) 19 некликабельных упоминаний трассируемых элементов и путей документов — исправлено автоматическим линкером; (2) исходное имя файла в верхнем регистре нарушало соглашение lower_snake_case — файл переименован; (3) иллюстративный пример хардкода секретного значения в коде внутри документа ложно срабатывал на сканере секретов — значение в примере заменено на плейсхолдер, сохраняющий педагогический смысл без реального похожего на секрет значения.
 
 ## 7. Проверки и доказательства
 
-**Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Все тесты в связанном TEST проходят
-3. MyPy type check успешен
-4. Форматирование соответствует
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_013`](../tests/test_013.md): юнит-тесты [`operations/tests/product/test_operations_state.py`](../../operations/tests/product/test_operations_state.py), часть обязательного gate `Quality skills`.
 
 **Ручные (code review):**
-1. Компонент не дублирует физическую инфраструктуру (наблюдаемость, развёртывание)
-2. Действия восстановления явно ограничены и не дают полного административного доступа
-3. Состояние планировщика согласовано с состоянием отдельных задач ([`TASK_006`](task_006_arc_007.md))
+1. Компонент не дублирует физическую инфраструктуру (наблюдаемость, развёртывание) — `HealthAggregator` не хранит метрики сам, `SchedulerState` не запускает ничего сама
+2. Действие восстановления (`SchedulerState.pause`) явно ограничено: не отменяет задачи, не даёт административного доступа — подтверждено тестом
+3. Состояние планировщика согласовано с состоянием отдельных задач: `runnable_intents` исключает намерения с отменённой задачей — подтверждено тестом
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_operations_state.py`](../../operations/tests/product/test_operations_state.py): 12/12 тестов прошли, часть CI gate)
+- ✅ Pre-commit валидация успешна
 - ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 
@@ -87,4 +85,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Пока напрямую ничего не доступно: логические контракты, ещё не подключённые к реальному мониторингу или расписанию. Появилось место, где сбой конкретной зависимости системы можно локализовать, не читая пользовательское содержимое, и форма, в которой намерение расписания хранится отдельно от разрешения на его выполнение. Реальный сбор метрик, оповещения и плановые задачи по расписанию появятся в следующих этапах.

@@ -14,28 +14,21 @@ NO_DESCRIPTION = "—"
 # actual purpose) — never invented. A path missing here falls back to
 # NO_DESCRIPTION rather than guessing.
 DESCRIPTIONS: dict[str, str] = {
-    ".claude/settings.json": "Реестр периодических и блокирующих quality-проверок репозитория.",
-    ".claude/skills/pre_commit_hook.sh": (
-        "Канонический pre-commit hook: версии authority-документов, dev-инструменты, "
-        "быстрый набор проверок, регенерация дашбордов."
-    ),
-    ".claude/skills/pre_push_hook.sh": (
-        "Канонический pre-push hook: полный набор проверок (mypy, форматирование, "
-        "покрытие, Bandit, Vulture, анализ AST) перед отправкой изменений."
-    ),
     ".github/workflows/project_check.yml": (
         "CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно."
     ),
     ".gitignore": "Список путей и масок, исключённых из git.",
     "operations/hooks/pre_commit_hook.sh": (
-        "Обёртка: запускает канонический hook .claude/skills/pre_commit_hook.sh."
+        "Канонический pre-commit hook: версии authority-документов, dev-инструменты, "
+        "быстрый набор проверок, регенерация дашбордов."
     ),
     "operations/hooks/pre_commit_regenerate_dashboards.sh": (
         "Шаг pre-commit hook: при изменении любого .md-файла бампит его версию и "
         "регенерирует project_status.md, tasks.md и generated/*."
     ),
     "operations/hooks/pre_push_hook.sh": (
-        "Обёртка: запускает канонический hook .claude/skills/pre_push_hook.sh."
+        "Канонический pre-push hook: полный набор проверок (mypy, форматирование, "
+        "покрытие, Bandit, Vulture, анализ AST) перед отправкой изменений."
     ),
     "operations/project_config.json": "Общие настройки репозитория: часовой пояс и адрес на GitHub.",
     "operations/quality/requirements_dev.txt": (

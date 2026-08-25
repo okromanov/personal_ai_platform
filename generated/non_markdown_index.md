@@ -10,22 +10,19 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `146` |
+| Всего файлов | `151` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
 | Файл | Задача | Описание |
 |---|---|---|
-| [`.claude/settings.json`](../.claude/settings.json) | — | Реестр периодических и блокирующих quality-проверок репозитория. |
-| [`.claude/skills/pre_commit_hook.sh`](../.claude/skills/pre_commit_hook.sh) | — | Канонический pre-commit hook: версии authority-документов, dev-инструменты, быстрый набор проверок, регенерация дашбордов. |
-| [`.claude/skills/pre_push_hook.sh`](../.claude/skills/pre_push_hook.sh) | — | Канонический pre-push hook: полный набор проверок (mypy, форматирование, покрытие, Bandit, Vulture, анализ AST) перед отправкой изменений. |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/hooks/__init__.py`](../operations/hooks/__init__.py) | — | Пустой файл-маркер Python-пакета. |
-| [`operations/hooks/pre_commit_hook.sh`](../operations/hooks/pre_commit_hook.sh) | — | Обёртка: запускает канонический hook .claude/skills/pre_commit_hook.sh. |
+| [`operations/hooks/pre_commit_hook.sh`](../operations/hooks/pre_commit_hook.sh) | — | Канонический pre-commit hook: версии authority-документов, dev-инструменты, быстрый набор проверок, регенерация дашбордов. |
 | [`operations/hooks/pre_commit_regenerate_dashboards.sh`](../operations/hooks/pre_commit_regenerate_dashboards.sh) | — | Шаг pre-commit hook: при изменении любого .md-файла бампит его версию и регенерирует project_status.md, tasks.md и generated/*. |
-| [`operations/hooks/pre_push_hook.sh`](../operations/hooks/pre_push_hook.sh) | — | Обёртка: запускает канонический hook .claude/skills/pre_push_hook.sh. |
+| [`operations/hooks/pre_push_hook.sh`](../operations/hooks/pre_push_hook.sh) | — | Канонический pre-push hook: полный набор проверок (mypy, форматирование, покрытие, Bandit, Vulture, анализ AST) перед отправкой изменений. |
 | [`operations/project_config.json`](../operations/project_config.json) | — | Общие настройки репозитория: часовой пояс и адрес на GitHub. |
 | [`operations/quality/requirements_dev.txt`](../operations/quality/requirements_dev.txt) | — | Зафиксированные версии dev-инструментов для локального и серверного quality suite. |
 | [`operations/quality_baseline.json`](../operations/quality_baseline.json) | — | Эталонный список известных ошибок mypy: gate не даёт их числу расти. |
@@ -96,8 +93,10 @@ version: 1.0
 | [`operations/tests/product/__init__.py`](../operations/tests/product/__init__.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/product/test_channels.py`](../operations/tests/product/test_channels.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Unit-тесты компонента Channels (ARC_CMP_001). |
 | [`operations/tests/product/test_model_gateway.py`](../operations/tests/product/test_model_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
+| [`operations/tests/product/test_operations_state.py`](../operations/tests/product/test_operations_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`operations/tests/product/test_owner_control.py`](../operations/tests/product/test_owner_control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
+| [`operations/tests/product/test_task_state.py`](../operations/tests/product/test_task_state.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
 | [`operations/tests/product/test_tool_gateway.py`](../operations/tests/product/test_tool_gateway.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |
 | [`operations/tests/stress/__init__.py`](../operations/tests/stress/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/tests/stress/test_scalability.py`](../operations/tests/stress/test_scalability.py) | — | Стресс-тесты масштабируемости функций, перебирающих этапы, задачи или файлы. |
@@ -148,6 +147,9 @@ version: 1.0
 | [`src/models/base.py`](../src/models/base.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`src/models/runtime_adapter.py`](../src/models/runtime_adapter.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`src/models/stub_gateway.py`](../src/models/stub_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
+| [`src/operations/__init__.py`](../src/operations/__init__.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
+| [`src/operations/health.py`](../src/operations/health.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
+| [`src/operations/scheduler_state.py`](../src/operations/scheduler_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/orchestration/__init__.py`](../src/orchestration/__init__.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/orchestration/orchestrator.py`](../src/orchestration/orchestrator.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/orchestration/runtime_port.py`](../src/orchestration/runtime_port.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
@@ -156,6 +158,9 @@ version: 1.0
 | [`src/owner_control/base.py`](../src/owner_control/base.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/control.py`](../src/owner_control/control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
 | [`src/owner_control/emergency_switch.py`](../src/owner_control/emergency_switch.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
+| [`src/task_state/__init__.py`](../src/task_state/__init__.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
+| [`src/task_state/base.py`](../src/task_state/base.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
+| [`src/task_state/store.py`](../src/task_state/store.py) | [`TASK_006`](../work/tasks/task_006_arc_007.md) | — |
 | [`src/tools/__init__.py`](../src/tools/__init__.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |
 | [`src/tools/base.py`](../src/tools/base.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |
 | [`src/tools/registry.py`](../src/tools/registry.py) | [`TASK_005`](../work/tasks/task_005_arc_005.md) | — |

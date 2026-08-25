@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `382` |
+| Всего тестов | `407` |
 | Core logic (acceptance, governance, lifecycle) | `129` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `65` |
+| Product | `90` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -126,8 +126,8 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `RebaseRelativeLinksTests` | `test_leaves_link_escaping_repository_root_unchanged` | Leaves link escaping repository root unchanged |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_event_gate_covers_push_pr_and_manual` | Событийный gate покрывает push, PR и ручной запуск. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_final_report_matches_current_repository_state` | work/m01_final_report.md полностью соответствует тому, что вычисляет render_final_report(). |
-| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_only_one_hook_contains_validation_logic` | Логика проверки находится только в одном каноническом хуке. |
-| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_pre_push_hook_wrapper_delegates_to_canonical_full_profile` | Обёртка pre-push hook делегирует канонический полный профиль проверок. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_pre_commit_hook_contains_validation_logic` | Pre commit hook contains validation logic |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_pre_push_hook_runs_the_canonical_full_profile` | Pre push hook runs the canonical full profile |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_proposed_technology_adrs_require_m02_evidence` | Предложенные технологические ADR требуют evidence по m02. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_quality_record_requires_exact_sha_and_present_artifacts` | Запись о прогоне качества требует точного SHA и реально существующих артефактов. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_shellcheck_covers_both_pre_commit_and_pre_push_hooks` | ShellCheck проверяет и pre-commit, и pre-push хуки. |
@@ -366,6 +366,18 @@ version: 1.0
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_registered_response_is_returned` | Registered response is returned |
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_simulated_unavailable_raises_model_gateway_error` | Simulated unavailable raises model gateway error |
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_usage_metrics_are_populated_on_success` | Usage metrics are populated on success |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_a_raising_check_is_isolated_as_that_dependencys_failure` | A raising check is isolated as that dependencys failure |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_registering_the_same_name_twice_replaces_the_check` | Registering the same name twice replaces the check |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_report_is_healthy_when_every_check_is_healthy` | Report is healthy when every check is healthy |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_report_is_unhealthy_when_any_check_fails` | Report is unhealthy when any check fails |
+| Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_unhealthy_dependencies_localizes_to_the_failing_ones_only` | Unhealthy dependencies localizes to the failing ones only |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_active_task_intent_is_runnable` | Active task intent is runnable |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_cancelled_task_intent_is_not_runnable` | Cancelled task intent is not runnable |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_multiple_intents_are_filtered_independently_by_task_state` | Multiple intents are filtered independently by task state |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_new_scheduler_is_not_paused` | New scheduler is not paused |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_pause_stops_all_intents_regardless_of_task_state` | Pause stops all intents regardless of task state |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_registering_the_same_intent_id_twice_replaces_it` | Registering the same intent id twice replaces it |
+| Product | `operations/tests/product/test_operations_state.py` | `SchedulerStateTests` | `test_resume_restores_runnable_intents` | Resume restores runnable intents |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_canned_runtime_response_is_sent_back` | Canned runtime response is sent back |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_message_is_marked_running_before_runtime_executes` | Message is marked running before runtime executes |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorHappyPathTests` | `test_successful_task_marks_completed_and_sends_output` | Successful task marks completed and sends output |
@@ -395,6 +407,19 @@ version: 1.0
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_read_action_id_is_also_rejected` | Duplicate read action id is also rejected |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_read_action_is_authorized_immediately` | Read action is authorized immediately |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_sensitive_action_without_confirmation_is_rejected` | Sensitive action without confirmation is rejected |
+| Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_checkpoint_is_retrievable` | Checkpoint is retrievable |
+| Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_checkpoint_preserves_retry_count_and_cancelled_flag` | Checkpoint preserves retry count and cancelled flag |
+| Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_new_checkpoint_replaces_the_previous_one` | New checkpoint replaces the previous one |
+| Product | `operations/tests/product/test_task_state.py` | `DuplicateProtectionTests` | `test_distinct_tasks_have_independent_state` | Distinct tasks have independent state |
+| Product | `operations/tests/product/test_task_state.py` | `DuplicateProtectionTests` | `test_has_executed_is_false_until_marked` | Has executed is false until marked |
+| Product | `operations/tests/product/test_task_state.py` | `DuplicateProtectionTests` | `test_marking_the_same_action_twice_does_not_error` | Marking the same action twice does not error |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_cancel_marks_state_cancelled` | Cancel marks state cancelled |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_cancel_preserves_checkpoint_and_retry_count` | Cancel preserves checkpoint and retry count |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_cancelling_twice_is_not_an_error` | Cancelling twice is not an error |
+| Product | `operations/tests/product/test_task_state.py` | `RetryAndCancelTests` | `test_increment_retry_increments_and_returns_the_new_count` | Increment retry increments and returns the new count |
+| Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_new_task_has_default_state` | New task has default state |
+| Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_saved_task_is_retrievable_by_id` | Saved task is retrievable by id |
+| Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_unknown_task_id_returns_none` | Unknown task id returns none |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_capability_effect_class_cannot_be_overridden_by_call_params` | SEC_CTL_007: the fixed, registered effect_class governs |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_resource_outside_allowlist_is_denied` | Resource outside allowlist is denied |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_unknown_capability_returns_failed_result` | Unknown capability returns failed result |
