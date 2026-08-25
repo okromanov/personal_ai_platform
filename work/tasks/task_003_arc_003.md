@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: planned
-version: 1.5
+version: 1.7
 updated: 2026-08-25
 next_actor: agent
 owner_action: none
