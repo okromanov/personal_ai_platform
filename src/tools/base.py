@@ -25,17 +25,23 @@ class ToolCall:
         action_id: Caller-supplied identifier used for duplicate protection
             (SEC_CTL_008) and to correlate an owner confirmation with this
             exact call.
+        subject_id: Channel-authenticated identity requesting the action.
         capability_name: The capability being invoked.
         resource: The concrete resource this call acts on.
-        params: Concrete significant parameters of the call.
+        params: JSON-serializable significant parameters of the call.
+        secret_refs: Named secret references requested by the call.
+        network_target: Network destination requested by the call, if any.
         confirmed: Whether the owner has confirmed these exact parameters;
             required before a sensitive call is authorized.
     """
 
     action_id: str
+    subject_id: str
     capability_name: str
     resource: str
     params: dict[str, Any] = field(default_factory=dict)
+    secret_refs: frozenset[str] = field(default_factory=frozenset)
+    network_target: str | None = None
     confirmed: bool = False
 
 
