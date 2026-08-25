@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: planned
-version: 1.4
+version: 1.5
 updated: 2026-08-24
 next_actor: agent
 owner_action: none
@@ -54,7 +54,7 @@ implements:
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `infrastructure/deploy/` или CI workflow), добавит в `allowed_paths`, создаст TEST.
+**В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `infrastructure/deploy/` или конфигурации существующего CI), добавит их в `allowed_paths` и создаст связанную карточку TEST.
 
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
