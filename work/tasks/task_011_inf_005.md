@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
 work_state: planned
-version: 1.6
+version: 1.7
 updated: 2026-08-25
 next_actor: agent
 owner_action: none
@@ -54,7 +54,7 @@ implements:
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно расширение `src/storage/`), добавит в `allowed_paths`, создаст TEST.
+**В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `src/storage/`), добавит их в `allowed_paths` и создаст связанную карточку TEST.
 
 **Ожидаемые файлы:**
 - `src/storage/persistent.py` — реализация `TaskLifecycleStore` поверх физического хранилища
