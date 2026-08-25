@@ -5,7 +5,7 @@ title: Реализация INF_CMP_003
 component: INF_CMP_003
 work_state: planned
 version: 1.5
-updated: 2026-08-24
+updated: 2026-08-25
 next_actor: agent
 owner_action: none
 depends_on:
