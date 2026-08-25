@@ -4,7 +4,7 @@ type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: completed
-version: 1.9
+version: 2.0
 updated: 2026-08-25
 next_actor: none
 owner_action: none
@@ -19,6 +19,15 @@ allowed_paths:
   - src/orchestration/orchestrator.py
   - operations/tests/product/test_orchestration.py
   - work/tests/test_009.md
+  - adr/adr_005_first_model_provider_selection.md
+  - adr/adr_006_agent_environment_framework.md
+  - adr/adr_007_cloud_provider_selection.md
+  - adr/adr_008_data_storage_schema.md
+  - adr/adr_009_secret_management_strategy.md
+  - milestones.md
+  - specifications/architecture_baseline.md
+  - specifications/system_specification.md
+  - specifications/infrastructure_baseline.md
 traces_to:
   - m02
 implements:
@@ -60,6 +69,8 @@ tests:
 
 [`src/orchestration/`](../../src/orchestration/) — стабильный контракт `RuntimePort` ([`runtime_port.py`](../../src/orchestration/runtime_port.py)), тестовый переходный слой `StubRuntimePort` ([`stub_runtime.py`](../../src/orchestration/stub_runtime.py)) и `Orchestrator` ([`orchestrator.py`](../../src/orchestration/orchestrator.py)), проводящий задачу через [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001). [`work/tests/test_009.md`](../tests/test_009.md) — описание проверок компонента. [`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py) — юнит-тесты, проверяющие компонент.
 
+[`adr/adr_005_first_model_provider_selection.md`](../../adr/adr_005_first_model_provider_selection.md)–[`adr/adr_009_secret_management_strategy.md`](../../adr/adr_009_secret_management_strategy.md), [`milestones.md`](../../milestones.md), [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md), [`specifications/system_specification.md`](../../specifications/system_specification.md) и [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md) добавлены в `allowed_paths` по прямому решению владельца отдельно от реализации [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) — они покрывают правку кликабельности ссылок на трассируемые элементы, включая упоминания внутри строк `traces_to` (см. [`work/tasks/task_001_arc_001.md`](task_001_arc_001.md)), и удаление раздела «Верхнеуровневая схема» из [`architecture_baseline.md`](../../specifications/architecture_baseline.md), а не оркестрацию задач.
+
 ## 7. Проверки и доказательства
 
 Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_009`](../tests/test_009.md): юнит-тесты [`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py), часть обязательного gate `Quality skills`.
@@ -76,7 +87,7 @@ tests:
 
 ## 9. Что будет дальше
 
-`TASK_004` реализует Шлюз моделей (`ARC_CMP_004`) — нормализованный доступ к LLM, который тестовый переходный слой (а затем и выбранная среда агента) будет вызывать в цикле выполнения задачи. `TASK_005` реализует Шлюз инструментов (`ARC_CMP_005`), необходимый оркестратору для авторизованных вызовов инструментов.
+[`TASK_004`](task_004_arc_004.md) реализует Шлюз моделей ([`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)) — нормализованный доступ к LLM, который тестовый переходный слой (а затем и выбранная среда агента) будет вызывать в цикле выполнения задачи. [`TASK_005`](task_005_arc_005.md) реализует Шлюз инструментов ([`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)), необходимый оркестратору для авторизованных вызовов инструментов. См. [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) для полного списка требований, реализуемых [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003).
 
 ## 10. Что это даёт владельцу
 

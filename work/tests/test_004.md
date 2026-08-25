@@ -5,8 +5,8 @@ title: Контроль владельца и аварийное отключе�
 spec_state: current
 execution: automated
 automated_evidence: m02_security_tests
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-08-24
 accepts:
   - m02
 verifies:
@@ -40,7 +40,7 @@ verifies:
 
 ## 3. Автоматический запуск
 
-Профиль m02 запускает набор негативных тестов с тестовыми адаптерами и записывает результат в `runtime/evidence/m02_security_tests.json`.
+Профиль [`m02`](../../milestones.md#m02) запускает набор негативных тестов с тестовыми адаптерами и записывает результат в `runtime/evidence/m02_security_tests.json`.
 
 ## 4. Критерий успеха
 

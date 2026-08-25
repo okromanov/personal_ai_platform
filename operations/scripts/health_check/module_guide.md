@@ -1,7 +1,7 @@
 ---
 id: health_check_module
 type: documentation
-version: 1.1
+version: 1.2
 document_state: current
 updated: 2026-08-24
 depends_on: []
@@ -167,7 +167,7 @@ def assess_health(health: RepositoryHealth) -> str:
 
 ## ✅ Требования
 
-- Python 3.12+ (ADR_001)
+- Python 3.12+ ([`ADR_001`](../../../adr/adr_001_language_and_runtime.md))
 - Git
 - pytest (для тестирования)
 - mypy (для проверки типов)
@@ -179,7 +179,7 @@ def assess_health(health: RepositoryHealth) -> str:
 были установлены именно для интерпретатора, которым запускается скрипт
 (проверяется через `sys.executable`, а не голый `python` из PATH). Если
 локально `python`/`python3` указывает на версию < 3.12 или на интерпретатор
-без `operations/quality/requirements_dev.txt`, соберите отдельное окружение:
+без [`operations/quality/requirements_dev.txt`](../../quality/requirements_dev.txt), соберите отдельное окружение:
 
 ```bash
 python3.12 -m venv .venv

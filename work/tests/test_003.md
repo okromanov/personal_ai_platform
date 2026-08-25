@@ -5,8 +5,8 @@ title: Контракты среды агента и поставщика мод
 spec_state: current
 execution: automated
 automated_evidence: m02_contract_tests
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-08-24
 accepts:
   - m02
 verifies:
@@ -33,7 +33,7 @@ verifies:
 
 ## 3. Автоматический запуск
 
-Команда и путь теста фиксируются в профиле качества m02 до перевода этапа в `in-progress`. CI записывает структурированный результат в `runtime/evidence/m02_contract_tests.json`.
+Команда и путь теста фиксируются в профиле качества [`m02`](../../milestones.md#m02) до перевода этапа в `in-progress`. CI записывает структурированный результат в `runtime/evidence/m02_contract_tests.json`.
 
 ## 4. Критерий успеха
 

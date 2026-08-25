@@ -2,7 +2,7 @@
 id: ADR_006
 type: adr
 decision_state: proposed
-version: 1.0
+version: 1.1
 updated: 2026-08-24
 traces_to:
   - m02
@@ -18,11 +18,11 @@ traces_to:
 
 ## 1. Назначение
 
-Зафиксировать Claude Agent SDK как кандидата для сравнительной проверки среды выполнения агента в m02, сохраняя заменяемую границу `RuntimePort` по [`SYS_003`](../specifications/system_specification.md#sys_003).
+Зафиксировать Claude Agent SDK как кандидата для сравнительной проверки среды выполнения агента в [`m02`](../milestones.md#m02), сохраняя заменяемую границу `RuntimePort` по [`SYS_003`](../specifications/system_specification.md#sys_003).
 
 ## 2. Контекст
 
-ADR_002 определяет границу `RuntimePort` между средой и платформой. Конкретный фреймворк выбирается в [`m02`](../milestones.md#m02) после проверки кандидатов для первого сквозного сценария ([`BR_001`](../specifications/business_requirements.md#br_001), [`SYS_001`](../specifications/system_specification.md#sys_001), [`SYS_003`](../specifications/system_specification.md#sys_003)):
+[`ADR_002`](adr_002_core_runtime_boundary.md#adr_002) определяет границу `RuntimePort` между средой и платформой. Конкретный фреймворк выбирается в [`m02`](../milestones.md#m02) после проверки кандидатов для первого сквозного сценария ([`BR_001`](../specifications/business_requirements.md#br_001), [`SYS_001`](../specifications/system_specification.md#sys_001), [`SYS_003`](../specifications/system_specification.md#sys_003)):
 
 - среда должна выполнять управляемый цикл обычной задачи через [`ARC_CMP_003`](../specifications/architecture_baseline.md#arc_cmp_003);
 - особенности SDK не должны проникать в канал [`ARC_CMP_001`](../specifications/architecture_baseline.md#arc_cmp_001) и контракты платформы;
@@ -39,7 +39,7 @@ ADR_002 определяет границу `RuntimePort` между средо�
 4. **Безопасность:** Изоляция инструментов через отдельные экземпляры и контексты
 5. **Эволюция:** `RuntimePort` позволяет сравнивать и заменять среды без изменения ядра.
 
-Документ остаётся `proposed` до сравнительного evidence и решения владельца. Он не разрешает заранее использовать Claude Agent SDK во всех этапах m02–m06.
+Документ остаётся `proposed` до сравнительного evidence и решения владельца. Он не разрешает заранее использовать Claude Agent SDK во всех этапах [`m02`](../milestones.md#m02)–[`m06`](../milestones.md#m06).
 
 ## 4. Альтернативы
 

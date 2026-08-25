@@ -56,9 +56,9 @@ The final `Project check` gate requires Windows portability validation and the c
 
 - Dynamic test and checker counts come from the current run, not this document.
 - The canonical unittest runner fails on every skipped test; an unavailable prerequisite is a gate failure, not a silent pass.
-- Aggregate, critical-module and changed-line coverage floors live in `pyproject.toml`; the mypy debt budget lives in `operations/quality_baseline.json`.
+- Aggregate, critical-module and changed-line coverage floors live in `pyproject.toml`; the mypy debt budget lives in [`operations/quality_baseline.json`](../../operations/quality_baseline.json).
 - A passing mypy baseline means no regression; it does not mean zero type errors until the budget reaches zero.
-- Ruff and development-tool versions are pinned in `operations/quality/requirements_dev.txt`.
+- Ruff and development-tool versions are pinned in [`operations/quality/requirements_dev.txt`](../../operations/quality/requirements_dev.txt).
 - Quality claims are bound to a Git SHA and CI run; an older green run is not evidence for a newer revision.
 
 ## Improving the Baseline

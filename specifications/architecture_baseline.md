@@ -2,8 +2,8 @@
 id: architecture_baseline
 type: architecture
 document_state: current
-version: 1.0
-updated: 2026-08-22
+version: 1.2
+updated: 2026-08-25
 depends_on:
   - system_specification
   - project_rules
@@ -29,38 +29,19 @@ depends_on:
 8. Логическая архитектура не меняется из-за смены физического размещения, если сохраняются контракты и границы полномочий.
 9. **Модульный монолит по умолчанию.** Логический компонент не означает отдельный процесс, контейнер или сервис. Пока нет доказанной потребности в иной границе, платформа развёртывается минимальным числом единиц. Физическое разделение вводится только ради изоляции, надёжности или другого измеримого выигрыша.
 
-## 3. Верхнеуровневая схема
-
-```mermaid
-flowchart TD
-    U[Владелец] --> C1[ARC_CMP_001 Каналы]
-    C1 --> C2[ARC_CMP_002 Контроль владельца]
-    C2 --> C3[ARC_CMP_003 Оркестрация]
-    C3 --> C4[ARC_CMP_004 Модели]
-    C3 --> C5[ARC_CMP_005 Инструменты]
-    C3 --> C6[ARC_CMP_006 Контекст и данные]
-    C3 --> C7[ARC_CMP_007 Состояние задач]
-    C3 --> C8[ARC_CMP_008 Проверка качества]
-    C7 --> C9[ARC_CMP_009 Эксплуатационные функции]
-    C5 --> X[Внешние системы / артефакты]
-    C8 --> R[Ответ / результат]
-```
-
-Схема является визуальной картой каталога ниже и не вводит самостоятельных архитектурных решений.
-
-## 4. Стабильные архитектурные компоненты
+## 3. Стабильные архитектурные компоненты
 
 <a id="arc_cmp_001"></a>
 ### ARC_CMP_001 — Каналы
 
-- `traces_to`: `SYS_001`, `SYS_036`, `SYS_005`, `SYS_006`, `SYS_007`
+- `traces_to`: [`SYS_001`](system_specification.md#sys_001), [`SYS_036`](system_specification.md#sys_036), [`SYS_005`](system_specification.md#sys_005), [`SYS_006`](system_specification.md#sys_006), [`SYS_007`](system_specification.md#sys_007)
 
 Нормализует пользовательский ввод и вывод для поддерживаемых интерфейсов. Канал не владеет бизнес-логикой задачи, постоянной памятью или полномочиями инструмента.
 
 <a id="arc_cmp_002"></a>
 ### ARC_CMP_002 — Контроль владельца
 
-- `traces_to`: `SYS_002`, `SYS_020`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_008`, `SEC_CTL_020`
+- `traces_to`: [`SYS_002`](system_specification.md#sys_002), [`SYS_020`](system_specification.md#sys_020), [`SEC_CTL_001`](system_specification.md#sec_ctl_001), [`SEC_CTL_002`](system_specification.md#sec_ctl_002), [`SEC_CTL_008`](system_specification.md#sec_ctl_008), [`SEC_CTL_020`](system_specification.md#sec_ctl_020)
 
 Проверяет личность, правила владельца, аварийное состояние и применимые условия до запуска или продолжения задачи. Отдельная проверка повторяется перед чувствительным действием.
 
@@ -69,7 +50,7 @@ flowchart TD
 <a id="arc_cmp_003"></a>
 ### ARC_CMP_003 — Оркестрация и RuntimePort
 
-- `traces_to`: `SYS_001`, `SYS_036`, `SYS_003`, `BR_033`
+- `traces_to`: [`SYS_001`](system_specification.md#sys_001), [`SYS_036`](system_specification.md#sys_036), [`SYS_003`](system_specification.md#sys_003), [`BR_033`](business_requirements.md#br_033)
 
 Преобразует задачу в исполнимый цикл и подключает выбранную среду агента через стабильную границу `RuntimePort`. Особенности конкретной реализации остаются внутри переходного слоя. Компонент не владеет главными секретами, контролем владельца или канонической долговременной памятью.
 
@@ -78,14 +59,14 @@ flowchart TD
 <a id="arc_cmp_004"></a>
 ### ARC_CMP_004 — Шлюз моделей
 
-- `traces_to`: `SYS_004`, `SYS_022`, `BR_034`, `SEC_CTL_015`
+- `traces_to`: [`SYS_004`](system_specification.md#sys_004), [`SYS_022`](system_specification.md#sys_022), [`BR_034`](business_requirements.md#br_034), [`SEC_CTL_015`](system_specification.md#sec_ctl_015)
 
 Предоставляет нормализованный контракт запросов, ответов, ошибок и доступных показателей моделей. Выбор поставщика не меняет контракты каналов, задач и данных и не ослабляет правила.
 
 <a id="arc_cmp_005"></a>
 ### ARC_CMP_005 — Шлюз инструментов
 
-- `traces_to`: `SYS_020`, `SYS_021`, `SEC_CTL_003`, `SEC_CTL_007`, `SEC_CTL_008`, `SEC_CTL_009`
+- `traces_to`: [`SYS_020`](system_specification.md#sys_020), [`SYS_021`](system_specification.md#sys_021), [`SEC_CTL_003`](system_specification.md#sec_ctl_003), [`SEC_CTL_007`](system_specification.md#sec_ctl_007), [`SEC_CTL_008`](system_specification.md#sec_ctl_008), [`SEC_CTL_009`](system_specification.md#sec_ctl_009)
 
 Является единой точкой технической авторизации вызовов инструментов. Контракт возможности задаёт разрешённый субъект, ресурс, область, класс воздействия, данные, секреты, сеть, ограничения, подтверждение и защиту от дублей.
 
@@ -94,38 +75,38 @@ MCP и другие протоколы являются способами ин�
 <a id="arc_cmp_006"></a>
 ### ARC_CMP_006 — Контекст, память и доказательства
 
-- `traces_to`: `SYS_008`, `SYS_009`, `SYS_010`, `SYS_011`, `SYS_012`, `SYS_029`, `SEC_CTL_004`, `SEC_CTL_006`, `SEC_CTL_019`
+- `traces_to`: [`SYS_008`](system_specification.md#sys_008), [`SYS_009`](system_specification.md#sys_009), [`SYS_010`](system_specification.md#sys_010), [`SYS_011`](system_specification.md#sys_011), [`SYS_012`](system_specification.md#sys_012), [`SYS_029`](system_specification.md#sys_029), [`SEC_CTL_004`](system_specification.md#sec_ctl_004), [`SEC_CTL_006`](system_specification.md#sec_ctl_006), [`SEC_CTL_019`](system_specification.md#sec_ctl_019)
 
 Логически разделяет рабочее состояние, разговор и сессию, долговременную память, контекст проекта и архив доказательств. Контекст собирается по принципу минимальной достаточности и поэтапного раскрытия. Источник или доказательство не превращается автоматически в долговременную память.
 
 <a id="arc_cmp_007"></a>
 ### ARC_CMP_007 — Состояние задач
 
-- `traces_to`: `SYS_001`, `SYS_036`, `SYS_013`, `SYS_020`, `SEC_CTL_008`, `SEC_CTL_017`
+- `traces_to`: [`SYS_001`](system_specification.md#sys_001), [`SYS_036`](system_specification.md#sys_036), [`SYS_013`](system_specification.md#sys_013), [`SYS_020`](system_specification.md#sys_020), [`SEC_CTL_008`](system_specification.md#sec_ctl_008), [`SEC_CTL_017`](system_specification.md#sec_ctl_017)
 
 Хранит идентичность и жизненный цикл исполняемой задачи, включая отмену, повтор, контрольную точку, возобновление и защиту от дублей. Состояние задачи не является внутренним состоянием конкретной среды агента.
 
 <a id="arc_cmp_008"></a>
 ### ARC_CMP_008 — Проверка качества
 
-- `traces_to`: `SYS_022`, `SYS_023`, `BR_027`
+- `traces_to`: [`SYS_022`](system_specification.md#sys_022), [`SYS_023`](system_specification.md#sys_023), [`BR_027`](business_requirements.md#br_027)
 
 Оркестрирует применимые детерминированные проверки, проверку материалов и оценку моделью. Недетерминированная оценка может улучшать качество, но не выдаёт полномочия безопасности и не заменяет проверки восстановления и целостности.
 
 <a id="arc_cmp_009"></a>
 ### ARC_CMP_009 — Эксплуатационные функции
 
-- `traces_to`: `SYS_013`, `SYS_024`, `SYS_025`, `SYS_026`, `SYS_027`, `SYS_030`
+- `traces_to`: [`SYS_013`](system_specification.md#sys_013), [`SYS_024`](system_specification.md#sys_024), [`SYS_025`](system_specification.md#sys_025), [`SYS_026`](system_specification.md#sys_026), [`SYS_027`](system_specification.md#sys_027), [`SYS_030`](system_specification.md#sys_030)
 
 Объединяет логическое состояние планировщика, работоспособности, версии, резервного копирования, восстановления и ограниченных действий восстановления. Физическая топология, средства наблюдения и механизм развёртывания принадлежат инфраструктуре и ADR.
 
-## 5. Стабильные архитектурные потоки
+## 4. Стабильные архитектурные потоки
 
 <a id="arc_flow_001"></a>
 ### ARC_FLOW_001 — Обычная задача
 
-- `traces_to`: `SYS_001`, `SYS_036`, `SYS_003`, `SYS_004`, `SYS_023`
-- `implements`: `ARC_CMP_001`, `ARC_CMP_002`, `ARC_CMP_003`, `ARC_CMP_004`, `ARC_CMP_006`, `ARC_CMP_008`
+- `traces_to`: [`SYS_001`](system_specification.md#sys_001), [`SYS_036`](system_specification.md#sys_036), [`SYS_003`](system_specification.md#sys_003), [`SYS_004`](system_specification.md#sys_004), [`SYS_023`](system_specification.md#sys_023)
+- `implements`: [`ARC_CMP_001`](#arc_cmp_001), [`ARC_CMP_002`](#arc_cmp_002), [`ARC_CMP_003`](#arc_cmp_003), [`ARC_CMP_004`](#arc_cmp_004), [`ARC_CMP_006`](#arc_cmp_006), [`ARC_CMP_008`](#arc_cmp_008)
 
 ```text
 ввод
@@ -141,8 +122,8 @@ MCP и другие протоколы являются способами ин�
 <a id="arc_flow_002"></a>
 ### ARC_FLOW_002 — Вызов инструмента или внешнее действие
 
-- `traces_to`: `SYS_020`, `SYS_021`, `SEC_CTL_007`, `SEC_CTL_008`
-- `implements`: `ARC_CMP_002`, `ARC_CMP_003`, `ARC_CMP_005`, `ARC_CMP_007`
+- `traces_to`: [`SYS_020`](system_specification.md#sys_020), [`SYS_021`](system_specification.md#sys_021), [`SEC_CTL_007`](system_specification.md#sec_ctl_007), [`SEC_CTL_008`](system_specification.md#sec_ctl_008)
+- `implements`: [`ARC_CMP_002`](#arc_cmp_002), [`ARC_CMP_003`](#arc_cmp_003), [`ARC_CMP_005`](#arc_cmp_005), [`ARC_CMP_007`](#arc_cmp_007)
 
 ```text
 планируемая возможность
@@ -158,8 +139,8 @@ MCP и другие протоколы являются способами ин�
 <a id="arc_flow_003"></a>
 ### ARC_FLOW_003 — Контекст и доказательства
 
-- `traces_to`: `SYS_008`, `SYS_009`, `SYS_010`, `SYS_011`, `SYS_029`, `SEC_CTL_004`, `SEC_CTL_006`
-- `implements`: `ARC_CMP_006`
+- `traces_to`: [`SYS_008`](system_specification.md#sys_008), [`SYS_009`](system_specification.md#sys_009), [`SYS_010`](system_specification.md#sys_010), [`SYS_011`](system_specification.md#sys_011), [`SYS_029`](system_specification.md#sys_029), [`SEC_CTL_004`](system_specification.md#sec_ctl_004), [`SEC_CTL_006`](system_specification.md#sec_ctl_006)
+- `implements`: [`ARC_CMP_006`](#arc_cmp_006)
 
 ```text
 источник / кандидат в память
@@ -173,8 +154,8 @@ MCP и другие протоколы являются способами ин�
 <a id="arc_flow_004"></a>
 ### ARC_FLOW_004 — Плановая задача
 
-- `traces_to`: `SYS_013`, `SYS_030`, `SEC_CTL_017`
-- `implements`: `ARC_CMP_007`, `ARC_CMP_009`
+- `traces_to`: [`SYS_013`](system_specification.md#sys_013), [`SYS_030`](system_specification.md#sys_030), [`SEC_CTL_017`](system_specification.md#sec_ctl_017)
+- `implements`: [`ARC_CMP_007`](#arc_cmp_007), [`ARC_CMP_009`](#arc_cmp_009)
 
 ```text
 расписание (намерение + ссылка на возможность)
