@@ -20,12 +20,12 @@ updated: 2026-08-25
 
 | Метрика | Значение | Статус |
 |---------|---------|--------|
-| **Всего коммитов** | 166 | ✅ |
-| **Размер репозитория (.git)** | 2935 KB | ✅ |
-| **Размер проекта** | 9.6 MB | ✅ |
-| **Python файлов** | 134 | ✅ |
-| **Строк кода** | 22,727 | ✅ |
-| **Тесты (пройдено/всего)** | 395 passed | ✅ |
+| **Всего коммитов** | 172 | ✅ |
+| **Размер репозитория (.git)** | 3065 KB | ✅ |
+| **Размер проекта** | 10.1 MB | ✅ |
+| **Python файлов** | 138 | ✅ |
+| **Строк кода** | 23,075 | ✅ |
+| **Тесты (пройдено/всего)** | 407 passed | ✅ |
 | **Ветки** | 6 | ✅ |
 
 ---
@@ -34,9 +34,9 @@ updated: 2026-08-25
 
 ### 1. **Тестирование**
 - **Статус:** ✅ PASSED
-- **Пройдено/Провалено:** 395/395
-- **Время выполнения:** 32.36s
-- **Охват:** 84.1%
+- **Пройдено/Провалено:** 407/407
+- **Время выполнения:** 33.88s
+- **Охват:** 84.5%
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** ✅ SUCCESS (0 issues)
@@ -50,21 +50,21 @@ updated: 2026-08-25
 ### 4. **Git Статус**
 - **Рабочая копия:** ✅ Чистая
 - **Remote URL:** https://github.com/okromanov/personal_ai_platform
-- **Коммитов:** 166
+- **Коммитов:** 172
 
 ### 5. **Недавние коммиты**
 ```
-fcf2a58 Merge pull request #36 from okromanov/claude/missing-links-task-001-ag1wg3
-145726c Regenerate health check report
-190e275 Implement ARC_CMP_007 (task lifecycle state) for m02
-5ea5525 Remove .claude/settings.json
-030e78e Merge pull request #35 from okromanov/claude/missing-links-task-001-ag1wg3
+ce46c6b Реализовать ARC_CMP_009: эксплуатационные функции (TASK_007)
+881cb79 Merge pull request #38 from okromanov/claude/repository-audit-agents-md-1pyqph
+f669fb7 Merge pull request #37 from okromanov/claude/missing-links-task-001-ag1wg3
+9fd19e6 Regenerate health check report
+fe0063c Добавить единый системный промпт для полного аудита репозитория
 ```
 
 ### 6. **Политика покрытия (pyproject.toml)**
 - **Статус:** ✅ PASSED
 ```
-overall: 84.14% (minimum 75.00%)
+overall: 84.53% (minimum 75.00%)
 operations/scripts/acceptance/apply.py: 86.16% (minimum 85.00%)
 operations/scripts/evidence/generate_bundle.py: 87.72% (minimum 85.00%)
 operations/scripts/evidence/record.py: 94.12% (minimum 85.00%)
@@ -83,26 +83,26 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 | Type Safety | ✅ | MyPy: 0 issues |
 | Linting | ✅ | Ruff: compliant |
 | Formatting | ✅ | All files compliant |
-| Tests | ✅ | 395 passed |
-| Coverage policy | ✅ | 84.1% overall — policy passed |
+| Tests | ✅ | 407 passed |
+| Coverage policy | ✅ | 84.5% overall — policy passed |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
 |--------|--------|----------|
-| Size | ✅ | 2935 KB (.git), 9.6 MB (total) |
+| Size | ✅ | 3065 KB (.git), 10.1 MB (total) |
 | Branches | ✅ | 6 branches |
 | Remote | ✅ | https://github.com/okromanov/personal_ai_platform |
 | Working Tree | ✅ | Clean |
-| Commits | ✅ | 166 commits |
+| Commits | ✅ | 172 commits |
 
 ---
 
 ## ✨ Сильные стороны
 
-- ✅ Comprehensive Python codebase (134 files, 22,727 LOC)
-- ✅ Test coverage at 84.1%
+- ✅ Comprehensive Python codebase (138 files, 23,075 LOC)
+- ✅ Test coverage at 84.5%
 - ✅ Type-safe codebase (MyPy: 0 issues)
-- ✅ Clean git history (166 commits)
+- ✅ Clean git history (172 commits)
 - ✅ Formatted according to standards
 - ✅ Regular commits and clean working tree
 
@@ -131,7 +131,7 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 Репозиторий находится в отличном состоянии с точки зрения:
 - ✅ Качества кода (type safety, linting)
-- ✅ Тестирования (395 passed)
+- ✅ Тестирования (407 passed)
 - ✅ Форматирования
 - ✅ Политики покрытия (pyproject.toml: overall/critical modules)
 - ✅ Управления (git hygiene, commits)
@@ -142,4 +142,4 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 **Сгенерировано:** Claude Code
 **Версия отчета:** 1.0
-**Время проверки:** 2026-08-25T12:47:46.981046Z
+**Время проверки:** 2026-08-25T13:12:13.408129Z
