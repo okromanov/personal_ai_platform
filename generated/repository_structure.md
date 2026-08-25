@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `210` |
+| Всего файлов | `216` |
 
 ```text
 personal_ai_platform/
@@ -146,6 +146,7 @@ personal_ai_platform/
 - operations/tests/performance/test_critical_paths.py
 - operations/tests/product/__init__.py
 - operations/tests/product/test_channels.py
+- operations/tests/product/test_owner_control.py
 - operations/tests/stress/__init__.py
 - operations/tests/stress/test_scalability.py
 - operations/tests/test_acceptance.py
@@ -199,6 +200,10 @@ personal_ai_platform/
 - src/channels/__init__.py
 - src/channels/base.py
 - src/channels/telegram.py
+- src/owner_control/__init__.py
+- src/owner_control/base.py
+- src/owner_control/control.py
+- src/owner_control/emergency_switch.py
 - tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
@@ -224,4 +229,5 @@ personal_ai_platform/
 - work/tests/test_005.md
 - work/tests/test_006.md
 - work/tests/test_007.md
+- work/tests/test_008.md
 ```

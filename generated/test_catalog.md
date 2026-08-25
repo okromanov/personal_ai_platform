@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `314` |
+| Всего тестов | `333` |
 | Core logic (acceptance, governance, lifecycle) | `125` |
 | Tooling (quality scripts, registries, traceability) | `157` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `16` |
+| Product | `35` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -336,3 +336,22 @@ version: 1.0
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelAsyncTests` | `test_send_without_token_raises_channel_error` | Отправка без токена вызывает ChannelError. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_channel_type_is_telegram` | Тип канала — Telegram. |
 | Product | `operations/tests/product/test_channels.py` | `TelegramChannelInitTests` | `test_default_token_is_empty` | Токен по умолчанию пуст. |
+| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_activate_then_deactivate_round_trips` | Activate then deactivate round trips |
+| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_corrupted_state_file_reads_as_inactive` | Corrupted state file reads as inactive |
+| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_missing_state_file_reads_as_inactive` | Missing state file reads as inactive |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_activate_blocks_new_operations` | Activate blocks new operations |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_deactivate_clears_the_block` | Deactivate clears the block |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_fresh_deployment_is_not_stopped` | Fresh deployment is not stopped |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_switch_is_independent_of_model_or_runtime_object` | Switch is independent of model or runtime object |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_switch_survives_process_restart` | Switch survives process restart |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_accepts_the_recognized_owner` | Accepts the recognized owner |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_rejects_any_other_subject` | Rejects any other subject |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_rejects_empty_subject` | Rejects empty subject |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateInitTests` | `test_rejects_empty_owner_subject_id` | Rejects empty owner subject id |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmation_with_different_params_is_rejected` | Confirmation with different params is rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmation_without_prior_request_is_rejected` | Confirmation without prior request is rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmed_sensitive_action_with_matching_params_is_authorized` | Confirmed sensitive action with matching params is authorized |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_action_id_is_rejected_after_authorization` | Duplicate action id is rejected after authorization |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_read_action_id_is_also_rejected` | Duplicate read action id is also rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_read_action_is_authorized_immediately` | Read action is authorized immediately |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_sensitive_action_without_confirmation_is_rejected` | Sensitive action without confirmation is rejected |

@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: planned
-version: 1.3
-updated: 2026-08-24
+version: 1.6
+updated: 2026-08-25
 next_actor: agent
 owner_action: none
 depends_on:
@@ -83,7 +83,7 @@ implements:
 
 ## 9. Что будет дальше
 
-[`TASK_004`](task_004_arc_004.md) реализует Шлюз моделей ([`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)) — нормализованный доступ к LLM, который оркестратор будет вызывать в цикле выполнения задачи. [`TASK_005`](task_005_arc_005.md) реализует Шлюз инструментов ([`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005)), необходимый оркестратору для авторизованных вызовов инструментов. См. [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) для полного списка требований, реализуемых [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003).
+`TASK_004` реализует Шлюз моделей (`ARC_CMP_004`) — нормализованный доступ к LLM, который оркестратор будет вызывать в цикле выполнения задачи. `TASK_005` реализует Шлюз инструментов (`ARC_CMP_005`), необходимый оркестратору для авторизованных вызовов инструментов.
 
 ## 10. Что это даёт владельцу
 
