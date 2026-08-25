@@ -10,7 +10,6 @@ from operations.scripts.documents.metadata import load_document
 from operations.scripts.documents.traceability import (
     ELEMENT_HEADING_PATTERN,
     REFERENCE_PATTERN,
-    RELATION_LINE_PATTERN,
     _normalize_id,
     collect_traceable_elements,
 )
@@ -34,6 +33,14 @@ INLINE_CODE_PATTERN = re.compile(r"`([^`\n]+)`")
 # Клика­бельность обязательна только для ссылок на документы этих типов —
 # .py и прочий код упоминаются по имени без требования их линковать.
 CLICKABLE_EXTENSIONS = ("md", "txt", "yaml", "json")
+# `traces_to` lines are exactly as much prose as any other mention of these
+# IDs — only the other relation keys (implements, depends_on, mitigated_by,
+# ...) stay exempt as pure structural metadata.
+OTHER_RELATION_LINE_PATTERN = re.compile(
+    r"^-\s+`?(implements|mitigates|mitigated_by|implemented_by|depends_on|verifies|accepts)`?:"
+    r"\s*(.+?)\s*$",
+    re.MULTILINE,
+)
 MARKDOWN_PATH_PATTERN = re.compile(
     rf"^[A-Za-z0-9_./\\-]+\.(?:{'|'.join(CLICKABLE_EXTENSIONS)})(?:#[^\s]+)?$"
 )
@@ -192,11 +199,12 @@ def _check_bare_identifier_references(
             continue
         if in_fence:
             continue
-        # Заголовки, таблицы и структурные строки связей (`- \`traces_to\`: ...`)
-        # уже являются каноническим представлением связи, а не прозой.
+        # Заголовки, таблицы и структурные строки связей, отличных от
+        # traces_to (`- \`implements\`: ...` и т.п.), уже являются
+        # каноническим представлением связи, а не прозой.
         if HEADING_PATTERN.match(line) or stripped.startswith("|"):
             continue
-        if RELATION_LINE_PATTERN.match(line):
+        if OTHER_RELATION_LINE_PATTERN.match(line):
             continue
         # Строки-якоря (`<a id="...">`) определяют идентификатор, а не
         # упоминают его — сам якорь не должен становиться ссылкой на себя.

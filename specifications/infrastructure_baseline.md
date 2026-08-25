@@ -2,8 +2,8 @@
 id: infrastructure_baseline
 type: infrastructure
 document_state: current
-version: 1.0
-updated: 2026-08-22
+version: 1.1
+updated: 2026-08-25
 depends_on:
   - architecture_baseline
   - project_rules
@@ -22,112 +22,112 @@ depends_on:
 <a id="inf_req_001"></a>
 ### INF_REQ_001 — Поддерживаемая и воспроизводимая рабочая среда
 
-- `traces_to`: `BR_005`, `SYS_024`, `SYS_027`
+- `traces_to`: [`BR_005`](business_requirements.md#br_005), [`SYS_024`](system_specification.md#sys_024), [`SYS_027`](system_specification.md#sys_027)
 
 Рабочая среда выполнения должна использовать поддерживаемую операционную систему и иметь воспроизводимый способ установки, запуска, перезапуска и проверки работоспособности.
 
 <a id="inf_req_002"></a>
 ### INF_REQ_002 — Разделение административных и прикладных полномочий
 
-- `traces_to`: `SEC_CTL_003`
+- `traces_to`: [`SEC_CTL_003`](system_specification.md#sec_ctl_003)
 
 Прикладная среда выполняется без административных полномочий. Административный доступ выделен и контролируется отдельно.
 
 <a id="inf_req_003"></a>
 ### INF_REQ_003 — Минимальная публичная поверхность
 
-- `traces_to`: `SEC_CTL_003`
+- `traces_to`: [`SEC_CTL_003`](system_specification.md#sec_ctl_003)
 
 Публичный вход создаётся только для функции, которой он действительно нужен, и ограничивается минимально необходимой поверхностью.
 
 <a id="inf_req_004"></a>
 ### INF_REQ_004 — Явная политика исходящей сети
 
-- `traces_to`: `SEC_CTL_010`
+- `traces_to`: [`SEC_CTL_010`](system_specification.md#sec_ctl_010)
 
 Для внешних адресов должны существовать явные правила исходящего трафика. Подключение одного сервиса к специальному маршруту не должно неявно менять трафик других сервисов.
 
 <a id="inf_req_005"></a>
 ### INF_REQ_005 — Закрытие при отказе обязательного сетевого маршрута
 
-- `traces_to`: `SEC_CTL_010`
+- `traces_to`: [`SEC_CTL_010`](system_specification.md#sec_ctl_010)
 
 Если для адреса принят обязательный защищённый маршрут, его потеря не должна приводить к скрытому переходу на запрещённый путь.
 
 <a id="inf_req_006"></a>
 ### INF_REQ_006 — Секреты вне репозитория
 
-- `traces_to`: `SEC_CTL_005`
+- `traces_to`: [`SEC_CTL_005`](system_specification.md#sec_ctl_005)
 
 Секретные значения хранятся и передаются вне отслеживаемых Git исходников. Прикладной код использует логические имена и получает только необходимую область доступа.
 
 <a id="inf_req_007"></a>
 ### INF_REQ_007 — Ограниченная временная рабочая область
 
-- `traces_to`: `SYS_008`, `SYS_021`, `SEC_CTL_009`
+- `traces_to`: [`SYS_008`](system_specification.md#sys_008), [`SYS_021`](system_specification.md#sys_021), [`SEC_CTL_009`](system_specification.md#sec_ctl_009)
 
 Временная обработка файлов и кода использует ограниченную область с квотой и управляемым жизненным циклом. Доступны только необходимые подключения файлов и сетевые возможности.
 
 <a id="inf_req_008"></a>
 ### INF_REQ_008 — Устойчивое постоянное состояние
 
-- `traces_to`: `SYS_011`, `SYS_012`, `SYS_025`, `BR_022`
+- `traces_to`: [`SYS_011`](system_specification.md#sys_011), [`SYS_012`](system_specification.md#sys_012), [`SYS_025`](system_specification.md#sys_025), [`BR_022`](business_requirements.md#br_022)
 
 Ценное постоянное состояние хранится независимо от жизненного цикла конкретной модели, среды агента и временной рабочей области.
 
 <a id="inf_req_009"></a>
 ### INF_REQ_009 — Проверяемое резервное копирование и восстановление
 
-- `traces_to`: `SYS_025`, `SEC_CTL_013`
+- `traces_to`: [`SYS_025`](system_specification.md#sys_025), [`SEC_CTL_013`](system_specification.md#sec_ctl_013)
 
 Резервная копия считается пригодной только после фактической проверки восстановления и целостности применимого состояния.
 
 <a id="inf_req_010"></a>
 ### INF_REQ_010 — Идентифицируемая версия развёртывания
 
-- `traces_to`: `SYS_024`, `SYS_026`
+- `traces_to`: [`SYS_024`](system_specification.md#sys_024), [`SYS_026`](system_specification.md#sys_026)
 
 Для работающего контура однозначно определяются версия приложения, конфигурационный профиль и значимые версии зависимостей, влияющих на воспроизводимость.
 
 <a id="inf_req_011"></a>
 ### INF_REQ_011 — Контролируемый откат
 
-- `traces_to`: `SYS_025`, `SYS_026`, `SEC_CTL_016`
+- `traces_to`: [`SYS_025`](system_specification.md#sys_025), [`SYS_026`](system_specification.md#sys_026), [`SEC_CTL_016`](system_specification.md#sec_ctl_016)
 
 Рискованное развёртывание имеет проверяемый путь возврата к заведомо исправному состоянию без ослабления контроля владельца и мер безопасности.
 
 <a id="inf_req_012"></a>
 ### INF_REQ_012 — Наблюдаемость критических зависимостей
 
-- `traces_to`: `SYS_024`, `BR_036`
+- `traces_to`: [`SYS_024`](system_specification.md#sys_024), [`BR_036`](business_requirements.md#br_036)
 
 Проверка работоспособности должна локализовать отказ прикладной среды, хранилища, обязательного сетевого пути, модели, поставщика и других активных критичных функций.
 
 <a id="inf_req_013"></a>
 ### INF_REQ_013 — Видимость стоимости и мощности
 
-- `traces_to`: `SYS_024`, `SEC_CTL_012`, `BR_036`
+- `traces_to`: [`SYS_024`](system_specification.md#sys_024), [`SEC_CTL_012`](system_specification.md#sec_ctl_012), [`BR_036`](business_requirements.md#br_036)
 
 Постоянные ресурсы и внешнее потребление должны быть измеримы настолько, насколько это поддерживает среда. Мощность увеличивается по фактическим сигналам, а не заранее.
 
 <a id="inf_req_014"></a>
 ### INF_REQ_014 — Восстановление в чистой подходящей среде
 
-- `traces_to`: `SYS_025`, `SYS_027`, `BR_038`
+- `traces_to`: [`SYS_025`](system_specification.md#sys_025), [`SYS_027`](system_specification.md#sys_027), [`BR_038`](business_requirements.md#br_038)
 
 Должен существовать проверяемый путь от исходного кода, защищённой конфигурации и резервной копии к работающему контуру в новой совместимой среде.
 
 <a id="inf_req_015"></a>
 ### INF_REQ_015 — Разделение среды разработки и рабочей среды
 
-- `traces_to`: `SYS_026`, `SEC_CTL_018`
+- `traces_to`: [`SYS_026`](system_specification.md#sys_026), [`SEC_CTL_018`](system_specification.md#sec_ctl_018)
 
 Локальная среда разработки и рабочий контур имеют разные полномочия и доказательства. Успешная локальная проверка сама по себе не подтверждает рабочую среду.
 
 <a id="inf_req_016"></a>
 ### INF_REQ_016 — Инфраструктурная переносимость
 
-- `traces_to`: `SYS_027`, `BR_033`, `BR_038`
+- `traces_to`: [`SYS_027`](system_specification.md#sys_027), [`BR_033`](business_requirements.md#br_033), [`BR_038`](business_requirements.md#br_038)
 
 API конкретного поставщика или идентификатор его ресурса не должен становиться прикладным контрактом платформы без отдельного осознанного решения.
 
