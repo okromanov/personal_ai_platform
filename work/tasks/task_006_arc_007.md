@@ -3,10 +3,10 @@ id: TASK_006
 type: task
 title: Реализация ARC_CMP_007
 component: ARC_CMP_007
-work_state: planned
-version: 1.9
+work_state: completed
+version: 2.0
 updated: 2026-08-25
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_005
@@ -15,10 +15,18 @@ allowed_paths:
   - operations/capability_summary.md
   - operations/scripts/status/human_status.py
   - operations/tests/test_owner_usability.py
+  - src/task_state/
+  - src/task_state/__init__.py
+  - src/task_state/base.py
+  - src/task_state/store.py
+  - operations/tests/product/test_task_state.py
+  - work/tests/test_012.md
 traces_to:
   - m02
 implements:
   - ARC_CMP_007
+tests:
+  - TEST_012
 ---
 
 # TASK_006 — Реализация ARC_CMP_007
@@ -33,58 +41,42 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007) определяет требования ([`SYS_001`](../../specifications/system_specification.md#sys_001), [`SYS_036`](../../specifications/system_specification.md#sys_036), [`SYS_013`](../../specifications/system_specification.md#sys_013), [`SYS_020`](../../specifications/system_specification.md#sys_020), [`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008), [`SEC_CTL_017`](../../specifications/system_specification.md#sec_ctl_017)). Реализации нет. Зависит от [`TASK_005`](task_005_arc_005.md) (шлюз инструментов) — оба компонента используются оркестратором ([`TASK_003`](task_003_arc_003.md)) на каждом шаге цикла выполнения.
+Спецификация и реализация [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007) полностью завершены и покрыты [`TEST_012`](../tests/test_012.md). Хранилище готово для планировщика ([`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009), [`TASK_007`](task_007_arc_009.md)), но `Orchestrator` ([`TASK_003`](task_003_arc_003.md)) пока не вызывает этот контракт — подключение контрольных точек к циклу выполнения задачи остаётся отдельной, ещё не проведённой работой.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена, следующего действия по этой TASK нет.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать реализацию
+- [x] Реализовать компонент
+- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**При начале:** агент определит реальные файлы (вероятно `src/task_state/`), добавит в `allowed_paths`, создаст TEST.
-
-**Ожидаемые файлы:**
-- `src/task_state/base.py` — контракт `TaskLifecycleStore`
-- `src/task_state/checkpoint.py` — модель контрольной точки и защита от дублей
-- `work/tests/test_00X.md` — описание проверок
+[`src/task_state/`](../../src/task_state/) — стабильный контракт `TaskLifecycleStore` ([`base.py`](../../src/task_state/base.py)) и эталонная реализация `InMemoryTaskLifecycleStore` ([`store.py`](../../src/task_state/store.py)). [`work/tests/test_012.md`](../tests/test_012.md) — описание проверок компонента. [`operations/tests/product/test_task_state.py`](../../operations/tests/product/test_task_state.py) — юнит-тесты, проверяющие компонент.
 
 [`operations/capability_summary.md`](../../operations/capability_summary.md), [`operations/scripts/status/human_status.py`](../../operations/scripts/status/human_status.py) и [`operations/tests/test_owner_usability.py`](../../operations/tests/test_owner_usability.py) добавлены в `allowed_paths` по отдельному решению владельца, не относящемуся к реализации [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007): раздел «Что уже умеет решение» в [`project_status.md`](../../project_status.md) заменён с автосписка по TASK на связную сводку, вручную поддерживаемую в [`operations/capability_summary.md`](../../operations/capability_summary.md) — карточки TASK свой текст «Что это даёт владельцу» не меняют.
 
 ## 7. Проверки и доказательства
 
-**Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Все тесты в связанном TEST проходят, включая сценарий возобновления с контрольной точки после сбоя
-3. MyPy type check успешен
-4. Форматирование соответствует
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_012`](../tests/test_012.md): юнит-тесты [`operations/tests/product/test_task_state.py`](../../operations/tests/product/test_task_state.py), часть обязательного gate `Quality skills`.
 
-**Ручные (code review):**
-1. Повторный запуск одного и того же действия не выполняется дважды (защита от дублей)
-2. Отмена задачи останавливает исполнение на ближайшей безопасной точке
-3. Состояние не привязано к конкретной реализации `RuntimePort`
+Ручная проверка при код-ревью: повторный вызов `mark_executed`/`checkpoint`/`cancel` не искажает уже сохранённое состояние (подтверждено тестами); `has_executed`/`mark_executed` защищают от повторного выполнения одного и того же действия; контракт не импортирует и не предполагает конкретную реализацию `RuntimePort`.
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_task_state.py`](../../operations/tests/product/test_task_state.py): 13/13 тестов прошли, часть CI gate)
+- ✅ Pre-commit валидация успешна
 - ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Код review (смысловая проверка) пройден
 
 ## 9. Что будет дальше
 
@@ -92,4 +84,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Пока напрямую ничего не доступно: контракт и работающая реализация хранения, ещё не подключённая к циклу выполнения задачи. Появилось место, где прогресс задачи (шаг, счётчик повторов, отмена) может сохраняться так, чтобы его можно было корректно возобновить, и где действие, уже выполненное однажды, не выполнится повторно по той же причине. Подключение к реальному циклу оркестратора и переживание перезапуска процесса появятся в следующих TASK.

@@ -20,11 +20,11 @@ updated: 2026-08-25
 
 | Метрика | Значение | Статус |
 |---------|---------|--------|
-| **Всего коммитов** | 160 | ✅ |
-| **Размер репозитория (.git)** | 2836 KB | ✅ |
+| **Всего коммитов** | 163 | ✅ |
+| **Размер репозитория (.git)** | 2863 KB | ✅ |
 | **Размер проекта** | 9.5 MB | ✅ |
 | **Python файлов** | 130 | ✅ |
-| **Строк кода** | 22,410 | ✅ |
+| **Строк кода** | 22,409 | ✅ |
 | **Тесты (пройдено/всего)** | 382 passed | ✅ |
 | **Ветки** | 6 | ✅ |
 
@@ -35,8 +35,8 @@ updated: 2026-08-25
 ### 1. **Тестирование**
 - **Статус:** ✅ PASSED
 - **Пройдено/Провалено:** 382/382
-- **Время выполнения:** 31.19s
-- **Охват:** 84.4%
+- **Время выполнения:** 30.75s
+- **Охват:** 84.1%
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** ✅ SUCCESS (0 issues)
@@ -50,21 +50,21 @@ updated: 2026-08-25
 ### 4. **Git Статус**
 - **Рабочая копия:** ✅ Чистая
 - **Remote URL:** https://github.com/okromanov/personal_ai_platform
-- **Коммитов:** 160
+- **Коммитов:** 163
 
 ### 5. **Недавние коммиты**
 ```
+5ea5525 Remove .claude/settings.json
+030e78e Merge pull request #35 from okromanov/claude/missing-links-task-001-ag1wg3
+e3477db Regenerate health check report
 7953480 Regenerate health check report
 40ffdb8 Move canonical quality playbooks and hooks out of .claude/skills/
-632ed6e Regenerate health check report
-751c5e9 Replace project_status.md's per-TASK capability list with a synthesis
-31a6290 Regenerate health check report
 ```
 
 ### 6. **Политика покрытия (pyproject.toml)**
 - **Статус:** ✅ PASSED
 ```
-overall: 84.41% (minimum 75.00%)
+overall: 84.09% (minimum 75.00%)
 operations/scripts/acceptance/apply.py: 86.16% (minimum 85.00%)
 operations/scripts/evidence/generate_bundle.py: 87.72% (minimum 85.00%)
 operations/scripts/evidence/record.py: 94.12% (minimum 85.00%)
@@ -84,25 +84,25 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 | Linting | ✅ | Ruff: compliant |
 | Formatting | ✅ | All files compliant |
 | Tests | ✅ | 382 passed |
-| Coverage policy | ✅ | 84.4% overall — policy passed |
+| Coverage policy | ✅ | 84.1% overall — policy passed |
 
 ### Repository Management (Управление репозиторием)
 | Аспект | Статус | Состояние |
 |--------|--------|----------|
-| Size | ✅ | 2836 KB (.git), 9.5 MB (total) |
+| Size | ✅ | 2863 KB (.git), 9.5 MB (total) |
 | Branches | ✅ | 6 branches |
 | Remote | ✅ | https://github.com/okromanov/personal_ai_platform |
 | Working Tree | ✅ | Clean |
-| Commits | ✅ | 160 commits |
+| Commits | ✅ | 163 commits |
 
 ---
 
 ## ✨ Сильные стороны
 
-- ✅ Comprehensive Python codebase (130 files, 22,410 LOC)
-- ✅ Test coverage at 84.4%
+- ✅ Comprehensive Python codebase (130 files, 22,409 LOC)
+- ✅ Test coverage at 84.1%
 - ✅ Type-safe codebase (MyPy: 0 issues)
-- ✅ Clean git history (160 commits)
+- ✅ Clean git history (163 commits)
 - ✅ Formatted according to standards
 - ✅ Regular commits and clean working tree
 
@@ -142,4 +142,4 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 **Сгенерировано:** Claude Code
 **Версия отчета:** 1.0
-**Время проверки:** 2026-08-25T12:10:31.022721Z
+**Время проверки:** 2026-08-25T12:21:18.826926Z

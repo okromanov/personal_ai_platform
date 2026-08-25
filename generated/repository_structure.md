@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `231` |
+| Всего файлов | `236` |
 
 ```text
 personal_ai_platform/
@@ -147,6 +147,7 @@ personal_ai_platform/
 - operations/tests/product/test_model_gateway.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
+- operations/tests/product/test_task_state.py
 - operations/tests/product/test_tool_gateway.py
 - operations/tests/stress/__init__.py
 - operations/tests/stress/test_scalability.py
@@ -213,6 +214,9 @@ personal_ai_platform/
 - src/owner_control/base.py
 - src/owner_control/control.py
 - src/owner_control/emergency_switch.py
+- src/task_state/__init__.py
+- src/task_state/base.py
+- src/task_state/store.py
 - src/tools/__init__.py
 - src/tools/base.py
 - src/tools/registry.py
@@ -245,4 +249,5 @@ personal_ai_platform/
 - work/tests/test_009.md
 - work/tests/test_010.md
 - work/tests/test_011.md
+- work/tests/test_012.md
 ```
