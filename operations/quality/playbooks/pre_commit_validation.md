@@ -1,3 +1,11 @@
+---
+id: pre_commit_validation
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Pre-Commit Validation
 
 **ID:** pre_commit_validation  
@@ -13,11 +21,9 @@ Run the canonical fast gate before a commit leaves the developer's machine. The 
 
 ```bash
 python3.12 -m pip install -r operations/quality/requirements_dev.txt
-cp .claude/skills/pre_commit_hook.sh .git/hooks/pre-commit
+cp operations/hooks/pre_commit_hook.sh .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
-
-`operations/hooks/pre_commit_hook.sh` is only a compatibility wrapper that delegates to this canonical file.
 
 ## Checks
 
@@ -28,7 +34,7 @@ The full server profile adds Ruff formatting, mypy regression, aggregate/per-mod
 ## Run
 
 ```bash
-bash .claude/skills/pre_commit_hook.sh
+bash operations/hooks/pre_commit_hook.sh
 ```
 
 ## Success Criteria

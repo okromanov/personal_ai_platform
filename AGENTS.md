@@ -2,8 +2,8 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 2.4
-updated: 2026-08-24
+version: 2.5
+updated: 2026-08-25
 depends_on:
   - project_rules
   - project_milestones
@@ -37,7 +37,7 @@ depends_on:
    ```bash
    python3.12 -m pip install -r operations/quality/requirements_dev.txt
    python3.12 operations/scripts/quality/run_suite.py full
-   bash .claude/skills/pre_commit_hook.sh
+   bash operations/hooks/pre_commit_hook.sh
    ```
 7. **Убедиться:** производные файлы повторно не меняются, рабочая разница понятна.
 8. **Для запроса на слияние:** проверить покрытие путей продукта TASK.

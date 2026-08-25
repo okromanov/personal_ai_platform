@@ -10,22 +10,20 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `146` |
+| Всего файлов | `144` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
 | Файл | Задача | Описание |
 |---|---|---|
 | [`.claude/settings.json`](../.claude/settings.json) | — | Реестр периодических и блокирующих quality-проверок репозитория. |
-| [`.claude/skills/pre_commit_hook.sh`](../.claude/skills/pre_commit_hook.sh) | — | Канонический pre-commit hook: версии authority-документов, dev-инструменты, быстрый набор проверок, регенерация дашбордов. |
-| [`.claude/skills/pre_push_hook.sh`](../.claude/skills/pre_push_hook.sh) | — | Канонический pre-push hook: полный набор проверок (mypy, форматирование, покрытие, Bandit, Vulture, анализ AST) перед отправкой изменений. |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/hooks/__init__.py`](../operations/hooks/__init__.py) | — | Пустой файл-маркер Python-пакета. |
-| [`operations/hooks/pre_commit_hook.sh`](../operations/hooks/pre_commit_hook.sh) | — | Обёртка: запускает канонический hook .claude/skills/pre_commit_hook.sh. |
+| [`operations/hooks/pre_commit_hook.sh`](../operations/hooks/pre_commit_hook.sh) | — | Канонический pre-commit hook: версии authority-документов, dev-инструменты, быстрый набор проверок, регенерация дашбордов. |
 | [`operations/hooks/pre_commit_regenerate_dashboards.sh`](../operations/hooks/pre_commit_regenerate_dashboards.sh) | — | Шаг pre-commit hook: при изменении любого .md-файла бампит его версию и регенерирует project_status.md, tasks.md и generated/*. |
-| [`operations/hooks/pre_push_hook.sh`](../operations/hooks/pre_push_hook.sh) | — | Обёртка: запускает канонический hook .claude/skills/pre_push_hook.sh. |
+| [`operations/hooks/pre_push_hook.sh`](../operations/hooks/pre_push_hook.sh) | — | Канонический pre-push hook: полный набор проверок (mypy, форматирование, покрытие, Bandit, Vulture, анализ AST) перед отправкой изменений. |
 | [`operations/project_config.json`](../operations/project_config.json) | — | Общие настройки репозитория: часовой пояс и адрес на GitHub. |
 | [`operations/quality/requirements_dev.txt`](../operations/quality/requirements_dev.txt) | — | Зафиксированные версии dev-инструментов для локального и серверного quality suite. |
 | [`operations/quality_baseline.json`](../operations/quality_baseline.json) | — | Эталонный список известных ошибок mypy: gate не даёт их числу расти. |

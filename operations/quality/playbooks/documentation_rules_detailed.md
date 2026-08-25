@@ -1,3 +1,11 @@
+---
+id: documentation_rules_detailed
+type: guide
+document_state: current
+version: 1.0
+updated: 2026-08-25
+---
+
 # Documentation Audit Rules - Detailed Reference
 
 **Purpose:** Explain the exact rules and patterns checked by `operations/scripts/documents/check.py`
@@ -84,7 +92,7 @@ isn't parsed as a real link to a nonexistent path):
 - Milestone states like `complete` and `completed` (inconsistent naming)
 - Incomplete category coverage (some items unclassified)
 
-**Exception:** Root [`m01`](../../milestones.md#m01) milestone allowed without `traces_to` field (foundational)
+**Exception:** Root [`m01`](../../../milestones.md#m01) milestone allowed without `traces_to` field (foundational)
 
 ## Consistency Rules
 
@@ -113,29 +121,29 @@ isn't parsed as a real link to a nonexistent path):
 ### Naming Conventions
 
 **Authority documents** (must match exactly):
-- [`project_rules.md`](../../project_rules.md)
-- [`AGENTS.md`](../../AGENTS.md)
-- [`operations/change_process.md`](../../operations/change_process.md)
+- [`project_rules.md`](../../../project_rules.md)
+- [`AGENTS.md`](../../../AGENTS.md)
+- [`operations/change_process.md`](../../../operations/change_process.md)
 - Milestone definitions in specifications
 
 **Specification documents:**
-- [`specifications/business_requirements.md`](../../specifications/business_requirements.md)
-- [`specifications/threat_model.md`](../../specifications/threat_model.md)
-- [`specifications/system_specification.md`](../../specifications/system_specification.md)
-- [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md)
-- [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md)
+- [`specifications/business_requirements.md`](../../../specifications/business_requirements.md)
+- [`specifications/threat_model.md`](../../../specifications/threat_model.md)
+- [`specifications/system_specification.md`](../../../specifications/system_specification.md)
+- [`specifications/architecture_baseline.md`](../../../specifications/architecture_baseline.md)
+- [`specifications/infrastructure_baseline.md`](../../../specifications/infrastructure_baseline.md)
 
 ## Generated Files
 
 **Definition:** Files created by scripts (not manually edited)
 
 **Current generated files:**
-- [`project_status.md`](../../project_status.md) - Auto-generated from status script
-- [`tasks.md`](../../tasks.md) - Auto-generated from task registry
-- [`generated/markdown_index.md`](../../generated/markdown_index.md) - Index of all Markdown docs
-- [`generated/non_markdown_index.md`](../../generated/non_markdown_index.md) - Index of all non-Markdown files
-- [`generated/repository_structure.md`](../../generated/repository_structure.md) - Directory tree
-- [`generated/traceability_matrix.md`](../../generated/traceability_matrix.md) - Requirement traceability
+- [`project_status.md`](../../../project_status.md) - Auto-generated from status script
+- [`tasks.md`](../../../tasks.md) - Auto-generated from task registry
+- [`generated/markdown_index.md`](../../../generated/markdown_index.md) - Index of all Markdown docs
+- [`generated/non_markdown_index.md`](../../../generated/non_markdown_index.md) - Index of all non-Markdown files
+- [`generated/repository_structure.md`](../../../generated/repository_structure.md) - Directory tree
+- [`generated/traceability_matrix.md`](../../../generated/traceability_matrix.md) - Requirement traceability
 
 **Rule:** Generated files must be bit-identical with last run
 
@@ -146,7 +154,7 @@ isn't parsed as a real link to a nonexistent path):
 ### Requirement → ADR → Code Mapping
 
 **Valid traces_to values:**
-- Milestone IDs: [`m01`](../../milestones.md#m01), [`m02`](../../milestones.md#m02), [`m03`](../../milestones.md#m03), etc.
+- Milestone IDs: [`m01`](../../../milestones.md#m01), [`m02`](../../../milestones.md#m02), [`m03`](../../../milestones.md#m03), etc.
 - ADR IDs: `adr-001`, `adr-002`, etc. (optional, creates bidirectional link)
 
 **Violations:**
@@ -231,7 +239,7 @@ The checker runs in this order:
 
 All checks run in:
 - `.github/workflows/project_check.yml` - Windows job via `check.py --all`
-- Local pre-commit hook via `.claude/skills/pre_commit_hook.sh`
+- Local pre-commit hook via `operations/hooks/pre_commit_hook.sh`
 
 **Command:** `python3.12 operations/scripts/documents/check.py --all --json`
 

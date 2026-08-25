@@ -96,6 +96,6 @@ class NonMarkdownIndexTests(unittest.TestCase):
         row = next(
             line
             for line in self.rendered.splitlines()
-            if line.startswith("| [`.claude/skills/pre_commit_hook.sh`]")
+            if line.startswith("| [`operations/hooks/pre_commit_hook.sh`]")
         )
         self.assertIn("Канонический pre-commit hook", row)
