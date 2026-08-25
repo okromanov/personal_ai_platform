@@ -7,7 +7,9 @@ retries, tool gateway and models -- none of those components has a bypass
 to resources.
 """
 
+import json
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
@@ -26,6 +28,14 @@ class EmergencyStopActive(OwnerControlError):
     """Raised when the independent emergency switch is active (SEC_CTL_002)."""
 
 
+class EmergencySwitchStateError(OwnerControlError):
+    """Raised when the persisted emergency state cannot be trusted."""
+
+
+class OwnerControlStateError(OwnerControlError):
+    """Raised when persisted authorization state cannot be trusted."""
+
+
 class ActionClass(Enum):
     """Impact classification of a candidate action (per SEC_CTL_008)."""
 
@@ -38,6 +48,57 @@ class ActionClass(Enum):
 SENSITIVE_ACTION_CLASSES = frozenset(
     {ActionClass.WRITE_EXTERNAL, ActionClass.DESTRUCTIVE, ActionClass.ADMIN}
 )
+
+
+@dataclass(frozen=True)
+class ActionDescriptor:
+    """Immutable identity of one technically authorizable action."""
+
+    subject_id: str
+    capability_name: str
+    resource: str
+    action_class: ActionClass
+    params_json: str
+    secret_refs: tuple[str, ...] = ()
+    network_target: str | None = None
+    constraints: tuple[tuple[str, str], ...] = ()
+    credential_ref: str | None = None
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        subject_id: str,
+        capability_name: str,
+        resource: str,
+        action_class: ActionClass,
+        params: Mapping[str, Any],
+        secret_refs: tuple[str, ...] = (),
+        network_target: str | None = None,
+        constraints: tuple[tuple[str, str], ...] = (),
+        credential_ref: str | None = None,
+    ) -> "ActionDescriptor":
+        """Create a descriptor with deterministic, immutable significant data."""
+        try:
+            params_json = json.dumps(
+                dict(params),
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError("action params must be JSON-serializable") from exc
+        return cls(
+            subject_id=subject_id,
+            capability_name=capability_name,
+            resource=resource,
+            action_class=action_class,
+            params_json=params_json,
+            secret_refs=tuple(sorted(secret_refs)),
+            network_target=network_target,
+            constraints=tuple(sorted(constraints)),
+            credential_ref=credential_ref,
+        )
 
 
 @dataclass(frozen=True)
@@ -90,8 +151,7 @@ class OwnerControl(ABC):
     def authorize_sensitive_action(
         self,
         action_id: str,
-        action_class: ActionClass,
-        params: dict[str, Any],
+        action: ActionDescriptor,
         *,
         confirmed: bool = False,
     ) -> AuthorizationDecision:
@@ -99,17 +159,17 @@ class OwnerControl(ABC):
 
         For `ActionClass.READ`, the action is authorized immediately. For the
         sensitive classes (`WRITE_EXTERNAL`, `DESTRUCTIVE`, `ADMIN`), a first
-        call with `confirmed=False` records the exact parameters as pending
+        call with `confirmed=False` records the exact action descriptor as pending
         and is rejected; the action is authorized only on a second call with
-        `confirmed=True` and the identical `action_id`/`action_class`/`params`.
+        `confirmed=True` and the identical `action_id`/descriptor.
         Once authorized, the same `action_id` is rejected as a duplicate on
         any further call, so a retry cannot silently repeat the effect.
 
         Args:
             action_id: Unique identifier of the candidate action.
-            action_class: Impact classification of the action.
-            params: Concrete significant parameters of the action.
-            confirmed: Whether the owner has confirmed these exact parameters.
+            action: Immutable descriptor containing the subject, capability,
+                resource, effect class, parameters and technical constraints.
+            confirmed: Whether the owner has confirmed this exact descriptor.
 
         Returns:
             AuthorizationDecision describing whether the action may proceed.
