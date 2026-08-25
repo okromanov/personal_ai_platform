@@ -10,11 +10,10 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `232` |
+| Всего файлов | `231` |
 
 ```text
 personal_ai_platform/
-- .claude/settings.json
 - .github/workflows/project_check.yml
 - .gitignore
 - AGENTS.md

@@ -10,13 +10,12 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `144` |
+| Всего файлов | `143` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
 | Файл | Задача | Описание |
 |---|---|---|
-| [`.claude/settings.json`](../.claude/settings.json) | — | Реестр периодических и блокирующих quality-проверок репозитория. |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
