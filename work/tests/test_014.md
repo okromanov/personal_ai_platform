@@ -28,12 +28,12 @@ depends_on:
 
 ## 2. Что проверяется
 
-Реализация `health_check.py` (`src/operations/health_check.py`) и структура корневого [`Dockerfile`](../../Dockerfile):
+Реализация `health_check.py` (`src/operations/health_check.py`) и структура корневого [`dockerfile`](../../dockerfile):
 
 - CLI `health_check.main()` возвращает код `0` и отчёт `healthy: true`, если ни одна проверка не зарегистрирована (на [`m02`](../../milestones.md#m02) нет живой внешней зависимости для проверки).
 - Возвращает код `1` и `healthy: false`, если зарегистрированная проверка нездорова — согласовано с `HealthAggregator` ([`TASK_007`](../tasks/task_007_arc_009.md)).
 - Отчёт называет версию из переменной окружения `APP_VERSION` (баз в образ на этапе сборки) или `"unknown"`, если не задана — [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010).
-- `Dockerfile` закрепляет базовый образ на конкретную поддерживаемую версию Python, объявляет непривилегированного пользователя приложения, `HEALTHCHECK`, вызывающий эту CLI, и аргумент сборки `APP_VERSION`.
+- `dockerfile` закрепляет базовый образ на конкретную поддерживаемую версию Python, объявляет непривилегированного пользователя приложения, `HEALTHCHECK`, вызывающий эту CLI, и аргумент сборки `APP_VERSION`.
 - `.dockerignore` исключает `.git` и кеши сборки Python из контекста образа.
 
 ## 3. Автоматический запуск
@@ -68,7 +68,7 @@ python3 -m unittest operations.tests.product.test_compute_environment -v
 
 `automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 10 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
 
-**Известный пробел (задокументирован, не скрыт):** реальный `docker build` корневого `Dockerfile` не выполнялся ни в этой среде разработки (нет запущенного демона Docker), ни в CI (минуты GitHub Actions исчерпаны, автоматический запуск недоступен). Автоматизированное доказательство здесь ограничено статической структурой `Dockerfile` и поведением CLI без контейнера. Практическая воспроизводимость сборки должна быть подтверждена владельцем или следующим прогоном CI на Ubuntu-раннере (там демон Docker доступен по умолчанию).
+**Известный пробел (задокументирован, не скрыт):** реальный `docker build` корневого `dockerfile` не выполнялся ни в этой среде разработки (нет запущенного демона Docker), ни в CI (минуты GitHub Actions исчерпаны, автоматический запуск недоступен). Автоматизированное доказательство здесь ограничено статической структурой `dockerfile` и поведением CLI без контейнера. Практическая воспроизводимость сборки должна быть подтверждена владельцем или следующим прогоном CI на Ubuntu-раннере (там демон Docker доступен по умолчанию).
 
 ## 6. Реализованные компоненты
 
@@ -76,7 +76,7 @@ python3 -m unittest operations.tests.product.test_compute_environment -v
 
 **Данные**: JSON-отчёт `health_check.main()` — `healthy`, `version`, `dependencies`
 
-**Реализация**: `src/operations/health_check.py` — тонкий CLI-адаптер поверх `HealthAggregator` ([`TASK_007`](../tasks/task_007_arc_009.md)), вызываемый `Dockerfile`'ом как `HEALTHCHECK` и как команда по умолчанию. `Dockerfile` — закреплённый образ `python:3.12-slim`, непривилегированный пользователь `app`, аргумент сборки `APP_VERSION`.
+**Реализация**: `src/operations/health_check.py` — тонкий CLI-адаптер поверх `HealthAggregator` ([`TASK_007`](../tasks/task_007_arc_009.md)), вызываемый `dockerfile`'ом как `HEALTHCHECK` и как команда по умолчанию. `dockerfile` — закреплённый образ `python:3.12-slim`, непривилегированный пользователь `app`, аргумент сборки `APP_VERSION`.
 
 ## 7. Структура кода
 
@@ -84,7 +84,7 @@ python3 -m unittest operations.tests.product.test_compute_environment -v
 src/operations/
 └── health_check.py — CLI: build_health_aggregator(), main()
 
-Dockerfile — вычислительная среда (корень репозитория)
+dockerfile — вычислительная среда (корень репозитория)
 .dockerignore — исключения контекста сборки
 
 operations/tests/product/
@@ -96,13 +96,13 @@ operations/tests/product/
 | Требование | Статус | Примечание |
 |---|---|---|
 | [`INF_REQ_001`](../../specifications/infrastructure_baseline.md#inf_req_001): Поддерживаемая и воспроизводимая рабочая среда | ✅ | Закреплённая версия базового образа, `HEALTHCHECK`; реальная сборка образа — известный пробел (см. §5) |
-| [`INF_REQ_002`](../../specifications/infrastructure_baseline.md#inf_req_002): Разделение административных и прикладных полномочий | ✅ | Непривилегированный пользователь `app`, подтверждено статическим тестом структуры `Dockerfile` |
+| [`INF_REQ_002`](../../specifications/infrastructure_baseline.md#inf_req_002): Разделение административных и прикладных полномочий | ✅ | Непривилегированный пользователь `app`, подтверждено статическим тестом структуры `dockerfile` |
 | [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010): Идентифицируемая версия развёртывания | ✅ | `APP_VERSION` встроен в образ на этапе сборки, отражается в отчёте `health_check` |
-| [`INF_REQ_015`](../../specifications/infrastructure_baseline.md#inf_req_015): Разделение среды разработки и рабочей среды | ➖ | Задокументировано прямо в `Dockerfile` (локальный прогон тестов не подтверждает рабочий контур); механической проверки нет — политика, а не код |
+| [`INF_REQ_015`](../../specifications/infrastructure_baseline.md#inf_req_015): Разделение среды разработки и рабочей среды | ➖ | Задокументировано прямо в `dockerfile` (локальный прогон тестов не подтверждает рабочий контур); механической проверки нет — политика, а не код |
 
 ## 9. Доказательства
 
-- **Исходный код**: [`src/operations/health_check.py`](../../src/operations/health_check.py), [`Dockerfile`](../../Dockerfile), [`.dockerignore`](../../.dockerignore)
+- **Исходный код**: [`src/operations/health_check.py`](../../src/operations/health_check.py), [`dockerfile`](../../dockerfile), [`.dockerignore`](../../.dockerignore)
 - **Тесты**: 10 юнит-тестов в [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py), часть обязательного gate `Quality skills`
 - **Отсутствие регрессий**: Запуск `check.py --all` прошёл успешно
 
@@ -110,7 +110,7 @@ operations/tests/product/
 
 - ✅ 10 тестов пройдено
 - ✅ `health_check.py` согласован с `HealthAggregator` ([`TASK_007`](../tasks/task_007_arc_009.md))
-- ✅ `Dockerfile` статически подтверждает непривилегированного пользователя, закреплённый образ, `HEALTHCHECK`, идентифицируемую версию
+- ✅ `dockerfile` статически подтверждает непривилегированного пользователя, закреплённый образ, `HEALTHCHECK`, идентифицируемую версию
 - ⚠️ Реальная сборка Docker-образа не проверена (см. §5) — ожидает подтверждения владельцем или CI
 
 ## 11. Что будет дальше

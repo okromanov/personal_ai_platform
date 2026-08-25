@@ -18,7 +18,6 @@ personal_ai_platform/
 - .github/workflows/project_check.yml
 - .gitignore
 - AGENTS.md
-- Dockerfile
 - adr/adr_001_language_and_runtime.md
 - adr/adr_002_core_runtime_boundary.md
 - adr/adr_003_model_provider_interface.md
@@ -28,6 +27,7 @@ personal_ai_platform/
 - adr/adr_007_cloud_provider_selection.md
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
+- dockerfile
 - generated/health_check_report.md
 - generated/markdown_index.md
 - generated/non_markdown_index.md

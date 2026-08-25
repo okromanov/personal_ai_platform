@@ -3,10 +3,10 @@
 Runs under the canonical `operations/scripts/quality/run_unittests.py`
 discovery, so it is part of the enforced CI gate.
 
-A real `docker build` of the root `Dockerfile` cannot be exercised here
+A real `docker build` of the root `dockerfile` cannot be exercised here
 (no Docker daemon in this environment) -- this suite instead covers what
 is verifiable without one: the health-check CLI's own behavior, and a
-static structural check that the Dockerfile actually declares the
+static structural check that the dockerfile actually declares the
 properties INF_CMP_001 requires (pinned base image, non-root user,
 health check, identifiable version).
 """
@@ -88,7 +88,7 @@ class DockerfileStructureTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.dockerfile = (REPO_ROOT / "Dockerfile").read_text(encoding="utf-8")
+        self.dockerfile = (REPO_ROOT / "dockerfile").read_text(encoding="utf-8")
 
     def test_base_image_is_pinned_to_a_supported_python_version(self) -> None:
         self.assertRegex(self.dockerfile, r"(?m)^FROM python:3\.12-slim\b")

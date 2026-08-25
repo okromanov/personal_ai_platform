@@ -10,8 +10,12 @@
 # INF_REQ_015: dev and prod carry different evidence. A green local
 # `operations/scripts/quality/run_suite.py` run (developer's own Python
 # environment, no admin privileges, no production data) does not certify
-# this build -- only a built, versioned image run from this Dockerfile is
+# this build -- only a built, versioned image run from this file is
 # this runtime environment's own evidence.
+#
+# Named lower_snake_case (`dockerfile`, not `Dockerfile`) per this
+# repository's naming convention -- unlike `docker build .`, this is not
+# picked up implicitly; build it with `docker build -f dockerfile .`.
 FROM python:3.12-slim
 
 ARG APP_VERSION=unknown

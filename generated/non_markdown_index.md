@@ -19,7 +19,7 @@ version: 1.0
 | [`.dockerignore`](../.dockerignore) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
-| [`Dockerfile`](../Dockerfile) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
+| [`dockerfile`](../dockerfile) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/hooks/__init__.py`](../operations/hooks/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/hooks/pre_commit_hook.sh`](../operations/hooks/pre_commit_hook.sh) | — | Канонический pre-commit hook: версии authority-документов, dev-инструменты, быстрый набор проверок, регенерация дашбордов. |
