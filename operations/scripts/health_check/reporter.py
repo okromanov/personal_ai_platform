@@ -118,19 +118,6 @@ version: 2.0
 
 # Repository health snapshot
 
-## Статистика репозитория
-
-| Метрика | Значение |
-|---|---:|
-| Коммитов | {repo.total_commits} |
-| Python-файлов | {repo.python_files} |
-| Строк кода | {repo.lines_of_code:,} |
-| Размер .git | {repo.git_size_kb} KB |
-| Размер проекта | {repo.project_size_mb} MB |
-| Веток | {len(repo.branches)} |
-| Тестов | {tests.total_passed} passed / {tests.total_failed} failed |
-| Coverage | {tests.coverage_percent}% |
-
 ## Слепок комплексного аудита
 
 | Столп | Evidence status |
