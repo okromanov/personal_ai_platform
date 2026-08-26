@@ -116,10 +116,7 @@ updated: {timestamp.strftime("%Y-%m-%d")}
 # 🏥 Repository Health Check Report
 ## `okromanov/personal_ai_platform`
 
-**Дата проверки:** {timestamp.isoformat()}
-**Ветка:** {repo.branch_name}
 **Git SHA:** `{repo.head_sha}`
-**Общее состояние:** {status}
 
 ---
 
