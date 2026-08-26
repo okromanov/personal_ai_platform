@@ -3,7 +3,7 @@ id: TASK_010
 type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
-work_state: in_progress
+work_state: in-progress
 version: 1.7
 updated: 2026-08-26
 next_actor: agent
@@ -32,11 +32,11 @@ implements:
 
 ## 2. Результат
 
-Механизм хранения и выдачи секретов на переменных окружения для m02. Потребитель запрашивает логическое имя через `SecretProvider`; TelegramChannel получает токен как `TELEGRAM_BOT_TOKEN`. Контракт не привязан к env-провайдеру.
+Механизм хранения и выдачи секретов на переменных окружения для [`m02`](../../milestones.md#m02). Потребитель запрашивает логическое имя через `SecretProvider`; TelegramChannel получает токен как `TELEGRAM_BOT_TOKEN`. Контракт не привязан к env-провайдеру.
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003) определяет [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006). Выбран минимальный для m02 вариант: переменные окружения с заменяемым контрактом. Конкретного шлюза моделей пока нет, поэтому ключ поставщика будет запрошен этим же контрактом при его реализации. Зависит от [`TASK_009`](task_009_inf_002.md).
+Спецификация [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003) определяет [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006). Выбран минимальный для [`m02`](../../milestones.md#m02) вариант: переменные окружения с заменяемым контрактом. Конкретного шлюза моделей пока нет, поэтому ключ поставщика будет запрошен этим же контрактом при его реализации. Зависит от [`TASK_009`](task_009_inf_002.md).
 
 ## 4. Что делать сейчас
 

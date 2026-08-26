@@ -12,7 +12,7 @@ version: 1.0
 |---|---|
 | Статус очереди | `10` из `13` |
 | Текущая задача | [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md) |
-| Состояние | запланирована |
+| Состояние | выполняется |
 | Следующий исполнитель | агент |
 
 ## Что делать сейчас
@@ -21,7 +21,7 @@ version: 1.0
 - **Положение в очереди:** `10` из `13`
 - **Сейчас действует:** агент
 - **Действие владельца:** нет
-- **Шаги:** выполнено `0`, осталось `6`
+- **Шаги:** выполнено `3`, осталось `3`
 
 ## Рабочая очередь
 
@@ -38,7 +38,7 @@ version: 1.0
 | `7` | [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_009.md) | выполнена | `6` из `6` | — |
 | `8` | [`TASK_008` — Реализация INF_CMP_001](work/tasks/task_008_inf_001.md) | выполнена | `6` из `6` | — |
 | `9` | [`TASK_009` — Реализация INF_CMP_002](work/tasks/task_009_inf_002.md) | выполнена | `6` из `6` | — |
-| `10` | [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md) | запланирована — **текущая** | `0` из `6` | агент |
+| `10` | [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md) | выполняется — **текущая** | `3` из `6` | агент |
 | `11` | [`TASK_011` — Реализация INF_CMP_005](work/tasks/task_011_inf_005.md) | запланирована | `0` из `6` | агент |
 | `12` | [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md) | запланирована | `0` из `6` | агент |
 | `13` | [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md) | запланирована | `0` из `6` | агент |
@@ -56,7 +56,7 @@ version: 1.0
 | `TASK_007` | [`m02`](milestones.md#m02) | [`ARC_CMP_009`](specifications/architecture_baseline.md#arc_cmp_009) | [`TEST_013`](work/tests/test_013.md) |
 | `TASK_008` | [`m02`](milestones.md#m02) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#inf_cmp_001) | [`TEST_014`](work/tests/test_014.md) |
 | `TASK_009` | [`m02`](milestones.md#m02) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#inf_cmp_002) | [`TEST_015`](work/tests/test_015.md) |
-| `TASK_010` | [`m02`](milestones.md#m02) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003) | — |
+| `TASK_010` | [`m02`](milestones.md#m02) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003) | [`TEST_016`](work/tests/test_016.md) |
 | `TASK_011` | [`m02`](milestones.md#m02) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | — |
 | `TASK_012` | [`m02`](milestones.md#m02) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | — |
 | `TASK_013` | [`m02`](milestones.md#m02) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — |
