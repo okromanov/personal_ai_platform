@@ -41,7 +41,7 @@ personal_ai_platform/
 - operations/__init__.py
 - operations/acceptance.md
 - operations/adr_lifecycle.md
-- operations/capability_summary.md
+- capability_summary.md
 - operations/change_process.md
 - operations/document_frontmatter_standard.md
 - operations/examples/sample_task_lifecycle.md
