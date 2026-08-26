@@ -100,7 +100,7 @@ def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
         linked = tests_by_task.get(str(task["id"]), [])
         evidence = ", ".join(f"[`{test_id}`]({path})" for test_id, path in linked) or "—"
         state = labels.get(str(task.get("work_state", "")), str(task.get("work_state", "")))
-        rows.append(f"| `{component}` | {task_link} | {evidence} | {state} |")
+        rows.append(f"| {_checkbox(str(task.get('work_state')) == 'completed')} | `{component}` | {task_link} | {evidence} | {state} |")
     return "\n".join(rows) or "| — | — | — | — |"
 
 
@@ -141,20 +141,6 @@ def render_repository_project_status(root: Path) -> str:
         for item in milestones
     )
     technical_coverage = _technical_coverage(current_tasks, root)
-
-    if current_tasks:
-        task_lines = "\n".join(
-            f"- {_checkbox(str(item['work_state']) == 'completed')} "
-            f"[`{item['id']}` — {item['title']}](work/tasks/{Path(str(item['path'])).name})"
-            for item in current_tasks
-        )
-    elif foundation_without_project_tasks:
-        task_lines = (
-            "Проектных TASK нет: `m01` посвящён подготовке и принятию основы. "
-            "Служебная история репозитория здесь не хранится."
-        )
-    else:
-        task_lines = "Проектные TASK для этого этапа ещё не созданы."
 
     if current_task:
         task_link = (
@@ -304,14 +290,10 @@ version: 1.0
 
 {milestone_lines}
 
-## Проектные задачи текущего этапа
+## Задачи и техническое покрытие текущего этапа
 
-{task_lines}
-
-## Техническое покрытие текущего этапа
-
-| Компонент | Поставка | Проверка | Состояние |
-|---|---|---|---|
+| Готово | Компонент | Задача | Проверка | Состояние |
+|---|---|---|---|---|
 {technical_coverage}
 
 ## Шаги текущей работы
