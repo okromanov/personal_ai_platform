@@ -20,6 +20,7 @@ allowed_paths:
   - capability_summary.md
   - project_status.md
   - generated/markdown_index.md
+  - generated/non_markdown_index.md
   - generated/repository_structure.md
   - generated/test_catalog.md
   - generated/traceability_matrix.md
