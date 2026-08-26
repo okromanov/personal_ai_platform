@@ -361,6 +361,39 @@ class RebaseRelativeLinksTests(unittest.TestCase):
             self.assertEqual(_rebase_relative_links(text, source_dir, root), text)
 
 
+    def test_queue_position_counts_the_entire_milestone_backlog(self) -> None:
+        milestones = [
+            {"id": "m01", "title": "Основа", "work_state": "completed", "scope": []},
+            {"id": "m02", "title": "Живой помощник", "work_state": "in-progress", "scope": []},
+        ]
+        tasks = [
+            _task_item(
+                f"TASK_{number:03d}",
+                "completed" if number < 13 else "planned",
+                traces_to=["m02"],
+                owner_action="none",
+            )
+            for number in range(1, 18)
+        ]
+        with (
+            patch(
+                "operations.scripts.status.human_status.collect_milestones",
+                return_value={"items": milestones, "current": milestones[1]},
+            ),
+            patch(
+                "operations.scripts.status.human_status.collect_tasks",
+                return_value={"tasks": tasks},
+            ),
+            patch(
+                "operations.scripts.status.human_status._technical_coverage",
+                return_value="| — | — | — | — |",
+            ),
+        ):
+            rendered = render_repository_project_status(self.root)
+
+        self.assertIn("| Место в очереди проекта | **13 из 17** |", rendered)
+
+
 class CapabilitySummaryTests(unittest.TestCase):
     def test_reads_the_current_summary_section_from_the_hand_maintained_file(self) -> None:
         with TemporaryDirectory() as tmp:
