@@ -7,6 +7,8 @@ Handles single interface with stateless message normalization.
 import asyncio
 from typing import Optional
 
+from src.secrets import SecretProvider
+
 from .base import Channel, ChannelError, TaskMessage
 
 
@@ -21,14 +23,22 @@ class TelegramChannel(Channel):
 
     This is a minimal implementation for the m02 scenario.
     Production would integrate with python-telegram-bot library.
+    A deployed token is obtained from SecretProvider by logical name.
     """
 
-    def __init__(self, bot_token: str = ""):
-        """Initialize Telegram channel.
+    def __init__(
+        self,
+        bot_token: str = "",
+        *,
+        secret_provider: SecretProvider | None = None,
+        secret_name: str = "TELEGRAM_BOT_TOKEN",
+    ):
+        """Initialize the channel with a test token or a secret provider."""
+        if bot_token and secret_provider is not None:
+            raise ValueError("Provide either bot_token or secret_provider, not both")
+        if secret_provider is not None:
+            bot_token = secret_provider.get(secret_name)
 
-        Args:
-            bot_token: Telegram bot token (from environment or config in production)
-        """
         super().__init__("telegram")
         self.bot_token = bot_token
         self._message_queue: asyncio.Queue[TaskMessage] = asyncio.Queue()
