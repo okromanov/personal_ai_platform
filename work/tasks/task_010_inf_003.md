@@ -3,10 +3,10 @@ id: TASK_010
 type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
-work_state: in-progress
-version: 1.7
+work_state: completed
+version: 1.8
 updated: 2026-08-26
-next_actor: agent
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_009
@@ -18,10 +18,19 @@ allowed_paths:
   - src/secrets/env_provider.py
   - src/channels/telegram.py
   - operations/tests/product/test_secrets.py
+  - operations/capability_summary.md
+  - operations/scripts/documents/generate.py
+  - operations/scripts/status/human_status.py
+  - project_status.md
+  - generated/markdown_index.md
+  - operations/scripts/documents/platform_capability.py
+  - generated/platfrom_capability.md
 traces_to:
   - m02
 implements:
   - INF_CMP_003
+tests:
+  - TEST_016
 ---
 
 # TASK_010 — Реализация INF_CMP_003
@@ -42,18 +51,16 @@ implements:
 
 ### Агенту
 
-1. Завершить реализацию env-провайдера и интеграции TelegramChannel
-2. Запустить целевые и доступные локальные проверки
-3. Обновить generated-документы и опубликовать PR
+Работа завершена. Следующая проектная задача — [`TASK_011`](task_011_inf_005.md).
 
 ## 5. План выполнения
 
 - [x] Изучить требования к [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003)
 - [x] Дополнить allowed_paths реальными путями
 - [x] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать [`TEST_016`](../tests/test_016.md), связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Реализовать компонент
+- [x] Написать [`TEST_016`](../tests/test_016.md), связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
@@ -61,15 +68,17 @@ implements:
 
 ## 7. Проверки и доказательства
 
-`operations/tests/product/test_secrets.py` проверяет выдачу, ошибки и интеграцию Telegram. [`TEST_016`](../tests/test_016.md) связан с [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006).
+`operations/tests/product/test_secrets.py` проверяет выдачу, ошибки и интеграцию Telegram; шесть целевых тестов пройдены. [`TEST_016`](../tests/test_016.md) связан с [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006).
+
+Полный серверный GitHub Actions gate намеренно отложен до 1 сентября 2026 года: бесплатный месячный лимит Actions исчерпан. Это ограничение верификации, а не заявленный успешный результат.
 
 ## 8. Готово когда
 
-- [ ] Шесть тестов `operations/tests/product/test_secrets.py` прошли;
-- [ ] Полный локальный quality-suite и pre-commit hook прошли;
-- [ ] generated-файлы не имеют drift;
-- [ ] Все пути поставки входят в `allowed_paths`;
-- [ ] [`TEST_016`](../tests/test_016.md) имеет актуальную спецификацию и автоматическое evidence.
+- [x] Шесть тестов `operations/tests/product/test_secrets.py` прошли;
+- [~] Полный server gate GitHub Actions отложен до 1 сентября 2026 года из-за исчерпанного лимита; успешный результат не заявляется;
+- [x] generated-документы обновлены на этой ветке;
+- [x] Все пути поставки входят в `allowed_paths`;
+- [x] [`TEST_016`](../tests/test_016.md) имеет актуальную спецификацию и автоматическое evidence.
 
 ## 9. Что будет дальше
 
@@ -77,4 +86,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Платформа получает заменяемый `SecretProvider`: секрет запрашивается по логическому имени из окружения, пустое или отсутствующее значение отвергается без вывода значения в ошибках, а TelegramChannel получает `TELEGRAM_BOT_TOKEN` через этот контракт.

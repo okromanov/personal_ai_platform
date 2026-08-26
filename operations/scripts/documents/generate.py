@@ -8,7 +8,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import (
-    atomic_write,
+    atomic_write_generated,
     find_project_root,
     require_supported_python,
     today_iso,
@@ -16,13 +16,11 @@ from operations.scripts.common.project import (
 from operations.scripts.documents.auto_generate_tasks import auto_generate_tasks
 from operations.scripts.documents.index import render_index
 from operations.scripts.documents.non_markdown_index import render_non_markdown_index
-from operations.scripts.documents.platform_capability import render_platfrom_capability
 from operations.scripts.documents.repository_tree import render_repository_structure
 from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import render_traceability
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.status.human_status import render_repository_project_status
-from operations.scripts.tasks.generate import render_task_index
 
 
 def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
@@ -41,16 +39,14 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     # landed on disk. Rendering it earlier would snapshot a file listing one
     # generation cycle stale whenever a new generated file is introduced.
     outputs = [
-        (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
         (root / "generated" / "markdown_index.md", render_index(root, date)),
         (root / "generated" / "non_markdown_index.md", render_non_markdown_index(root, date)),
         (root / "generated" / "traceability_matrix.md", render_traceability(root, date)),
         (root / "generated" / "test_catalog.md", render_test_catalog(root, date)),
-        (root / "generated" / "platfrom_capability.md", render_platfrom_capability(root, date)),
     ]
     for path, rendered in outputs:
-        if atomic_write(path, rendered):
+        if atomic_write_generated(path, rendered):
             changed.append(path.relative_to(root).as_posix())
 
     # Remove semantic_review_v1.md when moving past m01
@@ -62,7 +58,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
         changed.append(semantic_review.relative_to(root).as_posix())
 
     repository_structure_path = root / "generated" / "repository_structure.md"
-    if atomic_write(repository_structure_path, render_repository_structure(root, date)):
+    if atomic_write_generated(repository_structure_path, render_repository_structure(root, date)):
         changed.append(repository_structure_path.relative_to(root).as_posix())
 
     return changed
