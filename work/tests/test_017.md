@@ -24,17 +24,17 @@ depends_on:
 
 ## 1. Назначение
 
-Доказать, что INF_CMP_005 сохраняет каноническое состояние задачи в переносимой SQLite-базе и восстанавливает его новым экземпляром после перезапуска.
+Доказать, что [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005) сохраняет каноническое состояние задачи в переносимой SQLite-базе и восстанавливает его новым экземпляром после перезапуска.
 
 ## 2. Что проверяется
 
-SQLiteTaskLifecycleStore сохраняет нормализованное сообщение задачи, checkpoint, счётчик повторов, отмену и запись о выполненном действии. Все операции выполняются через неизменный контракт TaskLifecycleStore; физический путь к БД передаётся конфигурацией и не привязан к облачному поставщику.
+`SQLiteTaskLifecycleStore` сохраняет нормализованное сообщение задачи, checkpoint, счётчик повторов, отмену и запись о выполненном действии. Все операции выполняются через неизменный контракт `TaskLifecycleStore`; физический путь к БД передаётся конфигурацией и не привязан к облачному поставщику.
 
-Так выполняются INF_REQ_008 и INF_REQ_016.
+Так выполняются [`INF_REQ_008`](../../specifications/infrastructure_baseline.md#inf_req_008) и [`INF_REQ_016`](../../specifications/infrastructure_baseline.md#inf_req_016).
 
 ## 3. Автоматический запуск
 
-Канонический quality-suite запускает operations/tests/product/test_persistent_task_state.py.
+Канонический quality-suite запускает [`test_persistent_task_state.py`](../../operations/tests/product/test_persistent_task_state.py).
 
 ## 4. Критерий успеха
 
