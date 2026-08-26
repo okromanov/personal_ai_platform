@@ -67,7 +67,7 @@ version: 1.0
 | [`operations/threat_review_triggers.md`](../operations/threat_review_triggers.md) | `threat_review_triggers` | `guide` | `document_state` | `current` | `1.0` | Триггеры и процедуры угроз |
 | [`project_rules.md`](../project_rules.md) | `project_rules` | `project_rules` | `document_state` | `current` | `1.0` | Правила развития personal_ai_platform |
 | [`project_status.md`](../project_status.md) | `` | `` | `document_state` | `` | `` | Состояние проекта |
-| [`repository_audit_system_prompt.md`](../repository_audit_system_prompt.md) | `` | `` | `document_state` | `` | `` | СИСТЕМА ПРОМПТ: ПОЛНЫЙ АУДИТ РЕПОЗИТОРИЯ |
+| [`repository_audit_system_prompt.md`](../repository_audit_system_prompt.md) | `` | `` | `document_state` | `` | `` | СИСТЕМНЫЙ ПРОМПТ: ДОКАЗАТЕЛЬНЫЙ АУДИТ РЕПОЗИТОРИЯ |
 | [`specifications/architecture_baseline.md`](../specifications/architecture_baseline.md) | `architecture_baseline` | `architecture` | `document_state` | `current` | `1.2` | Базовая логическая архитектура personal_ai_platform |
 | [`specifications/business_requirements.md`](../specifications/business_requirements.md) | `business_requirements` | `business_requirements` | `document_state` | `current` | `1.0` | Бизнес-требования personal_ai_platform |
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.2` | Базовая инфраструктура personal_ai_platform |
