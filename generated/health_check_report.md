@@ -13,9 +13,7 @@ updated: 2026-08-25
 
 > **Актуальность:** это исторический снимок запуска, а не подтверждение текущей ревизии. Достоверный результат для точного SHA создаётся в `runtime/health_check_report.md` каноническим `run_suite.py` и хранится как artifact успешного запуска `Project check`; отсутствие такого artifact означает `INCOMPLETE`.
 
-**Дата проверки:** 25 August 2026
-**Ветка:** claude/m02-continuation-0j1nyk
-**Общее состояние:** ✅ HEALTHY
+undefined
 
 ---
 
@@ -143,6 +141,3 @@ operations/scripts/quality/registry.py: 92.13% (minimum 85.00%)
 
 ---
 
-**Сгенерировано:** Claude Code
-**Версия отчета:** 1.0
-**Время проверки:** 2026-08-25T15:09:14.418343Z
