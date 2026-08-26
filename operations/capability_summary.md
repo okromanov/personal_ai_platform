@@ -2,7 +2,7 @@
 id: capability_summary
 type: guide
 document_state: current
-version: 1.6
+version: 1.7
 updated: 2026-08-26
 depends_on:
   - TASK_001
@@ -15,6 +15,7 @@ depends_on:
   - TASK_008
   - TASK_009
   - TASK_010
+  - TASK_011
 ---
 
 # Карта компетенций
@@ -50,6 +51,11 @@ depends_on:
 
 - **TASK:** [TASK_010](../work/tasks/task_010_inf_003.md)
 - **Описание:** Секреты запрашиваются по логическому имени через заменяемый `SecretProvider`; env-реализация отклоняет пустые и отсутствующие значения без раскрытия секретов, а TelegramChannel получает `TELEGRAM_BOT_TOKEN` через контракт.
+
+### Системная — Постоянное состояние задач
+
+- **TASK:** [TASK_006](../work/tasks/task_006_arc_007.md), [TASK_011](../work/tasks/task_011_inf_005.md)
+- **Описание:** Состояние задачи, checkpoint, повторы, отмена и защита от повторного действия сохраняются в переносимой SQLite-базе и восстанавливаются после перезапуска без изменения прикладного контракта.
 
 ## Как обновлять
 

@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-26T14:01:52Z
+generated_at: 2026-08-26T16:19:42Z
 version: 1.0
 ---
 
@@ -15,9 +15,9 @@ version: 1.0
 
 > **Чтобы продолжить, отправьте агенту одну команду.**
 >
-> `ПРОДОЛЖАЙ TASK_011`
+> `ПРОДОЛЖАЙ TASK_012`
 
-**Осталось:** 1 шаг(ов) в текущей работе.
+**Осталось:** 6 шаг(ов) в текущей работе.
 
 Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную.
 
@@ -27,9 +27,9 @@ version: 1.0
 |---|---|
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
-| Текущая проектная задача | [`TASK_011` — Реализация INF_CMP_005](work/tasks/task_011_inf_005.md) |
-| Место в очереди проекта | **11 из 13** |
-| Шаги текущей задачи | **5** из **6** |
+| Текущая проектная задача | [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md) |
+| Место в очереди проекта | **12 из 13** |
+| Шаги текущей задачи | **0** из **6** |
 | Следующий исполнитель | **агент** |
 
 ## Этапы V1
@@ -56,22 +56,22 @@ version: 1.0
 | [`TASK_008`](work/tasks/task_008_inf_001.md) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#INF_CMP_001) | [`TEST_014`](work/tests/test_014.md) | выполнена |
 | [`TASK_009`](work/tasks/task_009_inf_002.md) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#INF_CMP_002) | [`TEST_015`](work/tests/test_015.md) | выполнена |
 | [`TASK_010`](work/tasks/task_010_inf_003.md) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#INF_CMP_003) | [`TEST_016`](work/tests/test_016.md) | выполнена |
-| [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005) | — | запланирована |
+| [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
 | [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#INF_CMP_007) | — | запланирована |
 | [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#INF_CMP_008) | — | запланирована |
 
 ## Шаги текущей работы
 
-- [ ] Изучить требования к [[`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005)](specifications/infrastructure_baseline.md#inf_cmp_005)
+- [ ] Изучить требования к [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007)
 - [ ] Дополнить `allowed_paths` фактическими путями реализации
 - [ ] Спроектировать реализацию
-- [x] Реализовать SQLiteTaskLifecycleStore
-- [x] Написать [`TEST_017`](work/tests/test_017.md), связанный с TASK и требованиями компонента
+- [ ] Реализовать компонент
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 - [ ] Проверить покрытие путей в `allowed_paths`
 
 ## Блокеры
 
-GitHub Actions не запускаются до 1 сентября 2026 года: исчерпан бесплатный лимит. Серверная проверка TASK_011 будет отложена до восстановления лимита.
+GitHub Actions не запускаются до 1 сентября 2026 года: исчерпан бесплатный лимит. Серверная проверка завершённой TASK_011 отложена до восстановления лимита.
 
 ## Незакрытые действия владельца (необязательные)
 
@@ -81,5 +81,5 @@ GitHub Actions не запускаются до 1 сентября 2026 года
 
 ## Что будет дальше
 
-[`TASK_011`](work/tasks/task_011_inf_005.md) реализует Постоянное хранилище ([[`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005)](specifications/infrastructure_baseline.md#inf_cmp_005)).
+[`TASK_012`](work/tasks/task_012_inf_007.md) реализует Наблюдаемость ([`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007)).
 
