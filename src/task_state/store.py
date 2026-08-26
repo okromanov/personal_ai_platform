@@ -2,9 +2,9 @@
 
 An in-process, in-memory store: the minimal working implementation for
 m02, same pattern as TASK_002's OwnerControlGate. It does not survive a
-process restart -- physical persistence across restarts is a separate
-concern (INF_CMP_005, not yet implemented) that will connect to this
-same contract without changing it.
+process restart -- physical persistence across restarts is provided by
+SQLiteTaskLifecycleStore (INF_CMP_005), which connects to this same
+contract without changing it.
 """
 
 from typing import Any

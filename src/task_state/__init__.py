@@ -3,9 +3,8 @@
 Provides a stable contract (TaskLifecycleStore) for persisting a task
 message and its execution state -- checkpoint, retry count, cancellation,
 and duplicate-action protection -- independent of any concrete agent
-execution environment. Includes an in-memory reference implementation,
-the minimal working option for m02; physical persistence across process
-restarts (INF_CMP_005) connects to this same contract later.
+execution environment. Includes an in-memory reference implementation and SQLiteTaskLifecycleStore,
+the durable single-node option for m02.
 
 This module implements ARC_CMP_007 — Состояние задач (Task State).
 """

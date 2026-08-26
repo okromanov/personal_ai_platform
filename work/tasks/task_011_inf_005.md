@@ -15,6 +15,7 @@ allowed_paths:
   - work/tests/test_017.md
   - src/task_state/sqlite_store.py
   - src/task_state/__init__.py
+  - src/task_state/store.py
   - operations/tests/product/test_persistent_task_state.py
 traces_to:
   - m02
@@ -52,8 +53,8 @@ implements:
 - [x] Изучить требования к [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)
 - [x] Дополнить allowed_paths реальными путями
 - [x] Спроектировать SQLite-реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Реализовать SQLiteTaskLifecycleStore
+- [x] Написать [`TEST_017`](../tests/test_017.md), связанный с TASK и требованиями компонента
 - [ ] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
