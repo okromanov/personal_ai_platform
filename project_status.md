@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-26T14:10:00Z
+generated_at: 2026-08-26T21:41:31Z
 version: 1.0
 ---
 
@@ -26,7 +26,7 @@ version: 1.0
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
 | Текущая проектная задача | [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md) |
-| Место в очереди проекта | **13 из 13** |
+| Место в очереди проекта | **13 из 17** |
 | Шаги текущей задачи | **0** из **6** |
 | Следующий исполнитель | **агент** |
 
@@ -57,6 +57,10 @@ version: 1.0
 | [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
 | [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#INF_CMP_007) | [`TEST_018`](work/tests/test_018.md) | выполнена |
 | [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#INF_CMP_008) | — | запланирована |
+| [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#ARC_CMP_003) | — | запланирована |
+| [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#ARC_CMP_004) | — | запланирована |
+| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#ARC_CMP_001) | — | запланирована |
+| [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#ARC_FLOW_001) | — | запланирована |
 
 ## Шаги текущей работы
 
