@@ -16,6 +16,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS
+
 
 class StubDetector(ast.NodeVisitor):
     """Find stub implementations like pass, NotImplementedError, etc."""
@@ -197,20 +202,20 @@ def analyze_file(filepath: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    """Analyze all Python files in operations/scripts and operations/tests."""
+    """Analyze every Python file in the canonical quality scope."""
     root = Path.cwd()
-    script_dir = root / "operations" / "scripts"
-    test_dir = root / "operations" / "tests"
+    scope_dirs = [root / relative for relative in PYTHON_QUALITY_PATHS]
 
-    if not script_dir.exists() or not test_dir.exists():
-        print("Error: operations/scripts or operations/tests not found", file=sys.stderr)
+    missing = [str(path.relative_to(root)) for path in scope_dirs if not path.exists()]
+    if missing:
+        print(f"Error: quality scope paths not found: {', '.join(missing)}", file=sys.stderr)
         return 1
 
     all_findings: list[dict[str, Any]] = []
     critical_count = 0
     warning_count = 0
 
-    for python_file in list(script_dir.rglob("*.py")) + list(test_dir.rglob("*.py")):
+    for python_file in [path for directory in scope_dirs for path in directory.rglob("*.py")]:
         findings = analyze_file(python_file)
         all_findings.append(findings)
 

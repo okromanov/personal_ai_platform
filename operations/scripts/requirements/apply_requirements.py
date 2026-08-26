@@ -314,7 +314,7 @@ def update_milestones(root: Path, wizard_result: dict, br_id: str) -> None:
     milestone_file.write_text(content, encoding="utf-8")
 
 
-def apply_wizard_result(root: Path, wizard_result: dict) -> None:
+def apply_wizard_result(root: Path, wizard_result: dict) -> list[str]:
     """Apply all wizard results to the repository."""
 
     print("\n" + "=" * 60)
@@ -349,6 +349,7 @@ def apply_wizard_result(root: Path, wizard_result: dict) -> None:
     print("2. Проверить: python operations/scripts/documents/check.py --all")
     print("3. Откомитить и пушить на GitHub")
     print("=" * 60)
+    return [*spec_changes, *test_task_changes, "milestones.md"]
 
 
 if __name__ == "__main__":

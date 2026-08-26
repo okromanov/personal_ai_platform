@@ -22,9 +22,13 @@ from operations.scripts.common.status_types import (
     MilestoneItem,
     MilestonesReport,
     TasksReport,
-    TestSpecItem,
-    TestSpecsReport,
     UnitSummary,
+)
+from operations.scripts.common.status_types import (
+    TestSpecItem as SpecificationItem,
+)
+from operations.scripts.common.status_types import (
+    TestSpecsReport as SpecificationsReport,
 )
 from operations.scripts.status.generate_project_status import (
     collect_milestones,
@@ -47,7 +51,7 @@ def _empty_tasks() -> TasksReport:
     return {"count": 0, "states": {}, "tasks": []}
 
 
-def _passing_test(test_id: str, milestone_id: str) -> TestSpecItem:
+def _passing_test(test_id: str, milestone_id: str) -> SpecificationItem:
     return {
         "id": test_id,
         "spec_state": "current",
@@ -62,7 +66,7 @@ def _passing_test(test_id: str, milestone_id: str) -> TestSpecItem:
     }
 
 
-def _tests_report(*items: TestSpecItem) -> TestSpecsReport:
+def _tests_report(*items: SpecificationItem) -> SpecificationsReport:
     return {"count": len(items), "items": list(items), "states": {}}
 
 

@@ -8,9 +8,18 @@ from operations.scripts.traceability.full_traceability import (
     milestone_test_coverage,
     validate_full_traceability,
 )
+from operations.scripts.traceability.relations import relation_targets
 
 
 class FullTraceabilityTests(unittest.TestCase):
+    def test_relation_targets_rejects_malformed_relations(self) -> None:
+        self.assertEqual(relation_targets({"relations": "invalid"}, "scope"), set())
+        self.assertEqual(relation_targets({"relations": {"scope": "BR_001"}}, "scope"), set())
+        self.assertEqual(
+            relation_targets({"relations": {"scope": ["BR_001", 2]}}, "scope"),
+            {"BR_001", "2"},
+        )
+
     def test_repository_has_complete_v1_chains_and_test_evidence(self) -> None:
         root = Path(__file__).resolve().parents[3]
         self.assertEqual(validate_full_traceability(root), [])

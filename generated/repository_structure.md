@@ -10,10 +10,11 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `248` |
+| Всего файлов | `252` |
 
 ```text
 personal_ai_platform/
+- .coverage
 - .dockerignore
 - .github/workflows/project_check.yml
 - .gitignore
@@ -106,9 +107,11 @@ personal_ai_platform/
 - operations/scripts/quality/run_mypy_baseline.py
 - operations/scripts/quality/run_suite.py
 - operations/scripts/quality/run_unittests.py
+- operations/scripts/quality/scope.py
 - operations/scripts/quality/test_coverage.py
 - operations/scripts/requirements/__init__.py
 - operations/scripts/requirements/apply_requirements.py
+- operations/scripts/requirements/prompting.py
 - operations/scripts/requirements/requirement_wizard.py
 - operations/scripts/requirements/stage_planning_wizard.py
 - operations/scripts/status/__init__.py
@@ -122,6 +125,7 @@ personal_ai_platform/
 - operations/scripts/traceability/__init__.py
 - operations/scripts/traceability/auto_link.py
 - operations/scripts/traceability/full_traceability.py
+- operations/scripts/traceability/relations.py
 - operations/scripts/traceability/semantic_consistency.py
 - operations/scripts/versioning/increment_file_version.py
 - operations/semantic_review.md

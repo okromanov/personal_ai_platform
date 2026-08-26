@@ -1,9 +1,9 @@
 ---
 id: health_check_module
 type: documentation
-version: 1.2
+version: 1.3
 document_state: current
-updated: 2026-08-24
+updated: 2026-08-26
 depends_on: []
 ---
 
@@ -29,7 +29,9 @@ python operations/scripts/health_check/generate.py --summary
 python operations/scripts/health_check/generate.py
 ```
 
-Сгенерирует: [`generated/health_check_report.md`](../../../generated/health_check_report.md)
+Сгенерирует `runtime/health_check_report.md`. Файл
+[`generated/health_check_report.md`](../../../generated/health_check_report.md)
+содержит только объяснение политики и намеренно не хранит статус конкретного запуска.
 
 ### Экспорт метрик в JSON
 ```bash
@@ -85,6 +87,7 @@ python operations/scripts/health_check/generate.py --json runtime/health_check.j
 | Статус | Условие | Действие |
 |--------|---------|---------|
 | ✅ HEALTHY | Нет ошибок тестов + type safe | Всё хорошо |
+| ❌ INCOMPLETE | Инструмент или метрика недоступны | Не использовать как evidence |
 | ⚠️ NEEDS ATTENTION | Есть ошибки типов/форматирования | Требуется исправление |
 | ⚠️ REVIEW RECOMMENDED | Требуется ручная проверка | Обратитесь к команде |
 
@@ -162,7 +165,7 @@ def assess_health(health: RepositoryHealth) -> str:
 ## 📚 Документация
 
 - Этот файл (module_guide.md)
-- [`health_check_report.md`](../../../generated/health_check_report.md) - пример отчёта
+- [`health_check_report.md`](../../../generated/health_check_report.md) - политика хранения отчёта
 - Встроенная документация в коде (docstrings)
 
 ## ✅ Требования
@@ -187,11 +190,9 @@ python3.12 -m venv .venv
 .venv/bin/python operations/scripts/quality/run_suite.py full
 ```
 
-Без этого `run_suite.py` либо падает на шаге "Regenerate derived documents"
-с сообщением `Требуется Python 3.12+ по ADR_001`, либо (если версия
-интерпретатора формально проходит, но нужные пакеты не установлены)
-[`health_check_report.md`](../../../generated/health_check_report.md) молча
-покажет `0 passed`.
+Без этого `run_suite.py` падает на обязательном шаге. Health collector не
+подменяет отсутствие инструмента нулём: отчёт получает `INCOMPLETE` и не может
+стать evidence.
 
 ## 🤝 Разработка
 

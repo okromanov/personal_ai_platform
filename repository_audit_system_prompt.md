@@ -84,9 +84,11 @@
 def test_function_exists():
     assert my_function is not None  # не проверяет ничего
 
+
 def test_returns_something():
     result = process_data({})
     assert result is not None  # можно что угодно вернуть
+
 
 def test_no_exception():
     try:
@@ -94,8 +96,9 @@ def test_no_exception():
     except:
         pass  # не проверяет никакое поведение
 
+
 def test_mock_everything():
-    with patch('everything'), patch('everywhere'):
+    with patch("everything"), patch("everywhere"):
         assert True  # логика не тестируется, только моки
 ```
 
@@ -105,14 +108,17 @@ def test_calculates_total_correctly():
     result = calculate_total([10, 20, 30])
     assert result == 60  # проверяет конкретное вычисление
 
+
 def test_raises_on_invalid_input():
     with pytest.raises(ValueError):
         process_data(None)  # проверяет конкретную ошибку
+
 
 def test_maintains_order():
     items = [3, 1, 4, 1, 5, 9, 2, 6]
     result = sort_items(items)
     assert result == [1, 1, 2, 3, 4, 5, 6, 9]  # проверяет конкретный результат
+
 
 def test_handles_concurrent_writes():
     # реально запускаются параллельные потоки
@@ -129,7 +135,7 @@ def test_handles_concurrent_writes():
 - Проверяет одно поведение (не 5 assert в одном тесте)
 
 **Проверка эффективности:**
-- Каждый test.py должен иметь ≥3 assert на тест
+- Каждый тест должен проверять наблюдаемый результат хотя бы одним содержательным assertion; документированный `must not raise` сценарий допустим без искусственного assertion
 - Тесты на ошибки (try/except, timeout, invalid input) для каждой функции
 - Граничные значения (пустой список, None, очень большие числа)
 - Интеграция между модулями (не только unit-тесты)
@@ -153,13 +159,18 @@ specifications/architecture_baseline.md ещё раз: "модуль Y испо�
 ```python
 # src/models/handler.py
 def validate_input(data):
-    if not data: raise ValueError("empty")
-    if len(data) > 100: raise ValueError("too long")
+    if not data:
+        raise ValueError("empty")
+    if len(data) > 100:
+        raise ValueError("too long")
+
 
 # src/tools/validator.py (копия!)
 def validate_input(data):
-    if not data: raise ValueError("empty")
-    if len(data) > 100: raise ValueError("too long")
+    if not data:
+        raise ValueError("empty")
+    if len(data) > 100:
+        raise ValueError("too long")
 ```
 
 **В тестах:**
@@ -168,6 +179,7 @@ def validate_input(data):
 def test_validate_empty():
     with pytest.raises(ValueError):
         validate_input(None)
+
 
 # tests/test_tools.py (копия!)
 def test_validate_empty():
@@ -194,8 +206,11 @@ BR_002: User can authenticate with email
 ```python
 # src/validation/__init__.py
 def validate_input(data):
-    if not data: raise ValueError("empty")
-    if len(data) > 100: raise ValueError("too long")
+    if not data:
+        raise ValueError("empty")
+    if len(data) > 100:
+        raise ValueError("too long")
+
 
 # src/models/handler.py
 from validation import validate_input  # используем, не дублируем
@@ -210,6 +225,7 @@ from validation import validate_input  # используем, не дублир
 def test_validate_empty():
     with pytest.raises(ValueError):
         validate_input(None)
+
 
 # tests/test_models.py
 def test_handler_rejects_empty():
@@ -450,10 +466,10 @@ return None  # без обработки
 
 ❌ **Хардкод:**
 ```python
-url = "http://192.168.1.1:8080"     # вместо os.getenv
-token = "sk_live_***"         # СЕКРЕТ В КОДЕ!
-path = "/home/user/data"            # абсолютный путь
-TIMEOUT = 30                        # магическое число
+url = "http://192.168.1.1:8080"  # вместо os.getenv
+token = "sk_live_***"  # СЕКРЕТ В КОДЕ!
+path = "/home/user/data"  # абсолютный путь
+TIMEOUT = 30  # магическое число
 ```
 
 ✅ **Допускается только:**
@@ -470,12 +486,15 @@ TIMEOUT = 30                        # магическое число
 ```python
 # src/models/handler.py
 def validate_input(data):
-    if not data: raise ValueError("empty")
+    if not data:
+        raise ValueError("empty")
     return data
+
 
 # src/tools/processor.py (копия!)
 def validate_input(data):
-    if not data: raise ValueError("empty")
+    if not data:
+        raise ValueError("empty")
     return data
 ```
 
@@ -483,8 +502,10 @@ def validate_input(data):
 ```python
 # src/validation/__init__.py
 def validate_input(data):
-    if not data: raise ValueError("empty")
+    if not data:
+        raise ValueError("empty")
     return data
+
 
 # src/models/handler.py
 from validation import validate_input
@@ -554,6 +575,7 @@ pytest --cov=src --cov-report=term-missing
 def test_function_exists():
     assert my_function is not None  # ❌ ничего не проверяет
 
+
 def test_no_error():
     result = process()
     assert result is not None  # ❌ слишком слабо
@@ -562,7 +584,8 @@ def test_no_error():
 **Хорошие тесты (эффективные):**
 ```python
 def test_calculates_correct_sum():
-    assert sum([1,2,3]) == 6  # ✅ конкретное значение
+    assert sum([1, 2, 3]) == 6  # ✅ конкретное значение
+
 
 def test_raises_on_none():
     with pytest.raises(ValueError):
@@ -578,7 +601,7 @@ grep -rn "assert True\|assert is not None\|pass" tests/
 ✅ **Качество тестов:**
 - Нет ли дублирования тестов (одна логика тестируется в двух местах)?
 - Каждый тест проверяет одно поведение?
-- Достаточно ли assertions (≥3 на тест)?
+- Проверяют ли assertions весь заявленный наблюдаемый результат без искусственного счётчика?
 
 ✅ **Flaky тесты:**
 - Есть ли нестабильные тесты (проходят/падают случайно)?
@@ -838,6 +861,6 @@ for i in {1..2}; do pytest -v; done
 
 ---
 
-**Версия:** 2.1  
-**Дата:** 2026-08-25  
+**Версия:** 2.2  
+**Дата:** 2026-08-26  
 **Совместимость:** Проекты с AGENTS.md и generated/ файлами

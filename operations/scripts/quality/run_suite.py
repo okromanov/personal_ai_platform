@@ -13,6 +13,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import find_project_root
+from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS, PYTHON_SOURCE_PATHS
 
 
 class QualityFailure(RuntimeError):
@@ -102,7 +103,8 @@ def validate_python_permissions(root: Path) -> None:
         return
     executable = [
         path.relative_to(root).as_posix()
-        for base in (root / "operations/scripts", root / "operations/tests")
+        for relative in PYTHON_QUALITY_PATHS
+        for base in (root / relative,)
         for path in base.rglob("*.py")
         if path.stat().st_mode & 0o111
     ]
@@ -150,7 +152,7 @@ def run_fast(root: Path, python: str) -> None:
     run_step(
         root,
         "Python syntax",
-        [python, "-m", "compileall", "-q", "operations/scripts", "operations/tests"],
+        [python, "-m", "compileall", "-q", *PYTHON_QUALITY_PATHS],
     )
     run_step(
         root, "Fast repository checks", [python, "operations/scripts/documents/check.py", "--fast"]
@@ -158,7 +160,7 @@ def run_fast(root: Path, python: str) -> None:
     run_step(
         root,
         "Ruff lint",
-        [python, "-m", "ruff", "check", "operations/scripts", "operations/tests"],
+        [python, "-m", "ruff", "check", *PYTHON_QUALITY_PATHS],
     )
     run_step(
         root,
@@ -200,7 +202,7 @@ def run_full(root: Path, python: str, base: str | None) -> None:
             "-m",
             "bandit",
             "-r",
-            "operations/scripts",
+            *PYTHON_SOURCE_PATHS,
             "--severity-level",
             "medium",
             "-f",
@@ -222,8 +224,7 @@ def run_full(root: Path, python: str, base: str | None) -> None:
             python,
             "-m",
             "vulture",
-            "operations/scripts",
-            "operations/tests",
+            *PYTHON_QUALITY_PATHS,
             "--min-confidence",
             "80",
             "--ignore-names",
@@ -239,8 +240,7 @@ def run_full(root: Path, python: str, base: str | None) -> None:
             "-m",
             "ruff",
             "check",
-            "operations/scripts",
-            "operations/tests",
+            *PYTHON_QUALITY_PATHS,
             "--output-format",
             "concise",
         ],
@@ -249,7 +249,7 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     run_step(
         root,
         "Ruff format",
-        [python, "-m", "ruff", "format", "operations/scripts", "operations/tests", "--check"],
+        [python, "-m", "ruff", "format", *PYTHON_QUALITY_PATHS, "--check"],
         artifact="runtime/ruff_format.txt",
     )
     run_step(
@@ -304,10 +304,12 @@ def run_full(root: Path, python: str, base: str | None) -> None:
         [
             python,
             "operations/scripts/health_check/generate.py",
+            "--output",
+            "runtime/health_check_report.md",
             "--json",
             "runtime/health_check.json",
         ],
-        artifact="runtime/health_check_report.md",
+        artifact="runtime/health_check_output.txt",
     )
 
 

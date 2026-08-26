@@ -10,12 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `156` |
+| Всего файлов | `160` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
 | Файл | Задача | Описание |
 |---|---|---|
+| [`.coverage`](../.coverage) | — | — |
 | [`.dockerignore`](../.dockerignore) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
@@ -52,7 +53,7 @@ version: 1.0
 | [`operations/scripts/github/__init__.py`](../operations/scripts/github/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/scripts/github/post_pr_comment.py`](../operations/scripts/github/post_pr_comment.py) | — | Публикует результаты проверок комментарием к Pull Request на GitHub. |
 | [`operations/scripts/health_check/__init__.py`](../operations/scripts/health_check/__init__.py) | — | Пустой файл-маркер Python-пакета. |
-| [`operations/scripts/health_check/generate.py`](../operations/scripts/health_check/generate.py) | — | Генерирует generated/health_check_report.md — отчёт о состоянии репозитория. |
+| [`operations/scripts/health_check/generate.py`](../operations/scripts/health_check/generate.py) | — | Генерирует runtime health-report и JSON, привязанные к точному Git SHA. |
 | [`operations/scripts/health_check/metrics.py`](../operations/scripts/health_check/metrics.py) | — | Собирает метрики репозитория: git-статистику, тесты, качество кода. |
 | [`operations/scripts/health_check/reporter.py`](../operations/scripts/health_check/reporter.py) | — | Форматирует собранные метрики health check в готовый Markdown-отчёт. |
 | [`operations/scripts/milestones/__init__.py`](../operations/scripts/milestones/__init__.py) | — | Управление жизненным циклом этапов (milestone). |
@@ -69,9 +70,11 @@ version: 1.0
 | [`operations/scripts/quality/run_mypy_baseline.py`](../operations/scripts/quality/run_mypy_baseline.py) | — | Запускает mypy и сверяет число ошибок с сохранённым baseline. |
 | [`operations/scripts/quality/run_suite.py`](../operations/scripts/quality/run_suite.py) | — | Канонический раннер: последовательно запускает весь набор проверок качества. |
 | [`operations/scripts/quality/run_unittests.py`](../operations/scripts/quality/run_unittests.py) | — | Канонический запуск unit-тестов: падает при любом пропущенном (skipped) тесте. |
+| [`operations/scripts/quality/scope.py`](../operations/scripts/quality/scope.py) | — | — |
 | [`operations/scripts/quality/test_coverage.py`](../operations/scripts/quality/test_coverage.py) | — | Проверяет, что каждое тестируемое требование этапа покрыто хотя бы одной карточкой TEST. |
 | [`operations/scripts/requirements/__init__.py`](../operations/scripts/requirements/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/scripts/requirements/apply_requirements.py`](../operations/scripts/requirements/apply_requirements.py) | — | Применяет результат requirement_wizard: создаёт документы требований в репозитории. |
+| [`operations/scripts/requirements/prompting.py`](../operations/scripts/requirements/prompting.py) | — | — |
 | [`operations/scripts/requirements/requirement_wizard.py`](../operations/scripts/requirements/requirement_wizard.py) | — | Интерактивный wizard для создания требований и задач из одного бизнес-требования. |
 | [`operations/scripts/requirements/stage_planning_wizard.py`](../operations/scripts/requirements/stage_planning_wizard.py) | — | Интерактивный wizard для планирования следующего этапа проекта. |
 | [`operations/scripts/status/__init__.py`](../operations/scripts/status/__init__.py) | — | Пустой файл-маркер Python-пакета. |
@@ -85,6 +88,7 @@ version: 1.0
 | [`operations/scripts/traceability/__init__.py`](../operations/scripts/traceability/__init__.py) | — | Пустой файл-маркер Python-пакета. |
 | [`operations/scripts/traceability/auto_link.py`](../operations/scripts/traceability/auto_link.py) | — | Автоматическое заполнение связей трассировки между документами требований. |
 | [`operations/scripts/traceability/full_traceability.py`](../operations/scripts/traceability/full_traceability.py) | — | Сквозные инварианты трассируемости, дополняющие структурные проверки связей. |
+| [`operations/scripts/traceability/relations.py`](../operations/scripts/traceability/relations.py) | — | — |
 | [`operations/scripts/traceability/semantic_consistency.py`](../operations/scripts/traceability/semantic_consistency.py) | — | Смысловые проверки связей, которые нельзя выявить только синтаксисом. |
 | [`operations/scripts/versioning/increment_file_version.py`](../operations/scripts/versioning/increment_file_version.py) | — | Автоматически повышает версию файла при изменении содержимого. |
 | [`operations/tests/__init__.py`](../operations/tests/__init__.py) | — | Пустой файл-маркер Python-пакета. |

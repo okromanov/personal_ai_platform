@@ -10,9 +10,9 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `437` |
-| Core logic (acceptance, governance, lifecycle) | `133` |
-| Tooling (quality scripts, registries, traceability) | `172` |
+| Всего тестов | `445` |
+| Core logic (acceptance, governance, lifecycle) | `134` |
+| Tooling (quality scripts, registries, traceability) | `179` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
@@ -134,6 +134,7 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_pre_push_hook_runs_the_canonical_full_profile` | Pre push hook runs the canonical full profile |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_proposed_technology_adrs_require_m02_evidence` | Предложенные технологические ADR требуют evidence по m02. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_quality_record_requires_exact_sha_and_present_artifacts` | Запись о прогоне качества требует точного SHA и реально существующих артефактов. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_quality_scope_includes_product_source_everywhere` | Quality scope includes product source everywhere |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_shellcheck_covers_both_pre_commit_and_pre_push_hooks` | ShellCheck проверяет и pre-commit, и pre-push хуки. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_scope_coverage.py` | `ScopeCoverageTests` | `test_foundation_paths_replace_empty_product_scope_in_status_counts` | Пути фундамента заменяют пустой продуктовый scope в счётчиках статуса. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_scope_coverage.py` | `ScopeCoverageTests` | `test_global_evidence_covers_scope_only_when_passed` | Глобальное evidence покрывает scope только когда проверка прошла. |
@@ -186,13 +187,15 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_evidence_record.py` | `EvidenceRecordTests` | `test_write_bundle_uses_sha_name_and_atomic_latest` | Запись evidence bundle использует имя по SHA и атомарно обновляет latest. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_core_requirement_without_system_decomposition_is_rejected` | Core-требование без декомпозиции на системные требования отклоняется. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_missing_decomposition_architecture_infrastructure_and_evidence_are_rejected` | Отсутствующая декомпозиция на архитектуру, инфраструктуру и evidence отклоняется. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_relation_targets_rejects_malformed_relations` | Relation targets rejects malformed relations |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_full_traceability.py` | `FullTraceabilityTests` | `test_repository_has_complete_v1_chains_and_test_evidence` | В репозитории есть полные цепочки трассировки V1 и evidence по тестам. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_healthy_when_everything_clean` | Репозиторий считается здоровым, когда всё чисто. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_incomplete_when_required_tool_is_unavailable` | Incomplete when required tool is unavailable |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_coverage_policy_fails` | Needs attention when coverage policy fails |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_tests_fail` | Репозиторий требует внимания при падающих тестах. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `AssessHealthTests` | `test_needs_attention_when_working_tree_dirty` | Репозиторий требует внимания при незакоммиченных изменениях. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_counts_ruff_issues_from_summary_line_and_flags_noncompliant_formatting` | Подсчёт замечаний ruff по итоговой строке и флаг несоответствия форматированию. |
-| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_missing_tools_leave_safe_defaults` | Отсутствующие инструменты дают безопасные значения по умолчанию. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_missing_tools_fail_closed` | Missing tools fail closed |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCodeQualityMetricsTests` | `test_ruff_output_with_no_findings_counts_zero` | Вывод ruff без замечаний даёт ноль в счётчике. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCoveragePolicyTests` | `test_fails_when_a_critical_module_is_below_its_own_higher_floor` | Fails when a critical module is below its own higher floor |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectCoveragePolicyTests` | `test_missing_coverage_json_is_reported_as_not_passed` | Missing coverage json is reported as not passed |
@@ -203,6 +206,9 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_parses_pytest_summary_line` | Итоговая строка pytest корректно разбирается. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_reads_coverage_percent_from_runtime_coverage_json` | Процент покрытия читается из runtime/coverage.json. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `CollectTestMetricsTests` | `test_runs_pytest_under_the_current_interpreter` | Runs pytest under the current interpreter |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `HealthCheckCliTests` | `test_main_defaults_to_uncommitted_runtime_report` | Main defaults to uncommitted runtime report |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `HealthCheckCliTests` | `test_main_fails_closed_when_repository_metrics_are_unavailable` | Main fails closed when repository metrics are unavailable |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `HealthCheckCliTests` | `test_main_writes_revision_bound_report_and_json_to_runtime_paths` | Main writes revision bound report and json to runtime paths |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_flags_real_problems_in_recommendations` | Generate report flags real problems in recommendations |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_includes_key_metrics` | Сгенерированный отчёт включает ключевые метрики. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_health_check.py` | `ReportRenderingTests` | `test_generate_report_recommends_nothing_critical_when_healthy` | Generate report recommends nothing critical when healthy |
@@ -290,6 +296,8 @@ version: 1.0
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `RequirementWizardTests` | `test_context_uses_an_independent_acceptance_criteria_list` | Контекст использует независимый список критериев приёмки. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `RequirementWizardTests` | `test_generators_create_complete_related_artifacts` | Генераторы создают полный набор связанных артефактов. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `RequirementWizardTests` | `test_interactive_wizard_builds_summary` | Интерактивный wizard формирует итоговую сводку. |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `SharedPromptingTests` | `test_supported_question_types_are_normalized` | Supported question types are normalized |
+| Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `SharedPromptingTests` | `test_unsupported_question_type_is_rejected` | Unsupported question type is rejected |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `StageWizardTests` | `test_collect_stage_info_accepts_indices_names_and_defaults` | Сбор информации об этапе принимает индексы, имена и значения по умолчанию. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `StageWizardTests` | `test_get_next_stage_handles_current_and_invalid_ids` | Определение следующего этапа обрабатывает текущий и некорректные ID. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_requirement_tooling.py` | `StageWizardTests` | `test_stage_plan_and_interactive_report` | План этапа и интерактивный отчёт формируются корректно. |

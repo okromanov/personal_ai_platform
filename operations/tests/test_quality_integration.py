@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import cast
 
 from operations.scripts.quality.record_quality_suite import build_record
+from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS, PYTHON_SOURCE_PATHS
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -42,6 +43,28 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn("shellcheck", workflow)
         self.assertIn("gitleaks", workflow)
         self.assertIn("pip_audit", workflow)
+        self.assertNotIn("isInitialSetup", workflow)
+        self.assertNotIn("ground zero|initial deployment", workflow)
+        self.assertIn("generated/markdown_index.md", workflow)
+        self.assertNotIn("generated/document_index.md", workflow)
+        self.assertIn("runtime/health_check_report.md", workflow)
+        self.assertIn("runtime/health_check.json", workflow)
+
+    def test_quality_scope_includes_product_source_everywhere(self) -> None:
+        self.assertIn("src", PYTHON_SOURCE_PATHS)
+        self.assertEqual(
+            PYTHON_QUALITY_PATHS,
+            ("operations/scripts", "src", "operations/tests"),
+        )
+        runner = (ROOT / "operations/scripts/quality/run_suite.py").read_text(encoding="utf-8")
+        analyzer = (ROOT / "operations/scripts/quality/code_analyzer.py").read_text(
+            encoding="utf-8"
+        )
+        health = (ROOT / "operations/scripts/health_check/metrics.py").read_text(encoding="utf-8")
+        self.assertIn("PYTHON_SOURCE_PATHS", runner)
+        self.assertIn("PYTHON_QUALITY_PATHS", runner)
+        self.assertIn("PYTHON_QUALITY_PATHS", analyzer)
+        self.assertIn("PYTHON_QUALITY_PATHS", health)
 
     def test_quality_record_requires_exact_sha_and_present_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

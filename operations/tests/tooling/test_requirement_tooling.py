@@ -13,6 +13,7 @@ from operations.scripts.requirements.apply_requirements import (
     apply_wizard_result,
     update_milestones,
 )
+from operations.scripts.requirements.prompting import ask_question
 from operations.scripts.requirements.requirement_wizard import (
     RequirementContext,
     collect_requirement_info,
@@ -71,6 +72,24 @@ def wizard_result() -> dict[str, object]:
         "tests": generate_test_documents(context, 1),
         "tasks": generate_task_documents(context, 1),
     }
+
+
+class SharedPromptingTests(unittest.TestCase):
+    def test_supported_question_types_are_normalized(self) -> None:
+        with patch("builtins.input", return_value="  answer  "):
+            self.assertEqual(ask_question("Text"), "answer")
+        with patch("builtins.input", side_effect=[" first ", "second", ""]):
+            self.assertEqual(ask_question("Body", "multiline"), "first\nsecond")
+        with patch("builtins.input", return_value=" alpha, , beta "):
+            self.assertEqual(ask_question("Items", "list"), ["alpha", "beta"])
+        with patch("builtins.input", return_value=" YES "):
+            self.assertEqual(ask_question("Choice", "choice"), "yes")
+        with patch("builtins.input", return_value="0, second  3"):
+            self.assertEqual(ask_question("Checks", "checkbox"), ["0", "second", "3"])
+
+    def test_unsupported_question_type_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "unsupported question type"):
+            ask_question("Unknown", "unsupported")
 
 
 class RequirementWizardTests(unittest.TestCase):
@@ -253,13 +272,21 @@ class ApplyRequirementsTests(unittest.TestCase):
                 patch(
                     "operations.scripts.requirements.apply_requirements.apply_requirements_to_specifications",
                     return_value=["spec"],
-                ),
+                ) as apply_specs,
                 patch(
                     "operations.scripts.requirements.apply_requirements.apply_tests_and_tasks",
                     return_value=["test", "task"],
-                ),
+                ) as apply_work,
+                patch(
+                    "operations.scripts.requirements.apply_requirements.update_milestones"
+                ) as update_milestones,
             ):
-                apply_wizard_result(root, wizard_result())
+                result = apply_wizard_result(root, wizard_result())
+
+            self.assertEqual(result, ["spec", "test", "task", "milestones.md"])
+            apply_specs.assert_called_once()
+            apply_work.assert_called_once()
+            update_milestones.assert_called_once()
 
 
 if __name__ == "__main__":

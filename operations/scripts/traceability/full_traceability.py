@@ -8,18 +8,11 @@ from pathlib import Path
 from operations.scripts.documents.traceability import collect_traceable_elements
 from operations.scripts.quality.registry import load_quality_registry
 from operations.scripts.status.generate_project_status import v1_milestone_ids
+from operations.scripts.traceability.relations import relation_targets
 
 ARCHITECTURE_FAMILIES = {"ARC_CMP", "ARC_FLOW"}
 INFRASTRUCTURE_FAMILIES = {"INF_CMP", "INF_FLOW"}
 TESTABLE_FAMILIES = {"SYS", "SEC_CTL", "INF_REQ"}
-
-
-def _targets(record: dict[str, object], relation: str) -> set[str]:
-    relations = record.get("relations", {})
-    if not isinstance(relations, dict):
-        return set()
-    values = relations.get(relation, [])
-    return {str(value) for value in values} if isinstance(values, list) else set()
 
 
 def _incoming(
@@ -33,7 +26,7 @@ def _incoming(
         identifier
         for identifier, record in records.items()
         if str(record.get("family")) in families
-        and any(target in _targets(record, relation) for relation in relations)
+        and any(target in relation_targets(record, relation) for relation in relations)
     }
 
 
@@ -42,7 +35,7 @@ def _v1_scope(root: Path, records: dict[str, dict[str, object]]) -> set[str]:
     for milestone in v1_milestone_ids(root):
         record = records.get(milestone.lower())
         if record:
-            scope.update(_targets(record, "scope"))
+            scope.update(relation_targets(record, "scope"))
     return scope
 
 
@@ -118,14 +111,15 @@ def milestone_test_coverage(root: Path, milestone_id: str) -> tuple[set[str], se
     milestone = records.get(milestone_id.lower(), {})
     required = {
         target
-        for target in _targets(milestone, "scope")
+        for target in relation_targets(milestone, "scope")
         if str(records.get(target, {}).get("family")) in TESTABLE_FAMILIES
     }
     covered: set[str] = set()
     for record in records.values():
         if record.get("family") != "TEST":
             continue
-        if milestone_id.lower() not in {value.lower() for value in _targets(record, "accepts")}:
+        accepted_milestones = {value.lower() for value in relation_targets(record, "accepts")}
+        if milestone_id.lower() not in accepted_milestones:
             continue
-        covered.update(_targets(record, "verifies"))
+        covered.update(relation_targets(record, "verifies"))
     return required, covered

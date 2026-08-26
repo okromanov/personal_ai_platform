@@ -46,6 +46,9 @@ def _build_recommendations(health: RepositoryHealth) -> str:
     repo = health.repository
 
     critical: list[str] = []
+    if tests.collection_error:
+        critical.append(f"Метрики тестов недоступны: {tests.collection_error}.")
+    critical.extend(f"Метрики качества недоступны: {error}." for error in quality.collection_errors)
     if tests.total_failed > 0:
         critical.append(f"Исправить {tests.total_failed} падающих тестов перед мержем.")
     if not quality.type_safe:
@@ -99,8 +102,7 @@ def generate_report(health: RepositoryHealth) -> str:
     status = health.overall_status
     recommendations = _build_recommendations(health)
 
-    timestamp = datetime.now().isoformat() + "Z"
-    timestamp = timestamp.replace("+00:00", "")
+    timestamp = datetime.fromisoformat(repo.collected_at_utc)
 
     report = f"""<!-- generated file: do not edit manually -->
 ---
@@ -108,14 +110,15 @@ id: health_check_latest
 type: generated_health_check
 generation_state: generated
 version: 1.0
-updated: {datetime.now().strftime("%Y-%m-%d")}
+updated: {timestamp.strftime("%Y-%m-%d")}
 ---
 
 # 🏥 Repository Health Check Report
 ## `okromanov/personal_ai_platform`
 
-**Дата проверки:** {datetime.now().strftime("%d %B %Y")}
-**Ветка:** {repo.branches[0] if repo.branches else "unknown"}
+**Дата проверки:** {timestamp.isoformat()}
+**Ветка:** {repo.branch_name}
+**Git SHA:** `{repo.head_sha}`
 **Общее состояние:** {status}
 
 ---
@@ -137,14 +140,16 @@ updated: {datetime.now().strftime("%Y-%m-%d")}
 ## ✅ Результаты проверок
 
 ### 1. **Тестирование**
-- **Статус:** {"✅ PASSED" if tests.total_failed == 0 else f"❌ FAILED ({tests.total_failed} failures)"}
+- **Статус:** {"❌ INCOMPLETE" if tests.collection_error else ("✅ PASSED" if tests.total_failed == 0 else f"❌ FAILED ({tests.total_failed} failures)")}
 - **Пройдено/Провалено:** {tests.total_passed}/{tests.total_passed + tests.total_failed}
 - **Время выполнения:** {tests.execution_time_sec:.2f}s
 - **Охват:** {tests.coverage_percent}%
+{f"- **Ошибка сбора:** {tests.collection_error}" if tests.collection_error else ""}
 
 ### 2. **Проверка типов (MyPy)**
 - **Статус:** {"✅ SUCCESS (0 issues)" if quality.type_safe else f"❌ ISSUES FOUND ({quality.mypy_issues} errors)"}
 - **Результат:** {"Проверка типов прошла успешно" if quality.type_safe else "Обнаружены ошибки типов"}
+{chr(10).join(f"- **Ошибка сбора:** {error}" for error in quality.collection_errors) if quality.collection_errors else ""}
 
 ### 3. **Форматирование кода (Ruff)**
 - **Статус:** {"✅ COMPLIANT" if quality.formatting_compliant else "❌ NON-COMPLIANT"}
@@ -211,7 +216,7 @@ updated: {datetime.now().strftime("%Y-%m-%d")}
 
 **Статус репозитория: {status}**
 
-Репозиторий находится в {"отличном" if status == "✅ HEALTHY" else "требующем внимания"} состоянии с точки зрения:
+Репозиторий находится в {"отличном" if status == "✅ HEALTHY" else "требующем внимания"} состоянии для точного SHA `{repo.head_sha}` с точки зрения:
 - {"✅" if quality.type_safe else "❌"} Качества кода (type safety, linting)
 - {"✅" if tests.total_failed == 0 else "❌"} Тестирования ({tests.total_passed} passed{f", {tests.total_failed} failed" if tests.total_failed > 0 else ""})
 - {"✅" if quality.formatting_compliant else "❌"} Форматирования

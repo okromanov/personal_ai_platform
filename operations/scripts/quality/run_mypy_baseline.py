@@ -7,6 +7,11 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS
+
 ROOT = Path(__file__).resolve().parents[3]
 BASELINE_PATH = ROOT / "operations" / "quality_baseline.json"
 ERROR_LINE = re.compile(r"^(.+):\d+(?::\d+)?: error:.*\[([^\]]+)\]$", re.MULTILINE)
@@ -24,9 +29,7 @@ def main() -> int:
         sys.executable,
         "-m",
         "mypy",
-        "operations/scripts",
-        "operations/tests",
-        "src",
+        *PYTHON_QUALITY_PATHS,
         "--show-error-codes",
         "--no-error-summary",
     ]
