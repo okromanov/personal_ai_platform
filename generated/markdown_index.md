@@ -3,7 +3,7 @@
 id: generated_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-26T13:20:35Z
+generated_at: 2026-08-26T14:10:00Z
 version: 1.0
 ---
 
@@ -82,7 +82,7 @@ version: 1.0
 | [`work/tasks/task_005_arc_005.md`](../work/tasks/task_005_arc_005.md) | `TASK_005` | `task` | `work_state` | `completed` | `2.1` | TASK_005 — Реализация ARC_CMP_005 |
 | [`work/tasks/task_006_arc_007.md`](../work/tasks/task_006_arc_007.md) | `TASK_006` | `task` | `work_state` | `completed` | `2.0` | TASK_006 — Реализация ARC_CMP_007 |
 | [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `completed` | `2.0` | TASK_007 — Реализация ARC_CMP_009 |
-| [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.0` | TASK_008 — Реализация INF_CMP_001 |
+| [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.1` | TASK_008 — Реализация INF_CMP_001 |
 | [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `completed` | `1.7` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `completed` | `1.8` | TASK_010 — Реализация INF_CMP_003 |
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `planned` | `1.7` | TASK_011 — Реализация INF_CMP_005 |
@@ -101,6 +101,6 @@ version: 1.0
 | [`work/tests/test_011.md`](../work/tests/test_011.md) | `TEST_011` | `test` | `spec_state` | `current` | `1.1` | TEST_011 — Шлюз инструментов: техническая авторизация вызова |
 | [`work/tests/test_012.md`](../work/tests/test_012.md) | `TEST_012` | `test` | `spec_state` | `current` | `1.0` | TEST_012 — Состояние задач: контрольные точки, повтор, отмена, защита от дублей |
 | [`work/tests/test_013.md`](../work/tests/test_013.md) | `TEST_013` | `test` | `spec_state` | `current` | `1.0` | TEST_013 — Эксплуатационные функции: работоспособность и логическое состояние планировщика |
-| [`work/tests/test_014.md`](../work/tests/test_014.md) | `TEST_014` | `test` | `spec_state` | `current` | `1.0` | TEST_014 — Вычислительная среда выполнения: health-check CLI и структура образа |
+| [`work/tests/test_014.md`](../work/tests/test_014.md) | `TEST_014` | `test` | `spec_state` | `current` | `1.1` | TEST_014 — Вычислительная среда выполнения: health-check CLI и структура образа |
 | [`work/tests/test_015.md`](../work/tests/test_015.md) | `TEST_015` | `test` | `spec_state` | `current` | `1.0` | TEST_015 — Сеть: fail-closed ingress, egress, DNS и обязательный туннель |
 | [`work/tests/test_016.md`](../work/tests/test_016.md) | `TEST_016` | `test` | `spec_state` | `current` | `1.0` | TEST_016 — Секреты вне репозитория и выдача по логическому имени |
