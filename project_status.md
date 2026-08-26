@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-26T14:10:00Z
+generated_at: 2026-08-26T12:07:00-06:00
 version: 1.0
 ---
 
@@ -27,7 +27,7 @@ version: 1.0
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
 | Текущая проектная задача | [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md) |
 | Место в очереди проекта | **12 из 13** |
-| Шаги текущей задачи | **0** из **6** |
+| Шаги текущей задачи | **5** из **6** |
 | Следующий исполнитель | **агент** |
 
 ## Этапы V1
@@ -44,40 +44,40 @@ version: 1.0
 
 | Задача | Компонент | Проверка | Состояние |
 |---|---|---|---|
-| [`TASK_001`](work/tasks/task_001_arc_001.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#ARC_CMP_001) | [`TEST_007`](work/tests/test_007.md) | выполнена |
-| [`TASK_002`](work/tasks/task_002_arc_002.md) | [`ARC_CMP_002`](specifications/architecture_baseline.md#ARC_CMP_002) | [`TEST_008`](work/tests/test_008.md) | выполнена |
-| [`TASK_003`](work/tasks/task_003_arc_003.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#ARC_CMP_003) | [`TEST_009`](work/tests/test_009.md) | выполнена |
-| [`TASK_004`](work/tasks/task_004_arc_004.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#ARC_CMP_004) | [`TEST_010`](work/tests/test_010.md) | выполнена |
-| [`TASK_005`](work/tasks/task_005_arc_005.md) | [`ARC_CMP_005`](specifications/architecture_baseline.md#ARC_CMP_005) | [`TEST_011`](work/tests/test_011.md) | выполнена |
-| [`TASK_006`](work/tasks/task_006_arc_007.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#ARC_CMP_007) | [`TEST_012`](work/tests/test_012.md) | выполнена |
-| [`TASK_007`](work/tasks/task_007_arc_009.md) | [`ARC_CMP_009`](specifications/architecture_baseline.md#ARC_CMP_009) | [`TEST_013`](work/tests/test_013.md) | выполнена |
-| [`TASK_008`](work/tasks/task_008_inf_001.md) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#INF_CMP_001) | [`TEST_014`](work/tests/test_014.md) | выполнена |
-| [`TASK_009`](work/tasks/task_009_inf_002.md) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#INF_CMP_002) | [`TEST_015`](work/tests/test_015.md) | выполнена |
-| [`TASK_010`](work/tasks/task_010_inf_003.md) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#INF_CMP_003) | [`TEST_016`](work/tests/test_016.md) | выполнена |
-| [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
-| [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#INF_CMP_007) | — | запланирована |
-| [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#INF_CMP_008) | — | запланирована |
+| [`TASK_001`](work/tasks/task_001_arc_001.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | [`TEST_007`](work/tests/test_007.md) | выполнена |
+| [`TASK_002`](work/tasks/task_002_arc_002.md) | [`ARC_CMP_002`](specifications/architecture_baseline.md#arc_cmp_002) | [`TEST_008`](work/tests/test_008.md) | выполнена |
+| [`TASK_003`](work/tasks/task_003_arc_003.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | [`TEST_009`](work/tests/test_009.md) | выполнена |
+| [`TASK_004`](work/tasks/task_004_arc_004.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | [`TEST_010`](work/tests/test_010.md) | выполнена |
+| [`TASK_005`](work/tasks/task_005_arc_005.md) | [`ARC_CMP_005`](specifications/architecture_baseline.md#arc_cmp_005) | [`TEST_011`](work/tests/test_011.md) | выполнена |
+| [`TASK_006`](work/tasks/task_006_arc_007.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | [`TEST_012`](work/tests/test_012.md) | выполнена |
+| [`TASK_007`](work/tasks/task_007_arc_009.md) | [`ARC_CMP_009`](specifications/architecture_baseline.md#arc_cmp_009) | [`TEST_013`](work/tests/test_013.md) | выполнена |
+| [`TASK_008`](work/tasks/task_008_inf_001.md) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#inf_cmp_001) | [`TEST_014`](work/tests/test_014.md) | выполнена |
+| [`TASK_009`](work/tasks/task_009_inf_002.md) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#inf_cmp_002) | [`TEST_015`](work/tests/test_015.md) | выполнена |
+| [`TASK_010`](work/tasks/task_010_inf_003.md) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003) | [`TEST_016`](work/tests/test_016.md) | выполнена |
+| [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
+| [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | [`TEST_018`](work/tests/test_018.md) | выполняется |
+| [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — | запланирована |
 
 ## Шаги текущей работы
 
-- [ ] Изучить требования к [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007)
-- [ ] Дополнить `allowed_paths` фактическими путями реализации
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в `allowed_paths`
+- [x] Изучить требования к [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007)
+- [x] Дополнить allowed_paths фактическими путями
+- [x] Спроектировать переносимый журнал наблюдений
+- [x] Реализовать компонент
+- [x] Написать [`TEST_018`](work/tests/test_018.md), связанный с TASK и требованиями компонента
+- [ ] Проверить покрытие путей в allowed_paths и полный quality-suite
 
 ## Блокеры
 
-GitHub Actions не запускаются до 1 сентября 2026 года: исчерпан бесплатный лимит. Серверная проверка завершённой TASK_011 отложена до восстановления лимита.
+В карточках задач блокеры не зафиксированы. Итоговую готовность проверит агент.
 
 ## Незакрытые действия владельца (необязательные)
 
 > Эти пункты не блокируют работу агента и не требуют немедленного ответа — они остаются здесь, пока вы их не закроете, независимо от того, что сама задача уже сдана.
 
-- [`TASK_008`](work/tasks/task_008_inf_001.md): Собрать Docker-образ по инструкции в разделе 11.
+Нет незакрытых необязательных действий владельца.
 
 ## Что будет дальше
 
-[`TASK_012`](work/tasks/task_012_inf_007.md) реализует Наблюдаемость ([`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007)).
+[`TASK_013`](work/tasks/task_013_inf_008.md) реализует Управление развёртыванием ([`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008)) — последний инфраструктурный компонент очереди, обеспечивающий идентифицируемое развёртывание и управляемый переход между версиями на основе данных наблюдаемости из этой TASK.
 
