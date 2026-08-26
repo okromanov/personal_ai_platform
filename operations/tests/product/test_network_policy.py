@@ -25,21 +25,15 @@ class NetworkPolicyTests(unittest.TestCase):
             )
         )
         self.assertFalse(
-            CURRENT_NETWORK_POLICY.allows_dns(
-                "resolver.example.test", 853, tunnel_active=True
-            )
+            CURRENT_NETWORK_POLICY.allows_dns("resolver.example.test", 853, tunnel_active=True)
         )
 
     def test_direct_rule_requires_exact_service_target_and_port(self) -> None:
         policy = NetworkPolicy(
-            egress_rules=(
-                EgressRule("model", "api.example.test", 443, RouteKind.DIRECT),
-            )
+            egress_rules=(EgressRule("model", "api.example.test", 443, RouteKind.DIRECT),)
         )
 
-        self.assertTrue(
-            policy.allows_egress("model", "api.example.test", 443, tunnel_active=False)
-        )
+        self.assertTrue(policy.allows_egress("model", "api.example.test", 443, tunnel_active=False))
         self.assertFalse(
             policy.allows_egress("research", "api.example.test", 443, tunnel_active=False)
         )
@@ -47,18 +41,12 @@ class NetworkPolicyTests(unittest.TestCase):
             policy.allows_egress("model", "api.example.test", 8443, tunnel_active=False)
         )
         self.assertFalse(
-            policy.allows_egress(
-                "model", "other.example.test", 443, tunnel_active=False
-            )
+            policy.allows_egress("model", "other.example.test", 443, tunnel_active=False)
         )
 
     def test_secure_tunnel_rule_denies_traffic_when_the_tunnel_is_down(self) -> None:
         policy = NetworkPolicy(
-            egress_rules=(
-                EgressRule(
-                    "telegram", "api.telegram.org", 443, RouteKind.SECURE_TUNNEL
-                ),
-            )
+            egress_rules=(EgressRule("telegram", "api.telegram.org", 443, RouteKind.SECURE_TUNNEL),)
         )
 
         self.assertFalse(
@@ -76,15 +64,9 @@ class NetworkPolicyTests(unittest.TestCase):
             dns_resolvers=(("resolver.example.test", 853),),
         )
 
-        self.assertFalse(
-            policy.allows_dns("resolver.example.test", 853, tunnel_active=False)
-        )
-        self.assertTrue(
-            policy.allows_dns("resolver.example.test", 853, tunnel_active=True)
-        )
-        self.assertFalse(
-            policy.allows_dns("other-resolver.example.test", 853, tunnel_active=True)
-        )
+        self.assertFalse(policy.allows_dns("resolver.example.test", 853, tunnel_active=False))
+        self.assertTrue(policy.allows_dns("resolver.example.test", 853, tunnel_active=True))
+        self.assertFalse(policy.allows_dns("other-resolver.example.test", 853, tunnel_active=True))
 
     def test_dns_resolver_without_dns_egress_rule_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "explicit dns egress rule"):

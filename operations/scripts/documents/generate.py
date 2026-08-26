@@ -8,7 +8,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import (
-    atomic_write_generated,
+    atomic_write,
     find_project_root,
     require_supported_python,
     today_iso,
@@ -22,6 +22,7 @@ from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import render_traceability
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.status.human_status import render_repository_project_status
+from operations.scripts.tasks.generate import render_task_index
 
 
 def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
@@ -40,6 +41,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     # landed on disk. Rendering it earlier would snapshot a file listing one
     # generation cycle stale whenever a new generated file is introduced.
     outputs = [
+        (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
         (root / "generated" / "markdown_index.md", render_index(root, date)),
         (root / "generated" / "non_markdown_index.md", render_non_markdown_index(root, date)),
@@ -48,7 +50,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
         (root / "generated" / "platfrom_capability.md", render_platfrom_capability(root, date)),
     ]
     for path, rendered in outputs:
-        if atomic_write_generated(path, rendered):
+        if atomic_write(path, rendered):
             changed.append(path.relative_to(root).as_posix())
 
     # Remove semantic_review_v1.md when moving past m01
@@ -60,7 +62,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
         changed.append(semantic_review.relative_to(root).as_posix())
 
     repository_structure_path = root / "generated" / "repository_structure.md"
-    if atomic_write_generated(repository_structure_path, render_repository_structure(root, date)):
+    if atomic_write(repository_structure_path, render_repository_structure(root, date)):
         changed.append(repository_structure_path.relative_to(root).as_posix())
 
     return changed

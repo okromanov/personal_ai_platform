@@ -36,7 +36,12 @@ def _entries(source: str) -> list[tuple[str, str, list[str], str]]:
         if not task_ids:
             raise ValueError(f"{match.group('title')}: не указана формирующая TASK")
         entries.append(
-            (match.group("kind"), match.group("title"), task_ids, _field(match.group("body"), "Описание"))
+            (
+                match.group("kind"),
+                match.group("title"),
+                task_ids,
+                _field(match.group("body"), "Описание"),
+            )
         )
     if not entries:
         raise ValueError(f"{CAPABILITY_SOURCE}: не найдена ни одна компетенция")
@@ -45,7 +50,9 @@ def _entries(source: str) -> list[tuple[str, str, list[str], str]]:
 
 def render_platfrom_capability(root: Path, generated_date: str | None = None) -> str:
     source = (root / CAPABILITY_SOURCE).read_text(encoding="utf-8-sig")
-    task_paths = {str(item["id"]): Path(str(item["path"])).name for item in collect_tasks(root)["tasks"]}
+    task_paths = {
+        str(item["id"]): Path(str(item["path"])).name for item in collect_tasks(root)["tasks"]
+    }
     lines = [
         GENERATED_HEADER,
         "---",
