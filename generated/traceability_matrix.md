@@ -3,7 +3,7 @@
 id: generated_traceability_matrix
 type: generated_report
 generation_state: generated
-generated_at: 2026-08-26T12:06:13Z
+generated_at: 2026-08-26T21:41:31Z
 version: 1.0
 ---
 
@@ -11,7 +11,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Отслеживаемых элементов | `201` |
+| Отслеживаемых элементов | `205` |
 
 > Производное представление канонических исходящих связей. Входящие связи однозначно выводятся из тех же рёбер и здесь не дублируются.
 
@@ -195,6 +195,10 @@ version: 1.0
 | `TASK_011` | `TASK` | `depends_on`: `TASK_010`<br>`implements`: `INF_CMP_005`<br>`traces_to`: `m02` | — |
 | `TASK_012` | `TASK` | `depends_on`: `TASK_011`<br>`implements`: `INF_CMP_007`<br>`traces_to`: `m02` | — |
 | `TASK_013` | `TASK` | `depends_on`: `TASK_012`<br>`implements`: `INF_CMP_008`<br>`traces_to`: `m02` | — |
+| `TASK_014` | `TASK` | `depends_on`: `TASK_013`<br>`implements`: `ARC_CMP_003`<br>`traces_to`: `m02` | — |
+| `TASK_015` | `TASK` | `depends_on`: `TASK_014`<br>`implements`: `ARC_CMP_004`<br>`traces_to`: `m02` | — |
+| `TASK_016` | `TASK` | `depends_on`: `TASK_015`<br>`implements`: `ARC_CMP_001`<br>`traces_to`: `m02` | — |
+| `TASK_017` | `TASK` | `depends_on`: `TASK_016`<br>`implements`: `ARC_FLOW_001`<br>`traces_to`: `m02` | — |
 | `TEST_001` | `TEST` | `accepts`: `m01` | `project_checks` |
 | `TEST_002` | `TEST` | `accepts`: `m01`<br>`verifies`: `SEC_CTL_018` | `unit_tests` |
 | `TEST_003` | `TEST` | `accepts`: `m02`<br>`verifies`: `SYS_003`, `SYS_004`, `SYS_027` | `m02_contract_tests` |
