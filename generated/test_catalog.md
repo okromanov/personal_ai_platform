@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `421` |
+| Всего тестов | `437` |
 | Core logic (acceptance, governance, lifecycle) | `133` |
 | Tooling (quality scripts, registries, traceability) | `172` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `100` |
+| Product | `116` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -403,24 +403,32 @@ version: 1.0
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorRuntimeFailureTests` | `test_unavailable_environment_marks_failed_with_distinct_message` | Unavailable environment marks failed with distinct message |
 | Product | `operations/tests/product/test_orchestration.py` | `OrchestratorRuntimeSwapTests` | `test_swapping_runtime_implementation_preserves_the_contract` | SYS_003: an alternative transitional layer runs the same contract |
 | Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_activate_then_deactivate_round_trips` | Activate then deactivate round trips |
-| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_corrupted_state_file_reads_as_inactive` | Corrupted state file reads as inactive |
+| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_atomic_write_leaves_no_temporary_file` | Atomic write leaves no temporary file |
+| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_corrupted_state_file_fails_closed` | Corrupted state file fails closed |
 | Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_missing_state_file_reads_as_inactive` | Missing state file reads as inactive |
+| Product | `operations/tests/product/test_owner_control.py` | `EmergencySwitchDirectTests` | `test_non_boolean_state_fails_closed` | Non boolean state fails closed |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_activate_blocks_new_operations` | Activate blocks new operations |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_active_switch_blocks_action_authorization` | Active switch blocks action authorization |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_corrupt_switch_state_causes_safe_stop` | Corrupt switch state causes safe stop |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_deactivate_clears_the_block` | Deactivate clears the block |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_fresh_deployment_is_not_stopped` | Fresh deployment is not stopped |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_switch_is_independent_of_model_or_runtime_object` | Switch is independent of model or runtime object |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateEmergencySwitchTests` | `test_switch_survives_process_restart` | Switch survives process restart |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_accepts_the_recognized_owner` | Accepts the recognized owner |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_action_authorization_rechecks_identity` | Action authorization rechecks identity |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_rejects_any_other_subject` | Rejects any other subject |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateIdentityTests` | `test_rejects_empty_subject` | Rejects empty subject |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateInitTests` | `test_rejects_empty_owner_subject_id` | Rejects empty owner subject id |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmation_with_different_params_is_rejected` | Confirmation with different params is rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmation_with_different_capability_is_rejected` | Confirmation with different capability is rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmation_with_different_resource_is_rejected` | Confirmation with different resource is rejected |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmation_without_prior_request_is_rejected` | Confirmation without prior request is rejected |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_confirmed_sensitive_action_with_matching_params_is_authorized` | Confirmed sensitive action with matching params is authorized |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_action_id_is_rejected_after_authorization` | Duplicate action id is rejected after authorization |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_read_action_id_is_also_rejected` | Duplicate read action id is also rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_corrupt_action_ledger_fails_closed` | Corrupt action ledger fails closed |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_duplicate_action_id_is_rejected_after_restart` | Duplicate action id is rejected after restart |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_existing_lock_fails_closed` | Existing lock fails closed |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_matching_descriptor_is_authorized` | Matching descriptor is authorized |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_parameter_order_does_not_change_descriptor` | Parameter order does not change descriptor |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_pending_confirmation_survives_restart` | Pending confirmation survives restart |
 | Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_read_action_is_authorized_immediately` | Read action is authorized immediately |
-| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_sensitive_action_without_confirmation_is_rejected` | Sensitive action without confirmation is rejected |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_sensitive_action_requires_confirmation` | Sensitive action requires confirmation |
+| Product | `operations/tests/product/test_owner_control.py` | `OwnerControlGateSensitiveActionTests` | `test_unconfirmed_action_id_cannot_be_rebound` | Unconfirmed action id cannot be rebound |
 | Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_checkpoint_is_retrievable` | Checkpoint is retrievable |
 | Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_checkpoint_preserves_retry_count_and_cancelled_flag` | Checkpoint preserves retry count and cancelled flag |
 | Product | `operations/tests/product/test_task_state.py` | `CheckpointTests` | `test_new_checkpoint_replaces_the_previous_one` | New checkpoint replaces the previous one |
@@ -434,12 +442,20 @@ version: 1.0
 | Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_new_task_has_default_state` | New task has default state |
 | Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_saved_task_is_retrievable_by_id` | Saved task is retrievable by id |
 | Product | `operations/tests/product/test_task_state.py` | `TaskPersistenceTests` | `test_unknown_task_id_returns_none` | Unknown task id returns none |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_capability_effect_class_cannot_be_overridden_by_call_params` | SEC_CTL_007: the fixed, registered effect_class governs |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_resource_outside_allowlist_is_denied` | Resource outside allowlist is denied |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayDenialTests` | `test_unknown_capability_returns_failed_result` | Unknown capability returns failed result |
+| Product | `operations/tests/product/test_tool_gateway.py` | `CapabilityPolicyTests` | `test_capability_requires_an_allowed_subject` | Capability requires an allowed subject |
+| Product | `operations/tests/product/test_tool_gateway.py` | `CapabilityPolicyTests` | `test_sensitive_capability_requires_explicit_resources` | Sensitive capability requires explicit resources |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayFailureTests` | `test_handler_exception_raises_tool_gateway_error` | Handler exception raises tool gateway error |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayFailureTests` | `test_tool_gateway_error_is_a_distinct_type` | Tool gateway error is a distinct type |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayReadTests` | `test_read_capability_authorized_immediately_without_confirmation` | Read capability authorized immediately without confirmation |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_duplicate_action_id_rejected_after_authorization` | Duplicate action id rejected after authorization |
-| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_sensitive_capability_authorized_on_matching_confirmation` | Sensitive capability authorized on matching confirmation |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayPolicyDenialTests` | `test_corrupt_switch_state_denies_without_handler` | Corrupt switch state denies without handler |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayPolicyDenialTests` | `test_resource_outside_allowlist_is_denied` | Resource outside allowlist is denied |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayPolicyDenialTests` | `test_secret_and_network_target_must_be_explicitly_allowed` | Secret and network target must be explicitly allowed |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayPolicyDenialTests` | `test_unknown_capability_returns_failed_result` | Unknown capability returns failed result |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayPolicyDenialTests` | `test_unlisted_parameter_is_denied` | Unlisted parameter is denied |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayReadTests` | `test_read_capability_authorized_immediately` | Read capability authorized immediately |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewayReadTests` | `test_unrecognized_subject_is_denied_before_handler` | Unrecognized subject is denied before handler |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_confirmation_cannot_be_reused_for_another_capability` | Confirmation cannot be reused for another capability |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_confirmation_cannot_be_reused_for_another_resource` | Confirmation cannot be reused for another resource |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_duplicate_action_remains_blocked_after_restart` | Duplicate action remains blocked after restart |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_matching_confirmation_executes_once` | Matching confirmation executes once |
 | Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_sensitive_capability_requires_confirmation_first` | Sensitive capability requires confirmation first |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_switch_activated_after_authorization_blocks_dispatch` | Switch activated after authorization blocks dispatch |
+| Product | `operations/tests/product/test_tool_gateway.py` | `ToolGatewaySensitiveActionTests` | `test_switch_activated_before_confirmation_blocks_dispatch` | Switch activated before confirmation blocks dispatch |

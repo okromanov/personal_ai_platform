@@ -9,22 +9,28 @@ This module implements ARC_CMP_002 — Контроль владельца (Owne
 
 from .base import (
     ActionClass,
+    ActionDescriptor,
     AuthorizationDecision,
     EmergencyStopActive,
+    EmergencySwitchStateError,
     IdentityRejected,
     OwnerControl,
     OwnerControlError,
+    OwnerControlStateError,
 )
 from .control import OwnerControlGate
 from .emergency_switch import EmergencySwitch
 
 __all__ = [
+    "ActionDescriptor",
     "ActionClass",
     "AuthorizationDecision",
     "EmergencyStopActive",
     "EmergencySwitch",
+    "EmergencySwitchStateError",
     "IdentityRejected",
     "OwnerControl",
     "OwnerControlError",
     "OwnerControlGate",
+    "OwnerControlStateError",
 ]

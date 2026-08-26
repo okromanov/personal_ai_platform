@@ -6,8 +6,10 @@ process restart and does not depend on the model or runtime being available
 or well-behaved.
 """
 
-import json
 from pathlib import Path
+
+from .base import EmergencySwitchStateError
+from .state_io import atomic_write_json, read_json_object
 
 
 class EmergencySwitch:
@@ -36,20 +38,19 @@ class EmergencySwitch:
     def is_active(self) -> bool:
         """Return whether the switch is currently on.
 
-        A missing or unreadable state file is treated as inactive rather than
-        raising, so a fresh deployment starts in a normally-operating state.
+        A missing file represents an explicit fresh-deployment default. An
+        existing file that cannot be trusted raises instead of failing open.
         """
         if not self._path.is_file():
             return False
         try:
-            data = json.loads(self._path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
-            return False
-        return bool(data.get("active", False))
+            data = read_json_object(self._path)
+        except ValueError as exc:
+            raise EmergencySwitchStateError("emergency switch state is unreadable") from exc
+        active = data.get("active")
+        if not isinstance(active, bool):
+            raise EmergencySwitchStateError("emergency switch state has no boolean 'active'")
+        return active
 
     def _write(self, *, active: bool, reason: str) -> None:
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        self._path.write_text(
-            json.dumps({"active": active, "reason": reason}),
-            encoding="utf-8",
-        )
+        atomic_write_json(self._path, {"active": active, "reason": reason})

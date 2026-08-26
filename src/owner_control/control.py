@@ -1,100 +1,192 @@
-"""Owner control gate implementation (ARC_CMP_002).
+"""Owner control gate implementation (ARC_CMP_002)."""
 
-Minimal working implementation for m02: the owner identity and emergency
-switch use a local file instead of an external secret store. Real admin
-identity protection (multi-factor authentication on GitHub/hosting) is an
-operational practice outside this component's code scope -- see TEST_008
-section 6.
-"""
+from __future__ import annotations
 
-from dataclasses import dataclass, field
+import os
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from .base import (
     SENSITIVE_ACTION_CLASSES,
     ActionClass,
+    ActionDescriptor,
     AuthorizationDecision,
     EmergencyStopActive,
+    EmergencySwitchStateError,
     IdentityRejected,
     OwnerControl,
+    OwnerControlStateError,
 )
 from .emergency_switch import EmergencySwitch
+from .state_io import atomic_write_json, read_json_object
 
 
-@dataclass
-class _PendingAction:
-    """A sensitive action awaiting owner confirmation of its exact parameters."""
+def _serialize_action(action: ActionDescriptor) -> dict[str, Any]:
+    return {
+        "subject_id": action.subject_id,
+        "capability_name": action.capability_name,
+        "resource": action.resource,
+        "action_class": action.action_class.value,
+        "params_json": action.params_json,
+        "secret_refs": list(action.secret_refs),
+        "network_target": action.network_target,
+        "constraints": [list(item) for item in action.constraints],
+        "credential_ref": action.credential_ref,
+    }
 
-    action_class: ActionClass
-    params: dict[str, Any] = field(default_factory=dict)
+
+def _deserialize_action(raw: object) -> ActionDescriptor:
+    if not isinstance(raw, dict):
+        raise OwnerControlStateError("pending action state must be an object")
+    try:
+        return ActionDescriptor(
+            subject_id=str(raw["subject_id"]),
+            capability_name=str(raw["capability_name"]),
+            resource=str(raw["resource"]),
+            action_class=ActionClass(str(raw["action_class"])),
+            params_json=str(raw["params_json"]),
+            secret_refs=tuple(str(item) for item in raw.get("secret_refs", [])),
+            network_target=(
+                str(raw["network_target"]) if raw.get("network_target") is not None else None
+            ),
+            constraints=tuple((str(item[0]), str(item[1])) for item in raw.get("constraints", [])),
+            credential_ref=(
+                str(raw["credential_ref"]) if raw.get("credential_ref") is not None else None
+            ),
+        )
+    except (KeyError, TypeError, ValueError, IndexError) as exc:
+        raise OwnerControlStateError("pending action state is malformed") from exc
 
 
 class OwnerControlGate(OwnerControl):
-    """Reference `OwnerControl` implementation for a single owner identity."""
+    """Single-owner gate with durable confirmation and duplicate state."""
 
     def __init__(self, owner_subject_id: str, state_dir: Path) -> None:
-        """Initialize the gate.
-
-        Args:
-            owner_subject_id: The one recognized owner identity (e.g. Telegram user id).
-            state_dir: Directory used to persist the emergency switch state.
-
-        Raises:
-            ValueError: If owner_subject_id is empty.
-        """
         if not owner_subject_id:
             raise ValueError("owner_subject_id must not be empty")
         self._owner_subject_id = owner_subject_id
+        self._state_dir = state_dir
         self.emergency_switch = EmergencySwitch(state_dir / "emergency_switch.json")
-        self._pending_actions: dict[str, _PendingAction] = {}
-        self._authorized_action_ids: set[str] = set()
+        self._actions_path = state_dir / "owner_control_actions.json"
+        self._actions_lock_path = state_dir / "owner_control_actions.lock"
 
     def verify_identity(self, subject_id: str) -> None:
         if subject_id != self._owner_subject_id:
             raise IdentityRejected(f"subject '{subject_id}' is not the recognized owner")
 
     def check_emergency_stop(self) -> None:
-        if self.emergency_switch.is_active():
+        try:
+            active = self.emergency_switch.is_active()
+        except EmergencySwitchStateError as exc:
+            raise EmergencyStopActive("emergency switch state cannot be trusted") from exc
+        if active:
             raise EmergencyStopActive("emergency switch is active")
+
+    @contextmanager
+    def _exclusive_state(self) -> Iterator[None]:
+        self._state_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            os.mkdir(self._actions_lock_path)
+        except FileExistsError as exc:
+            raise OwnerControlStateError(
+                "owner-control state is locked or recovery is required"
+            ) from exc
+        try:
+            yield
+        finally:
+            try:
+                os.rmdir(self._actions_lock_path)
+            except OSError as exc:
+                raise OwnerControlStateError(
+                    "owner-control state lock could not be released"
+                ) from exc
+
+    def _load_actions(self) -> tuple[dict[str, ActionDescriptor], set[str]]:
+        if not self._actions_path.is_file():
+            return {}, set()
+        try:
+            raw = read_json_object(self._actions_path)
+            pending_raw = raw.get("pending", {})
+            authorized_raw = raw.get("authorized_action_ids", [])
+            if not isinstance(pending_raw, dict) or not isinstance(authorized_raw, list):
+                raise ValueError("invalid action state shape")
+            pending = {
+                str(action_id): _deserialize_action(descriptor)
+                for action_id, descriptor in pending_raw.items()
+            }
+            authorized = {str(action_id) for action_id in authorized_raw}
+            return pending, authorized
+        except (ValueError, TypeError) as exc:
+            if isinstance(exc, OwnerControlStateError):
+                raise
+            raise OwnerControlStateError("owner-control action state cannot be trusted") from exc
+
+    def _save_actions(self, pending: dict[str, ActionDescriptor], authorized: set[str]) -> None:
+        atomic_write_json(
+            self._actions_path,
+            {
+                "pending": {
+                    action_id: _serialize_action(descriptor)
+                    for action_id, descriptor in sorted(pending.items())
+                },
+                "authorized_action_ids": sorted(authorized),
+            },
+        )
 
     def authorize_sensitive_action(
         self,
         action_id: str,
-        action_class: ActionClass,
-        params: dict[str, Any],
+        action: ActionDescriptor,
         *,
         confirmed: bool = False,
     ) -> AuthorizationDecision:
-        if action_id in self._authorized_action_ids:
-            return AuthorizationDecision(
-                authorized=False,
-                action_id=action_id,
-                reason="duplicate action_id already authorized",
-            )
+        self.verify_identity(action.subject_id)
+        self.check_emergency_stop()
 
-        if action_class not in SENSITIVE_ACTION_CLASSES:
-            self._authorized_action_ids.add(action_id)
-            return AuthorizationDecision(
-                authorized=True, action_id=action_id, reason="not sensitive"
-            )
+        with self._exclusive_state():
+            self.check_emergency_stop()
+            pending, authorized = self._load_actions()
+            if action_id in authorized:
+                return AuthorizationDecision(
+                    authorized=False,
+                    action_id=action_id,
+                    reason="duplicate action_id already authorized",
+                )
 
-        if not confirmed:
-            self._pending_actions[action_id] = _PendingAction(action_class, dict(params))
-            return AuthorizationDecision(
-                authorized=False,
-                action_id=action_id,
-                reason="owner confirmation required",
-            )
+            if action.action_class not in SENSITIVE_ACTION_CLASSES:
+                authorized.add(action_id)
+                self._save_actions(pending, authorized)
+                return AuthorizationDecision(
+                    authorized=True, action_id=action_id, reason="not sensitive"
+                )
 
-        pending = self._pending_actions.get(action_id)
-        if pending is None or pending.action_class != action_class or pending.params != params:
-            return AuthorizationDecision(
-                authorized=False,
-                action_id=action_id,
-                reason="confirmation does not match the requested action",
-            )
+            existing = pending.get(action_id)
+            if not confirmed:
+                if existing is not None and existing != action:
+                    return AuthorizationDecision(
+                        authorized=False,
+                        action_id=action_id,
+                        reason="action_id already awaits confirmation for a different action",
+                    )
+                pending[action_id] = action
+                self._save_actions(pending, authorized)
+                return AuthorizationDecision(
+                    authorized=False,
+                    action_id=action_id,
+                    reason="owner confirmation required",
+                )
 
-        del self._pending_actions[action_id]
-        self._authorized_action_ids.add(action_id)
-        return AuthorizationDecision(authorized=True, action_id=action_id, reason="owner confirmed")
+            if existing is None or existing != action:
+                return AuthorizationDecision(
+                    authorized=False,
+                    action_id=action_id,
+                    reason="confirmation does not match the requested action",
+                )
+
+            del pending[action_id]
+            authorized.add(action_id)
+            self._save_actions(pending, authorized)
+            return AuthorizationDecision(
+                authorized=True, action_id=action_id, reason="owner confirmed"
+            )

@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `247` |
+| Всего файлов | `248` |
 
 ```text
 personal_ai_platform/
@@ -223,6 +223,7 @@ personal_ai_platform/
 - src/owner_control/base.py
 - src/owner_control/control.py
 - src/owner_control/emergency_switch.py
+- src/owner_control/state_io.py
 - src/task_state/__init__.py
 - src/task_state/base.py
 - src/task_state/store.py
