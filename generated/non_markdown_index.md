@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `162` |
+| Всего файлов | `163` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -44,6 +44,7 @@ version: 1.0
 | [`operations/scripts/documents/links.py`](../operations/scripts/documents/links.py) | — | Проверяет, что ссылки и якоря в Markdown-документах ведут на существующие файлы и разделы. |
 | [`operations/scripts/documents/metadata.py`](../operations/scripts/documents/metadata.py) | — | Разбор YAML-фронтматтера Markdown-документов. |
 | [`operations/scripts/documents/non_markdown_index.py`](../operations/scripts/documents/non_markdown_index.py) | — | Строит generated/non_markdown_index.md — перечень не-Markdown файлов репозитория. |
+| [`operations/scripts/documents/platform_capability.py`](../operations/scripts/documents/platform_capability.py) | — | — |
 | [`operations/scripts/documents/repository_tree.py`](../operations/scripts/documents/repository_tree.py) | — | Строит generated/repository_structure.md — полное дерево отслеживаемых файлов. |
 | [`operations/scripts/documents/test_catalog.py`](../operations/scripts/documents/test_catalog.py) | — | Строит generated/test_catalog.md — каталог всех unit-тестов с описаниями. |
 | [`operations/scripts/documents/traceability.py`](../operations/scripts/documents/traceability.py) | — | Строит generated/traceability_matrix.md — таблицу связей требований, компонентов, TASK и TEST. |

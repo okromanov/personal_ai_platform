@@ -29,6 +29,7 @@ from operations.scripts.documents.metadata import (
     metadata_list,
 )
 from operations.scripts.documents.non_markdown_index import render_non_markdown_index
+from operations.scripts.documents.platform_capability import render_platfrom_capability
 from operations.scripts.documents.repository_tree import (
     GENERATED_HEADER,
     render_repository_structure,
@@ -1288,6 +1289,7 @@ def check_generated(root: Path) -> CheckResult:
         root / "generated/repository_structure.md",
         root / "generated/traceability_matrix.md",
         root / "generated/test_catalog.md",
+        root / "generated/platfrom_capability.md",
     ]
     for path in required:
         if not path.exists():
@@ -1304,6 +1306,7 @@ def check_generated(root: Path) -> CheckResult:
         root / "generated/repository_structure.md": render_repository_structure(root, "2000-01-01"),
         root / "generated/traceability_matrix.md": render_traceability(root, "2000-01-01"),
         root / "generated/test_catalog.md": render_test_catalog(root, "2000-01-01"),
+        root / "generated/platfrom_capability.md": render_platfrom_capability(root, "2000-01-01"),
     }
     for path, rendered in expected.items():
         if path.exists() and read_text(path).strip() != rendered.strip():

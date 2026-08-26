@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `255` |
+| Всего файлов | `257` |
 
 ```text
 personal_ai_platform/
@@ -32,6 +32,7 @@ personal_ai_platform/
 - generated/health_check_report.md
 - generated/markdown_index.md
 - generated/non_markdown_index.md
+- generated/platfrom_capability.md
 - generated/repository_structure.md
 - generated/test_catalog.md
 - generated/traceability_matrix.md
@@ -80,6 +81,7 @@ personal_ai_platform/
 - operations/scripts/documents/links.py
 - operations/scripts/documents/metadata.py
 - operations/scripts/documents/non_markdown_index.py
+- operations/scripts/documents/platform_capability.py
 - operations/scripts/documents/repository_tree.py
 - operations/scripts/documents/test_catalog.py
 - operations/scripts/documents/traceability.py
