@@ -143,6 +143,7 @@ THREAT_REQUIRED_LABELS = (
     "**Остаточный риск:**",
 )
 ALLOWED_WORKFLOW_PERMISSIONS = {"read", "none"}
+MERGE_ONLY_GENERATED_WORKFLOW = "publish_health_check_report.yml"
 
 
 @dataclass
@@ -1234,6 +1235,12 @@ def check_automation_policy(root: Path) -> CheckResult:
         workflow_name = workflow_path.name
         workflow_text = read_text(workflow_path)
         errors.extend(_block_scalar_errors(workflow_name, workflow_text))
+        if workflow_name == MERGE_ONLY_GENERATED_WORKFLOW:
+            if "branches:\n      - main" not in workflow_text:
+                errors.append(f"{workflow_name}: должен запускаться только после push в main")
+            if "generated/health_check_report.md" not in workflow_text:
+                errors.append(f"{workflow_name}: может публиковать только health_check_report.md")
+            continue
         permission_match = re.search(
             r"(?m)^permissions:\s*$\n(?P<body>(?:[ \t]+[^\n]*\n)*)",
             workflow_text,
