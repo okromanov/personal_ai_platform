@@ -3,7 +3,7 @@
 id: generated_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-26T14:10:00Z
+generated_at: 2026-08-26T21:41:31Z
 version: 1.0
 ---
 
@@ -11,7 +11,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `87` |
+| Всего документов | `91` |
 
 > Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
@@ -88,6 +88,10 @@ version: 1.0
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `planned` | `1.7` | TASK_011 — Реализация INF_CMP_005 |
 | [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `planned` | `1.6` | TASK_012 — Реализация INF_CMP_007 |
 | [`work/tasks/task_013_inf_008.md`](../work/tasks/task_013_inf_008.md) | `TASK_013` | `task` | `work_state` | `planned` | `1.5` | TASK_013 — Реализация INF_CMP_008 |
+| [`work/tasks/task_014_real_runtime.md`](../work/tasks/task_014_real_runtime.md) | `TASK_014` | `task` | `work_state` | `planned` | `1.0` | TASK_014 — Реальная среда агента для ARC_CMP_003 |
+| [`work/tasks/task_015_real_model_provider.md`](../work/tasks/task_015_real_model_provider.md) | `TASK_015` | `task` | `work_state` | `planned` | `1.0` | TASK_015 — Реальный поставщик модели для ARC_CMP_004 |
+| [`work/tasks/task_016_real_telegram.md`](../work/tasks/task_016_real_telegram.md) | `TASK_016` | `task` | `work_state` | `planned` | `1.0` | TASK_016 — Реальный Telegram Bot API для ARC_CMP_001 |
+| [`work/tasks/task_017_m02_live_e2e.md`](../work/tasks/task_017_m02_live_e2e.md) | `TASK_017` | `task` | `work_state` | `planned` | `1.0` | TASK_017 — Живое E2E-доказательство ARC_FLOW_001 |
 | [`work/tests/test_001.md`](../work/tests/test_001.md) | `TEST_001` | `test` | `spec_state` | `current` | `1.3` | TEST_001 — Проверка модели документов и трассировки |
 | [`work/tests/test_002.md`](../work/tests/test_002.md) | `TEST_002` | `test` | `spec_state` | `current` | `1.2` | TEST_002 — Проверка качества, доказательств и автоматизации принятия |
 | [`work/tests/test_003.md`](../work/tests/test_003.md) | `TEST_003` | `test` | `spec_state` | `current` | `1.3` | TEST_003 — Контракты среды агента и поставщика модели |
