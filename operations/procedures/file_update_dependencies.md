@@ -55,7 +55,7 @@ updated: 2026-08-24
 - **Зависит от:** каждый отслеживаемый `.md` файл репозитория (его YAML-фронтматтер), кроме файлов внутри `generated/`
 - **Генерируется:** render_index() в operations/scripts/documents/index.py
 - **Проверка:** check.py: generated (drift check)
-- Одна строка на каждый `.md` файл репозитория (включая [`project_status.md`](../../project_status.md), [`tasks.md`](../../tasks.md)) с его `id`/`type`/состоянием/версией/названием — без фильтрации по «первичности» документа.
+- Одна строка на каждый `.md` файл репозитория (включая [`project_status.md`](../../project_status.md)) с его `id`/`type`/состоянием/версией/названием — без фильтрации по «первичности» документа.
 
 ### generated/non_markdown_index.md
 - **Зависит от:** каждый отслеживаемый не-`.md` файл репозитория, `work/tasks/*` (`allowed_paths`)
