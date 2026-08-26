@@ -2,8 +2,8 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 1.5
-updated: 2026-08-24
+version: 1.6
+updated: 2026-08-26
 depends_on:
   - business_requirements
   - architecture_baseline
@@ -79,6 +79,10 @@ V1 — первый регулярно используемый персонал
 - результат: владелец отправляет сообщение через Telegram и получает реальный ответ модели из постоянно работающей выбранной среды. Границы платформы остаются под контролем владельца.
 - состав: [`BR_001`](specifications/business_requirements.md#br_001), [`BR_004`](specifications/business_requirements.md#br_004), [`BR_005`](specifications/business_requirements.md#br_005), [`BR_006`](specifications/business_requirements.md#br_006), [`BR_033`](specifications/business_requirements.md#br_033), [`BR_036`](specifications/business_requirements.md#br_036), [`SYS_001`](specifications/system_specification.md#sys_001), [`SYS_002`](specifications/system_specification.md#sys_002), [`SYS_003`](specifications/system_specification.md#sys_003), [`SYS_004`](specifications/system_specification.md#sys_004), [`SYS_006`](specifications/system_specification.md#sys_006), [`SYS_020`](specifications/system_specification.md#sys_020), [`SYS_024`](specifications/system_specification.md#sys_024), [`SYS_027`](specifications/system_specification.md#sys_027), [`SEC_CTL_001`](specifications/system_specification.md#sec_ctl_001), [`SEC_CTL_002`](specifications/system_specification.md#sec_ctl_002), [`SEC_CTL_003`](specifications/system_specification.md#sec_ctl_003), [`SEC_CTL_005`](specifications/system_specification.md#sec_ctl_005), [`SEC_CTL_008`](specifications/system_specification.md#sec_ctl_008), [`SEC_CTL_020`](specifications/system_specification.md#sec_ctl_020), [`INF_REQ_001`](specifications/infrastructure_baseline.md#inf_req_001), [`INF_REQ_002`](specifications/infrastructure_baseline.md#inf_req_002), [`INF_REQ_003`](specifications/infrastructure_baseline.md#inf_req_003), [`INF_REQ_006`](specifications/infrastructure_baseline.md#inf_req_006), [`INF_REQ_010`](specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_012`](specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](specifications/infrastructure_baseline.md#inf_req_013), [`INF_REQ_015`](specifications/infrastructure_baseline.md#inf_req_015), [`INF_REQ_016`](specifications/infrastructure_baseline.md#inf_req_016).
 
+### Обязательный пользовательский результат
+
+До принятия этапа должен быть доказан один внешний сценарий: разрешённый владелец отправляет текст реальному Telegram-боту и получает ответ от реального поставщика модели в выбранной постоянно работающей среде. До вызова модели проверяются allowlist и аварийный выключатель; при обязательном VPN-профиле потеря туннеля не допускает вызова модели. Заглушка канала, RuntimePort или ModelGateway не является доказательством этого результата.
+
 ### Подэтапы
 
 1. Сравнить 2–3 сильных варианта среды агента на одном минимальном сквозном сценарии.
@@ -89,7 +93,11 @@ V1 — первый регулярно используемый персонал
 3. Развернуть минимально достаточную рабочую среду согласно выбранным решениям и `INF_REQ_*`.
 4. Подключить одного поставщика модели через [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) и проверить время ожидания, бюджет и обработку ошибок.
 5. Реализовать минимальный сквозной сценарий Telegram по [`SYS_001`](specifications/system_specification.md#sys_001)–[`SYS_004`](specifications/system_specification.md#sys_004) и [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) без повтора архитектурного контракта. Добавить только ограниченный независимый административный путь [`SYS_006`](specifications/system_specification.md#sys_006) для аварийного выключателя; это не включает общий CLI в продуктовый периметр V1.
-6. Проверить отрицательные сценарии: чужая личность, аварийный выключатель, недоступная модель, секреты в журналах, обязательный сетевой путь и контролируемый перезапуск/повторное развёртывание минимального контура.
+6. Проверить внешний сценарий и отрицательные сценарии: чужая личность, аварийный выключатель, недоступная модель, секреты в журналах, обязательный сетевой путь и контролируемый перезапуск/повторное развёртывание минимального контура.
+
+### Очередь, закрывающая пользовательский результат
+
+`TASK_012` и `TASK_013` завершают наблюдаемость и управляемое развёртывание. Затем обязательны: `TASK_014` — выбранная среда агента, `TASK_015` — реальный поставщик модели, `TASK_016` — реальный Telegram Bot API, `TASK_017` — независимое сквозное доказательство. Компонентные TASK, использующие только stub-реализации, не могут заменить эти четыре результата.
 
 Полное резервное копирование, восстановление ценного состояния, памяти и проектов по [`SYS_025`](specifications/system_specification.md#sys_025), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013) и [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009)–[`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014) доказывается в [`m04`](#m04)/[`m06`](#m06). [`m02`](#m02) не подменяет это требование облегчённым smoke-тестом.
 
