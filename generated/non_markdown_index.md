@@ -3,7 +3,6 @@
 id: generated_non_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-26T12:06:13Z
 version: 1.0
 ---
 
@@ -11,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `167` |
+| Всего файлов | `168` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -20,6 +19,7 @@ version: 1.0
 | [`.coverage`](../.coverage) | — | — |
 | [`.dockerignore`](../.dockerignore) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) | — | CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно. |
+| [`.github/workflows/publish_health_check_report.yml`](../.github/workflows/publish_health_check_report.yml) | — | — |
 | [`.gitignore`](../.gitignore) | — | Список путей и масок, исключённых из git. |
 | [`dockerfile`](../dockerfile) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`operations/__init__.py`](../operations/__init__.py) | — | Пустой файл-маркер Python-пакета. |
