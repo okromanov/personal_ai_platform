@@ -121,7 +121,9 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
         if row is None:
             return None
         try:
-            completed_at = datetime.fromisoformat(row["completed_at"]) if row["completed_at"] else None
+            completed_at = (
+                datetime.fromisoformat(row["completed_at"]) if row["completed_at"] else None
+            )
             return TaskMessage(
                 task_id=row["task_id"],
                 channel_type=row["channel_type"],
