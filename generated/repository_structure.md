@@ -3,7 +3,6 @@
 id: generated_repository_structure
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-26T12:06:13Z
 version: 1.0
 ---
 
@@ -11,13 +10,14 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `262` |
+| Всего файлов | `263` |
 
 ```text
 personal_ai_platform/
 - .coverage
 - .dockerignore
 - .github/workflows/project_check.yml
+- .github/workflows/publish_health_check_report.yml
 - .gitignore
 - AGENTS.md
 - adr/adr_001_language_and_runtime.md
@@ -243,6 +243,7 @@ personal_ai_platform/
 - src/tools/__init__.py
 - src/tools/base.py
 - src/tools/registry.py
+- tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
 - work/m01_final_report.md
