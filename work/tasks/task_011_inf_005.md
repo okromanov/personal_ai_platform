@@ -3,15 +3,19 @@ id: TASK_011
 type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
-work_state: planned
-version: 1.7
-updated: 2026-08-25
+work_state: in-progress
+version: 1.8
+updated: 2026-08-26
 next_actor: agent
 owner_action: none
 depends_on:
   - TASK_010
 allowed_paths:
   - work/tasks/task_011_inf_005.md
+  - work/tests/test_017.md
+  - src/task_state/sqlite_store.py
+  - src/task_state/__init__.py
+  - operations/tests/product/test_persistent_task_state.py
 traces_to:
   - m02
 implements:
@@ -45,9 +49,9 @@ implements:
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
+- [x] Изучить требования к INF_CMP_005
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать SQLite-реализацию
 - [ ] Реализовать компонент
 - [ ] Написать TEST, связанный с TASK и требованиями компонента
 - [ ] Проверить покрытие путей в allowed_paths

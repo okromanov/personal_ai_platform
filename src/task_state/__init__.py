@@ -11,11 +11,13 @@ This module implements ARC_CMP_007 — Состояние задач (Task State
 """
 
 from .base import Checkpoint, TaskLifecycleError, TaskLifecycleState, TaskLifecycleStore
+from .sqlite_store import SQLiteTaskLifecycleStore
 from .store import InMemoryTaskLifecycleStore
 
 __all__ = [
     "Checkpoint",
     "InMemoryTaskLifecycleStore",
+    "SQLiteTaskLifecycleStore",
     "TaskLifecycleError",
     "TaskLifecycleState",
     "TaskLifecycleStore",
