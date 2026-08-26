@@ -61,9 +61,7 @@ class NetworkPolicy:
         if len(ingress_keys) != len(self.ingress_rules):
             raise ValueError("ingress rules must be unique by service and port")
 
-        egress_keys = {
-            (rule.service_id, rule.target, rule.port) for rule in self.egress_rules
-        }
+        egress_keys = {(rule.service_id, rule.target, rule.port) for rule in self.egress_rules}
         if len(egress_keys) != len(self.egress_rules):
             raise ValueError("egress rules must be unique by service, target and port")
 

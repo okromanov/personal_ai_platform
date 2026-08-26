@@ -23,7 +23,7 @@ depends_on:
 2. Открыть указанную там задачу либо этапный рубеж.
 3. Прочитать [`project_rules.md`](project_rules.md) только те разделы, которые нужны для текущей работы.
 4. Не удалять и не перезаписывать незнакомые изменения пользователя.
-5. Убедиться, что установлен канонический pre-commit hook (`ls -la .git/hooks/pre-commit`); если его нет — поставить командой из [`operations/setup_precommit.md`](operations/setup_precommit.md) прежде, чем вносить изменения. Без него `generated/*`, [`project_status.md`](project_status.md), [`tasks.md`](tasks.md) не проверяются на рассинхрон локально и расходятся с источником до первого запуска CI.
+5. Убедиться, что установлен канонический pre-commit hook (`ls -la .git/hooks/pre-commit`); если его нет — поставить командой из [`operations/setup_precommit.md`](operations/setup_precommit.md) прежде, чем вносить изменения. Без него `generated/*`, [`project_status.md`](project_status.md) не проверяется на рассинхрон локально и расходятся с источником до первого запуска CI.
 
 Команда `ПРОДОЛЖАЙ TASK_xxx` означает выполнить оставшуюся работу по этой карточке. Команда `ПРОДОЛЖАЙ mXX` означает провести следующий рубеж текущего этапа и показать владельцу результат либо одно необходимое решение.
 
@@ -49,7 +49,7 @@ depends_on:
 ### Чек-лист перед публикацией PR
 
 - [ ] `run_suite.py full` и `pre_commit_hook.sh` зелёные локально
-- [ ] `generated/*`, [`project_status.md`](project_status.md), [`tasks.md`](tasks.md) не требуют повторной регенерации (drift-check пройден)
+- [ ] `generated/*`, [`project_status.md`](project_status.md) не требуют повторной регенерации (drift-check пройден)
 - [ ] TASK/TEST карточки отражают фактический `work_state`/`spec_state`, `updated` совпадает с датой последнего изменения
 - [ ] Diff понятен без дополнительных объяснений; ничего не изменено вне `allowed_paths`
 - [ ] Нет TODO/FIXME/заглушек и нестабильных тестов (см. §5.1)
@@ -193,7 +193,7 @@ Hook проверит структуру документов, целостно�
 | Как устроена инфраструктура? | [`specifications/infrastructure_baseline.md`](specifications/infrastructure_baseline.md) |
 | Как меняется код? | [`operations/change_process.md`](operations/change_process.md) |
 | Каковы этапы? | [`milestones.md`](milestones.md) |
-| Какая текущая работа? | [`tasks.md`](tasks.md) + карточки `work/tasks/` |
+| Какая текущая работа? | [`project_status.md`](project_status.md) + карточки `work/tasks/` |
 | Как тестировать? | [`work/tests/`](work/tests/) |
 
 Не переносить логику из одного документа в другой. Не дублировать одну связь в прямом и обратном направлении. Не добавлять реализацию, которой не требует текущий этап.

@@ -13,7 +13,6 @@ DERIVED_PATH_PATTERNS = (
     "generated/**",
     "runtime/**",
     "project_status.md",
-    "tasks.md",
     "work/m*_final_report.md",
 )
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")

@@ -10,13 +10,14 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `257` |
+| Всего файлов | `263` |
 
 ```text
 personal_ai_platform/
 - .coverage
 - .dockerignore
 - .github/workflows/project_check.yml
+- .github/workflows/publish_health_check_report.yml
 - .gitignore
 - AGENTS.md
 - adr/adr_001_language_and_runtime.md
@@ -158,6 +159,7 @@ personal_ai_platform/
 - operations/tests/product/test_operations_state.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
+- operations/tests/product/test_secrets.py
 - operations/tests/product/test_task_state.py
 - operations/tests/product/test_tool_gateway.py
 - operations/tests/stress/__init__.py
@@ -232,6 +234,9 @@ personal_ai_platform/
 - src/owner_control/control.py
 - src/owner_control/emergency_switch.py
 - src/owner_control/state_io.py
+- src/secrets/__init__.py
+- src/secrets/base.py
+- src/secrets/env_provider.py
 - src/task_state/__init__.py
 - src/task_state/base.py
 - src/task_state/store.py
@@ -271,4 +276,5 @@ personal_ai_platform/
 - work/tests/test_013.md
 - work/tests/test_014.md
 - work/tests/test_015.md
+- work/tests/test_016.md
 ```

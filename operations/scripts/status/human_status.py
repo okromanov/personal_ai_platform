@@ -3,8 +3,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from operations.scripts.common.project import atomic_write
+from operations.scripts.common.project import atomic_write_generated, iter_files, relative_posix
 from operations.scripts.common.status_types import TaskItem
+from operations.scripts.documents.metadata import load_document
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -78,6 +79,30 @@ def _task_context(tasks: list[TaskItem], milestone_id: str) -> TaskItem | None:
 def _checkbox(done: bool) -> str:
     return "[x]" if done else "[ ]"
 
+def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
+    """Build the component-to-evidence table from TASK and TEST metadata."""
+    tests_by_task: dict[str, list[tuple[str, str]]] = {}
+    for path in iter_files(root, suffixes={".md"}, include_generated=False):
+        relative = relative_posix(path, root)
+        if not relative.startswith("work/tests/"):
+            continue
+        document = load_document(path)
+        test_id = str(document.metadata.get("id", ""))
+        for task_id in document.metadata.get("traces_to", []):
+            tests_by_task.setdefault(str(task_id), []).append((test_id, relative))
+
+    labels = {"completed": "выполнена", "in-progress": "выполняется", "planned": "запланирована", "blocked": "заблокирована"}
+    rows: list[str] = []
+    for task in tasks:
+        component = str(task.get("component", "—"))
+        task_path = Path(str(task["path"])).name
+        task_link = f"[`{task['id']}`](work/tasks/{task_path})"
+        linked = tests_by_task.get(str(task["id"]), [])
+        evidence = ", ".join(f"[`{test_id}`]({path})" for test_id, path in linked) or "—"
+        state = labels.get(str(task.get("work_state", "")), str(task.get("work_state", "")))
+        rows.append(f"| {task_link} | `{component}` | {evidence} | {state} |")
+    return "\n".join(rows) or "| — | — | — | — |"
+
 
 def render_repository_project_status(root: Path) -> str:
     milestone_state = collect_milestones(root)
@@ -115,19 +140,7 @@ def render_repository_project_status(root: Path) -> str:
         + (" — **текущий этап**" if item["id"] == current_id else "")
         for item in milestones
     )
-    if current_tasks:
-        task_lines = "\n".join(
-            f"- {_checkbox(str(item['work_state']) == 'completed')} "
-            f"[`{item['id']}` — {item['title']}](work/tasks/{Path(str(item['path'])).name})"
-            for item in current_tasks
-        )
-    elif foundation_without_project_tasks:
-        task_lines = (
-            "Проектных TASK нет: `m01` посвящён подготовке и принятию основы. "
-            "Служебная история репозитория здесь не хранится."
-        )
-    else:
-        task_lines = "Проектные TASK для этого этапа ещё не созданы."
+    technical_coverage = _technical_coverage(current_tasks, root)
 
     if current_task:
         task_link = (
@@ -277,9 +290,11 @@ version: 1.0
 
 {milestone_lines}
 
-## Проектные задачи текущего этапа
+## Задачи и техническое покрытие текущего этапа
 
-{task_lines}
+| Задача | Компонент | Проверка | Состояние |
+|---|---|---|---|
+{technical_coverage}
 
 ## Шаги текущей работы
 
@@ -303,4 +318,4 @@ version: 1.0
 
 
 def generate_repository_project_status(root: Path) -> bool:
-    return atomic_write(root / "project_status.md", render_repository_project_status(root))
+    return atomic_write_generated(root / "project_status.md", render_repository_project_status(root))

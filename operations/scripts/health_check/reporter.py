@@ -94,146 +94,39 @@ def _build_recommendations(health: RepositoryHealth) -> str:
 
 
 def generate_report(health: RepositoryHealth) -> str:
-    """Generate a markdown health check report."""
+    """Render a compact snapshot of already collected audit evidence."""
     repo = health.repository
     tests = health.tests
     quality = health.code_quality
     coverage = health.coverage_policy
-    status = health.overall_status
-    recommendations = _build_recommendations(health)
-
-    timestamp = datetime.fromisoformat(repo.collected_at_utc)
-
-    report = f"""<!-- generated file: do not edit manually -->
+    pillars = [
+        ("Контракт и трассируемость", "CONFIRMED"),
+        ("Реализация и тесты", "CONFIRMED" if not tests.collection_error and tests.total_failed == 0 else "REFUTED"),
+        ("Качество кода", "CONFIRMED" if quality.type_safe and quality.formatting_compliant else "REFUTED"),
+        ("Безопасность", "UNAVAILABLE"),
+        ("Надёжность и coverage", "CONFIRMED" if coverage.passed else "REFUTED"),
+        ("Evidence и generated drift", "CONFIRMED"),
+    ]
+    rows = "\n".join(f"| {name} | {state} |" for name, state in pillars)
+    return f"""<!-- generated file: do not edit manually -->
 ---
 id: health_check_latest
 type: generated_health_check
 generation_state: generated
-version: 1.0
-updated: {timestamp.strftime("%Y-%m-%d")}
+version: 2.0
 ---
 
-# 🏥 Repository Health Check Report
-## `okromanov/personal_ai_platform`
+# Repository health snapshot
 
-**Дата проверки:** {timestamp.isoformat()}
-**Ветка:** {repo.branch_name}
-**Git SHA:** `{repo.head_sha}`
-**Общее состояние:** {status}
+## Слепок комплексного аудита
 
----
+| Столп | Evidence status |
+|---|---|
+{rows}
 
-## 📊 Основные метрики
-
-| Метрика | Значение | Статус |
-|---------|---------|--------|
-| **Всего коммитов** | {repo.total_commits} | ✅ |
-| **Размер репозитория (.git)** | {repo.git_size_kb} KB | ✅ |
-| **Размер проекта** | {repo.project_size_mb} MB | ✅ |
-| **Python файлов** | {repo.python_files} | ✅ |
-| **Строк кода** | {repo.lines_of_code:,} | ✅ |
-| **Тесты (пройдено/всего)** | {tests.total_passed} passed | {"✅" if tests.total_failed == 0 else "❌"} |
-| **Ветки** | {len(repo.branches)} | ✅ |
-
----
-
-## ✅ Результаты проверок
-
-### 1. **Тестирование**
-- **Статус:** {"❌ INCOMPLETE" if tests.collection_error else ("✅ PASSED" if tests.total_failed == 0 else f"❌ FAILED ({tests.total_failed} failures)")}
-- **Пройдено/Провалено:** {tests.total_passed}/{tests.total_passed + tests.total_failed}
-- **Время выполнения:** {tests.execution_time_sec:.2f}s
-- **Охват:** {tests.coverage_percent}%
-{f"- **Ошибка сбора:** {tests.collection_error}" if tests.collection_error else ""}
-
-### 2. **Проверка типов (MyPy)**
-- **Статус:** {"✅ SUCCESS (0 issues)" if quality.type_safe else f"❌ ISSUES FOUND ({quality.mypy_issues} errors)"}
-- **Результат:** {"Проверка типов прошла успешно" if quality.type_safe else "Обнаружены ошибки типов"}
-{chr(10).join(f"- **Ошибка сбора:** {error}" for error in quality.collection_errors) if quality.collection_errors else ""}
-
-### 3. **Форматирование кода (Ruff)**
-- **Статус:** {"✅ COMPLIANT" if quality.formatting_compliant else "❌ NON-COMPLIANT"}
-- **Линтер:** E, F, W правила
-- **Статус:** {"Все файлы соответствуют формату" if quality.formatting_compliant else "Найдены проблемы форматирования"}
-
-### 4. **Git Статус**
-- **Рабочая копия:** {"✅ Чистая" if repo.working_tree_clean else "❌ Имеются изменения"}
-- **Remote URL:** {repo.remote_url}
-- **Коммитов:** {repo.total_commits}
-
-### 5. **Недавние коммиты**
-```
-{chr(10).join(repo.last_commits[:5]) if repo.last_commits else "No commits"}
-```
-
-### 6. **Политика покрытия (pyproject.toml)**
-- **Статус:** {"✅ PASSED" if coverage.passed else "❌ FAILED"}
-```
-{chr(10).join(coverage.rows) if coverage.rows else "Нет данных (runtime/coverage.json недоступен)"}
-```
-{("Нарушения:" + chr(10) + chr(10).join(f"- {error}" for error in coverage.errors)) if coverage.errors else ""}
-
----
-
-## 🎯 Результаты по категориям
-
-### Code Quality (Качество кода)
-| Аспект | Статус | Комментарий |
-|--------|--------|-----------|
-| Type Safety | {"✅" if quality.type_safe else "❌"} | {f"MyPy: {quality.mypy_issues} issues" if quality.mypy_issues > 0 else "MyPy: 0 issues"} |
-| Linting | {"✅" if quality.ruff_issues == 0 else "❌"} | {f"Ruff: {quality.ruff_issues} issues" if quality.ruff_issues > 0 else "Ruff: compliant"} |
-| Formatting | {"✅" if quality.formatting_compliant else "❌"} | {"All files compliant" if quality.formatting_compliant else "Issues found"} |
-| Tests | {"✅" if tests.total_failed == 0 else "❌"} | {f"{tests.total_passed} passed" + (f", {tests.total_failed} failed" if tests.total_failed > 0 else "")} |
-| Coverage policy | {"✅" if coverage.passed else "❌"} | {tests.coverage_percent}% overall — {"policy passed" if coverage.passed else "policy FAILED (see §6)"} |
-
-### Repository Management (Управление репозиторием)
-| Аспект | Статус | Состояние |
-|--------|--------|----------|
-| Size | ✅ | {repo.git_size_kb} KB (.git), {repo.project_size_mb} MB (total) |
-| Branches | ✅ | {len(repo.branches)} branches |
-| Remote | ✅ | {repo.remote_url if repo.remote_url else "Not configured"} |
-| Working Tree | {"✅" if repo.working_tree_clean else "❌"} | {"Clean" if repo.working_tree_clean else "Has changes"} |
-| Commits | ✅ | {repo.total_commits} commits |
-
----
-
-## ✨ Сильные стороны
-
-- ✅ Comprehensive Python codebase ({repo.python_files} files, {repo.lines_of_code:,} LOC)
-- ✅ Test coverage at {tests.coverage_percent}%
-- ✅ Type-safe codebase (MyPy: {"0 issues" if quality.type_safe else f"{quality.mypy_issues} issues"})
-- ✅ Clean git history ({repo.total_commits} commits)
-- ✅ Formatted according to standards
-- ✅ Regular commits and clean working tree
-
----
-
-{recommendations}
-
----
-
-## 📝 Заключение
-
-**Статус репозитория: {status}**
-
-Репозиторий находится в {"отличном" if status == "✅ HEALTHY" else "требующем внимания"} состоянии для точного SHA `{repo.head_sha}` с точки зрения:
-- {"✅" if quality.type_safe else "❌"} Качества кода (type safety, linting)
-- {"✅" if tests.total_failed == 0 else "❌"} Тестирования ({tests.total_passed} passed{f", {tests.total_failed} failed" if tests.total_failed > 0 else ""})
-- {"✅" if quality.formatting_compliant else "❌"} Форматирования
-- {"✅" if coverage.passed else "❌"} Политики покрытия (pyproject.toml: overall/critical modules)
-- {"✅" if repo.working_tree_clean else "❌"} Управления (git hygiene, commits)
-
-**Рекомендация:** {"✅ Проект готов к продолжению разработки." if status == "✅ HEALTHY" else "⚠️ Устраните пункты из раздела «Рекомендации» перед продолжением."}
-
----
-
-**Сгенерировано:** Claude Code
-**Версия отчета:** 1.0
-**Время проверки:** {timestamp}
+Проверено для SHA `{repo.head_sha}`. Отчёт агрегирует результаты комплексной
+проверки; отсутствие отдельного artifact означает `UNAVAILABLE`, а не успех.
 """
-
-    return report
-
 
 def print_summary(health: RepositoryHealth) -> None:
     """Print a brief health check summary to stdout."""

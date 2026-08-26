@@ -3,6 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
+generated_at: 2026-08-26T13:39:59Z
 version: 1.0
 ---
 
@@ -14,7 +15,7 @@ version: 1.0
 
 > **Чтобы продолжить, отправьте агенту одну команду.**
 >
-> `ПРОДОЛЖАЙ TASK_010`
+> `ПРОДОЛЖАЙ TASK_011`
 
 **Осталось:** 6 шаг(ов) в текущей работе.
 
@@ -26,8 +27,8 @@ version: 1.0
 |---|---|
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
-| Текущая проектная задача | [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md) |
-| Место в очереди проекта | **10 из 13** |
+| Текущая проектная задача | [`TASK_011` — Реализация INF_CMP_005](work/tasks/task_011_inf_005.md) |
+| Место в очереди проекта | **11 из 13** |
 | Шаги текущей задачи | **0** из **6** |
 | Следующий исполнитель | **агент** |
 
@@ -41,34 +42,36 @@ version: 1.0
 - [ ] [`m06` — Стабилизация и приёмка V1](milestones.md#m06)
 - [ ] [`m07` — Оценка эксплуатации и планирование следующего цикла](milestones.md#m07)
 
-## Проектные задачи текущего этапа
+## Задачи и техническое покрытие текущего этапа
 
-- [x] [`TASK_001` — Реализация ARC_CMP_001](work/tasks/task_001_arc_001.md)
-- [x] [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md)
-- [x] [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md)
-- [x] [`TASK_004` — Реализация ARC_CMP_004](work/tasks/task_004_arc_004.md)
-- [x] [`TASK_005` — Реализация ARC_CMP_005](work/tasks/task_005_arc_005.md)
-- [x] [`TASK_006` — Реализация ARC_CMP_007](work/tasks/task_006_arc_007.md)
-- [x] [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_009.md)
-- [x] [`TASK_008` — Реализация INF_CMP_001](work/tasks/task_008_inf_001.md)
-- [x] [`TASK_009` — Реализация INF_CMP_002](work/tasks/task_009_inf_002.md)
-- [ ] [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md)
-- [ ] [`TASK_011` — Реализация INF_CMP_005](work/tasks/task_011_inf_005.md)
-- [ ] [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md)
-- [ ] [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md)
+| Задача | Компонент | Проверка | Состояние |
+|---|---|---|---|
+| [`TASK_001`](work/tasks/task_001_arc_001.md) | `ARC_CMP_001` | [`TEST_007`](work/tests/test_007.md) | выполнена |
+| [`TASK_002`](work/tasks/task_002_arc_002.md) | `ARC_CMP_002` | [`TEST_008`](work/tests/test_008.md) | выполнена |
+| [`TASK_003`](work/tasks/task_003_arc_003.md) | `ARC_CMP_003` | [`TEST_009`](work/tests/test_009.md) | выполнена |
+| [`TASK_004`](work/tasks/task_004_arc_004.md) | `ARC_CMP_004` | [`TEST_010`](work/tests/test_010.md) | выполнена |
+| [`TASK_005`](work/tasks/task_005_arc_005.md) | `ARC_CMP_005` | [`TEST_011`](work/tests/test_011.md) | выполнена |
+| [`TASK_006`](work/tasks/task_006_arc_007.md) | `ARC_CMP_007` | [`TEST_012`](work/tests/test_012.md) | выполнена |
+| [`TASK_007`](work/tasks/task_007_arc_009.md) | `ARC_CMP_009` | [`TEST_013`](work/tests/test_013.md) | выполнена |
+| [`TASK_008`](work/tasks/task_008_inf_001.md) | `INF_CMP_001` | [`TEST_014`](work/tests/test_014.md) | выполнена |
+| [`TASK_009`](work/tasks/task_009_inf_002.md) | `INF_CMP_002` | [`TEST_015`](work/tests/test_015.md) | выполнена |
+| [`TASK_010`](work/tasks/task_010_inf_003.md) | `INF_CMP_003` | [`TEST_016`](work/tests/test_016.md) | выполнена |
+| [`TASK_011`](work/tasks/task_011_inf_005.md) | `INF_CMP_005` | — | запланирована |
+| [`TASK_012`](work/tasks/task_012_inf_007.md) | `INF_CMP_007` | — | запланирована |
+| [`TASK_013`](work/tasks/task_013_inf_008.md) | `INF_CMP_008` | — | запланирована |
 
 ## Шаги текущей работы
 
-- [ ] Изучить требования к [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003)
-- [ ] Дополнить allowed_paths реальными путями
+- [ ] Изучить требования к [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005)
+- [ ] Дополнить `allowed_paths` фактическими путями реализации
 - [ ] Спроектировать реализацию
 - [ ] Реализовать компонент
 - [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [ ] Проверить покрытие путей в `allowed_paths`
 
 ## Блокеры
 
-В карточках задач блокеры не зафиксированы. Итоговую готовность проверит агент.
+GitHub Actions не запускаются до 1 сентября 2026 года: исчерпан бесплатный лимит. Это отложенная серверная проверка; блокеров реализации TASK_010 не зафиксировано.
 
 ## Незакрытые действия владельца (необязательные)
 
@@ -78,4 +81,5 @@ version: 1.0
 
 ## Что будет дальше
 
-[`TASK_011`](work/tasks/task_011_inf_005.md) реализует Постоянное хранилище ([`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005)) — компонент, который обеспечивает физическую основу для `TaskLifecycleStore` ([`TASK_006`](work/tasks/task_006_arc_007.md)), чтобы его данные переживали перезапуск среды.
+[`TASK_011`](work/tasks/task_011_inf_005.md) реализует Постоянное хранилище ([`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005)).
+

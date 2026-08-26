@@ -113,7 +113,6 @@ TEST без evidence, неявные зависимости SYS и несогл�
     "operations/change_process.md",
     "milestones.md",
     "project_status.md",
-    "tasks.md",
     "specifications/",
     "adr/",
     "operations/",

@@ -1,1636 +1,8 @@
-from __future__ import annotations
-
-import argparse
-import json
-import re
-import sys
-from dataclasses import dataclass
-from pathlib import Path
-from typing import TypedDict, cast
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
-from operations.scripts.common.project import (
-    IGNORED_DIRS,
-    find_project_root,
-    iter_files,
-    read_text,
-    relative_posix,
-    require_supported_python,
-)
-from operations.scripts.documents.index import is_primary_markdown, render_index
-from operations.scripts.documents.links import check_markdown_links
-from operations.scripts.documents.metadata import (
-    STATE_FIELDS,
-    STATE_VALUES,
-    expected_state_field,
-    load_document,
-    metadata_list,
-)
-from operations.scripts.documents.non_markdown_index import render_non_markdown_index
-from operations.scripts.documents.platform_capability import render_platfrom_capability
-from operations.scripts.documents.repository_tree import (
-    GENERATED_HEADER,
-    render_repository_structure,
-)
-from operations.scripts.documents.test_catalog import render_test_catalog
-from operations.scripts.documents.traceability import (
-    collect_traceable_elements,
-    render_traceability,
-)
-from operations.scripts.quality.registry import (
-    load_quality_registry,
-    profiles_for_milestone,
-    validate_quality_registry,
-)
-from operations.scripts.status.generate_project_status import (
-    collect_milestones,
-    collect_test_specs,
-    v1_milestone_ids,
-)
-from operations.scripts.status.human_status import render_repository_project_status
-from operations.scripts.tasks.generate import TASK_ID_PATTERN, collect_tasks, render_task_index
-from operations.scripts.tasks.semantics import validate_task_semantics
-from operations.scripts.traceability.full_traceability import validate_full_traceability
-from operations.scripts.traceability.semantic_consistency import validate_semantic_consistency
-
-REQUIRED_METADATA = ("id", "type", "version")
-VERSION_PATTERN = re.compile(r"^\d+\.\d+$")
-UPDATED_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-REFERENCE_KEYS = (
-    "depends_on",
-    "traces_to",
-    "implements",
-    "mitigates",
-    "implemented_by",
-    "verifies",
-    "accepts",
-)
-TEST_FILE_PATTERN = re.compile(r"^test_\d{3}\.md$")
-TEST_ID_PATTERN = re.compile(r"^TEST_\d{3}$")
-TEST_EXECUTIONS = {"automated", "manual"}
-FAMILY_WIDTH = {
-    "BR": 3,
-    "SYS": 3,
-    "THR": 3,
-    "SEC_CTL": 3,
-    "INF_REQ": 3,
-    "INF_CMP": 3,
-    "INF_FLOW": 3,
-    "ADR": 3,
-    "TASK": 3,
-    "TEST": 3,
-}
-REQUIRED_TEMPLATES = [
-    "business_requirement_template.md",
-    "system_requirement_template.md",
-    "threat_template.md",
-    "security_control_template.md",
-    "infrastructure_requirement_template.md",
-    "infrastructure_component_template.md",
-    "infrastructure_flow_template.md",
-    "milestone_template.md",
-    "adr_template.md",
-    "task_template.md",
-    "test_template.md",
-]
-STABLE_CONTENT_PATHS: dict[str, object] = {}
-STABLE_FORBIDDEN = [
-    # Ð’ÐµÑ€ÑÐ¸Ñ Ð¿Ð¾ÑÑ‚Ð°Ð²ÐºÐ¸, Ð½Ð¾ Ð½Ðµ Ð²ÐµÑ€ÑÐ¸Ñ Ð¿Ñ€Ð¾Ñ‚Ð¾ÐºÐ¾Ð»Ð° Ð¸Ð»Ð¸ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð°: "TLS v1.3" Ð¸ "OAuth v2.0"
-    # Ð¾Ð±ÑÐ·Ð°Ð½Ñ‹ Ð¾ÑÑ‚Ð°Ð²Ð°Ñ‚ÑŒÑÑ Ð´Ð¾Ð¿ÑƒÑÑ‚Ð¸Ð¼Ñ‹Ð¼Ð¸ Ð² Ð¿Ñ€ÐµÐ´Ð¼ÐµÑ‚Ð½Ð¾Ð¹ ÑÐ¿ÐµÑ†Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¸.
-    re.compile(r"\bV[123](?![\w]|\.\d)", re.IGNORECASE),
-    re.compile(r"post[- ]?V1", re.IGNORECASE),
-    re.compile(r"\bHermes\b", re.IGNORECASE),
-    re.compile(r"Cloud\.ru", re.IGNORECASE),
-    re.compile(r"\bm\d{2}\b", re.IGNORECASE),
-]
-DEPRECATED_TOKENS = [
-    "engineering_as_code.md",
-    "security_and_reliability.md",
-    "adr_006_hermes_first_portable_runtime.md",
-    "adr_007_code_execution_sandbox.md",
-    "adr_008_telegram_vpn_and_egress.md",
-    "RUNTIME_CONTRACT_GATE_1",
-]
-SECRET_PATTERNS = [
-    re.compile(
-        r"(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"]?[A-Za-z0-9_\-+/]{16,}={0,2}"
-    ),
-    re.compile(r"-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----"),
-    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{16,}\b"),
-]
-SCANNED_TEXT_SUFFIXES = {
-    ".md",
-    ".py",
-    ".ps1",
-    ".json",
-    ".yaml",
-    ".yml",
-    ".toml",
-    ".txt",
-    ".cfg",
-    ".ini",
-    ".sh",
-    ".env",
-    ".example",
-}
-THREAT_REQUIRED_LABELS = (
-    "**Ð¡Ñ†ÐµÐ½Ð°Ñ€Ð¸Ð¹:**",
-    "**ÐÐºÑ‚Ð¸Ð²Ñ‹:**",
-    "**ÐŸÐ¾ÑÐ»ÐµÐ´ÑÑ‚Ð²Ð¸Ðµ:**",
-    "**ÐžÑÑ‚Ð°Ñ‚Ð¾Ñ‡Ð½Ñ‹Ð¹ Ñ€Ð¸ÑÐº:**",
-)
-ALLOWED_WORKFLOW_PERMISSIONS = {"read", "none"}
-
-
-@dataclass
-class CheckResult:
-    name: str
-    ok: bool
-    errors: list[str]
-    warnings: list[str]
-
-
-def _result(name: str, errors: list[str], warnings: list[str] | None = None) -> CheckResult:
-    return CheckResult(name=name, ok=not errors, errors=errors, warnings=warnings or [])
-
-
-def _path_part_uses_snake_case(part: str) -> bool:
-    if part == "AGENTS.md" or part.startswith("."):
-        return True
-    return part.isascii() and part == part.lower() and "-" not in part
-
-
-def check_structure(root: Path) -> CheckResult:
-    errors: list[str] = []
-    required_dirs = [
-        ".github/workflows",
-        "adr",
-        "specifications",
-        "operations",
-        "operations/templates",
-        "operations/scripts",
-        "operations/scripts/quality",
-        "operations/scripts/evidence",
-        "operations/scripts/acceptance",
-        "operations/tests",
-        "work",
-        "work/tests",
-        "generated",
-        "work/acceptance",
-        "work/tasks",
-    ]
-    required_files = [
-        ".github/workflows/project_check.yml",
-        "milestones.md",
-        "specifications/business_requirements.md",
-        "specifications/threat_model.md",
-        "specifications/system_specification.md",
-        "specifications/architecture_baseline.md",
-        "specifications/infrastructure_baseline.md",
-        "project_status.md",
-        "tasks.md",
-        "operations/acceptance.md",
-        "operations/semantic_review.md",
-        "AGENTS.md",
-        "operations/local_development_windows.md",
-        "operations/project_config.json",
-        "operations/quality_registry.json",
-        "operations/scripts/acceptance/apply.py",
-        "operations/scripts/evidence/record.py",
-    ] + [f"operations/templates/{name}" for name in REQUIRED_TEMPLATES]
-    for relative in required_dirs:
-        if not (root / relative).is_dir():
-            errors.append(f"ÐžÑ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³: {relative}/")
-    for relative in required_files:
-        if not (root / relative).is_file():
-            errors.append(f"ÐžÑ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ñ„Ð°Ð¹Ð»: {relative}")
-    expected_specification_files = {
-        "architecture_baseline.md",
-        "business_requirements.md",
-        "infrastructure_baseline.md",
-        "system_specification.md",
-        "threat_model.md",
-    }
-    actual_specification_files = {path.name for path in (root / "specifications").glob("*.md")}
-    if actual_specification_files != expected_specification_files:
-        errors.append(
-            "ÐšÐ°Ñ‚Ð°Ð»Ð¾Ð³ specifications/ Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ‡ÐµÑ‚Ñ‹Ñ€Ðµ Ð±Ð°Ð·Ð¾Ð²Ñ‹Ñ… Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð° Ð¸ Ð¾Ð´Ð½Ñƒ ÑÐ¸ÑÑ‚ÐµÐ¼Ð½ÑƒÑŽ ÑÐ¿ÐµÑ†Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸ÑŽ; "
-            f"Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¾ {sorted(actual_specification_files)}"
-        )
-    root_entry_names = {path.name for path in root.iterdir()}
-    for name in root_entry_names:
-        normalized_name = name.lower()
-        if normalized_name == "readme" or normalized_name.startswith("readme."):
-            errors.append(
-                f"README Ð·Ð°Ð¿Ñ€ÐµÑ‰Ñ‘Ð½ Ñ€ÐµÑˆÐµÐ½Ð¸ÐµÐ¼ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°: {name}; "
-                "ÐµÐ´Ð¸Ð½ÑÑ‚Ð²ÐµÐ½Ð½Ð°Ñ Ñ‚Ð¾Ñ‡ÐºÐ° Ð²Ñ…Ð¾Ð´Ð° â€” project_status.md"
-            )
-    for forbidden in [
-        "docs",
-        "scripts",
-        "tests",
-        "operations/agent_instruction.md",
-        "agent_instruction.md",
-        "operations/scripts/tasks/finalize.py",
-        "business_requirements.md",
-        "architecture_baseline.md",
-        "infrastructure_baseline.md",
-        "threat_model.md",
-        "specifications/core_and_channels.md",
-        "specifications/context_and_evidence.md",
-        "specifications/presentations.md",
-        "specifications/work_and_office.md",
-        "specifications/quality_and_operations.md",
-        "specifications/home_and_family.md",
-        "specifications/security_controls.md",
-    ]:
-        if (root / forbidden).exists():
-            errors.append(f"Ð£ÑÑ‚Ð°Ñ€ÐµÐ²ÑˆÐ¸Ð¹ Ð¸Ð»Ð¸ Ð»Ð¸ÑˆÐ½Ð¸Ð¹ Ð¿ÑƒÑ‚ÑŒ Ð·Ð°Ð¿Ñ€ÐµÑ‰Ñ‘Ð½: {forbidden}")
-    for path in root.rglob("*"):
-        parts = path.relative_to(root).parts
-        if any(part.lower() in IGNORED_DIRS for part in parts):
-            continue
-        relative = Path(*parts).as_posix()
-        if any(not _path_part_uses_snake_case(part) for part in parts):
-            errors.append(f"ÐŸÑƒÑ‚ÑŒ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÑŒ Ð°Ð½Ð³Ð»Ð¸Ð¹ÑÐºÐ¸Ð¹ lower_snake_case: {relative}")
-    return _result("structure", errors)
-
-
-def _primary_documents(root: Path):
-    for path in iter_files(root, suffixes={".md"}, include_generated=False):
-        relative = relative_posix(path, root)
-        if is_primary_markdown(relative):
-            yield relative, load_document(path)
-
-
-def _document_ids(root: Path) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for relative, doc in _primary_documents(root):
-        identifier = str(doc.metadata.get("id", "")).strip()
-        if identifier:
-            result[identifier.lower()] = relative
-    return result
-
-
-def _known_reference_ids(root: Path, document_ids: dict[str, str]) -> set[str]:
-    known = set(document_ids)
-    try:
-        known.update(identifier.lower() for identifier in collect_traceable_elements(root))
-    except Exception:
-        pass
-    try:
-        known.update(str(item["id"]).lower() for item in collect_milestones(root)["items"])
-    except Exception:
-        pass
-    return known
-
-
-def check_metadata(root: Path) -> CheckResult:
-    errors: list[str] = []
-    identifiers: dict[str, str] = {}
-    documents = []
-    for relative, doc in _primary_documents(root):
-        documents.append((relative, doc))
-        expected_field = expected_state_field(relative)
-        for key in (*REQUIRED_METADATA, expected_field):
-            if key not in doc.metadata or doc.metadata[key] in (None, "", []):
-                errors.append(f"{relative}: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð¿Ð¾Ð»Ðµ '{key}'")
-        if "status" in doc.metadata:
-            errors.append(
-                f"{relative}: ÑƒÐ½Ð¸Ð²ÐµÑ€ÑÐ°Ð»ÑŒÐ½Ð¾Ðµ Ð¿Ð¾Ð»Ðµ 'status' Ð·Ð°Ð¿Ñ€ÐµÑ‰ÐµÐ½Ð¾; Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ '{expected_field}'"
-            )
-        present_fields = [field for field in STATE_FIELDS if field in doc.metadata]
-        if present_fields != [expected_field]:
-            errors.append(
-                f"{relative}: Ð¾Ð¶Ð¸Ð´Ð°ÐµÑ‚ÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¿Ð¾Ð»Ðµ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ñ '{expected_field}', Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¾ {present_fields or 'Ð½Ð¸Ñ‡ÐµÐ³Ð¾'}"
-            )
-        identifier = str(doc.metadata.get("id", "")).strip()
-        normalized = identifier.lower()
-        if identifier:
-            if normalized in identifiers:
-                errors.append(
-                    f"Ð”ÑƒÐ±Ð»Ð¸Ñ€ÑƒÑŽÑ‰Ð¸Ð¹ document id '{identifier}': {identifiers[normalized]} Ð¸ {relative}"
-                )
-            else:
-                identifiers[normalized] = relative
-        version = str(doc.metadata.get("version", "")).strip()
-        if version and not VERSION_PATTERN.fullmatch(version):
-            errors.append(f"{relative}: version Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚ x.x, Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¾ '{version}'")
-        updated = str(doc.metadata.get("updated", "")).strip()
-        # Ð¨Ð°Ð±Ð»Ð¾Ð½ â€” ÑÑ‚Ð¾ Ñ„Ð¾Ñ€Ð¼Ð°, Ð° Ð½Ðµ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚: Ð¾Ð½ Ð·Ð°ÐºÐ¾Ð½Ð½Ð¾ Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ Ð·Ð°Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒ Ð´Ð°Ñ‚Ñ‹.
-        if (
-            updated
-            and not relative.startswith("operations/templates/")
-            and not UPDATED_PATTERN.fullmatch(updated)
-        ):
-            errors.append(
-                f"{relative}: updated Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ Ð´Ð°Ñ‚Ð¾Ð¹ Ð“Ð“Ð“Ð“-ÐœÐœ-Ð”Ð”, Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¾ '{updated}'; "
-                "Ð½ÐµÐ·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð½Ñ‹Ð¹ Ð·Ð°Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒ Ð¸Ð· ÑˆÐ°Ð±Ð»Ð¾Ð½Ð° Ð½ÐµÐ´Ð¾Ð¿ÑƒÑÑ‚Ð¸Ð¼ Ð² Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ðµ"
-            )
-        state = str(doc.metadata.get(expected_field, "")).strip().lower()
-        if state and state not in STATE_VALUES[expected_field]:
-            errors.append(f"{relative}: Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ {expected_field} '{state}'")
-
-    known = _known_reference_ids(root, identifiers)
-    for relative, doc in documents:
-        for key in REFERENCE_KEYS:
-            for reference in metadata_list(doc.metadata, key):
-                if reference.strip().lower() not in known:
-                    errors.append(f"{relative}: {key} ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ id '{reference}'")
-    return _result("metadata", errors)
-
-
-def _expected_ids(family: str, actual: list[str]) -> set[str]:
-    width = FAMILY_WIDTH[family]
-    numbers = []
-    for identifier in actual:
-        match = re.search(r"(\d+)$", identifier)
-        if not match:
-            raise ValueError(f"{identifier}: Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð·Ð°ÐºÐ°Ð½Ñ‡Ð¸Ð²Ð°Ñ‚ÑŒÑÑ Ñ‡Ð¸ÑÐ»Ð¾Ð¼")
-        numbers.append(int(match.group(1)))
-    maximum = max(numbers)
-    return {f"{family}_{index:0{width}d}" for index in range(1, maximum + 1)}
-
-
-def check_traceability(root: Path) -> CheckResult:
-    errors: list[str] = []
-    try:
-        records = collect_traceable_elements(root)
-    except Exception as exc:
-        return _result("traceability", [str(exc)])
-
-    by_family: dict[str, list[str]] = {}
-    for identifier, record in records.items():
-        family = str(record["family"])
-        if family in FAMILY_WIDTH:
-            by_family.setdefault(family, []).append(identifier)
-    for family in FAMILY_WIDTH:
-        actual = sorted(by_family.get(family, []))
-        if not actual:
-            if family == "TASK":
-                continue
-            errors.append(f"ÐÐµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾ Ð½Ð¸ Ð¾Ð´Ð½Ð¾Ð³Ð¾ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð° {family}")
-            continue
-        expected = _expected_ids(family, actual)
-        if set(actual) != expected:
-            errors.append(
-                f"{family} Ð´Ð¾Ð»Ð¶Ð½Ñ‹ Ð¸Ð´Ñ‚Ð¸ Ð±ÐµÐ· Ð¿Ñ€Ð¾Ð¿ÑƒÑÐºÐ¾Ð²; Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÑŽÑ‚ {sorted(expected - set(actual))}"
-            )
-
-    for identifier, record in records.items():
-        # "relations" is always dict[str, list[str]] by construction â€” see
-        # collect_traceable_elements() in traceability.py.
-        relations = cast(dict[str, list[str]], record.get("relations", {}))
-        for key, targets in relations.items():
-            for target in targets:
-                if target not in records:
-                    errors.append(
-                        f"{identifier}: {key} ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ Ñ‚Ñ€Ð°ÑÑÐ¸Ñ€ÑƒÐµÐ¼Ñ‹Ð¹ id '{target}'"
-                    )
-        family = str(record["family"])
-        if family == "SYS" and not any(
-            target.startswith("BR_") for target in relations.get("traces_to", [])
-        ):
-            errors.append(f"{identifier}: SYS Ð´Ð¾Ð»Ð¶ÐµÐ½ traces_to Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ Ð¾Ð´Ð¸Ð½ BR")
-        if family == "THR":
-            if not any(
-                target.startswith("SEC_CTL_") for target in relations.get("mitigated_by", [])
-            ):
-                errors.append(f"{identifier}: THR Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ mitigated_by SEC_CTL")
-            section = str(record.get("section", ""))
-            for label in THREAT_REQUIRED_LABELS:
-                if label not in section:
-                    errors.append(f"{identifier}: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾Ðµ Ð¿Ð¾Ð»Ðµ {label}")
-        if family == "SEC_CTL" and not any(
-            identifier
-            in cast(dict[str, list[str]], other.get("relations", {})).get("mitigated_by", [])
-            for other in records.values()
-            if other.get("family") == "THR"
-        ):
-            errors.append(
-                f"{identifier}: Ð½Ð° SEC_CTL Ð´Ð¾Ð»Ð¶Ð½Ð° ÑÑÑ‹Ð»Ð°Ñ‚ÑŒÑÑ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ Ð¾Ð´Ð½Ð° THR Ñ‡ÐµÑ€ÐµÐ· mitigated_by"
-            )
-        if family != "THR" and (relations.get("mitigates") or relations.get("implemented_by")):
-            errors.append(
-                f"{identifier}: Ð¾Ð±Ñ€Ð°Ñ‚Ð½Ñ‹Ðµ mitigates/implemented_by Ð·Ð°Ð¿Ñ€ÐµÑ‰ÐµÐ½Ñ‹; "
-                "Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ THR.mitigated_by Ð¸ ÑÐ²ÑÐ·Ð¸ Ð½Ð¸Ð¶Ð½ÐµÐ³Ð¾ ÑÐ»Ð¾Ñ traces_to"
-            )
-        if family != "THR":
-            # Ð¡Ð²ÑÐ·ÑŒ Â«ÑƒÐ³Ñ€Ð¾Ð·Ð° â€” Ð¼ÐµÑ€Ð°Â» Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ ÐºÐ°Ðº THR.mitigated_by. Ð¡ÑÑ‹Ð»ÐºÐ° Ð½Ð¸Ð¶Ð½ÐµÐ³Ð¾
-            # ÑÐ»Ð¾Ñ Ð½Ð° THR Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€ÑÐµÑ‚ ÑƒÐ¶Ðµ ÑÑƒÑ‰ÐµÑÑ‚Ð²ÑƒÑŽÑ‰ÐµÐµ Ñ€ÐµÐ±Ñ€Ð¾ Ð² Ð¾Ð±Ñ…Ð¾Ð´ ÐºÐ°Ð½Ð¾Ð½Ð¸Ñ‡ÐµÑÐºÐ¾Ð³Ð¾
-            # Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð¸ Ð´ÐµÐ»Ð°ÐµÑ‚ Ð³Ñ€Ð°Ñ„ Ð½ÐµÐ¾Ð´Ð½Ð¾Ð·Ð½Ð°Ñ‡Ð½Ñ‹Ð¼ (governance.md, Ñ€Ð°Ð·Ð´ÐµÐ» 3).
-            threat_targets = sorted(
-                {
-                    target
-                    for key in ("traces_to", "implements")
-                    for target in relations.get(key, [])
-                    if target.startswith("THR_")
-                }
-            )
-            if threat_targets:
-                errors.append(
-                    f"{identifier}: ÑÑÑ‹Ð»ÐºÐ° Ð½Ð° ÑƒÐ³Ñ€Ð¾Ð·Ñƒ {threat_targets} Ð·Ð°Ð´Ð°Ñ‘Ñ‚ÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ñ‡ÐµÑ€ÐµÐ· "
-                    "THR.mitigated_by; Ð½Ð¸Ð¶Ð½Ð¸Ð¹ ÑÐ»Ð¾Ð¹ ÑƒÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÑ‚ Ñ‚Ñ€ÐµÐ±Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¸Ð»Ð¸ Ð¼ÐµÑ€Ñƒ Ð·Ð°Ñ‰Ð¸Ñ‚Ñ‹"
-                )
-        if family in {"INF_CMP", "INF_FLOW"} and not any(
-            target.startswith("INF_REQ_") for target in relations.get("implements", [])
-        ):
-            errors.append(f"{identifier}: {family} Ð´Ð¾Ð»Ð¶ÐµÐ½ implements Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ Ð¾Ð´Ð¸Ð½ INF_REQ")
-        if family == "ADR" and not relations.get("traces_to"):
-            errors.append(f"{identifier}: ADR Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ traces_to")
-        if family == "TASK" and not any(
-            target.startswith("m") for target in relations.get("traces_to", [])
-        ):
-            errors.append(f"{identifier}: TASK Ð´Ð¾Ð»Ð¶ÐµÐ½ traces_to milestone")
-        if family == "TEST":
-            has_task = any(target.startswith("TASK_") for target in relations.get("traces_to", []))
-            accepts_milestone = any(
-                str(target).lower().startswith("m") for target in relations.get("accepts", [])
-            )
-            if not has_task and not accepts_milestone:
-                errors.append(f"{identifier}: TEST Ð´Ð¾Ð»Ð¶ÐµÐ½ traces_to TASK Ð»Ð¸Ð±Ð¾ accepts milestone")
-            if not relations.get("verifies") and not any(
-                str(target).lower().startswith("m") for target in relations.get("accepts", [])
-            ):
-                errors.append(
-                    f"{identifier}: TEST Ð´Ð¾Ð»Ð¶ÐµÐ½ verifies Ñ‚Ñ€Ð°ÑÑÐ¸Ñ€ÑƒÐµÐ¼Ð¾Ðµ ÑÐ²Ð¾Ð¹ÑÑ‚Ð²Ð¾ Ð»Ð¸Ð±Ð¾ accepts milestone"
-                )
-    return _result("traceability", errors)
-
-
-def check_full_traceability(root: Path) -> CheckResult:
-    return _result("full_traceability", validate_full_traceability(root))
-
-
-def check_semantic_consistency(root: Path) -> CheckResult:
-    return _result("semantic_consistency", validate_semantic_consistency(root))
-
-
-def check_authority_graph(root: Path) -> CheckResult:
-    errors: list[str] = []
-    for relative, doc in _primary_documents(root):
-        deps = {value.strip().lower() for value in metadata_list(doc.metadata, "depends_on")}
-        if str(doc.metadata.get("type", "")).strip() in {
-            "system_specification",
-            "security_specification",
-        }:
-            forbidden = {"architecture_baseline", "infrastructure_baseline"}.intersection(deps)
-            if forbidden:
-                errors.append(
-                    f"{relative}: SYS/SEC specification Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ depends_on Ð½Ð¸Ð¶Ð½Ð¸Ð¹ ÑÐ»Ð¾Ð¹ {sorted(forbidden)}"
-                )
-
-    docs = list(_primary_documents(root))
-    by_id = {
-        str(doc.metadata.get("id", "")).strip().lower(): relative
-        for relative, doc in docs
-        if str(doc.metadata.get("id", "")).strip()
-    }
-    graph: dict[str, set[str]] = {}
-    for relative, doc in docs:
-        identifier = str(doc.metadata.get("id", "")).strip().lower()
-        if not identifier:
-            continue
-        deps = {
-            value.strip().lower()
-            for value in metadata_list(doc.metadata, "depends_on")
-            if value.strip()
-        }
-        unknown = sorted(dep for dep in deps if dep not in by_id)
-        for dep in unknown:
-            errors.append(f"{relative}: depends_on ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ document id {dep}")
-        graph[identifier] = {dep for dep in deps if dep in by_id}
-
-    visiting: set[str] = set()
-    visited: set[str] = set()
-
-    def visit(node: str, stack: list[str]) -> None:
-        if node in visited:
-            return
-        if node in visiting:
-            try:
-                start = stack.index(node)
-                cycle_nodes = stack[start:] + [node]
-            except ValueError:
-                cycle_nodes = stack + [node]
-            errors.append("depends_on cycle: " + " -> ".join(cycle_nodes))
-            return
-        visiting.add(node)
-        stack.append(node)
-        for dep in sorted(graph.get(node, set())):
-            visit(dep, stack)
-        stack.pop()
-        visiting.discard(node)
-        visited.add(node)
-
-    for node in sorted(graph):
-        visit(node, [])
-
-    try:
-        milestones = collect_milestones(root)
-    except Exception as exc:
-        return _result("authority_graph", [str(exc)])
-    m01 = next((item for item in milestones["items"] if str(item["id"]) == "m01"), None)
-    if m01 and m01.get("scope"):
-        errors.append(
-            "m01: foundation milestone Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¾Ð±ÑŠÑÐ²Ð»ÑÑ‚ÑŒ product requirement implementation scope"
-        )
-
-    architecture_path = "specifications/architecture_baseline.md"
-    architecture = read_text(root / architecture_path)
-    if "ÐšÐ°Ð½Ð¾Ð½Ð¸Ñ‡ÐµÑÐºÐ¾Ðµ Ð¿Ð¾ÑÑ‚Ð¾ÑÐ½Ð½Ð¾Ðµ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð¿Ñ€Ð¸Ð½Ð°Ð´Ð»ÐµÐ¶Ð¸Ñ‚ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ðµ" in architecture:
-        errors.append(f"{architecture_path}: ownership Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¿Ñ€Ð¾Ñ‚Ð¸Ð²Ð¾Ñ€ÐµÑ‡Ð¸Ñ‚ ÐšÐ¾Ð½ÑÑ‚Ð¸Ñ‚ÑƒÑ†Ð¸Ð¸")
-    threat_path = "specifications/threat_model.md"
-    threat = read_text(root / threat_path)
-    if "platform-owned policy" in threat:
-        errors.append(f"{threat_path}: policy Ð½Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð¾Ð±ÑŠÑÐ²Ð»ÑÑ‚ÑŒÑÑ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ð¾ÑÑ‚ÑŒÑŽ Ð¿Ð»Ð°Ñ‚Ñ„Ð¾Ñ€Ð¼Ñ‹")
-    return _result("authority_graph", errors)
-
-
-def check_document_policy(root: Path) -> CheckResult:
-    errors: list[str] = []
-    warnings: list[str] = []
-    for path in iter_files(
-        root,
-        suffixes={".md", ".py", ".ps1", ".json", ".yaml", ".yml", ".toml"},
-        include_generated=False,
-    ):
-        relative = relative_posix(path, root)
-        text = path.read_text(encoding="utf-8-sig", errors="replace")
-        if relative in STABLE_CONTENT_PATHS or relative.startswith("specifications/"):
-            for pattern in STABLE_FORBIDDEN:
-                match = pattern.search(text)
-                if match:
-                    errors.append(
-                        f"{relative}: stable source ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ñ‚ roadmap/implementation token '{match.group(0)}'"
-                    )
-        if relative != "operations/scripts/documents/check.py":
-            for token in DEPRECATED_TOKENS:
-                if token in text:
-                    errors.append(f"{relative}: Ð½Ð°Ð¹Ð´ÐµÐ½ deprecated token '{token}'")
-        if relative.endswith(".md"):
-            for line_number, line in enumerate(text.splitlines(), start=1):
-                match = re.match(r"^#{1,6}\s+(.+?)\s*$", line)
-                if not match:
-                    continue
-                heading = match.group(1).lstrip("`*_ ")
-                if heading and heading[0] in "Ð°Ð±Ð²Ð³Ð´ÐµÑ‘Ð¶Ð·Ð¸Ð¹ÐºÐ»Ð¼Ð½Ð¾Ð¿Ñ€ÑÑ‚ÑƒÑ„Ñ…Ñ†Ñ‡ÑˆÑ‰ÑŠÑ‹ÑŒÑÑŽÑ":
-                    errors.append(
-                        f"{relative}:{line_number}: Ñ€ÑƒÑÑÐºÐ¸Ð¹ Ð·Ð°Ð³Ð¾Ð»Ð¾Ð²Ð¾Ðº Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð½Ð°Ñ‡Ð¸Ð½Ð°Ñ‚ÑŒÑÑ Ñ Ð¿Ñ€Ð¾Ð¿Ð¸ÑÐ½Ð¾Ð¹ Ð±ÑƒÐºÐ²Ñ‹"
-                    )
-    misplaced_sections = {
-        "specifications/architecture_baseline.md": "Ð“Ñ€Ð°Ð½Ð¸Ñ†Ð° Ñ Ð¸Ð½Ñ„Ñ€Ð°ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¾Ð¹",
-        "specifications/infrastructure_baseline.md": "Ð“Ñ€Ð°Ð½Ð¸Ñ†Ð° Ñ ADR Ð¸ operations",
-        "specifications/threat_model.md": "ÐšÐ¾Ð³Ð´Ð° Ð¼Ð¾Ð´ÐµÐ»ÑŒ ÑƒÐ³Ñ€Ð¾Ð· Ð¿ÐµÑ€ÐµÑÐ¼Ð°Ñ‚Ñ€Ð¸Ð²Ð°ÐµÑ‚ÑÑ",
-    }
-    expected_last_sections = {
-        "specifications/architecture_baseline.md": "Ð¡Ñ‚Ð°Ð±Ð¸Ð»ÑŒÐ½Ñ‹Ðµ Ð°Ñ€Ñ…Ð¸Ñ‚ÐµÐºÑ‚ÑƒÑ€Ð½Ñ‹Ðµ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¸",
-        "specifications/infrastructure_baseline.md": "Ð˜Ð½Ñ„Ñ€Ð°ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð½Ñ‹Ðµ Ð¿Ð¾Ñ‚Ð¾ÐºÐ¸",
-        "specifications/threat_model.md": "ÐšÐ°Ñ‚Ð°Ð»Ð¾Ð³ ÑƒÐ³Ñ€Ð¾Ð·",
-    }
-    for relative, heading in misplaced_sections.items():
-        text = read_text(root / relative)
-        if re.search(rf"(?m)^##\s+(?:\d+\.\s*)?{re.escape(heading)}\s*$", text, re.IGNORECASE):
-            errors.append(
-                f"{relative}: Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ½Ñ‹Ð¹ Ñ€Ð°Ð·Ð´ÐµÐ» '{heading}' Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð½Ð°Ñ…Ð¾Ð´Ð¸Ñ‚ÑŒÑÑ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð² operations/change_process.md"
-            )
-        headings = re.findall(r"(?m)^##\s+(?:\d+\.\s*)?(.+?)\s*$", text)
-        if not headings or headings[-1] != expected_last_sections[relative]:
-            errors.append(
-                f"{relative}: Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð¸Ð¹ Ñ€Ð°Ð·Ð´ÐµÐ» Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¾ÑÑ‚Ð°Ð²Ð°Ñ‚ÑŒÑÑ Ð¿Ñ€ÐµÐ´Ð¼ÐµÑ‚Ð½Ñ‹Ð¼ Ñ€Ð°Ð·Ð´ÐµÐ»Ð¾Ð¼ "
-                f"'{expected_last_sections[relative]}'; Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐ½Ñ‹Ðµ Ð¿Ñ€Ð°Ð²Ð¸Ð»Ð° Ð¿Ñ€Ð¸Ð½Ð°Ð´Ð»ÐµÐ¶Ð°Ñ‚ operations/change_process.md"
-            )
-    change_process = read_text(root / "operations/change_process.md")
-    if not re.search(r"(?m)^##\s+7\.\s+Ð“Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð¸ Ð¿ÐµÑ€ÐµÑÐ¼Ð¾Ñ‚Ñ€ ÑÐ¿ÐµÑ†Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¹\s*$", change_process):
-        errors.append(
-            "operations/change_process.md: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ ÐºÐ°Ð½Ð¾Ð½Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ€Ð°Ð·Ð´ÐµÐ» Ð¾ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ð°Ñ… Ð¸ Ð¿ÐµÑ€ÐµÑÐ¼Ð¾Ñ‚Ñ€Ðµ ÑÐ¿ÐµÑ†Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¹"
-        )
-    system_path = "specifications/system_specification.md"
-    system_text = read_text(root / system_path)
-    ordered_ids = re.findall(r"(?m)^###\s+((?:SYS|SEC_CTL)_\d{3})\s+â€”", system_text)
-    expected_order = sorted(
-        ordered_ids,
-        key=lambda identifier: (
-            0 if identifier.startswith("SYS_") else 1,
-            int(identifier.rsplit("_", 1)[1]),
-        ),
-    )
-    if ordered_ids != expected_order:
-        errors.append(
-            f"{system_path}: SYS Ð¸ SEC_CTL Ð´Ð¾Ð»Ð¶Ð½Ñ‹ Ð±Ñ‹Ñ‚ÑŒ Ñ€Ð°ÑÐ¿Ð¾Ð»Ð¾Ð¶ÐµÐ½Ñ‹ Ð¿Ð¾ Ð¿Ð¾Ñ€ÑÐ´ÐºÑƒ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€Ð¾Ð²"
-        )
-    records = collect_traceable_elements(root)
-    misplaced_requirements = sorted(
-        identifier
-        for identifier, record in records.items()
-        if record["family"] in {"SYS", "SEC_CTL"} and record["path"] != system_path
-    )
-    if misplaced_requirements:
-        errors.append(
-            f"{system_path}: Ð²ÑÐµ SYS Ð¸ SEC_CTL Ð´Ð¾Ð»Ð¶Ð½Ñ‹ Ð½Ð°Ñ…Ð¾Ð´Ð¸Ñ‚ÑŒÑÑ Ð² ÐµÐ´Ð¸Ð½Ð¾Ð¼ Ñ„Ð°Ð¹Ð»Ðµ; "
-            f"Ð²Ð½Ðµ Ñ„Ð°Ð¹Ð»Ð° Ð½Ð°Ð¹Ð´ÐµÐ½Ñ‹ {misplaced_requirements}"
-        )
-    return _result("document_policy", errors, warnings)
-
-
-MILESTONE_HEADING_PATTERN = re.compile(r"(?m)^##\s+(m\d{2})\s+â€”\s+.+$", re.IGNORECASE)
-BR_ID_PATTERN = re.compile(r"\bBR_\d{3}\b")
-V1_SCOPE_LINE_PATTERN = re.compile(r"(?m)^ÐžÐ±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² Ð¿Ñ€Ð¾Ð´ÑƒÐºÑ‚Ð°:\s*(.+?)\s*$")
-CANDIDATES_HEADING_PATTERN = re.compile(r"(?m)^#{2,3}\s+(?:\d+\.\s*)?ÐšÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð½Ñ‹Ðµ Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ.*$")
-CANDIDATE_ROW_PATTERN = re.compile(r"(?m)^\|\s*\[`?(BR_\d{3})`?\]")
-MILESTONE_SCOPE_LINE_PATTERN = re.compile(r"(?m)^-\s+ÑÐ¾ÑÑ‚Ð°Ð²:\s*(.+)$")
-BR_PRIORITY_PATTERN = re.compile(
-    r"(?ms)^###\s+(BR_\d{3})\s+â€”.*?^-\s+priority:\s*`([a-z]+)`\s*$",
-)
-CORE_PRIORITY = "core"
-
-
-def _milestone_raw_sections(milestone_text: str) -> dict[str, str]:
-    headings = list(MILESTONE_HEADING_PATTERN.finditer(milestone_text))
-    raw_sections: dict[str, str] = {}
-    for index, match in enumerate(headings):
-        end = headings[index + 1].start() if index + 1 < len(headings) else len(milestone_text)
-        raw_sections[match.group(1).lower()] = milestone_text[match.end() : end]
-    return raw_sections
-
-
-def _candidate_priorities(milestone_text: str) -> dict[str, str]:
-    """ÐŸÑ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚, Ð¿Ñ€Ð¾Ð´ÑƒÐ±Ð»Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ðµ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð², Ð¿Ð¾ BR."""
-    heading = CANDIDATES_HEADING_PATTERN.search(milestone_text)
-    if not heading:
-        return {}
-    result: dict[str, str] = {}
-    for line in milestone_text[heading.end() :].splitlines():
-        if not line.lstrip().startswith("|"):
-            continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if len(cells) < 3:
-            continue
-        identifier = CANDIDATE_ROW_PATTERN.search(line)
-        priority = re.fullmatch(r"`([a-z]+)`", cells[2])
-        if identifier and priority:
-            result[identifier.group(1)] = priority.group(1)
-    return result
-
-
-def check_business_requirements_coverage(root: Path) -> CheckResult:
-    """ÐšÐ°Ñ‚Ð°Ð»Ð¾Ð³ BR Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ Ð¿Ð¾Ð»Ð½Ð¾ÑÑ‚ÑŒÑŽ Ð¸ Ð½ÐµÐ¿ÐµÑ€ÐµÑÐµÐºÐ°ÑŽÑ‰Ð¸Ð¼ÑÑ Ð¾Ð±Ñ€Ð°Ð·Ð¾Ð¼ Ñ€Ð°Ð·Ð»Ð¾Ð¶ÐµÐ½ Ð½Ð°
-    Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² V1 Ð¸ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñƒ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² Ð¿Ð¾ÑÐ»Ðµ V1.
-
-    Ð”Ð¾Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÑÐµÑ‚ÑÑ ÑÐ¼Ñ‹ÑÐ», Ð° Ð½Ðµ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ñ„Ð¾Ñ€Ð¼Ð°Ð»ÑŒÐ½Ð¾Ðµ Ñ€Ð°Ð·Ð±Ð¸ÐµÐ½Ð¸Ðµ:
-    ÐºÐ°Ð¶Ð´Ñ‹Ð¹ BR Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð° `core` Ð¾Ð±ÑÐ·Ð°Ð½ Ð²Ñ…Ð¾Ð´Ð¸Ñ‚ÑŒ Ð² V1, ÐºÐ°Ð¶Ð´Ñ‹Ð¹ BR Ð¸Ð· ÑÐ¾ÑÑ‚Ð°Ð²Ð° V1
-    Ð¾Ð±ÑÐ·Ð°Ð½ Ñ€ÐµÐ°Ð»ÑŒÐ½Ð¾ Ð¿Ð¾ÑÑ‚Ð°Ð²Ð»ÑÑ‚ÑŒÑÑ ÑÐ¾ÑÑ‚Ð°Ð²Ð¾Ð¼ ÐºÐ°ÐºÐ¾Ð³Ð¾-Ñ‚Ð¾ ÑÑ‚Ð°Ð¿Ð° Ð²Ð½ÑƒÑ‚Ñ€Ð¸ Ð¿ÐµÑ€Ð¸Ð¼ÐµÑ‚Ñ€Ð° V1,
-    Ð¸ Ð¿Ñ€Ð¾Ð´ÑƒÐ±Ð»Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ðµ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ð½ ÑÐ¾Ð²Ð¿Ð°Ð´Ð°Ñ‚ÑŒ Ñ ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³Ð¾Ð¼.
-    Ð­Ñ‚Ð°Ð¿Ñ‹ Ð¿Ð¾ÑÐ»Ðµ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ V1 Ð¿Ð»Ð°Ð½Ð¸Ñ€ÑƒÑŽÑ‚ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² Ð»ÐµÐ³Ð°Ð»ÑŒÐ½Ð¾ Ð¸ Ð·Ð´ÐµÑÑŒ Ð½Ðµ Ð¾Ð³Ñ€Ð°Ð½Ð¸Ñ‡Ð¸Ð²Ð°ÑŽÑ‚ÑÑ.
-    """
-    errors: list[str] = []
-    br_text = read_text(root / "specifications" / "business_requirements.md")
-    catalog = set(BR_ID_PATTERN.findall(br_text))
-    if not catalog:
-        return _result(
-            "business_requirements_coverage",
-            ["business_requirements.md: Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾ Ð½Ð¸ Ð¾Ð´Ð½Ð¾Ð³Ð¾ BR_*"],
-        )
-    priorities = {match.group(1): match.group(2) for match in BR_PRIORITY_PATTERN.finditer(br_text)}
-
-    milestone_text = read_text(root / "milestones.md")
-    v1_match = V1_SCOPE_LINE_PATTERN.search(milestone_text)
-    # V1 scope is derived from core-priority requirements, not from explicit list
-    # If explicit list exists, it must match core requirements
-    if v1_match:
-        v1_scope = BR_ID_PATTERN.findall(v1_match.group(1))
-        v1_scope_set = set(v1_scope)
-        if len(v1_scope) != len(v1_scope_set):
-            errors.append("milestones.md: Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² V1 ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ñ‚ Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð½Ñ‹Ðµ BR_*")
-    else:
-        # No explicit list: derive V1 scope from core-priority requirements
-        v1_scope_set = set()
-
-    # If no explicit V1 scope list found, derive it from core-priority requirements
-    if not v1_scope_set:
-        v1_scope_set = {id for id in catalog if priorities.get(id) == CORE_PRIORITY}
-
-    candidates_heading = CANDIDATES_HEADING_PATTERN.search(milestone_text)
-    if not candidates_heading:
-        errors.append(
-            "milestones.md: Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½ Ñ€Ð°Ð·Ð´ÐµÐ» 'ÐšÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð½Ñ‹Ðµ Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ' Ñ Ñ‚Ð°Ð±Ð»Ð¸Ñ†ÐµÐ¹ BR Ð¿Ð¾ÑÐ»Ðµ V1"
-        )
-    candidates_text = milestone_text[candidates_heading.end() :] if candidates_heading else ""
-    candidates_set = set(CANDIDATE_ROW_PATTERN.findall(candidates_text))
-
-    unknown_in_v1 = v1_scope_set - catalog
-    unknown_in_candidates = candidates_set - catalog
-    if unknown_in_v1:
-        errors.append(
-            f"milestones.md: ÑÐ¾ÑÑ‚Ð°Ð² V1 ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ðµ BR_*: {sorted(unknown_in_v1)}"
-        )
-    if unknown_in_candidates:
-        errors.append(
-            f"milestones.md: Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð° ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ðµ BR_*: {sorted(unknown_in_candidates)}"
-        )
-
-    overlap = v1_scope_set & candidates_set
-    if overlap:
-        errors.append(
-            f"BR_* Ð¾Ð´Ð½Ð¾Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾ Ð² ÑÐ¾ÑÑ‚Ð°Ð²Ðµ V1 Ð¸ Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ðµ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² Ð¿Ð¾ÑÐ»Ðµ V1: {sorted(overlap)}"
-        )
-
-    missing = catalog - (v1_scope_set | candidates_set)
-    if missing:
-        errors.append(
-            f"BR_* Ð½Ðµ Ð²Ñ…Ð¾Ð´Ð¸Ñ‚ Ð½Ð¸ Ð² ÑÐ¾ÑÑ‚Ð°Ð² V1, Ð½Ð¸ Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñƒ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² Ð¿Ð¾ÑÐ»Ðµ V1: {sorted(missing)}"
-        )
-
-    # ÐŸÐµÑ€Ð¸Ð¼ÐµÑ‚Ñ€ V1 Ð²Ñ‹Ð²Ð¾Ð´Ð¸Ñ‚ÑÑ Ð¸Ð· Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð¾Ð², Ð° Ð½Ðµ Ð·Ð°Ð´Ð°Ñ‘Ñ‚ÑÑ Ð²Ñ‚Ð¾Ñ€Ñ‹Ð¼ Ð½ÐµÐ·Ð°Ð²Ð¸ÑÐ¸Ð¼Ñ‹Ð¼ Ñ€ÐµÑˆÐµÐ½Ð¸ÐµÐ¼:
-    # ÑÐ¾ÑÑ‚Ð°Ð² Ð¾Ð±ÑÐ·Ð°Ð½ ÑÐ¾Ð²Ð¿Ð°Ð´Ð°Ñ‚ÑŒ Ñ Ð¼Ð½Ð¾Ð¶ÐµÑÑ‚Ð²Ð¾Ð¼ `core` Ð² Ð¾Ð±Ðµ ÑÑ‚Ð¾Ñ€Ð¾Ð½Ñ‹, Ð¸Ð½Ð°Ñ‡Ðµ Ð¿Ð¾ÑÐ²Ð»ÑÑŽÑ‚ÑÑ
-    # Ð´Ð²Ð° Ñ€Ð°Ð²Ð½Ð¾Ð¿Ñ€Ð°Ð²Ð½Ñ‹Ñ… Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸ÐºÐ° Ð¾Ð´Ð½Ð¾Ð³Ð¾ ÑÐ¼Ñ‹ÑÐ»Ð°.
-    deferred_core = sorted(
-        identifier for identifier in candidates_set if priorities.get(identifier) == CORE_PRIORITY
-    )
-    if deferred_core:
-        errors.append(
-            "BR_* Ñ Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð¾Ð¼ `core` Ð¾Ñ‚Ð»Ð¾Ð¶ÐµÐ½ Ð·Ð° Ð¿Ñ€ÐµÐ´ÐµÐ»Ñ‹ V1: Ð±ÐµÐ· Ð½ÐµÐ³Ð¾ Ð¿Ñ€Ð¾Ð´ÑƒÐºÑ‚ Ñ‚ÐµÑ€ÑÐµÑ‚ Ð¾ÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ ÑÐ¼Ñ‹ÑÐ», "
-            f"Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ Ð¾Ð½ Ð¾Ð±ÑÐ·Ð°Ð½ Ð²Ñ…Ð¾Ð´Ð¸Ñ‚ÑŒ Ð² Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² V1: {deferred_core}"
-        )
-    non_core_in_v1 = sorted(
-        identifier
-        for identifier in v1_scope_set
-        if priorities.get(identifier, CORE_PRIORITY) != CORE_PRIORITY
-    )
-    if non_core_in_v1:
-        errors.append(
-            "BR_* Ð±ÐµÐ· Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð° `core` Ð²ÐºÐ»ÑŽÑ‡Ñ‘Ð½ Ð² Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² V1: Ð¿ÐµÑ€Ð¸Ð¼ÐµÑ‚Ñ€ Ñ€Ð°Ð²ÐµÐ½ Ð¼Ð½Ð¾Ð¶ÐµÑÑ‚Ð²Ñƒ `core`, "
-            f"Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ Ñ€Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð¸Ðµ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÑÐµÑ‚ÑÑ Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸ÐµÐ¼ Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð° Ð² ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³Ðµ: {non_core_in_v1}"
-        )
-    for identifier, declared in sorted(_candidate_priorities(milestone_text).items()):
-        actual = priorities.get(identifier)
-        if actual and actual != declared:
-            errors.append(
-                f"milestones.md: Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚ {identifier} Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ðµ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² (`{declared}`) "
-                f"Ñ€Ð°Ð·Ð¾ÑˆÑ‘Ð»ÑÑ Ñ ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³Ð¾Ð¼ business_requirements.md (`{actual}`)"
-            )
-
-    raw_sections = _milestone_raw_sections(milestone_text)
-    v1_milestones = {value.lower() for value in v1_milestone_ids(root)}
-    delivered_in_v1: set[str] = set()
-    for milestone_id, section in raw_sections.items():
-        if milestone_id not in v1_milestones:
-            continue
-        scope_line = MILESTONE_SCOPE_LINE_PATTERN.search(section)
-        if scope_line:
-            delivered_in_v1.update(BR_ID_PATTERN.findall(scope_line.group(1)))
-    undelivered = v1_scope_set - delivered_in_v1
-    unexpected_delivery = delivered_in_v1 & candidates_set
-    if undelivered:
-        errors.append(
-            "BR_* Ð·Ð°ÑÐ²Ð»ÐµÐ½ Ð² Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾Ð¼ ÑÐ¾ÑÑ‚Ð°Ð²Ðµ V1, Ð½Ð¾ Ð½Ð¸ Ð¾Ð´Ð¸Ð½ ÑÑ‚Ð°Ð¿ Ð²Ð½ÑƒÑ‚Ñ€Ð¸ Ð¿ÐµÑ€Ð¸Ð¼ÐµÑ‚Ñ€Ð° V1 "
-            f"Ð½Ðµ Ð¿Ð¾ÑÑ‚Ð°Ð²Ð»ÑÐµÑ‚ ÐµÐ³Ð¾ Ñ‡ÐµÑ€ÐµÐ· ÑÑ‚Ñ€Ð¾ÐºÑƒ 'ÑÐ¾ÑÑ‚Ð°Ð²:': {sorted(undelivered)}"
-        )
-    if unexpected_delivery:
-        errors.append(
-            "BR_* Ð¸Ð· Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ ÐºÐ°Ð½Ð´Ð¸Ð´Ð°Ñ‚Ð¾Ð² Ð¿Ð¾ÑÐ»Ðµ V1 Ð¿Ð¾ÑÑ‚Ð°Ð²Ð»ÑÐµÑ‚ÑÑ ÑÑ‚Ð°Ð¿Ð¾Ð¼ Ð²Ð½ÑƒÑ‚Ñ€Ð¸ Ð¿ÐµÑ€Ð¸Ð¼ÐµÑ‚Ñ€Ð° V1, "
-            f"Ñ…Ð¾Ñ‚Ñ Ð½Ðµ Ð²Ñ…Ð¾Ð´Ð¸Ñ‚ Ð² Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² V1: {sorted(unexpected_delivery)}"
-        )
-    return _result("business_requirements_coverage", errors)
-
-
-def check_milestones(root: Path) -> CheckResult:
-    errors: list[str] = []
-    try:
-        state = collect_milestones(root)
-        records = collect_traceable_elements(root)
-    except Exception as exc:
-        return _result("milestones", [str(exc)])
-    ids = [str(item["id"]) for item in state["items"]]
-    expected = [f"m{index:02d}" for index in range(1, len(ids) + 1)]
-    if ids != expected:
-        errors.append(
-            f"milestones Ð´Ð¾Ð»Ð¶Ð½Ñ‹ Ð¸Ð´Ñ‚Ð¸ Ð¿Ð¾ÑÐ»ÐµÐ´Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾: Ð¾Ð¶Ð¸Ð´Ð°Ð»Ð¾ÑÑŒ {expected}, Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¾ {ids}"
-        )
-
-    states = [str(item["work_state"]) for item in state["items"]]
-    active_indexes = [
-        index for index, value in enumerate(states) if value in {"in-progress", "blocked"}
-    ]
-    if len(active_indexes) > 1:
-        errors.append("ÐžÐ´Ð½Ð¾Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¾Ð´Ð¸Ð½ Ð°ÐºÑ‚Ð¸Ð²Ð½Ñ‹Ð¹ Ð¸Ð»Ð¸ Ð·Ð°Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ ÑÑ‚Ð°Ð¿")
-    first_unfinished = next(
-        (index for index, value in enumerate(states) if value != "completed"), None
-    )
-    if (
-        any(value == "completed" for value in states[(first_unfinished or 0) :])
-        and first_unfinished is not None
-    ):
-        errors.append("Ð—Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ñ‹Ðµ ÑÑ‚Ð°Ð¿Ñ‹ Ð´Ð¾Ð»Ð¶Ð½Ñ‹ Ð¾Ð±Ñ€Ð°Ð·Ð¾Ð²Ñ‹Ð²Ð°Ñ‚ÑŒ Ð½ÐµÐ¿Ñ€ÐµÑ€Ñ‹Ð²Ð½Ñ‹Ð¹ Ð¿Ñ€ÐµÑ„Ð¸ÐºÑ Ð±ÐµÐ· Ð¿Ñ€Ð¾Ð¿ÑƒÑÐºÐ¾Ð²")
-    if active_indexes and first_unfinished is not None and active_indexes[0] != first_unfinished:
-        errors.append("ÐÐºÑ‚Ð¸Ð²Ð½Ñ‹Ð¼ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð½ÐµÐ·Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ñ‹Ð¹ ÑÑ‚Ð°Ð¿")
-    milestone_text = read_text(root / "milestones.md")
-    raw_sections = _milestone_raw_sections(milestone_text)
-
-    for item in state["items"]:
-        for target in item.get("scope", []):
-            if str(target) not in records:
-                errors.append(f"{item['id']}: ÑÐ¾ÑÑ‚Ð°Ð² ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ñ‚ Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€ {target}")
-        if str(item.get("work_state")) in {"in-progress", "blocked"}:
-            section = raw_sections.get(str(item["id"]).lower(), "")
-            scope_line = re.search(r"(?m)^-\s+ÑÐ¾ÑÑ‚Ð°Ð²:\s*(.+)$", section)
-            is_foundation = str(item["id"]).lower() == "m01"
-            if not is_foundation and not item.get("scope"):
-                errors.append(
-                    f"{item['id']}: Ð°ÐºÑ‚Ð¸Ð²Ð½Ñ‹Ð¹ ÑÑ‚Ð°Ð¿ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ Ð½ÐµÐ¿ÑƒÑÑ‚Ð¾Ð¹ ÑÐ¾ÑÑ‚Ð°Ð² Ð¸Ð· Ñ‚Ð¾Ñ‡Ð½Ñ‹Ñ… Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€Ð¾Ð²"
-                )
-            if not is_foundation and not scope_line:
-                errors.append(f"{item['id']}: Ð°ÐºÑ‚Ð¸Ð²Ð½Ñ‹Ð¹ ÑÑ‚Ð°Ð¿ Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ ÑÑ‚Ñ€Ð¾ÐºÑƒ '- ÑÐ¾ÑÑ‚Ð°Ð²:'")
-            if scope_line:
-                raw_scope = scope_line.group(1).lower()
-                if any(
-                    token in raw_scope
-                    for token in [
-                        "*",
-                        "Ð¿Ñ€Ð¸Ð¼ÐµÐ½Ð¸Ð¼",
-                        "applicable",
-                        "product scope",
-                        "ÑÐ¾ÑÑ‚Ð°Ð² Ð¿Ñ€Ð¾Ð´ÑƒÐºÑ‚Ð°",
-                        "Ð¸Ð· Ñ€Ð°Ð·Ð´ÐµÐ»Ð°",
-                    ]
-                ):
-                    errors.append(
-                        f"{item['id']}: ÑÐ¾ÑÑ‚Ð°Ð² Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¾Ð³Ð¾ ÑÑ‚Ð°Ð¿Ð° Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ Ð²Ñ‹Ñ€Ð°Ð¶ÐµÐ½ Ñ‚Ð¾Ñ‡Ð½Ñ‹Ð¼Ð¸ Ð¸Ð´ÐµÐ½Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ð¾Ñ€Ð°Ð¼Ð¸ "
-                        "Ð±ÐµÐ· Ð¼Ð°ÑÐ¾Ðº Ð¸ ÑÑÑ‹Ð»Ð¾Ðº Ð½Ð° Ð¾Ð±Ñ‰Ð¸Ð¹ ÑÐ¾ÑÑ‚Ð°Ð²"
-                    )
-    return _result("milestones", errors)
-
-
-def check_tasks(root: Path) -> CheckResult:
-    errors: list[str] = []
-    try:
-        state = collect_tasks(root)
-    except Exception as exc:
-        return _result("tasks", [str(exc)])
-    index_path = root / "tasks.md"
-    if not index_path.exists():
-        errors.append("ÐžÑ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ tasks.md")
-    elif render_task_index(root, "2000-01-01").strip() != read_text(index_path).strip():
-        errors.append("tasks.md Ð½Ðµ ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ ÐºÐ°Ñ€Ñ‚Ð¾Ñ‡ÐºÐ°Ð¼ TASK/TEST")
-    required_headings = [
-        "Ð—Ð°Ñ‡ÐµÐ¼ ÑÑ‚Ð¾ Ð´ÐµÐ»Ð°ÐµÐ¼",
-        "Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚",
-        "Ð“Ð´Ðµ Ð¼Ñ‹ ÑÐµÐ¹Ñ‡Ð°Ñ",
-        "Ð§Ñ‚Ð¾ Ð´ÐµÐ»Ð°Ñ‚ÑŒ ÑÐµÐ¹Ñ‡Ð°Ñ",
-        "ÐŸÐ»Ð°Ð½ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ",
-        "Ð¡Ð¾ÑÑ‚Ð°Ð²",
-        "ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ¸ Ð¸ Ð´Ð¾ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÑŒÑÑ‚Ð²Ð°",
-        "Ð“Ð¾Ñ‚Ð¾Ð²Ð¾ ÐºÐ¾Ð³Ð´Ð°",
-        "Ð§Ñ‚Ð¾ Ð±ÑƒÐ´ÐµÑ‚ Ð´Ð°Ð»ÑŒÑˆÐµ",
-    ]
-    for task in state["tasks"]:
-        relative = str(task["path"])
-        body = str(task["body"])
-        actor = str(task["next_actor"])
-        owner_action = str(task["owner_action"])
-        allowed_paths = [str(value) for value in task.get("allowed_paths", [])]
-        if actor not in {"owner", "agent", "automation", "none"}:
-            errors.append(f"{relative}: Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ next_actor '{actor}'")
-        if actor == "owner" and owner_action == "none":
-            errors.append(f"{relative}: next_actor=owner Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ Ð¾Ð´Ð½Ð¾ ÐºÐ¾Ð½ÐºÑ€ÐµÑ‚Ð½Ð¾Ðµ owner_action")
-        if actor != "owner" and owner_action != "none":
-            errors.append(f"{relative}: owner_action Ð·Ð°Ð´Ð°Ð½Ð¾, Ð½Ð¾ next_actor Ð½Ðµ owner")
-        if owner_action != "none" and owner_action not in body:
-            errors.append(
-                f"{relative}: owner_action Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð´Ð¾ÑÐ»Ð¾Ð²Ð½Ð¾ Ð¿Ñ€Ð¸ÑÑƒÑ‚ÑÑ‚Ð²Ð¾Ð²Ð°Ñ‚ÑŒ Ð² Ñ€Ð°Ð·Ð´ÐµÐ»Ðµ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°"
-            )
-        if str(task["work_state"]) in {"completed", "cancelled"} and actor != "none":
-            errors.append(
-                f"{relative}: Ð·Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ð°Ñ Ð¸Ð»Ð¸ Ð¾Ñ‚Ð¼ÐµÐ½Ñ‘Ð½Ð½Ð°Ñ TASK Ð´Ð¾Ð»Ð¶Ð½Ð° Ð¸Ð¼ÐµÑ‚ÑŒ next_actor=none"
-            )
-        if str(task["work_state"]) == "completed":
-            component = str(task.get("component", ""))
-            placeholder_result = (
-                f"ÐšÐ¾Ð¼Ð¿Ð¾Ð½ÐµÐ½Ñ‚ `{component}` Ð¿Ð¾Ð»Ð½Ð¾ÑÑ‚ÑŒÑŽ Ñ€ÐµÐ°Ð»Ð¸Ð·Ð¾Ð²Ð°Ð½, Ð¿Ñ€Ð¾Ñ‚ÐµÑÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½ Ð¸ Ð¸Ð½Ñ‚ÐµÐ³Ñ€Ð¸Ñ€Ð¾Ð²Ð°Ð½."
-            )
-            if _markdown_section(body, "Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚") == placeholder_result:
-                errors.append(
-                    f"{relative}: Ñ€Ð°Ð·Ð´ÐµÐ» 'Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚' Ð·Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ð¾Ð¹ TASK Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð¾ÑÑ‚Ð°Ð²Ð°Ñ‚ÑŒÑÑ "
-                    "ÑˆÐ°Ð±Ð»Ð¾Ð½Ð½Ð¾Ð¹ Ð·Ð°Ð³Ð»ÑƒÑˆÐºÐ¾Ð¹ auto_generate_tasks.py â€” Ð¾Ð¿Ð¸ÑˆÐ¸Ñ‚Ðµ, Ñ‡Ñ‚Ð¾ Ñ€ÐµÐ°Ð»ÑŒÐ½Ð¾ "
-                    "Ð¿Ð¾ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¾ (ÐºÐ¾Ð½ÐºÑ€ÐµÑ‚Ð½Ñ‹Ðµ Ð¼Ð¾Ð´ÑƒÐ»Ð¸, Ð¾Ð³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÐ½Ð¸Ñ, Ñ‡Ñ‚Ð¾ ÐÐ• ÑÐ´ÐµÐ»Ð°Ð½Ð¾)"
-                )
-            owner_capability = _markdown_section(body, "Ð§Ñ‚Ð¾ ÑÑ‚Ð¾ Ð´Ð°Ñ‘Ñ‚ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ")
-            if not owner_capability:
-                errors.append(
-                    f"{relative}: Ð·Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ð°Ñ TASK Ð´Ð¾Ð»Ð¶Ð½Ð° ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ€Ð°Ð·Ð´ÐµÐ» "
-                    "'Ð§Ñ‚Ð¾ ÑÑ‚Ð¾ Ð´Ð°Ñ‘Ñ‚ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ' â€” 1-3 Ð¿Ñ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ Ð½Ð° Ð±Ñ‹Ñ‚Ð¾Ð²Ð¾Ð¼ ÑÐ·Ñ‹ÐºÐµ Ð¾ Ð½Ð¾Ð²Ð¾Ð¹ "
-                    "Ð²Ð¾Ð·Ð¼Ð¾Ð¶Ð½Ð¾ÑÑ‚Ð¸ Ð´Ð»Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°"
-                )
-            elif owner_capability == "Ð¤ÑƒÐ½ÐºÑ†Ð¸Ð¾Ð½Ð°Ð» Ð¿Ð¾ÑÐ²Ð¸Ñ‚ÑÑ Ð¿Ð¾ÑÐ»Ðµ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¸Ñ ÑÑ‚Ð¾Ð¹ TASK.":
-                errors.append(
-                    f"{relative}: Ñ€Ð°Ð·Ð´ÐµÐ» 'Ð§Ñ‚Ð¾ ÑÑ‚Ð¾ Ð´Ð°Ñ‘Ñ‚ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ' Ð·Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ð¾Ð¹ TASK Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ "
-                    "Ð¾ÑÑ‚Ð°Ð²Ð°Ñ‚ÑŒÑÑ ÑˆÐ°Ð±Ð»Ð¾Ð½Ð½Ð¾Ð¹ Ð·Ð°Ð³Ð»ÑƒÑˆÐºÐ¾Ð¹ auto_generate_tasks.py"
-                )
-        if str(task["work_state"]) in {"planned", "in-progress", "blocked"} and actor == "none":
-            errors.append(
-                f"{relative}: Ð½ÐµÐ·Ð°Ð²ÐµÑ€ÑˆÑ‘Ð½Ð½Ð°Ñ TASK Ð´Ð¾Ð»Ð¶Ð½Ð° Ð¸Ð¼ÐµÑ‚ÑŒ Ð¾Ð´Ð½Ð¾Ð³Ð¾ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐ³Ð¾ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»Ñ"
-            )
-        actor_heading = {"owner": "Ð’Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ", "agent": "ÐÐ³ÐµÐ½Ñ‚Ñƒ", "automation": "ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸ÐºÐµ"}.get(
-            actor
-        )
-        if actor_heading and not re.search(rf"(?m)^###\s+{actor_heading}\s*$", body):
-            errors.append(f"{relative}: next_actor={actor} Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ Ñ€Ð°Ð·Ð´ÐµÐ» '{actor_heading}'")
-        if not task["checklist"]:
-            errors.append(f"{relative}: Ñ€Ð°Ð·Ð´ÐµÐ» 'ÐŸÐ»Ð°Ð½ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ' Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ checklist")
-        if str(task["work_state"]) == "completed" and int(task["steps_remaining"]) != 0:
-            errors.append(f"{relative}: completed TASK Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð½ÐµÐ²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð½Ñ‹Ðµ ÑˆÐ°Ð³Ð¸")
-        if owner_action == "none":
-            if re.search(
-                r"(?m)^###\s+Ð’Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ\s*$|^##\s+(?:\d+\.\s*)?ÐŸÐ¾ÑˆÐ°Ð³Ð¾Ð²Ð°Ñ Ð¸Ð½ÑÑ‚Ñ€ÑƒÐºÑ†Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ\s*$",
-                body,
-            ):
-                errors.append(
-                    f"{relative}: Ð¿ÑƒÑÑ‚Ð¾Ð¹ Ñ€Ð°Ð·Ð´ÐµÐ» Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð° Ð·Ð°Ð¿Ñ€ÐµÑ‰Ñ‘Ð½, ÐºÐ¾Ð³Ð´Ð° owner_action=none"
-                )
-        elif not re.search(r"(?m)^###\s+Ð’Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ\s*$", body):
-            errors.append(f"{relative}: Ð´Ð»Ñ owner_action Ð½ÑƒÐ¶ÐµÐ½ Ñ€Ð°Ð·Ð´ÐµÐ» 'Ð’Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ'")
-        if "%" in body:
-            errors.append(
-                f"{relative}: Ð¸ÑÐºÑƒÑÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ðµ Ð¿Ñ€Ð¾Ñ†ÐµÐ½Ñ‚Ñ‹ Ð·Ð°Ð¿Ñ€ÐµÑ‰ÐµÐ½Ñ‹; Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ checklist Ð¸ ÑÑ‡Ñ‘Ñ‚Ñ‡Ð¸ÐºÐ¸"
-            )
-        if not allowed_paths:
-            errors.append(f"{relative}: TASK Ð´Ð¾Ð»Ð¶Ð½Ð° ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð½ÐµÐ¿ÑƒÑÑ‚Ð¾Ð¹ ÑÐ¿Ð¸ÑÐ¾Ðº allowed_paths")
-        if relative not in allowed_paths:
-            errors.append(f"{relative}: allowed_paths Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð²ÐºÐ»ÑŽÑ‡Ð°Ñ‚ÑŒ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ð¹ Ñ„Ð°Ð¹Ð» TASK")
-        if str(task["work_state"]) == "blocked" and not str(task.get("blocker", "")).strip():
-            errors.append(f"{relative}: Ð·Ð°Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ð°Ñ TASK Ð´Ð¾Ð»Ð¶Ð½Ð° ÑƒÐºÐ°Ð·Ñ‹Ð²Ð°Ñ‚ÑŒ Ð¿Ñ€Ð¸Ñ‡Ð¸Ð½Ñƒ Ð² blocker")
-        if str(task["work_state"]) != "blocked" and str(task.get("blocker", "")).strip():
-            errors.append(f"{relative}: blocker Ð´Ð¾Ð¿ÑƒÑÑ‚Ð¸Ð¼ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¿Ñ€Ð¸ work_state=blocked")
-        open_followup_actions: list[str] = []
-        for followup in task.get("owner_followups", []):
-            status = str(followup.get("status", ""))
-            action = str(followup.get("action", ""))
-            if status not in {"open", "done"}:
-                errors.append(
-                    f"{relative}: owner_followups: status Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ 'open' Ð¸Ð»Ð¸ 'done', "
-                    f"Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð¾ '{status}'"
-                )
-            if not action:
-                errors.append(f"{relative}: owner_followups: action Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¿ÑƒÑÑ‚Ñ‹Ð¼")
-            elif status == "open":
-                open_followup_actions.append(action)
-                if action not in body:
-                    errors.append(
-                        f"{relative}: owner_followups: Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ð¾Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð´Ð¾ÑÐ»Ð¾Ð²Ð½Ð¾ "
-                        "Ð¿Ñ€Ð¸ÑÑƒÑ‚ÑÑ‚Ð²Ð¾Ð²Ð°Ñ‚ÑŒ Ð² Ñ€Ð°Ð·Ð´ÐµÐ»Ðµ 'ÐÐµÐ·Ð°ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°'"
-                    )
-        has_followups_heading = bool(
-            re.search(
-                r"(?m)^##\s+(?:\d+\.\s*)?ÐÐµÐ·Ð°ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°\s*$",
-                body,
-            )
-        )
-        if open_followup_actions and not has_followups_heading:
-            errors.append(
-                f"{relative}: ÐµÑÑ‚ÑŒ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ owner_followups, Ð½Ð¾ Ð½ÐµÑ‚ Ñ€Ð°Ð·Ð´ÐµÐ»Ð° "
-                "'ÐÐµÐ·Ð°ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°'"
-            )
-        if has_followups_heading and not open_followup_actions:
-            errors.append(
-                f"{relative}: Ñ€Ð°Ð·Ð´ÐµÐ» 'ÐÐµÐ·Ð°ÐºÑ€Ñ‹Ñ‚Ñ‹Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°' Ð¿Ñ€Ð¸ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚, "
-                "Ð½Ð¾ Ð½ÐµÑ‚ Ð½Ð¸ Ð¾Ð´Ð½Ð¾Ð³Ð¾ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ð¾Ð³Ð¾ owner_followups"
-            )
-        for heading in required_headings:
-            if not re.search(
-                rf"^##\s+(?:\d+\.\s*)?{re.escape(heading)}\b", body, re.MULTILINE | re.IGNORECASE
-            ):
-                errors.append(f"{relative}: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ñ€Ð°Ð·Ð´ÐµÐ» '{heading}'")
-    return _result("tasks", errors)
-
-
-def _markdown_section(body: str, heading: str) -> str:
-    match = re.search(
-        rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(heading)}\s*$\n(.*?)(?=^##\s|\Z)",
-        body,
-    )
-    return match.group(1).strip() if match else ""
-
-
-def check_test_specs(root: Path) -> CheckResult:
-    errors: list[str] = []
-    records = collect_traceable_elements(root)
-    milestone_ids = {str(item["id"]).lower() for item in collect_milestones(root)["items"]}
-    try:
-        raw_catalog = load_quality_registry(root).get("evidence_catalog", {})
-        evidence_ids = (
-            {str(value) for value in raw_catalog} if isinstance(raw_catalog, dict) else set()
-        )
-    except Exception:
-        evidence_ids = set()
-    tests_dir = root / "work/tests"
-    seen: set[str] = set()
-    for path in sorted(tests_dir.glob("*.md")):
-        relative = relative_posix(path, root)
-        if not TEST_FILE_PATTERN.fullmatch(path.name):
-            errors.append(f"ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ð¾Ðµ Ð¸Ð¼Ñ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸: {relative}")
-            continue
-        doc = load_document(path)
-        identifier = str(doc.metadata.get("id", "")).strip()
-        if not TEST_ID_PATTERN.fullmatch(identifier):
-            errors.append(f"{relative}: id Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚ TEST_001")
-        if identifier in seen:
-            errors.append(f"Ð”ÑƒÐ±Ð»Ð¸Ñ€ÑƒÑŽÑ‰Ð¸Ð¹ TEST id: {identifier}")
-        seen.add(identifier)
-        spec_state = str(doc.metadata.get("spec_state", "")).strip().lower()
-        if spec_state not in STATE_VALUES["spec_state"]:
-            errors.append(f"{relative}: Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ spec_state '{spec_state}'")
-        traces = [value.strip() for value in metadata_list(doc.metadata, "traces_to")]
-        verifies = [value.strip() for value in metadata_list(doc.metadata, "verifies")]
-        accepts = [value.strip().lower() for value in metadata_list(doc.metadata, "accepts")]
-        execution = str(doc.metadata.get("execution", "")).strip().lower()
-        automated_evidence = str(doc.metadata.get("automated_evidence", "")).strip()
-        manual_evidence = str(doc.metadata.get("manual_evidence", "")).strip()
-        if not any(TASK_ID_PATTERN.fullmatch(value) for value in traces) and not accepts:
-            errors.append(f"{relative}: Ð½ÑƒÐ¶ÐµÐ½ traces_to Ð½Ð° TASK_xxxx Ð»Ð¸Ð±Ð¾ accepts Ð½Ð° ÑÑ‚Ð°Ð¿")
-        if not verifies and not any(
-            re.fullmatch(r"m\d{2}", value, re.IGNORECASE) for value in accepts
-        ):
-            errors.append(
-                f"{relative}: Ð½ÑƒÐ¶ÐµÐ½ verifies Ñ‚Ñ€Ð°ÑÑÐ¸Ñ€ÑƒÐµÐ¼Ð¾Ð³Ð¾ ÑÐ²Ð¾Ð¹ÑÑ‚Ð²Ð° Ð»Ð¸Ð±Ð¾ accepts milestone"
-            )
-        if execution not in TEST_EXECUTIONS:
-            errors.append(f"{relative}: execution Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ automated Ð¸Ð»Ð¸ manual")
-        if execution == "automated":
-            if not automated_evidence:
-                errors.append(f"{relative}: automated TEST Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ automated_evidence")
-            if manual_evidence:
-                errors.append(f"{relative}: automated TEST Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ manual_evidence")
-            if not re.search(
-                r"^##\s+(?:\d+\.\s*)?ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ð·Ð°Ð¿ÑƒÑÐº\b",
-                doc.body,
-                re.MULTILINE | re.IGNORECASE,
-            ):
-                errors.append(
-                    f"{relative}: automated TEST Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ€Ð°Ð·Ð´ÐµÐ» 'ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ð·Ð°Ð¿ÑƒÑÐº'"
-                )
-            if re.search(
-                r"(?mi)^##\s+(?:\d+\.\s*)?(?:ÐŸÐ¾ÑˆÐ°Ð³Ð¾Ð²Ð°Ñ Ð¸Ð½ÑÑ‚Ñ€ÑƒÐºÑ†Ð¸Ñ|Ð”ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°)\b|^###\s+Ð’Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ\s*$",
-                doc.body,
-            ):
-                errors.append(
-                    f"{relative}: automated TEST Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð¸Ð½ÑÑ‚Ñ€ÑƒÐºÑ†Ð¸Ð¸ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ"
-                )
-            if automated_evidence and automated_evidence not in evidence_ids:
-                errors.append(f"{relative}: Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ automated_evidence '{automated_evidence}'")
-        if execution == "manual":
-            if automated_evidence:
-                errors.append(f"{relative}: manual TEST Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ automated_evidence")
-            if not manual_evidence:
-                errors.append(f"{relative}: manual TEST Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ manual_evidence")
-            if manual_evidence and manual_evidence not in evidence_ids:
-                errors.append(f"{relative}: Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ manual_evidence '{manual_evidence}'")
-            owner_steps = _markdown_section(doc.body, "Ð”ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°")
-            if not owner_steps:
-                errors.append(
-                    f"{relative}: manual TEST Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ€Ð°Ð·Ð´ÐµÐ» 'Ð”ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°'"
-                )
-            unsafe = re.search(
-                r"(?i)\b(?:git|powershell|pwsh)\b|operations[\\/]scripts|\.ps1\b", owner_steps
-            )
-            if unsafe:
-                errors.append(
-                    f"{relative}: manual TEST Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ñ‚Ñ€ÐµÐ±Ð¾Ð²Ð°Ñ‚ÑŒ Ð¾Ñ‚ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð° Git, PowerShell Ð¸Ð»Ð¸ Ð²Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½Ð¸Ðµ ÑÐºÑ€Ð¸Ð¿Ñ‚Ñ‹"
-                )
-        for target in verifies:
-            if target not in records:
-                errors.append(
-                    f"{relative}: verifies ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ Ñ‚Ñ€Ð°ÑÑÐ¸Ñ€ÑƒÐµÐ¼Ñ‹Ð¹ id '{target}'"
-                )
-        for milestone in accepts:
-            if milestone not in milestone_ids:
-                errors.append(
-                    f"{relative}: accepts ÑÑÑ‹Ð»Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ð¹ milestone '{milestone}'"
-                )
-        for required_heading in [
-            "ÐÐ°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ",
-            "Ð§Ñ‚Ð¾ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÑÐµÑ‚ÑÑ",
-            "ÐšÑ€Ð¸Ñ‚ÐµÑ€Ð¸Ð¹ ÑƒÑÐ¿ÐµÑ…Ð°",
-            "Ð¡Ð¾ÑÑ‚Ð°Ð² Ð´Ð¾ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÑŒÑÑ‚Ð²Ð°",
-        ]:
-            if not re.search(
-                rf"^##\s+(?:\d+\.\s+)?{re.escape(required_heading)}\b",
-                doc.body,
-                re.MULTILINE | re.IGNORECASE,
-            ):
-                errors.append(f"{relative}: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ñ€Ð°Ð·Ð´ÐµÐ» '{required_heading}'")
-    return _result("test_specs", errors)
-
-
-def check_quality_registry(root: Path) -> CheckResult:
-    try:
-        milestone_ids = {str(item["id"]).lower() for item in collect_milestones(root)["items"]}
-    except Exception as exc:
-        return _result("quality_registry", [str(exc)])
-    return _result("quality_registry", validate_quality_registry(root, milestone_ids))
-
-
-def check_acceptance_model(root: Path) -> CheckResult:
-    errors: list[str] = []
-    warnings: list[str] = []
-    try:
-        milestones = collect_milestones(root)
-        collect_tasks(root)
-        collect_test_specs(root)
-        registry = load_quality_registry(root)
-    except Exception as exc:
-        return _result("acceptance_model", [str(exc)])
-
-    current = milestones["current"]
-    current_id = str(current["id"])
-    current_work_state = str(current.get("work_state", "planned"))
-    profiles = profiles_for_milestone(registry, current_id)
-    if not profiles:
-        if current_work_state == "planned":
-            warnings.append(
-                f"{current_id}: quality profile ÑÑ‚Ð°Ð½ÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¼ Ð¿Ñ€Ð¸ Ð¿ÐµÑ€ÐµÐ²Ð¾Ð´Ðµ milestone Ð² in-progress"
-            )
-            return _result("acceptance_model", errors, warnings)
-        errors.append(f"Ð”Ð»Ñ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¾Ð³Ð¾ milestone {current_id} Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ quality profile")
-        return _result("acceptance_model", errors, warnings)
-
-    modes = {str(raw.get("scope_coverage", "task_test")) for _, raw in profiles}
-
-    if "global_evidence" in modes:
-        for profile_id, raw in profiles:
-            if str(raw.get("scope_coverage", "task_test")) == "global_evidence" and not raw.get(
-                "scope_evidence"
-            ):
-                errors.append(f"{profile_id}: global_evidence Ð±ÐµÐ· scope_evidence")
-    else:
-        errors.extend(validate_task_semantics(root, current_id))
-    return _result("acceptance_model", errors, warnings)
-
-
-def _block_scalar_errors(workflow_name: str, text: str) -> list[str]:
-    """ÐÐ°Ð¹Ñ‚Ð¸ ÑÑ‚Ñ€Ð¾ÐºÐ¸ Ð¼Ð½Ð¾Ð³Ð¾ÑÑ‚Ñ€Ð¾Ñ‡Ð½Ð¾Ð³Ð¾ ÑÐºÑ€Ð¸Ð¿Ñ‚Ð°, Ð²Ñ‹Ð¿Ð°Ð²ÑˆÐ¸Ðµ Ð¸Ð· Ð±Ð»Ð¾ÐºÐ° YAML.
-
-    ÐœÐ½Ð¾Ð³Ð¾ÑÑ‚Ñ€Ð¾Ñ‡Ð½Ñ‹Ð¹ `run: |` Ñ€Ð²Ñ‘Ñ‚ÑÑ, ÐµÑÐ»Ð¸ Ð¿Ñ€Ð¾Ð´Ð¾Ð»Ð¶ÐµÐ½Ð¸Ðµ Ð¾ÐºÐ°Ð·Ñ‹Ð²Ð°ÐµÑ‚ÑÑ Ð½Ð° Ð¾Ñ‚ÑÑ‚ÑƒÐ¿Ðµ
-    Ð½Ðµ Ð³Ð»ÑƒÐ±Ð¶Ðµ ÑÐ°Ð¼Ð¾Ð³Ð¾ ÐºÐ»ÑŽÑ‡Ð°: YAML Ð¼Ð¾Ð»Ñ‡Ð° Ð·Ð°ÐºÑ€Ñ‹Ð²Ð°ÐµÑ‚ Ð±Ð»Ð¾Ðº, Ð¸ Ñ€Ð°Ð±Ð¾Ñ‡Ð¸Ð¹ Ð¿Ñ€Ð¾Ñ†ÐµÑÑ
-    Ð¿ÐµÑ€ÐµÑÑ‚Ð°Ñ‘Ñ‚ Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ñ‚ÑŒÑÑ. ÐŸÐ¾Ð»Ð½Ð¾Ñ†ÐµÐ½Ð½Ñ‹Ð¹ Ñ€Ð°Ð·Ð±Ð¾Ñ€ YAML ÑÑŽÐ´Ð° Ð½Ðµ Ñ‚ÑÐ½ÐµÑ‚ÑÑ, Ñ‡Ñ‚Ð¾Ð±Ñ‹
-    Ð½Ðµ Ð·Ð°Ð²Ð¾Ð´Ð¸Ñ‚ÑŒ Ð²Ð½ÐµÑˆÐ½ÑŽÑŽ Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑ‚ÑŒ Ñ€Ð°Ð´Ð¸ Ð¾Ð´Ð½Ð¾Ð³Ð¾ Ð¿Ñ€Ð°Ð²Ð¸Ð»Ð°.
-    """
-    errors: list[str] = []
-    lines = text.splitlines()
-    for index, line in enumerate(lines):
-        opening = re.match(r"^(\s*)-?\s*(?:run|if|shell):\s*[|>][+-]?\s*$", line)
-        if not opening:
-            continue
-        key_indent = len(opening.group(1))
-        for offset, following in enumerate(lines[index + 1 :], start=index + 2):
-            if not following.strip():
-                continue
-            indent = len(following) - len(following.lstrip())
-            if indent > key_indent:
-                continue
-            if re.match(r"^\s*(?:-\s|\w[\w-]*:)", following):
-                break
-            errors.append(
-                f"{workflow_name}:{offset}: ÑÑ‚Ñ€Ð¾ÐºÐ° Ð¼Ð½Ð¾Ð³Ð¾ÑÑ‚Ñ€Ð¾Ñ‡Ð½Ð¾Ð³Ð¾ Ð±Ð»Ð¾ÐºÐ° Ð½Ðµ Ð³Ð»ÑƒÐ±Ð¶Ðµ ÐºÐ»ÑŽÑ‡Ð° "
-                f"Ð¸ Ñ€Ð°Ð·Ñ€Ñ‹Ð²Ð°ÐµÑ‚ ÐµÐ³Ð¾: {following.strip()[:60]}"
-            )
-            break
-    return errors
-
-
-def check_automation_policy(root: Path) -> CheckResult:
-    errors: list[str] = []
-    project_workflow = read_text(root / ".github/workflows/project_check.yml")
-    acceptance = read_text(root / "operations/scripts/acceptance/apply.py")
-
-    if not re.search(r"(?ms)^permissions:\s*\n\s+contents:\s*read\s*$", project_workflow):
-        errors.append("project_check.yml Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ contents: read")
-    if re.search(r"(?ms)^\s*pull_request:\s*\n\s+paths(?:-ignore)?:", project_workflow):
-        errors.append(
-            "Project check Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð·Ð°Ð¿ÑƒÑÐºÐ°Ñ‚ÑŒÑÑ Ð½Ð° ÐºÐ°Ð¶Ð´Ð¾Ð¼ PR Ð±ÐµÐ· path-filter, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ð¾Ð²Ñ‹Ðµ Ñ‚Ð¸Ð¿Ñ‹ Ñ„Ð°Ð¹Ð»Ð¾Ð² Ð½Ðµ Ð¾Ð±Ñ…Ð¾Ð´Ð¸Ð»Ð¸ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸"
-        )
-    if "operations\\scripts\\tasks\\check_change_scope.py" not in project_workflow:
-        errors.append("Project check Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÑÑ‚ÑŒ Ð¿Ð¾ÐºÑ€Ñ‹Ñ‚Ð¸Ðµ Ð¸Ð·Ð¼ÐµÐ½Ñ‘Ð½Ð½Ñ‹Ñ… Ð¿ÑƒÑ‚ÐµÐ¹ TASK")
-    if "runs-on: ubuntu-latest" not in project_workflow:
-        errors.append("Project check Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð¿ÐµÑ€ÐµÐ½Ð¾ÑÐ¸Ð¼ÑƒÑŽ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÑƒ Python Ð½Ð° Linux")
-    push_trigger = re.search(
-        r"(?m)^  push:\s*$\n(?P<body>(?:[ \t]+[^\n]*\n)*)",
-        project_workflow,
-    )
-    if not push_trigger or not re.search(r"(?m)^\s+-\s+main\s*$", push_trigger.group("body")):
-        errors.append(
-            "Project check Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð·Ð°Ð¿ÑƒÑÐºÐ°Ñ‚ÑŒÑÑ Ð¿Ð¾ push Ð½Ð° main: Ð»ÑŽÐ±Ð¾Ðµ Ð¿Ñ€ÑÐ¼Ð¾Ðµ Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ðµ main Ð´Ð¾Ð»Ð¶Ð½Ð¾ "
-            "Ð¿Ñ€Ð¾Ð¹Ñ‚Ð¸ Ñ‚Ðµ Ð¶Ðµ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸, Ñ‡Ñ‚Ð¾ Ð¸ Ð·Ð°Ð¿Ñ€Ð¾Ñ Ð½Ð° ÑÐ»Ð¸ÑÐ½Ð¸Ðµ (ÑÐ¼. operations/change_process.md)"
-        )
-    elif re.search(r"(?m)^\s+paths(?:-ignore)?:\s*$", push_trigger.group("body")):
-        errors.append(
-            "Ð¢Ñ€Ð¸Ð³Ð³ÐµÑ€ push Ð½Ð° main Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð¸Ð¼ÐµÑ‚ÑŒ path-filter: Ð¾Ñ‚Ñ„Ð¸Ð»ÑŒÑ‚Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ñ‚Ñ€Ð¸Ð³Ð³ÐµÑ€ Ð¼Ð¾Ð»Ñ‡Ð° Ð¿ÐµÑ€ÐµÑÑ‚Ð°Ñ‘Ñ‚ "
-            "ÑÑ€Ð°Ð±Ð°Ñ‚Ñ‹Ð²Ð°Ñ‚ÑŒ"
-        )
-    if "commits/$env:GITHUB_SHA/pulls" not in project_workflow:
-        errors.append(
-            "Project check Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¾Ð±Ð½Ð°Ñ€ÑƒÐ¶Ð¸Ð²Ð°Ñ‚ÑŒ push Ð² main Ð±ÐµÐ· ÑÐ²ÑÐ·Ð°Ð½Ð½Ð¾Ð³Ð¾ merged pull request"
-        )
-    workflow_paths = sorted((root / ".github/workflows").glob("*.yml")) + sorted(
-        (root / ".github/workflows").glob("*.yaml")
-    )
-    for workflow_path in workflow_paths:
-        workflow_name = workflow_path.name
-        workflow_text = read_text(workflow_path)
-        errors.extend(_block_scalar_errors(workflow_name, workflow_text))
-        permission_match = re.search(
-            r"(?m)^permissions:\s*$\n(?P<body>(?:[ \t]+[^\n]*\n)*)",
-            workflow_text,
-        )
-        permission_body = permission_match.group("body") if permission_match else ""
-        if not re.search(r"(?m)^[ \t]+contents:\s*read\s*$", permission_body):
-            errors.append(
-                f"{workflow_name}: persistent workflow Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ²Ð½Ð¾ Ð¾Ð³Ñ€Ð°Ð½Ð¸Ñ‡Ð¸Ð²Ð°Ñ‚ÑŒ repository permission Ð´Ð¾ contents: read"
-            )
-        if "contents: write" in workflow_text.lower():
-            errors.append(f"{workflow_name}: persistent workflow Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð¸Ð¼ÐµÑ‚ÑŒ contents: write")
-        # Ð¨Ñ‚Ð°Ñ‚Ð½Ð°Ñ Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð¾ÑÑ‚Ð°Ñ‘Ñ‚ÑÑ Ñ‡Ð¸Ñ‚Ð°ÑŽÑ‰ÐµÐ¹ Ñ†ÐµÐ»Ð¸ÐºÐ¾Ð¼, Ð° Ð½Ðµ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¿Ð¾ contents.
-        # Ð˜Ð½Ð°Ñ‡Ðµ Ð¿Ð¾Ð»Ð½Ð¾Ð¼Ð¾Ñ‡Ð¸Ñ Ñ€Ð°ÑÑˆÐ¸Ñ€ÑÑŽÑ‚ÑÑ Ð¼Ð¾Ð»Ñ‡Ð°, Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð¸ÐµÐ¼ Ð¾Ð´Ð½Ð¾Ð¹ ÑÑ‚Ñ€Ð¾ÐºÐ¸ Ð² permissions.
-        for scope, value in re.findall(r"(?m)^[ \t]+([a-z-]+):\s*([a-z]+)\s*$", permission_body):
-            if value not in ALLOWED_WORKFLOW_PERMISSIONS:
-                errors.append(
-                    f"{workflow_name}: Ñ€Ð°Ð·Ñ€ÐµÑˆÐµÐ½Ð¸Ðµ '{scope}: {value}' Ñ€Ð°ÑÑˆÐ¸Ñ€ÑÐµÑ‚ Ð¿Ð¾Ð»Ð½Ð¾Ð¼Ð¾Ñ‡Ð¸Ñ Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ð·Ð°Ñ†Ð¸Ð¸; "
-                    f"Ð´Ð¾Ð¿ÑƒÑÑ‚Ð¸Ð¼Ñ‹ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ {sorted(ALLOWED_WORKFLOW_PERMISSIONS)} (operations/change_process.md, Ñ€Ð°Ð·Ð´ÐµÐ» 5)"
-                )
-        for token in ["git push", "git commit"]:
-            if token in workflow_text.lower():
-                errors.append(
-                    f"{workflow_name}: persistent workflow ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ñ‚ repository mutation primitive {token}"
-                )
-        for match in re.finditer(r"(?m)^\s*uses:\s*([^@\s#]+)@([^\s#]+)", workflow_text):
-            action, ref = match.groups()
-            if action.startswith("./") or action.startswith("docker://"):
-                continue
-            if not re.fullmatch(r"[0-9a-fA-F]{40}", ref):
-                errors.append(
-                    f"{workflow_name}: external Action {action}@{ref} Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ pinned Ð½Ð° immutable 40-char commit SHA"
-                )
-    for token in ["git push", "git commit"]:
-        if token in acceptance.lower():
-            errors.append(f"acceptance/apply.py Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÑÑ‚ÑŒ {token}")
-    if "--semantic-review" not in acceptance or "validate_semantic_review" not in acceptance:
-        errors.append("acceptance/apply.py Ð´Ð¾Ð»Ð¶ÐµÐ½ Ñ‚Ñ€ÐµÐ±Ð¾Ð²Ð°Ñ‚ÑŒ SHA-bound semantic review Ð´Ð»Ñ m01")
-    return _result("automation_policy", errors)
-
-
-def check_generated(root: Path) -> CheckResult:
-    errors: list[str] = []
-    required = [
-        root / "project_status.md",
-        root / "tasks.md",
-        root / "generated/markdown_index.md",
-        root / "generated/non_markdown_index.md",
-        root / "generated/repository_structure.md",
-        root / "generated/traceability_matrix.md",
-        root / "generated/test_catalog.md",
-        root / "generated/platfrom_capability.md",
-    ]
-    for path in required:
-        if not path.exists():
-            errors.append(f"ÐžÑ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð¿Ñ€Ð¾Ð¸Ð·Ð²Ð¾Ð´Ð½Ñ‹Ð¹ Ñ„Ð°Ð¹Ð»: {relative_posix(path, root)}")
-            continue
-        first = path.read_text(encoding="utf-8-sig").splitlines()[0:1]
-        if first != [GENERATED_HEADER]:
-            errors.append(f"{relative_posix(path, root)}: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ marker generated")
-    expected = {
-        root / "project_status.md": render_repository_project_status(root),
-        root / "tasks.md": render_task_index(root, "2000-01-01"),
-        root / "generated/markdown_index.md": render_index(root, "2000-01-01"),
-        root / "generated/non_markdown_index.md": render_non_markdown_index(root, "2000-01-01"),
-        root / "generated/repository_structure.md": render_repository_structure(root, "2000-01-01"),
-        root / "generated/traceability_matrix.md": render_traceability(root, "2000-01-01"),
-        root / "generated/test_catalog.md": render_test_catalog(root, "2000-01-01"),
-        root / "generated/platfrom_capability.md": render_platfrom_capability(root, "2000-01-01"),
-    }
-    for path, rendered in expected.items():
-        if path.exists() and read_text(path).strip() != rendered.strip():
-            errors.append(f"{relative_posix(path, root)} Ð½Ðµ ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð³ÐµÐ½ÐµÑ€Ð°Ñ‚Ð¾Ñ€Ñƒ")
-    return _result("generated", errors)
-
-
-def check_owner_interface(root: Path) -> CheckResult:
-    errors: list[str] = []
-    rendered = render_repository_project_status(root)
-    if "%" in rendered:
-        errors.append("project_status.md Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð¸ÑÐºÑƒÑÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ðµ Ð¿Ñ€Ð¾Ñ†ÐµÐ½Ñ‚Ñ‹")
-    for token in [
-        "[x]",
-        "[ ]",
-        "Ð²Ñ‹Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¾",
-        "Ð¾ÑÑ‚Ð°Ð»Ð¾ÑÑŒ",
-        "Ð’Ð°ÑˆÐµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ ÑÐµÐ¹Ñ‡Ð°Ñ",
-        "Ð¡Ð»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¹ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒ",
-        "Ð‘Ð»Ð¾ÐºÐµÑ€Ñ‹",
-    ]:
-        if token not in rendered:
-            errors.append(f"project_status.md: Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÐµÑ‚ Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÑÐ»ÐµÐ¼ÐµÐ½Ñ‚ '{token}'")
-    if not any(
-        phrase in rendered
-        for phrase in [
-            "Ð§Ñ‚Ð¾Ð±Ñ‹ Ð¿Ñ€Ð¾Ð´Ð¾Ð»Ð¶Ð¸Ñ‚ÑŒ, Ð¾Ñ‚Ð¿Ñ€Ð°Ð²ÑŒÑ‚Ðµ Ð°Ð³ÐµÐ½Ñ‚Ñƒ Ð¾Ð´Ð½Ñƒ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒ",
-            "Ð§Ñ‚Ð¾Ð±Ñ‹ Ð¿Ñ€Ð¾Ð´Ð¾Ð»Ð¶Ð¸Ñ‚ÑŒ, Ð¾Ñ‚ÐºÑ€Ð¾Ð¹Ñ‚Ðµ Ð½Ð¾Ð²Ñ‹Ð¹ ÑÐµÐ°Ð½Ñ Ð°Ð³ÐµÐ½Ñ‚Ð°",
-            "Ð¡ÐµÐ¹Ñ‡Ð°Ñ Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ÑÑ Ð²Ð°ÑˆÐµ Ñ€ÐµÑˆÐµÐ½Ð¸Ðµ",
-        ]
-    ):
-        errors.append("project_status.md Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ²Ð½Ð¾ ÑÐ¾Ð¾Ð±Ñ‰Ð°Ñ‚ÑŒ, Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ÑÑ Ð»Ð¸ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ðµ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°")
-    for token in [
-        "in-review",
-        "in-progress",
-        "ready-for-acceptance",
-        "owner_action",
-        "PowerShell",
-        "Git SHA",
-        "evidence bundle",
-    ]:
-        if token in rendered:
-            errors.append(
-                f"project_status.md: Ð²Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½ÑÑ Ñ‚ÐµÑ…Ð½Ð¸Ñ‡ÐµÑÐºÐ°Ñ Ð´ÐµÑ‚Ð°Ð»ÑŒ '{token}' Ð½Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð° Ð¿Ð¾ÐºÐ°Ð·Ñ‹Ð²Ð°Ñ‚ÑŒÑÑ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ñƒ"
-            )
-    if rendered.count("| Ð¡Ð»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ð¹ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒ |") != 1:
-        errors.append("project_status.md Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¿Ð¾ÐºÐ°Ð·Ñ‹Ð²Ð°Ñ‚ÑŒ Ñ€Ð¾Ð²Ð½Ð¾ Ð¾Ð´Ð½Ð¾Ð³Ð¾ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐ³Ð¾ Ð¸ÑÐ¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»Ñ")
-    return _result("owner_interface", errors)
-
-
-def check_secrets(root: Path) -> CheckResult:
-    errors: list[str] = []
-    forbidden_names = {".env", "id_rsa", "id_ed25519", "credentials.json"}
-    # ÐŸÑ€Ð¾Ð¸Ð·Ð²Ð¾Ð´Ð½Ñ‹Ðµ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ñ‚Ð¾Ð¶Ðµ ÑÐºÐ°Ð½Ð¸Ñ€ÑƒÑŽÑ‚ÑÑ: ÑÐµÐºÑ€ÐµÑ‚, Ð¿Ð¾Ð¿Ð°Ð²ÑˆÐ¸Ð¹ Ð² Ð¿ÐµÑ€Ð²Ð¸Ñ‡Ð½Ñ‹Ð¹ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚,
-    # ÐºÐ¾Ð¿Ð¸Ñ€ÑƒÐµÑ‚ÑÑ Ð² generated/ Ð¸ Ð¾Ð±ÑÐ·Ð°Ð½ Ð¾Ð±Ð½Ð°Ñ€ÑƒÐ¶Ð¸Ð²Ð°Ñ‚ÑŒÑÑ Ñ‚Ð°Ð¼ Ð¶Ðµ.
-    for path in iter_files(root, include_generated=True):
-        relative = relative_posix(path, root)
-        if path.name.lower() in forbidden_names or path.suffix.lower() in {".pem", ".p12", ".pfx"}:
-            errors.append(f"ÐŸÐ¾Ñ‚ÐµÐ½Ñ†Ð¸Ð°Ð»ÑŒÐ½Ñ‹Ð¹ ÑÐµÐºÑ€ÐµÑ‚: {relative}")
-            continue
-        if path.suffix.lower() not in SCANNED_TEXT_SUFFIXES:
-            continue
-        text = path.read_text(encoding="utf-8-sig", errors="replace")
-        if any(pattern.search(text) for pattern in SECRET_PATTERNS):
-            errors.append(f"{relative}: Ð½Ð°Ð¹Ð´ÐµÐ½ Ñ„Ñ€Ð°Ð³Ð¼ÐµÐ½Ñ‚, Ð¿Ð¾Ñ…Ð¾Ð¶Ð¸Ð¹ Ð½Ð° ÑÐµÐºÑ€ÐµÑ‚")
-    return _result("secrets", errors)
-
-
-def check_test_coverage_quality(root: Path) -> CheckResult:
-    """ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð¿Ð¾ÐºÑ€Ñ‹Ñ‚Ð¸Ñ Ñ‚Ñ€ÐµÐ±Ð¾Ð²Ð°Ð½Ð¸Ð¹ Ñ‚ÐµÑÑ‚Ð°Ð¼Ð¸ (Ð²ÐºÐ»ÑŽÑ‡Ð°ÐµÑ‚ÑÑ Ð½Ð° m02+)."""
-    # ÐÐ° m01 Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð¿Ð¾Ð´Ð³Ð¾Ñ‚Ð¾Ð²ÐºÐ° Ð¾ÑÐ½Ð¾Ð²Ñ‹, Ñ‚Ñ€ÐµÐ±Ð¾Ð²Ð°Ð½Ð¸Ñ Ð±ÑƒÐ´ÑƒÑ‚ Ð¿Ñ€Ð¾Ñ‚ÐµÑÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ñ‹ Ð½Ð° m02+
-    # Ð­Ñ‚Ð° Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ð¾Ð½Ð½Ð°Ñ Ð¸ Ð½Ðµ Ð±Ð»Ð¾ÐºÐ¸Ñ€ÑƒÐµÑ‚ Ð¿Ñ€Ð¸Ð½ÑÑ‚Ð¸Ðµ m01
-    try:
-        from operations.scripts.quality.test_coverage import validate_test_coverage
-
-        return _result("test_coverage", validate_test_coverage(root))
-    except Exception as exc:
-        return _result("test_coverage", [f"ÐžÑˆÐ¸Ð±ÐºÐ° Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸: {exc}"])
-
-
-def check_owner_action_quality(root: Path) -> CheckResult:
-    """ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð¿Ñ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ð¾ÑÑ‚Ð¸ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ð¹ Ð²Ð»Ð°Ð´ÐµÐ»ÑŒÑ†Ð°."""
-    try:
-        from operations.scripts.quality.action_practicality import check_project_status
-
-        errors = check_project_status(root)
-        return _result("owner_actions", errors if errors else [])
-    except Exception as exc:
-        return _result("owner_actions", [f"ÐžÑˆÐ¸Ð±ÐºÐ° Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸: {exc}"])
-
-
-def check_allowed_paths_quality(root: Path) -> CheckResult:
-    """ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° ÐºÐ¾Ð½ÑÐ¸ÑÑ‚ÐµÐ½Ñ‚Ð½Ð¾ÑÑ‚Ð¸ Ð¿ÑƒÑ‚ÐµÐ¹ Ð² allowed_paths."""
-    try:
-        from operations.scripts.quality.paths_validation import validate_task_paths
-
-        errors = validate_task_paths(root)
-        return _result("allowed_paths", errors if errors else [])
-    except Exception as exc:
-        return _result("allowed_paths", [f"ÐžÑˆÐ¸Ð±ÐºÐ° Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸: {exc}"])
-
-
-def check_frontmatter_standard(root: Path) -> CheckResult:
-    """ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²Ð¸Ñ frontmatter ÑÑ‚Ð°Ð½Ð´Ð°Ñ€Ñ‚Ñƒ Ð¿Ð¾ Ñ‚Ð¸Ð¿Ð°Ð¼ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð¾Ð².
-
-    Ð¡Ð¾Ð³Ð»Ð°ÑÐ½Ð¾ operations/change_process.md#82, ÐºÐ°Ð¶Ð´Ñ‹Ð¹ Ñ‚Ð¸Ð¿ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð°
-    Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¸Ð¼ÐµÑ‚ÑŒ Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»Ñ‘Ð½Ð½Ñ‹Ð¹ Ð¼Ð¸Ð½Ð¸Ð¼Ð°Ð»ÑŒÐ½Ñ‹Ð¹ Ð½Ð°Ð±Ð¾Ñ€ Ð¿Ð¾Ð»ÐµÐ¹.
-    """
-    errors: list[str] = []
-
-    # ÐœÐ¸Ð½Ð¸Ð¼Ð°Ð»ÑŒÐ½Ñ‹Ðµ Ñ‚Ñ€ÐµÐ±ÑƒÐµÐ¼Ñ‹Ðµ Ð¿Ð¾Ð»Ñ Ð¿Ð¾ Ñ‚Ð¸Ð¿Ð°Ð¼ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð¾Ð²
-    type_requirements = {
-        "adr": {"id", "type", "decision_state", "version", "updated", "traces_to"},
-        "task": {
-            "id",
-            "type",
-            "title",
-            "work_state",
-            "version",
-            "updated",
-            "depends_on",
-            "next_actor",
-            "owner_action",
-            "allowed_paths",
-            "traces_to",
-        },
-        "test": {"id", "type", "spec_state", "version", "updated"},
-        "quality_evidence": {"id", "type", "evidence_state", "version", "created"},
-        "generated_owner_status": {"id", "type", "generation_state", "version"},
-        # ÐŸÐµÑ€Ð²Ð¸Ñ‡Ð½Ñ‹Ðµ Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ñ‹ (Ð¿Ñ€Ð°Ð²Ð¸Ð»Ð°, ÑÐ¿ÐµÑ†Ð¸Ñ„Ð¸ÐºÐ°Ñ†Ð¸Ð¸ Ð¸ Ñ‚.Ð¿.)
-        "project_rules": {"id", "type", "document_state", "version", "updated", "depends_on"},
-        "business_requirements": {
-            "id",
-            "type",
-            "document_state",
-            "version",
-            "updated",
-            "depends_on",
-        },
-        "system_specification": {
-            "id",
-            "type",
-            "document_state",
-            "version",
-            "updated",
-            "depends_on",
-        },
-        "threat_model": {"id", "type", "document_state", "version", "updated", "depends_on"},
-        "architecture_baseline": {
-            "id",
-            "type",
-            "document_state",
-            "version",
-            "updated",
-            "depends_on",
-        },
-        "infrastructure_baseline": {
-            "id",
-            "type",
-            "document_state",
-            "version",
-            "updated",
-            "depends_on",
-        },
-        "agent_instruction": {"id", "type", "document_state", "version", "updated", "depends_on"},
-        "operations": {"id", "type", "document_state", "version", "updated", "depends_on"},
-        "checklist": {"id", "type", "document_state", "version", "updated", "depends_on"},
-    }
-
-    for relative, doc in _primary_documents(root):
-        doc_type = str(doc.metadata.get("type", "")).strip()
-        if not doc_type:
-            continue
-
-        # ÐŸÑ€Ð¾Ð¿ÑƒÑÐºÐ°ÐµÐ¼ ÑˆÐ°Ð±Ð»Ð¾Ð½Ñ‹ Ð¸ Ð³ÐµÐ½ÐµÑ€Ð¸Ñ€ÑƒÐµÐ¼Ñ‹Ðµ Ñ„Ð°Ð¹Ð»Ñ‹
-        if relative.startswith("operations/templates/") or "generated" in relative:
-            continue
-
-        required = type_requirements.get(doc_type)
-        if not required:
-            # Ð”Ð»Ñ Ð½ÐµÐ¸Ð·Ð²ÐµÑÑ‚Ð½Ñ‹Ñ… Ñ‚Ð¸Ð¿Ð¾Ð² Ð½Ðµ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼
-            continue
-
-        # ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ Ð½Ð°Ð»Ð¸Ñ‡Ð¸Ðµ Ñ‚Ñ€ÐµÐ±ÑƒÐµÐ¼Ñ‹Ñ… Ð¿Ð¾Ð»ÐµÐ¹
-        missing = required - set(doc.metadata.keys())
-        if missing:
-            errors.append(
-                f"{relative}: Ð´Ð»Ñ Ñ‚Ð¸Ð¿Ð° '{doc_type}' Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²ÑƒÑŽÑ‚ Ð¿Ð¾Ð»Ñ: {', '.join(sorted(missing))}"
-            )
-
-        # ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼ ÑÐ¿ÐµÑ†Ð¸Ñ„Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ Ñ‚Ñ€ÐµÐ±Ð¾Ð²Ð°Ð½Ð¸Ñ
-        if doc_type == "task":
-            next_actor = str(doc.metadata.get("next_actor", "")).strip()
-            if next_actor == "owner":
-                owner_action = str(doc.metadata.get("owner_action", "")).strip()
-                if owner_action == "none":
-                    errors.append(
-                        f"{relative}: Ð¿Ñ€Ð¸ next_actor=owner, owner_action Ð½Ðµ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð±Ñ‹Ñ‚ÑŒ 'none'"
-                    )
-
-            # ÐŸÑ€Ð¾Ð²ÐµÑ€ÑÐµÐ¼, Ñ‡Ñ‚Ð¾ allowed_paths Ð¸Ð¼ÐµÐµÑ‚ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ
-            paths = doc.metadata.get("allowed_paths", [])
-            if not paths or (isinstance(paths, list) and not any(paths)):
-                errors.append(f"{relative}: allowed_paths Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ñ…Ð¾Ñ‚Ñ Ð±Ñ‹ Ð¾Ð´Ð¸Ð½ Ð¿ÑƒÑ‚ÑŒ")
-
-        if doc_type == "test":
-            execution = str(doc.metadata.get("execution", "owner")).strip().lower() or "owner"
-            if execution == "automated":
-                evidence = doc.metadata.get("automated_evidence", "")
-                if not evidence or str(evidence).strip() == "":
-                    errors.append(
-                        f"{relative}: Ð¿Ñ€Ð¸ execution=automated, Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð±Ñ‹Ñ‚ÑŒ Ð·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¾ automated_evidence"
-                    )
-            elif execution == "manual":
-                evidence = doc.metadata.get("manual_evidence", "")
-                if not evidence or str(evidence).strip() == "":
-                    errors.append(
-                        f"{relative}: Ð¿Ñ€Ð¸ execution=manual, Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð±Ñ‹Ñ‚ÑŒ Ð·Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¾ manual_evidence"
-                    )
-
-    return _result("frontmatter_standard", errors)
-
-
-def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
-    # Fast mode: Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð±Ñ‹ÑÑ‚Ñ€Ñ‹Ðµ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð½Ñ‹Ðµ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸ (<0.2s ÐºÐ°Ð¶Ð´Ð°Ñ)
-    fast_checks = [
-        ("structure", check_structure),
-        ("metadata", check_metadata),
-        ("frontmatter_standard", check_frontmatter_standard),
-        ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
-        ("secrets", check_secrets),
-    ]
-    # Full mode: Ð²ÑÐµ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸ (Ð´Ð»Ñ CI)
-    all_checks = [
-        ("structure", check_structure),
-        ("metadata", check_metadata),
-        ("frontmatter_standard", check_frontmatter_standard),
-        ("traceability", check_traceability),
-        ("full_traceability", check_full_traceability),
-        ("semantic_consistency", check_semantic_consistency),
-        ("authority_graph", check_authority_graph),
-        ("document_policy", check_document_policy),
-        ("milestones", check_milestones),
-        ("business_requirements_coverage", check_business_requirements_coverage),
-        ("tasks", check_tasks),
-        ("test_specs", check_test_specs),
-        ("quality_registry", check_quality_registry),
-        ("acceptance_model", check_acceptance_model),
-        ("automation_policy", check_automation_policy),
-        ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
-        ("generated", check_generated),
-        ("owner_interface", check_owner_interface),
-        ("secrets", check_secrets),
-        ("test_coverage", check_test_coverage_quality),
-        ("owner_actions", check_owner_action_quality),
-        ("allowed_paths", check_allowed_paths_quality),
-    ]
-    checks = fast_checks if fast else all_checks
-    results: list[CheckResult] = []
-    for name, checker in checks:
-        try:
-            results.append(checker(root))
-        except Exception as exc:
-            results.append(
-                _result(name, [f"ÐÐµÐ¿Ñ€ÐµÐ´Ð²Ð¸Ð´ÐµÐ½Ð½Ð°Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ° Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸: {type(exc).__name__}: {exc}"])
-            )
-    return results
-
-
-class CheckResultDict(TypedDict):
-    name: str
-    ok: bool
-    errors: list[str]
-    warnings: list[str]
-
-
-class Summary(TypedDict):
-    ok: bool
-    checks: list[CheckResultDict]
-    error_count: int
-    warning_count: int
-
-
-def summarize(results: list[CheckResult]) -> Summary:
-    return {
-        "ok": all(result.ok for result in results),
-        "checks": [
-            {
-                "name": result.name,
-                "ok": result.ok,
-                "errors": result.errors,
-                "warnings": result.warnings,
-            }
-            for result in results
-        ],
-        "error_count": sum(len(result.errors) for result in results),
-        "warning_count": sum(len(result.warnings) for result in results),
-    }
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description="ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° personal_ai_platform")
-    parser.add_argument("--all", action="store_true", help="Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸ (Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ)")
-    parser.add_argument(
-        "--fast", action="store_true", help="Ð’Ñ‹Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÑŒ Ñ‚Ð¾Ð»ÑŒÐºÐ¾ Ð±Ñ‹ÑÑ‚Ñ€Ñ‹Ðµ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð½Ñ‹Ðµ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¸"
-    )
-    parser.add_argument("--json", action="store_true", help="Ð’Ñ‹Ð²ÐµÑÑ‚Ð¸ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚ Ð² JSON")
-    args = parser.parse_args()
-    require_supported_python()
-    root = find_project_root(Path.cwd())
-    fast = args.fast and not args.all
-    summary = summarize(run_all_checks(root, fast=fast))
-    if args.json:
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
-    else:
-        for result in summary["checks"]:
-            print(f"[{'PASS' if result['ok'] else 'FAIL'}] {result['name']}")
-            for warning in result["warnings"]:
-                print(f"  WARNING: {warning}")
-            for error in result["errors"]:
-                print(f"  ERROR: {error}")
-        print(f"Ð˜Ñ‚Ð¾Ð³: errors={summary['error_count']}, warnings={summary['warning_count']}")
-    return 0 if summary["ok"] else 1
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíÛ­µÝ:-jZ.¶›­–)Þ³Vg&öÒõögWGW&Uõò–×÷'Bææ÷FF–öç0 ¦–×÷'B&w'6P¦–×÷'B§6öà¦–×÷'B&P¦–×÷'B7—0¦g&öÒFF6Æ76W2–×÷'BFF6Æ70¦g&öÒF†Æ–"–×÷'BF€¦g&öÒG—–ær–×÷'BG—VDF–7BÂ67@ ¦–bõ÷6¶vUõò–â´æöæRÂ"'Ó ¢7—2çF‚æ–ç6W'BƒÂ7G"…F‚…õöf–ÆUõò’ç&W6öÇfR‚’ç&VçG5³5Ò’ ¦g&öÒ÷W&F–öç2ç67&—G2æ6öÖÖöâç&ö¦V7B–×÷'B€¢”täõ$TEôD•%2À¢f–æE÷&ö¦V7E÷&ö÷BÀ¢—FW%öf–ÆW2À¢&VE÷FW‡BÀ¢&VÆF—fU÷÷6—‚À¢&WV—&U÷7W÷'FVE÷—F†öâÀ¢¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2æ–æFW‚–×÷'B—5÷&–Ö'•öÖ&¶F÷vâÂ&VæFW%ö–æFW€¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2æÆ–æ·2–×÷'B6†V6µöÖ&¶F÷våöÆ–æ·0¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2æÖWFFF–×÷'B€¢5DDUôd”TÄE2À¢5DDUõdÅTU2À¢W‡V7FVE÷7FFUöf–VÆBÀ¢ÆöEöFö7VÖVçBÀ¢ÖWFFFöÆ—7BÀ¢¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2ææöåöÖ&¶F÷våö–æFW‚–×÷'B&VæFW%öæöåöÖ&¶F÷våö–æFW€¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2çÆFf÷&Õö6&–Æ—G’–×÷'B&VæFW%÷ÆFg&öÕö6&–Æ—G¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2ç&W÷6—F÷'•÷G&VR–×÷'B€¢tTäU$DTEô„TDU"À¢&VæFW%÷&W÷6—F÷'•÷7G'V7GW&RÀ¢¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2çFW7Eö6FÆör–×÷'B&VæFW%÷FW7Eö6FÆöp¦g&öÒ÷W&F–öç2ç67&—G2æFö7VÖVçG2çG&6V&–Æ—G’–×÷'B€¢6öÆÆV7E÷G&6V&ÆUöVÆVÖVçG2À¢&VæFW%÷G&6V&–Æ—G’À¢¦g&öÒ÷W&F–öç2ç67&—G2çVÆ—G’ç&Vv—7G'’–×÷'B€¢ÆöE÷VÆ—G•÷&Vv—7G'’À¢&öf–ÆW5öf÷%öÖ–ÆW7FöæRÀ¢fÆ–FFU÷VÆ—G•÷&Vv—7G'’À¢¦g&öÒ÷W&F–öç2ç67&—G2ç7FGW2ævVæW&FU÷&ö¦V7E÷7FGW2–×÷'B€¢6öÆÆV7EöÖ–ÆW7FöæW2À¢6öÆÆV7E÷FW7E÷7V72À¢cöÖ–ÆW7FöæUö–G2À¢¦g&öÒ÷W&F–öç2ç67&—G2ç7FGW2æ‡VÖå÷7FGW2–×÷'B&VæFW%÷&W÷6—F÷'•÷&ö¦V7E÷7FGW0¦g&öÒ÷W&F–öç2ç67&—G2çF6·2ævVæW&FR–×÷'BD4µô”EõEDU$âÂ6öÆÆV7E÷F6·2Â&VæFW%÷F6µö–æFW€¦g&öÒ÷W&F–öç2ç67&—G2çF6·2ç6VÖçF–72–×÷'BfÆ–FFU÷F6µ÷6VÖçF–70¦g&öÒ÷W&F–öç2ç67&—G2çG&6V&–Æ—G’ægVÆÅ÷G&6V&–Æ—G’–×÷'BfÆ–FFUögVÆÅ÷G&6V&–Æ—G¦g&öÒ÷W&F–öç2ç67&—G2çG&6V&–Æ—G’ç6VÖçF–5ö6öç6—7FVæ7’–×÷'BfÆ–FFU÷6VÖçF–5ö6öç6—7FVæ7 ¥$UT•$TEôÔUDDDÒ‚&–B"Â'G—R"Â'fW'6–öâ"¥dU%4”ôåõEDU$âÒ&Ræ6ö×–ÆR‡"%åÆBµÂåÆB²B"¥UDDTEõEDU$âÒ&Ræ6ö×–ÆR‡"%åÆG³GÒÕÆG³'ÒÕÆG³'ÒB"¥$TdU$Tä4Uô´U•2Ò€¢&FWVæG5ööâ"À¢'G&6W5÷Fò"À¢&–×ÆVÖVçG2"À¢&Ö—F–vFW2"À¢&–×ÆVÖVçFVEö'’"À¢'fW&–f–W2"À¢&66WG2"À¢¥DU5Eôd”ÄUõEDU$âÒ&Ræ6ö×–ÆR‡"%çFW7EõÆG³7ÕÂæÖBB"¥DU5Eô”EõEDU$âÒ&Ræ6ö×–ÆR‡"%åDU5EõÆG³7ÒB"¥DU5EôU„T5UD”ôå2Ò²&WFöÖFVB"Â&ÖçVÂ'Ð¤dÔ”Å•õt”ED‚Ò°¢$%"#¢2À¢%5•2#¢2À¢%D…"#¢2À¢%4T5ô5DÂ#¢2À¢$”äeõ$U#¢2À¢$”äeô4Õ#¢2À¢$”äeôdÄõr#¢2À¢$E"#¢2À¢%D4²#¢2À¢%DU5B#¢2À§Ð¥$UT•$TEõDTÕÄDU2Ò°¢&'W6–æW75÷&WV—&VÖVçE÷FV×ÆFRæÖB"À¢'7—7FVÕ÷&WV—&VÖVçE÷FV×ÆFRæÖB"À¢'F‡&VE÷FV×ÆFRæÖB"À¢'6V7W&—G•ö6öçG&öÅ÷FV×ÆFRæÖB"À¢&–æg&7G'V7GW&U÷&WV—&VÖVçE÷FV×ÆFRæÖB"À¢&–æg&7G'V7GW&Uö6ö×öæVçE÷FV×ÆFRæÖB"À¢&–æg&7G'V7GW&UöfÆ÷u÷FV×ÆFRæÖB"À¢&Ö–ÆW7FöæU÷FV×ÆFRæÖB"À¢&G%÷FV×ÆFRæÖB"À¢'F6µ÷FV×ÆFRæÖB"À¢'FW7E÷FV×ÆFRæÖB"À¥Ð¥5D$ÄUô4ôåDTåEõD…3¢F–7E·7G"Âö&¦V7EÒÒ·Ð¥5D$ÄUôdõ$$”DDTâÒ°¢2	-]òýí--­‚ÂÝâÝR-]òýí-í­í½½‚MíÍ-¢%DÅ2cã2"‚$ôWF‚c"ã ¢2íý}Ý²í---ÍòMíý=-Í½Í‚"ý]MÍ]-Ýí’ý]mM­m‚à¢&Ræ6ö×–ÆR‡"%Æ%e³#5ÒƒòµÇu×ÅÂåÆB’"Â&Rä”täõ$T44R’À¢&Ræ6ö×–ÆR‡"'÷7E²ÒÓõc"Â&Rä”täõ$T44R’À¢&Ræ6ö×–ÆR‡"%Æ$†W&ÖW5Æ""Â&Rä”täõ$T44R’À¢&Ræ6ö×–ÆR‡"$6Æ÷VEÂç'R"Â&Rä”täõ$T44R’À¢&Ræ6ö×–ÆR‡"%Æ&ÕÆG³'ÕÆ""Â&Rä”täõ$T44R’À¥Ð¤DU$T4DTEõDô´Tå2Ò°¢&Væv–æVW&–æuö5ö6öFRæÖB"À¢'6V7W&—G•öæE÷&VÆ–&–Æ—G’æÖB"À¢&G%óeö†W&ÖW5öf—'7E÷÷'F&ÆU÷'VçF–ÖRæÖB"À¢&G%óuö6öFUöW†V7WF–öå÷6æF&÷‚æÖB"À¢&G%ó…÷FVÆVw&Õ÷gåöæEöVw&W72æÖB"À¢%%TåD”ÔUô4ôåE$5EôtDUó"À¥Ð¥4T5$UEõEDU$å2Ò°¢&Ræ6ö×–ÆR€¢""ƒö’’†•µòÕÓö¶W—Ç6V7&WGÇFö¶VçÇ77v÷&B•Ç2¥³£ÕÕÇ2¥²uÂ%Óõ´Õ¦×£Ó•õÂÒ²õ×³bÇÓ×³Ã'Ò ¢’À¢&Ræ6ö×–ÆR‡""ÒÒÒÒÔ$Tt”â…%4ÄT2ÄõTå54‚“õ$•dDR´U’ÒÒÒÒÒ"’À¢&Ræ6ö×–ÆR‡"%Æ&v…·÷W7%Õõ´Õ¦×£Ó•×³bÇÕÆ""’À¥Ð¥44ääTEõDU…Eõ5Tdd•„U2Ò°¢"æÖB"À¢"ç’"À¢"ç3"À¢"æ§6öâ"À¢"ç–ÖÂ"À¢"ç–ÖÂ"À¢"çFöÖÂ"À¢"çG‡B"À¢"æ6fr"À¢"æ–æ’"À¢"ç6‚"À¢"æVçb"À¢"æW†×ÆR"À§Ð¥D…$TEõ$UT•$TEôÄ$TÅ2Ò€¢"¢­
+m]Ý“¢¢¢"À¢"¢­	­--³¢¢¢"À¢"¢­	ýí½]M--S¢¢¢"À¢"¢­	í--í}Ý½’£¢¢¢"À¢¤ÄÄõtTEõtõ$´dÄõuõU$Ô•54”ôå2Ò²'&VB"Â&æöæR'Ð  ¤FF6Æ70¦6Æ726†V6µ&W7VÇC ¢æÖS¢7G ¢ö³¢&ööÀ¢W'&÷'3¢Æ—7E·7G%Ð¢v&æ–æw3¢Æ—7E·7G%Ð  ¦FVb÷&W7VÇB†æÖS¢7G"ÂW'&÷'3¢Æ—7E·7G%ÒÂv&æ–æw3¢Æ—7E·7G%ÒÂæöæRÒæöæR’Óâ6†V6µ&W7VÇC ¢&WGW&â6†V6µ&W7VÇB†æÖSÖæÖRÂö³Öæ÷BW'&÷'2ÂW'&÷'3ÖW'&÷'2Âv&æ–æw3×v&æ–æw2÷"µÒ  ¦FVb÷F…÷'E÷W6W5÷6æ¶Uö66R‡'C¢7G"’Óâ&ööÃ ¢–b'BÓÒ$tTåE2æÖB"÷"'Bç7F'G7v—F‚‚"â"“ ¢&WGW&âG'VP¢&WGW&â'Bæ—666–’‚’æB'BÓÒ'BæÆ÷vW"‚’æB"Ò"æ÷B–â'@  ¦FVb6†V6µ÷7G'V7GW&R‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢W'&÷'3¢Æ—7E·7G%ÒÒµÐ¢&WV—&VEöF—'2Ò°¢"æv—F‡V"÷v÷&¶fÆ÷w2"À¢&G""À¢'7V6–f–6F–öç2"À¢&÷W&F–öç2"À¢&÷W&F–öç2÷FV×ÆFW2"À¢&÷W&F–öç2÷67&—G2"À¢&÷W&F–öç2÷67&—G2÷VÆ—G’"À¢&÷W&F–öç2÷67&—G2öWf–FVæ6R"À¢&÷W&F–öç2÷67&—G2ö66WFæ6R"À¢&÷W&F–öç2÷FW7G2"À¢'v÷&²"À¢'v÷&²÷FW7G2"À¢&vVæW&FVB"À¢'v÷&²ö66WFæ6R"À¢'v÷&²÷F6·2"À¢Ð¢&WV—&VEöf–ÆW2Ò°¢"æv—F‡V"÷v÷&¶fÆ÷w2÷&ö¦V7Eö6†V6²ç–ÖÂ"À¢&Ö–ÆW7FöæW2æÖB"À¢'7V6–f–6F–öç2ö'W6–æW75÷&WV—&VÖVçG2æÖB"À¢'7V6–f–6F–öç2÷F‡&VEöÖöFVÂæÖB"À¢'7V6–f–6F–öç2÷7—7FVÕ÷7V6–f–6F–öâæÖB"À¢'7V6–f–6F–öç2ö&6†—FV7GW&Uö&6VÆ–æRæÖB"À¢'7V6–f–6F–öç2ö–æg&7G'V7GW&Uö&6VÆ–æRæÖB"À¢'&ö¦V7E÷7FGW2æÖB"À¢'F6·2æÖB"À¢&÷W&F–öç2ö66WFæ6RæÖB"À¢&÷W&F–öç2÷6VÖçF–5÷&Wf–WræÖB"À¢$tTåE2æÖB"À¢&÷W&F–öç2öÆö6ÅöFWfVÆ÷ÖVçE÷v–æF÷w2æÖB"À¢&÷W&F–öç2÷&ö¦V7Eö6öæf–ræ§6öâ"À¢&÷W&F–öç2÷VÆ—G•÷&Vv—7G'’æ§6öâ"À¢&÷W&F–öç2÷67&—G2ö66WFæ6RöÇ’ç’"À¢&÷W&F–öç2÷67&—G2öWf–FVæ6R÷&V6÷&Bç’"À¢Ò²¶b&÷W&F–öç2÷FV×ÆFW2÷¶æÖWÒ"f÷"æÖR–â$UT•$TEõDTÕÄDU5Ð¢f÷"&VÆF—fR–â&WV—&VEöF—'3 ¢–bæ÷B‡&ö÷Bò&VÆF—fR’æ—5öF—"‚“ ¢W'&÷'2æVæB†b-	í-=---=]"íý}-]½ÍÝ½’­-½í3¢·&VÆF—fWÒò"¢f÷"&VÆF—fR–â&WV—&VEöf–ÆW3 ¢–bæ÷B‡&ö÷Bò&VÆF—fR’æ—5öf–ÆR‚“ ¢W'&÷'2æVæB†b-	í-=---=]"íý}-]½ÍÝ½’M³¢·&VÆF—fWÒ"¢W‡V7FVE÷7V6–f–6F–öåöf–ÆW2Ò°¢&&6†—FV7GW&Uö&6VÆ–æRæÖB"À¢&'W6–æW75÷&WV—&VÖVçG2æÖB"À¢&–æg&7G'V7GW&Uö&6VÆ–æRæÖB"À¢'7—7FVÕ÷7V6–f–6F–öâæÖB"À¢'F‡&VEöÖöFVÂæÖB"À¢Ð¢7GVÅ÷7V6–f–6F–öåöf–ÆW2Ò·F‚ææÖRf÷"F‚–â‡&ö÷Bò'7V6–f–6F–öç2"’ævÆö"‚"¢æÖB"—Ð¢–b7GVÅ÷7V6–f–6F–öåöf–ÆW2ÒW‡V7FVE÷7V6–f–6F–öåöf–ÆW3 ¢W'&÷'2æVæB€¢-	­-½í27V6–f–6F–öç2òMí½m]ÒíM]m-Â}]-½R}í-½RMí­=Í]Ý-‚íMÝ2-]ÍÝ=âý]mM­mã² ¢b-ýí½=}]Ýâ·6÷'FVB†7GVÅ÷7V6–f–6F–öåöf–ÆW2—Ò ¢¢&ö÷EöVçG'•öæÖW2Ò·F‚ææÖRf÷"F‚–â&ö÷Bæ—FW&F—"‚—Ð¢f÷"æÖR–â&ö÷EöVçG'•öæÖW3 ¢æ÷&ÖÆ—¦VEöæÖRÒæÖRæÆ÷vW"‚¢–bæ÷&ÖÆ—¦VEöæÖRÓÒ'&VFÖR"÷"æ÷&ÖÆ—¦VEöæÖRç7F'G7v—F‚‚'&VFÖRâ"“ ¢W'&÷'2æVæB€¢b%$TDÔR}ý]Ò]]Ý]Â-½M]½Ím¢¶æÖWÓ² ¢-]MÝ--]ÝÝò-í}­-]íM(	B&ö¦V7E÷7FGW2æÖB ¢¢f÷"f÷&&–FFVâ–â°¢&Fö72"À¢'67&—G2"À¢'FW7G2"À¢&÷W&F–öç2övVçEö–ç7G'V7F–öâæÖB"À¢&vVçEö–ç7G'V7F–öâæÖB"À¢&÷W&F–öç2÷67&—G2÷F6·2öf–æÆ—¦Rç’"À¢&'W6–æW75÷&WV—&VÖVçG2æÖB"À¢&&6†—FV7GW&Uö&6VÆ–æRæÖB"À¢&–æg&7G'V7GW&Uö&6VÆ–æRæÖB"À¢'F‡&VEöÖöFVÂæÖB"À¢'7V6–f–6F–öç2ö6÷&UöæEö6†ææVÇ2æÖB"À¢'7V6–f–6F–öç2ö6öçFW‡EöæEöWf–FVæ6RæÖB"À¢'7V6–f–6F–öç2÷&W6VçFF–öç2æÖB"À¢'7V6–f–6F–öç2÷v÷&µöæEööff–6RæÖB"À¢'7V6–f–6F–öç2÷VÆ—G•öæEö÷W&F–öç2æÖB"À¢'7V6–f–6F–öç2ö†öÖUöæEöfÖ–Ç’æÖB"À¢'7V6–f–6F–öç2÷6V7W&—G•ö6öçG&öÇ2æÖB"À¢Ó ¢–b‡&ö÷Bòf÷&&–FFVâ’æW†—7G2‚“ ¢W'&÷'2æVæB†b-
+=-]-’½‚½Ý’ý=-Â}ý]Ó¢¶f÷&&–FFVçÒ"¢f÷"F‚–â&ö÷Bç&vÆö"‚"¢"“ ¢'G2ÒF‚ç&VÆF—fU÷Fò‡&ö÷B’ç'G0¢–bç’‡'BæÆ÷vW"‚’–â”täõ$TEôD•%2f÷"'B–â'G2“ ¢6öçF–çVP¢&VÆF—fRÒF‚‚§'G2’æ5÷÷6—‚‚¢–bç’†æ÷B÷F…÷'E÷W6W5÷6æ¶Uö66R‡'B’f÷"'B–â'G2“ ¢W'&÷'2æVæB†b-	ý=-ÂMí½m]Òýí½Í}í--ÂÝ=½­’Æ÷vW%÷6æ¶Uö66S¢·&VÆF—fWÒ"¢&WGW&â÷&W7VÇB‚'7G'V7GW&R"ÂW'&÷'2  ¦FVb÷&–Ö'•öFö7VÖVçG2‡&ö÷C¢F‚“ ¢f÷"F‚–â—FW%öf–ÆW2‡&ö÷BÂ7Vff—†W3×²"æÖB'ÒÂ–æ6ÇVFUövVæW&FVCÔfÇ6R“ ¢&VÆF—fRÒ&VÆF—fU÷÷6—‚‡F‚Â&ö÷B¢–b—5÷&–Ö'•öÖ&¶F÷vâ‡&VÆF—fR“ ¢––VÆB&VÆF—fRÂÆöEöFö7VÖVçB‡F‚  ¦FVböFö7VÖVçEö–G2‡&ö÷C¢F‚’ÓâF–7E·7G"Â7G%Ó ¢&W7VÇC¢F–7E·7G"Â7G%ÒÒ·Ð¢f÷"&VÆF—fRÂFö2–â÷&–Ö'•öFö7VÖVçG2‡&ö÷B“ ¢–FVçF–f–W"Ò7G"†Fö2æÖWFFFævWB‚&–B"Â""’’ç7G&—‚¢–b–FVçF–f–W# ¢&W7VÇE¶–FVçF–f–W"æÆ÷vW"‚•ÒÒ&VÆF—fP¢&WGW&â&W7VÇ@  ¦FVbö¶æ÷vå÷&VfW&Væ6Uö–G2‡&ö÷C¢F‚ÂFö7VÖVçEö–G3¢F–7E·7G"Â7G%Ò’Óâ6WE·7G%Ó ¢¶æ÷vâÒ6WB†Fö7VÖVçEö–G2¢G'“ ¢¶æ÷vâçWFFR†–FVçF–f–W"æÆ÷vW"‚’f÷"–FVçF–f–W"–â6öÆÆV7E÷G&6V&ÆUöVÆVÖVçG2‡&ö÷B’¢W†6WBW†6WF–öã ¢70¢G'“ ¢¶æ÷vâçWFFR‡7G"†—FVÕ²&–B%Ò’æÆ÷vW"‚’f÷"—FVÒ–â6öÆÆV7EöÖ–ÆW7FöæW2‡&ö÷B•²&—FV×2%Ò¢W†6WBW†6WF–öã ¢70¢&WGW&â¶æ÷và  ¦FVb6†V6µöÖWFFF‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢W'&÷'3¢Æ—7E·7G%ÒÒµÐ¢–FVçF–f–W'3¢F–7E·7G"Â7G%ÒÒ·Ð¢Fö7VÖVçG2ÒµÐ¢f÷"&VÆF—fRÂFö2–â÷&–Ö'•öFö7VÖVçG2‡&ö÷B“ ¢Fö7VÖVçG2æVæB‚‡&VÆF—fRÂFö2’¢W‡V7FVEöf–VÆBÒW‡V7FVE÷7FFUöf–VÆB‡&VÆF—fR¢f÷"¶W’–â‚¥$UT•$TEôÔUDDDÂW‡V7FVEöf–VÆB“ ¢–b¶W’æ÷B–âFö2æÖWFFF÷"Fö2æÖWFFF¶¶W•Ò–â„æöæRÂ""ÂµÒ“ ¢W'&÷'2æVæB†b'·&VÆF—fWÓ¢í-=---=]"ýí½Rw¶¶W—Òr"¢–b'7FGW2"–âFö2æÖWFFF ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢=Ý-]½ÍÝíRýí½Rw7FGW2r}ý]]Ýã²ýí½Í}=-Rw¶W‡V7FVEöf–VÆGÒr ¢¢&W6VçEöf–VÆG2Ò¶f–VÆBf÷"f–VÆB–â5DDUôd”TÄE2–bf–VÆB–âFö2æÖWFFFÐ¢–b&W6VçEöf–VÆG2Ò¶W‡V7FVEöf–VÆEÓ ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢ímM]-ò-í½Í­âýí½Rí-íýÝòw¶W‡V7FVEöf–VÆGÒrÂýí½=}]Ýâ·&W6VçEöf–VÆG2÷"}Ý}]=âwÒ ¢¢–FVçF–f–W"Ò7G"†Fö2æÖWFFFævWB‚&–B"Â""’’ç7G&—‚¢æ÷&ÖÆ—¦VBÒ–FVçF–f–W"æÆ÷vW"‚¢–b–FVçF–f–W# ¢–bæ÷&ÖÆ—¦VB–â–FVçF–f–W'3 ¢W'&÷'2æVæB€¢b-	M=½=í’Fö7VÖVçB–Bw¶–FVçF–f–W'Òs¢¶–FVçF–f–W'5¶æ÷&ÖÆ—¦VE×Ò‚·&VÆF—fWÒ ¢¢VÇ6S ¢–FVçF–f–W'5¶æ÷&ÖÆ—¦VEÒÒ&VÆF—fP¢fW'6–öâÒ7G"†Fö2æÖWFFFævWB‚'fW'6–öâ"Â""’’ç7G&—‚¢–bfW'6–öâæBæ÷BdU%4”ôåõEDU$âægVÆÆÖF6‚‡fW'6–öâ“ ¢W'&÷'2æVæB†b'·&VÆF—fWÓ¢fW'6–öâMí½m]ÒÍ]-ÂMíÍ"‚ç‚Âýí½=}]Ýâw·fW'6–öçÒr"¢WFFVBÒ7G"†Fö2æÖWFFFævWB‚'WFFVB"Â""’’ç7G&—‚¢2
+½íÒ(	BÝ-âMíÍÂÝRMí­=Í]Ý#¢íÒ}­íÝÝâ]Ý"}ýí½Ý-]½ÂM-²à¢–b€¢WFFV@¢æBæ÷B&VÆF—fRç7F'G7v—F‚‚&÷W&F–öç2÷FV×ÆFW2ò"¢æBæ÷BUDDTEõEDU$âægVÆÆÖF6‚‡WFFVB¢“ ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢WFFVBMí½m]Ò½-ÂM-í’	=	=	=	2Ý	Í	ÂÝ	M	BÂýí½=}]Ýâw·WFFVGÒs² ¢-Ý]}ýí½Ý]ÝÝ½’}ýí½Ý-]½Âr½íÝÝ]Míý=-Â"Mí­=Í]Ý-R ¢¢7FFRÒ7G"†Fö2æÖWFFFævWB†W‡V7FVEöf–VÆBÂ""’’ç7G&—‚’æÆ÷vW"‚¢–b7FFRæB7FFRæ÷B–â5DDUõdÅTU5¶W‡V7FVEöf–VÆEÓ ¢W'&÷'2æVæB†b'·&VÆF—fWÓ¢Ý]}-]-Ý½’¶W‡V7FVEöf–VÆGÒw·7FFWÒr" ¢¶æ÷vâÒö¶æ÷vå÷&VfW&Væ6Uö–G2‡&ö÷BÂ–FVçF–f–W'2¢f÷"&VÆF—fRÂFö2–âFö7VÖVçG3 ¢f÷"¶W’–â$TdU$Tä4Uô´U•3 ¢f÷"&VfW&Væ6R–âÖWFFFöÆ—7B†Fö2æÖWFFFÂ¶W’“ ¢–b&VfW&Væ6Rç7G&—‚’æÆ÷vW"‚’æ÷B–â¶æ÷vã ¢W'&÷'2æVæB†b'·&VÆF—fWÓ¢¶¶W—Ò½½]-òÝÝ]}-]-Ý½’–Bw·&VfW&Væ6WÒr"¢&WGW&â÷&W7VÇB‚&ÖWFFF"ÂW'&÷'2  ¦FVböW‡V7FVEö–G2†fÖ–Ç“¢7G"Â7GVÃ¢Æ—7E·7G%Ò’Óâ6WE·7G%Ó ¢v–GF‚ÒdÔ”Å•õt”ED…¶fÖ–Ç•Ð¢çVÖ&W'2ÒµÐ¢f÷"–FVçF–f–W"–â7GVÃ ¢ÖF6‚Ò&Rç6V&6‚‡""…ÆB²’B"Â–FVçF–f–W"¢–bæ÷BÖF6ƒ ¢&—6RfÇVTW'&÷"†b'¶–FVçF–f–W'Ó¢M]Ý-M­-íMí½m]Ò}­Ý}--Íò}½íÂ"¢çVÖ&W'2æVæB†–çB†ÖF6‚æw&÷Wƒ’’¢Ö†–×VÒÒÖ‚†çVÖ&W'2¢&WGW&â¶b'¶fÖ–Ç—Õ÷¶–æFWƒ£·v–GF‡ÖGÒ"f÷"–æFW‚–â&ævRƒÂÖ†–×VÒ²—Ð  ¦FVb6†V6µ÷G&6V&–Æ—G’‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢W'&÷'3¢Æ—7E·7G%ÒÒµÐ¢G'“ ¢&V6÷&G2Ò6öÆÆV7E÷G&6V&ÆUöVÆVÖVçG2‡&ö÷B¢W†6WBW†6WF–öâ2W†3 ¢&WGW&â÷&W7VÇB‚'G&6V&–Æ—G’"Â·7G"†W†2•Ò ¢'•öfÖ–Ç“¢F–7E·7G"ÂÆ—7E·7G%ÕÒÒ·Ð¢f÷"–FVçF–f–W"Â&V6÷&B–â&V6÷&G2æ—FV×2‚“ ¢fÖ–Ç’Ò7G"‡&V6÷&E²&fÖ–Ç’%Ò¢–bfÖ–Ç’–âdÔ”Å•õt”EDƒ ¢'•öfÖ–Ç’ç6WFFVfVÇB†fÖ–Ç’ÂµÒ’æVæB†–FVçF–f–W"¢f÷"fÖ–Ç’–âdÔ”Å•õt”EDƒ ¢7GVÂÒ6÷'FVB†'•öfÖ–Ç’ævWB†fÖ–Ç’ÂµÒ’¢–bæ÷B7GVÃ ¢–bfÖ–Ç’ÓÒ%D4²# ¢6öçF–çVP¢W'&÷'2æVæB†b-	ÝRÝM]ÝâÝ‚íMÝí=âÝ½]Í]Ý-¶fÖ–Ç—Ò"¢6öçF–çVP¢W‡V7FVBÒöW‡V7FVEö–G2†fÖ–Ç’Â7GVÂ¢–b6WB†7GVÂ’ÒW‡V7FVC ¢W'&÷'2æVæB€¢b'¶fÖ–Ç—ÒMí½mÝ²M-‚]rýíý=­í#²í-=---=í"·6÷'FVB†W‡V7FVBÒ6WB†7GVÂ’—Ò ¢ ¢f÷"–FVçF–f–W"Â&V6÷&B–â&V6÷&G2æ—FV×2‚“ ¢2'&VÆF–öç2"—2Çv—2F–7E·7G"ÂÆ—7E·7G%ÕÒ'’6öç7G'V7F–öâ(	B6VP¢26öÆÆV7E÷G&6V&ÆUöVÆVÖVçG2‚’–âG&6V&–Æ—G’ç’à¢&VÆF–öç2Ò67B†F–7E·7G"ÂÆ—7E·7G%ÕÒÂ&V6÷&BævWB‚'&VÆF–öç2"Â·Ò’¢f÷"¶W’ÂF&vWG2–â&VÆF–öç2æ—FV×2‚“ ¢f÷"F&vWB–âF&vWG3 ¢–bF&vWBæ÷B–â&V6÷&G3 ¢W'&÷'2æVæB€¢b'¶–FVçF–f–W'Ó¢¶¶W—Ò½½]-òÝÝ]}-]-Ý½’-=]Í½’–Bw·F&vWGÒr ¢¢fÖ–Ç’Ò7G"‡&V6÷&E²&fÖ–Ç’%Ò¢–bfÖ–Ç’ÓÒ%5•2"æBæ÷Bç’€¢F&vWBç7F'G7v—F‚‚$%%ò"’f÷"F&vWB–â&VÆF–öç2ævWB‚'G&6W5÷Fò"ÂµÒ¢“ ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢5•2Mí½m]ÒG&6W5÷FòÍÝÍ=ÂíMÒ%""¢–bfÖ–Ç’ÓÒ%D…"# ¢–bæ÷Bç’€¢F&vWBç7F'G7v—F‚‚%4T5ô5DÅò"’f÷"F&vWB–â&VÆF–öç2ævWB‚&Ö—F–vFVEö'’"ÂµÒ¢“ ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢D…"Mí½m]ÒÍ]-ÂÖ—F–vFVEö'’4T5ô5DÂ"¢6V7F–öâÒ7G"‡&V6÷&BævWB‚'6V7F–öâ"Â""’¢f÷"Æ&VÂ–âD…$TEõ$UT•$TEôÄ$TÅ3 ¢–bÆ&VÂæ÷B–â6V7F–öã ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢í-=---=]"íý}-]½ÍÝíRýí½R¶Æ&VÇÒ"¢–bfÖ–Ç’ÓÒ%4T5ô5DÂ"æBæ÷Bç’€¢–FVçF–f–W ¢–â67B†F–7E·7G"ÂÆ—7E·7G%ÕÒÂ÷F†W"ævWB‚'&VÆF–öç2"Â·Ò’’ævWB‚&Ö—F–vFVEö'’"ÂµÒ¢f÷"÷F†W"–â&V6÷&G2çfÇVW2‚¢–b÷F†W"ævWB‚&fÖ–Ç’"’ÓÒ%D…" ¢“ ¢W'&÷'2æVæB€¢b'¶–FVçF–f–W'Ó¢Ý4T5ô5DÂMí½mÝ½½-ÍòÍÝÍ=ÂíMÝD…"}]]rÖ—F–vFVEö'’ ¢¢–bfÖ–Ç’Ò%D…""æB‡&VÆF–öç2ævWB‚&Ö—F–vFW2"’÷"&VÆF–öç2ævWB‚&–×ÆVÖVçFVEö'’"’“ ¢W'&÷'2æVæB€¢b'¶–FVçF–f–W'Ó¢í-Ý½RÖ—F–vFW2ö–×ÆVÖVçFVEö'’}ý]]Ý³² ¢-ýí½Í}=-RD…"æÖ—F–vFVEö'’‚-ý}‚ÝmÝ]=â½íòG&6W5÷Fò ¢¢–bfÖ–Ç’Ò%D…"# ¢2
+-ý}Â*½==í}(	BÍ]+²]Ý-ò-í½Í­â­¢D…"æÖ—F–vFVEö'’â
+½½­ÝmÝ]=à¢2½íòÝD…"ýí--íý]"=mR=]--=í]R]â"í]íB­ÝíÝ}]­í=à¢2Ýý-½]Ýò‚M]½]"=BÝ]íMÝí}Ý}Ý½Â†v÷fW&ææ6RæÖBÂ}M]²2’à¢F‡&VE÷F&vWG2Ò6÷'FVB€¢°¢F&vW@¢f÷"¶W’–â‚'G&6W5÷Fò"Â&–×ÆVÖVçG2"¢f÷"F&vWB–â&VÆF–öç2ævWB†¶W’ÂµÒ¢–bF&vWBç7F'G7v—F‚‚%D…%ò"¢Ð¢¢–bF‡&VE÷F&vWG3 ¢W'&÷'2æVæB€¢b'¶–FVçF–f–W'Ó¢½½­Ý==í}2·F‡&VE÷F&vWG7Ò}M-ò-í½Í­â}]]r ¢%D…"æÖ—F–vFVEö'“²ÝmÝ’½í’=­}½-]"-]í-ÝR½‚Í]2}-² ¢¢–bfÖ–Ç’–â²$”äeô4Õ"Â$”äeôdÄõr'ÒæBæ÷Bç’€¢F&vWBç7F'G7v—F‚‚$”äeõ$Uò"’f÷"F&vWB–â&VÆF–öç2ævWB‚&–×ÆVÖVçG2"ÂµÒ¢“ ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢¶fÖ–Ç—ÒMí½m]Ò–×ÆVÖVçG2ÍÝÍ=ÂíMÒ”äeõ$U"¢–bfÖ–Ç’ÓÒ$E""æBæ÷B&VÆF–öç2ævWB‚'G&6W5÷Fò"“ ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢E"Mí½m]ÒÍ]-ÂG&6W5÷Fò"¢–bfÖ–Ç’ÓÒ%D4²"æBæ÷Bç’€¢F&vWBç7F'G7v—F‚‚&Ò"’f÷"F&vWB–â&VÆF–öç2ævWB‚'G&6W5÷Fò"ÂµÒ¢“ ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢D4²Mí½m]ÒG&6W5÷FòÖ–ÆW7FöæR"¢–bfÖ–Ç’ÓÒ%DU5B# ¢†5÷F6²Òç’‡F&vWBç7F'G7v—F‚‚%D4µò"’f÷"F&vWB–â&VÆF–öç2ævWB‚'G&6W5÷Fò"ÂµÒ’¢66WG5öÖ–ÆW7FöæRÒç’€¢7G"‡F&vWB’æÆ÷vW"‚’ç7F'G7v—F‚‚&Ò"’f÷"F&vWB–â&VÆF–öç2ævWB‚&66WG2"ÂµÒ¢¢–bæ÷B†5÷F6²æBæ÷B66WG5öÖ–ÆW7FöæS ¢W'&÷'2æVæB†b'¶–FVçF–f–W'Ó¢DU5BMí½m]ÒG&6W5÷FòD4²½â66WG2Ö–ÆW7FöæR"¢–bæ÷B&VÆF–öç2ævWB‚'fW&–f–W2"’æBæ÷Bç’€¢7G"‡F&vWB’æÆ÷vW"‚’ç7F'G7v—F‚‚&Ò"’f÷"F&vWB–â&VÆF–öç2ævWB‚&66WG2"ÂµÒ¢“ ¢W'&÷'2æVæB€¢b'¶–FVçF–f–W'Ó¢DU5BMí½m]ÒfW&–f–W2-=]ÍíR-í--â½â66WG2Ö–ÆW7FöæR ¢¢&WGW&â÷&W7VÇB‚'G&6V&–Æ—G’"ÂW'&÷'2  ¦FVb6†V6µögVÆÅ÷G&6V&–Æ—G’‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢&WGW&â÷&W7VÇB‚&gVÆÅ÷G&6V&–Æ—G’"ÂfÆ–FFUögVÆÅ÷G&6V&–Æ—G’‡&ö÷B’  ¦FVb6†V6µ÷6VÖçF–5ö6öç6—7FVæ7’‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢&WGW&â÷&W7VÇB‚'6VÖçF–5ö6öç6—7FVæ7’"ÂfÆ–FFU÷6VÖçF–5ö6öç6—7FVæ7’‡&ö÷B’  ¦FVb6†V6µöWF†÷&—G•öw&‚‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢W'&÷'3¢Æ—7E·7G%ÒÒµÐ¢f÷"&VÆF—fRÂFö2–â÷&–Ö'•öFö7VÖVçG2‡&ö÷B“ ¢FW2Ò·fÇVRç7G&—‚’æÆ÷vW"‚’f÷"fÇVR–âÖWFFFöÆ—7B†Fö2æÖWFFFÂ&FWVæG5ööâ"—Ð¢–b7G"†Fö2æÖWFFFævWB‚'G—R"Â""’’ç7G&—‚’–â°¢'7—7FVÕ÷7V6–f–6F–öâ"À¢'6V7W&—G•÷7V6–f–6F–öâ"À¢Ó ¢f÷&&–FFVâÒ²&&6†—FV7GW&Uö&6VÆ–æR"Â&–æg&7G'V7GW&Uö&6VÆ–æR'Òæ–çFW'6V7F–öâ†FW2¢–bf÷&&–FFVã ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢5•2õ4T27V6–f–6F–öâÝRÍím]"FWVæG5ööâÝmÝ’½í’·6÷'FVB†f÷&&–FFVâ—Ò ¢ ¢Fö72ÒÆ—7B…÷&–Ö'•öFö7VÖVçG2‡&ö÷B’¢'•ö–BÒ°¢7G"†Fö2æÖWFFFævWB‚&–B"Â""’’ç7G&—‚’æÆ÷vW"‚“¢&VÆF—fP¢f÷"&VÆF—fRÂFö2–âFö70¢–b7G"†Fö2æÖWFFFævWB‚&–B"Â""’’ç7G&—‚¢Ð¢w&ƒ¢F–7E·7G"Â6WE·7G%ÕÒÒ·Ð¢f÷"&VÆF—fRÂFö2–âFö73 ¢–FVçF–f–W"Ò7G"†Fö2æÖWFFFævWB‚&–B"Â""’’ç7G&—‚’æÆ÷vW"‚¢–bæ÷B–FVçF–f–W# ¢6öçF–çVP¢FW2Ò°¢fÇVRç7G&—‚’æÆ÷vW"‚¢f÷"fÇVR–âÖWFFFöÆ—7B†Fö2æÖWFFFÂ&FWVæG5ööâ"¢–bfÇVRç7G&—‚¢Ð¢Væ¶æ÷vâÒ6÷'FVB†FWf÷"FW–âFW2–bFWæ÷B–â'•ö–B¢f÷"FW–âVæ¶æ÷vã ¢W'&÷'2æVæB†b'·&VÆF—fWÓ¢FWVæG5ööâ½½]-òÝÝ]}-]-Ý½’Fö7VÖVçB–B¶FWÒ"¢w&…¶–FVçF–f–W%ÒÒ¶FWf÷"FW–âFW2–bFW–â'•ö–GÐ ¢f—6—F–æs¢6WE·7G%ÒÒ6WB‚¢f—6—FVC¢6WE·7G%ÒÒ6WB‚ ¢FVbf—6—B†æöFS¢7G"Â7F6³¢Æ—7E·7G%Ò’ÓâæöæS ¢–bæöFR–âf—6—FVC ¢&WGW&à¢–bæöFR–âf—6—F–æs ¢G'“ ¢7F'BÒ7F6²æ–æFW‚†æöFR¢7–6ÆUöæöFW2Ò7F6µ·7F'C¥Ò²¶æöFUÐ¢W†6WBfÇVTW'&÷# ¢7–6ÆUöæöFW2Ò7F6²²¶æöFUÐ¢W'&÷'2æVæB‚&FWVæG5ööâ7–6ÆS¢"²"Óâ"æ¦ö–â†7–6ÆUöæöFW2’¢&WGW&à¢f—6—F–æræFB†æöFR¢7F6²æVæB†æöFR¢f÷"FW–â6÷'FVB†w&‚ævWB†æöFRÂ6WB‚’’“ ¢f—6—B†FWÂ7F6²¢7F6²ç÷‚¢f—6—F–æræF—66&B†æöFR¢f—6—FVBæFB†æöFR ¢f÷"æöFR–â6÷'FVB†w&‚“ ¢f—6—B†æöFRÂµÒ ¢G'“ ¢Ö–ÆW7FöæW2Ò6öÆÆV7EöÖ–ÆW7FöæW2‡&ö÷B¢W†6WBW†6WF–öâ2W†3 ¢&WGW&â÷&W7VÇB‚&WF†÷&—G•öw&‚"Â·7G"†W†2•Ò¢ÓÒæW‡B‚†—FVÒf÷"—FVÒ–âÖ–ÆW7FöæW5²&—FV×2%Ò–b7G"†—FVÕ²&–B%Ò’ÓÒ&Ó"’ÂæöæR¢–bÓæBÓævWB‚'66÷R"“ ¢W'&÷'2æVæB€¢&Ó¢f÷VæFF–öâÖ–ÆW7FöæRÝRMí½m]Òí­ý-½ý-Â&öGV7B&WV—&VÖVçB–×ÆVÖVçFF–öâ66÷R ¢ ¢&6†—FV7GW&U÷F‚Ò'7V6–f–6F–öç2ö&6†—FV7GW&Uö&6VÆ–æRæÖB ¢&6†—FV7GW&RÒ&VE÷FW‡B‡&ö÷Bò&6†—FV7GW&U÷F‚¢–b-	­ÝíÝ}]­íRýí-íýÝÝíRí-íýÝRýÝM½]m"ý½-MíÍR"–â&6†—FV7GW&S ¢W'&÷'2æVæB†b'¶&6†—FV7GW&U÷F‡Ó¢÷væW'6†—MÝÝ½Rýí--í]}"	­íÝ--=m‚"¢F‡&VE÷F‚Ò'7V6–f–6F–öç2÷F‡&VEöÖöFVÂæÖB ¢F‡&VBÒ&VE÷FW‡B‡&ö÷BòF‡&VE÷F‚¢–b'ÆFf÷&ÒÖ÷væVBöÆ–7’"–âF‡&VC ¢W'&÷'2æVæB†b'·F‡&VE÷F‡Ó¢öÆ–7’ÝRMí½mÝí­ý-½ý-Íòí--]ÝÝí-Íâý½-MíÍ²"¢&WGW&â÷&W7VÇB‚&WF†÷&—G•öw&‚"ÂW'&÷'2  ¦FVb6†V6µöFö7VÖVçE÷öÆ–7’‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢W'&÷'3¢Æ—7E·7G%ÒÒµÐ¢v&æ–æw3¢Æ—7E·7G%ÒÒµÐ¢f÷"F‚–â—FW%öf–ÆW2€¢&ö÷BÀ¢7Vff—†W3×²"æÖB"Â"ç’"Â"ç3"Â"æ§6öâ"Â"ç–ÖÂ"Â"ç–ÖÂ"Â"çFöÖÂ'ÒÀ¢–æ6ÇVFUövVæW&FVCÔfÇ6RÀ¢“ ¢&VÆF—fRÒ&VÆF—fU÷÷6—‚‡F‚Â&ö÷B¢FW‡BÒF‚ç&VE÷FW‡B†Væ6öF–æsÒ'WFbÓ‚×6–r"ÂW'&÷'3Ò'&WÆ6R"¢–b&VÆF—fR–â5D$ÄUô4ôåDTåEõD…2÷"&VÆF—fRç7F'G7v—F‚‚'7V6–f–6F–öç2ò"“ ¢f÷"GFW&â–â5D$ÄUôdõ$$”DDTã ¢ÖF6‚ÒGFW&âç6V&6‚‡FW‡B¢–bÖF6ƒ ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢7F&ÆR6÷W&6RíM]m"&öFÖö–×ÆVÖVçFF–öâFö¶Vâw¶ÖF6‚æw&÷Wƒ—Òr ¢¢–b&VÆF—fRÒ&÷W&F–öç2÷67&—G2öFö7VÖVçG2ö6†V6²ç’# ¢f÷"Fö¶Vâ–âDU$T4DTEõDô´Tå3 ¢–bFö¶Vâ–âFW‡C ¢W'&÷'2æVæB†b'·&VÆF—fWÓ¢ÝM]ÒFW&V6FVBFö¶Vâw·Fö¶VçÒr"¢–b&VÆF—fRæVæG7v—F‚‚"æÖB"“ ¢f÷"Æ–æUöçVÖ&W"ÂÆ–æR–âVçVÖW&FR‡FW‡Bç7Æ—FÆ–æW2‚’Â7F'CÓ“ ¢ÖF6‚Ò&RæÖF6‚‡"%â7³ÃgÕÇ2²‚â³ò•Ç2¢B"ÂÆ–æR¢–bæ÷BÖF6ƒ ¢6öçF–çVP¢†VF–ærÒÖF6‚æw&÷Wƒ’æÇ7G&—‚&¥ò"¢–b†VF–æræB†VF–æu³Ò–â--=M]m}­½ÍÝíý-=M]m}­½ÍÝíò# ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ§¶Æ–æUöçVÖ&W'Ó¢=­’}=í½í-í¢Mí½m]ÒÝ}Ý-ÍòýíýÝí’=­-² ¢¢Ö—7Æ6VE÷6V7F–öç2Ò°¢'7V6–f–6F–öç2ö&6†—FV7GW&Uö&6VÆ–æRæÖB#¢-	=ÝmÝM-=­-=í’"À¢'7V6–f–6F–öç2ö–æg&7G'V7GW&Uö&6VÆ–æRæÖB#¢-	=ÝmE"‚÷W&F–öç2"À¢'7V6–f–6F–öç2÷F‡&VEöÖöFVÂæÖB#¢-	­í=MÍíM]½Â==írý]]Í--]-ò"À¢Ð¢W‡V7FVEöÆ7E÷6V7F–öç2Ò°¢'7V6–f–6F–öç2ö&6†—FV7GW&Uö&6VÆ–æRæÖB#¢-
+-½ÍÝ½R]-]­-=Ý½Rýí-í­‚"À¢'7V6–f–6F–öç2ö–æg&7G'V7GW&Uö&6VÆ–æRæÖB#¢-	ÝM-=­-=Ý½Rýí-í­‚"À¢'7V6–f–6F–öç2÷F‡&VEöÖöFVÂæÖB#¢-	­-½í2==ír"À¢Ð¢f÷"&VÆF—fRÂ†VF–ær–âÖ—7Æ6VE÷6V7F–öç2æ—FV×2‚“ ¢FW‡BÒ&VE÷FW‡B‡&ö÷Bò&VÆF—fR¢–b&Rç6V&6‚‡&b"ƒöÒ•â25Ç2²ƒó¥ÆBµÂåÇ2¢“÷·&RæW66R††VF–ær—ÕÇ2¢B"ÂFW‡BÂ&Rä”täõ$T44R“ ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢ýím]Ý½’}M]²w¶†VF–æwÒrMí½m]ÒÝ]íM-Íò-í½Í­â"÷W&F–öç2ö6†ævU÷&ö6W72æÖB ¢¢†VF–æw2Ò&Ræf–æFÆÂ‡""ƒöÒ•â25Ç2²ƒó¥ÆBµÂåÇ2¢“ò‚â³ò•Ç2¢B"ÂFW‡B¢–bæ÷B†VF–æw2÷"†VF–æw5²ÓÒÒW‡V7FVEöÆ7E÷6V7F–öç5·&VÆF—fUÓ ¢W'&÷'2æVæB€¢b'·&VÆF—fWÓ¢ýí½]MÝ’}M]²Mí½m]Òí---Íòý]MÍ]-Ý½Â}M]½íÂ ¢b"w¶W‡V7FVEöÆ7E÷6V7F–öç5·&VÆF—fU×Òs²ýím]Ý½Rý-½ýÝM½]m"÷W&F–öç2ö6†ævU÷&ö6W72æÖB ¢¢6†ævU÷&ö6W72Ò&VE÷FW‡B‡&ö÷Bò&÷W&F–öç2ö6†ævU÷&ö6W72æÖB"¢–bæ÷B&Rç6V&6‚‡""ƒöÒ•â25Ç2³uÂåÇ2½	=Ým²‚ý]]Íí-ý]mM­m•Ç2¢B"Â6†ævU÷&ö6W72“ ¢W'&÷'2æVæB€¢&÷W&F–öç2ö6†ævU÷&ö6W72æÖC¢í-=---=]"­ÝíÝ}]­’}M]²â=ÝmR‚ý]]Íí-Rý]mM­m’ ¢¢7—7FVÕ÷F‚Ò'7V6–f–6F–öç2÷7—7FVÕ÷7V6–f–6F–öâæÖB ¢7—7FVÕ÷FW‡BÒ&VE÷FW‡B‡&ö÷Bò7—7FVÕ÷F‚¢÷&FW&VEö–G2Ò&Ræf–æFÆÂ‡""ƒöÒ•â225Ç2²‚ƒó¥5•7Å4T5ô5DÂ•õÆG³7Ò•Ç2¾(	B"Â7—7FVÕ÷FW‡B¢W‡V7FVEö÷&FW"Ò6÷'FVB€¢÷&FW&VEö–G2À¢¶W“ÖÆÖ&F–FVçF–f–W#¢€¢–b–FVçF–f–W"ç7F'G7v—F‚‚%5•5ò"’VÇ6RÀ¢–çB†–FVçF–f–W"ç'7Æ—B‚%ò"Â•³Ò’À¢’À¢¢–b÷&FW&VEö–G2ÒW‡V7FVEö÷&FW# ¢W'&÷'2æVæB€¢b'·7—7FVÕ÷F‡Ó¢5•2‚4T5ô5DÂMí½mÝ²½-Âýí½ím]Ý²ýâýíýM­2M]Ý-M­-íí" ¢¢&V6÷&G2Ò6öÆÆV7E÷G&6V&ÆUöVÆVÖVçG2‡&ö÷B¢Ö—7Æ6VE÷&WV—&VÖVçG2Ò6÷'FVB€¢–FVçF–f–W ¢f÷"–FVçF–f–W"Â&V6÷&B–â&V6÷&G2æ—FV×2‚¢–b&V6÷&E²&fÖ–Ç’%Ò–â²%5•2"Â%4T5ô5DÂ'ÒæB&V6÷&E²'F‚%ÒÒ7—7FVÕ÷F€¢¢–bÖ—7Æ6VE÷&WV—&VÖVçG3 ¢W'&÷'2æVæB€¢b'·7—7FVÕ÷F‡Ó¢-R5•2‚4T5ô5DÂMí½mÝ²Ý]íM-Íò"]MÝíÂM½S² ¢b--ÝRM½ÝM]Ý²¶Ö—7Æ6VE÷&WV—&VÖVçG7Ò ¢¢&WGW&â÷&W7VÇB‚&Fö7VÖVçE÷öÆ–7’"ÂW'&÷'2Âv&æ–æw2  ¤Ô”ÄU5DôäUô„TD”äuõEDU$âÒ&Ræ6ö×–ÆR‡""ƒöÒ•â25Ç2²†ÕÆG³'Ò•Ç2¾(	EÇ2²â²B"Â&Rä”täõ$T44R¤%%ô”EõEDU$âÒ&Ræ6ö×–ÆR‡"%Æ$%%õÆG³7ÕÆ""¥cõ44õUôÄ”äUõEDU$âÒ&Ræ6ö×–ÆR‡""ƒöÒ•í	íý}-]½ÍÝ½’í-"ýíM=­-¥Ç2¢‚â³ò•Ç2¢B"¤4äD”DDU5ô„TD”äuõEDU$âÒ&Ræ6ö×–ÆR‡""ƒöÒ•â7³"Ã7ÕÇ2²ƒó¥ÆBµÂåÇ2¢“ý	­ÝMM-Ý½RÝý-½]Ýòâ¢B"¤4äD”DDUõ$õuõEDU$âÒ&Ræ6ö×–ÆR‡""ƒöÒ•åÇÅÇ2¥Å¶ò„%%õÆG³7Ò–õÅÒ"¤Ô”ÄU5DôäUõ44õUôÄ”äUõEDU$âÒ&Ræ6ö×–ÆR‡""ƒöÒ•âÕÇ2½í-#¥Ç2¢‚â²’B"¤%%õ$”õ$•E•õEDU$âÒ&Ræ6ö×–ÆR€¢""ƒö×2•â225Ç2²„%%õÆG³7Ò•Ç2¾(	Bâ£õâÕÇ2·&–÷&—G“¥Ç2¦…¶×¥Ò²–Ç2¢B"À¢¤4õ$Uõ$”õ$•E’Ò&6÷&R   ¦FVböÖ–ÆW7FöæU÷&u÷6V7F–öç2†Ö–ÆW7FöæU÷FW‡C¢7G"’ÓâF–7E·7G"Â7G%Ó ¢†VF–æw2ÒÆ—7B„Ô”ÄU5DôäUô„TD”äuõEDU$âæf–æF—FW"†Ö–ÆW7FöæU÷FW‡B’¢&u÷6V7F–öç3¢F–7E·7G"Â7G%ÒÒ·Ð¢f÷"–æFW‚ÂÖF6‚–âVçVÖW&FR††VF–æw2“ ¢VæBÒ†VF–æw5¶–æFW‚²Òç7F'B‚’–b–æFW‚²ÂÆVâ††VF–æw2’VÇ6RÆVâ†Ö–ÆW7FöæU÷FW‡B¢&u÷6V7F–öç5¶ÖF6‚æw&÷Wƒ’æÆ÷vW"‚•ÒÒÖ–ÆW7FöæU÷FW‡E¶ÖF6‚æVæB‚’¢VæEÐ¢&WGW&â&u÷6V7F–öç0  ¦FVbö6æF–FFU÷&–÷&—F–W2†Ö–ÆW7FöæU÷FW‡C¢7G"’ÓâF–7E·7G"Â7G%Ó ¢""-	ýí-]"ÂýíM=½í-ÝÝ½’"-½mR­ÝMM-í"Âýâ%"â"" ¢†VF–ærÒ4äD”DDU5ô„TD”äuõEDU$âç6V&6‚†Ö–ÆW7FöæU÷FW‡B¢–bæ÷B†VF–æs ¢&WGW&â·Ð¢&W7VÇC¢F–7E·7G"Â7G%ÒÒ·Ð¢f÷"Æ–æR–âÖ–ÆW7FöæU÷FW‡E¶†VF–æræVæB‚’¥Òç7Æ—FÆ–æW2‚“ ¢–bæ÷BÆ–æRæÇ7G&—‚’ç7F'G7v—F‚‚'Â"“ ¢6öçF–çVP¢6VÆÇ2Ò¶6VÆÂç7G&—‚’f÷"6VÆÂ–âÆ–æRç7G&—‚’ç7G&—‚'Â"’ç7Æ—B‚'Â"•Ð¢–bÆVâ†6VÆÇ2’Â3 ¢6öçF–çVP¢–FVçF–f–W"Ò4äD”DDUõ$õuõEDU$âç6V&6‚†Æ–æR¢&–÷&—G’Ò&RægVÆÆÖF6‚‡"&…¶×¥Ò²–"Â6VÆÇ5³%Ò¢–b–FVçF–f–W"æB&–÷&—G“ ¢&W7VÇE¶–FVçF–f–W"æw&÷Wƒ•ÒÒ&–÷&—G’æw&÷Wƒ¢&WGW&â&W7VÇ@  ¦FVb6†V6µö'W6–æW75÷&WV—&VÖVçG5ö6÷fW&vR‡&ö÷C¢F‚’Óâ6†V6µ&W7VÇC ¢""-	­-½í2%"Mí½m]Ò½-Âýí½Ýí-Íâ‚Ý]ý]]]­íÍòí}íÂ}½ím]ÒÝ ¢íý}-]½ÍÝ½’í-"c‚-½m2­ÝMM-í"ýí½Rcà ¢	Míýí½Ý-]½ÍÝâýí-]ý]-òÍ½²ÂÝR-í½Í­âMíÍ½ÍÝíR}]ÝS ¢­mM½’%"ýí-]-6÷&Víý}Ò-]íM-Â"cÂ­mM½’%"rí--c¢íý}Ò]½ÍÝâýí--½ý-Íòí--íÂ­­í=âÝ-âÝ-ý-Ý=-‚ý]Í]-cÀ¢‚ýíM=½í-ÝÝ½’"-½mR­ÝMM-í"ýí-]"íý}Òí-ýM-Â­-½í=íÂà¢
+Ý-þ¶×{h‘éì¶»§q«^t€€€€•Ù¥‘•¹•}¥‘Ì€ô€ (€€€€€€€€€€€íÍÑÈ¡Ù…±Õ”¤™½ÈÙ…±Õ”¥¸É…Ý}…Ñ…±½ô¥˜¥Í¥¹ÍÑ…¹”¡É…Ý}…Ñ…±½œ°‘¥Ð¤•±Í”Í•Ð ¤(€€€€€€€€¤(€€€•á•ÁÐá•ÁÑ¥½¸è(€€€€€€€•Ù¥‘•¹•}¥‘Ì€ôÍ•Ð ¤(€€€Ñ•ÍÑÍ}‘¥È€ôÉ½½Ð€¼€‰Ý½É¬½Ñ•ÍÑÌˆ(€€€Í••¸èÍ•ÑmÍÑÉt€ôÍ•Ð ¤(€€€™½ÈÁ…Ñ ¥¸Í½ÉÑ•¡Ñ•ÍÑÍ}‘¥È¹±½ˆ ˆ¨¹µˆ¤¤è(€€€€€€€É•±…Ñ¥Ù”€ôÉ•±…Ñ¥Ù•}Á½Í¥à¡Á…Ñ °É½½Ð¤(€€€€€€€¥˜¹½ÐQMQ}%1}AQQI8¹™Õ±±µ…Ñ ¡Á…Ñ ¹¹…µ”¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‹BwB×BëBûFFB×BëFB÷BûBÔƒBãBóF<ƒBÿFBûBËB×FBëBàèíÉ•±…Ñ¥Ù•ôˆ¤(€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€‘½Œ€ô±½…‘}‘½Õµ•¹Ð¡Á…Ñ ¤(€€€€€€€¥‘•¹Ñ¥™¥•È€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰¥ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤(€€€€€€€¥˜¹½ÐQMQ}%}AQQI8¹™Õ±±µ…Ñ ¡¥‘•¹Ñ¥™¥•È¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôè¥ƒBÓBûBïBÛB×BôƒBãBóB×FF0ƒFBûFBóBÃFQMQ|ÀÀÄˆ¤(€€€€€€€¥˜¥‘•¹Ñ¥™¥•È¥¸Í••¸è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‹BSFBÇBïBãFFF;F'BãBäQMP¥èí¥‘•¹Ñ¥™¥•Éôˆ¤(€€€€€€€Í••¸¹…‘¡¥‘•¹Ñ¥™¥•È¤(€€€€€€€ÍÁ•}ÍÑ…Ñ”€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰ÍÁ•}ÍÑ…Ñ”ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤¹±½Ý•È ¤(€€€€€€€¥˜ÍÁ•}ÍÑ…Ñ”¹½Ð¥¸MQQ}Y1UMl‰ÍÁ•}ÍÑ…Ñ”‰tè(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèƒB÷B×BãBßBËB×FFB÷F/BäÍÁ•}ÍÑ…Ñ”€íÍÁ•}ÍÑ…Ñ•ôœˆ¤(€€€€€€€ÑÉ…•Ì€ômÙ…±Õ”¹ÍÑÉ¥À ¤™½ÈÙ…±Õ”¥¸µ•Ñ…‘…Ñ…}±¥ÍÐ¡‘½Œ¹µ•Ñ…‘…Ñ„°€‰ÑÉ…•Í}Ñ¼ˆ¥t(€€€€€€€Ù•É¥™¥•Ì€ômÙ…±Õ”¹ÍÑÉ¥À ¤™½ÈÙ…±Õ”¥¸µ•Ñ…‘…Ñ…}±¥ÍÐ¡‘½Œ¹µ•Ñ…‘…Ñ„°€‰Ù•É¥™¥•Ìˆ¥t(€€€€€€€…•ÁÑÌ€ômÙ…±Õ”¹ÍÑÉ¥À ¤¹±½Ý•È ¤™½ÈÙ…±Õ”¥¸µ•Ñ…‘…Ñ…}±¥ÍÐ¡‘½Œ¹µ•Ñ…‘…Ñ„°€‰…•ÁÑÌˆ¥t(€€€€€€€•á•ÕÑ¥½¸€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰•á•ÕÑ¥½¸ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤¹±½Ý•È ¤(€€€€€€€…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤(€€€€€€€µ…¹Õ…±}•Ù¥‘•¹”€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰µ…¹Õ…±}•Ù¥‘•¹”ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤(€€€€€€€¥˜¹½Ð…¹ä¡QM-}%}AQQI8¹™Õ±±µ…Ñ ¡Ù…±Õ”¤™½ÈÙ…±Õ”¥¸ÑÉ…•Ì¤…¹¹½Ð…•ÁÑÌè(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèƒB÷FBÛB×BôÑÉ…•Í}Ñ¼ƒB÷BÀQM-}áááàƒBïBãBÇBø…•ÁÑÌƒB÷BÀƒF7FBÃBüˆ¤(€€€€€€€¥˜¹½ÐÙ•É¥™¥•Ì…¹¹½Ð…¹ä (€€€€€€€€€€€É”¹™Õ±±µ…Ñ ¡È‰µq‘ìÉôˆ°Ù…±Õ”°É”¹%9=IM¤™½ÈÙ…±Õ”¥¸…•ÁÑÌ(€€€€€€€€¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèƒB÷FBÛB×BôÙ•É¥™¥•ÌƒFFBÃFFBãFFB×BóBûBÏBøƒFBËBûBçFFBËBÀƒBïBãBÇBø…•ÁÑÌµ¥±•ÍÑ½¹”ˆ(€€€€€€€€€€€€¤(€€€€€€€¥˜•á•ÕÑ¥½¸¹½Ð¥¸QMQ}aUQ%=9Lè(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôè•á•ÕÑ¥½¸ƒBÓBûBïBÛB×BôƒBÇF/FF0…ÕÑ½µ…Ñ•ƒBãBïBàµ…¹Õ…°ˆ¤(€€€€€€€¥˜•á•ÕÑ¥½¸€ôô€‰…ÕÑ½µ…Ñ•ˆè(€€€€€€€€€€€¥˜¹½Ð…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôè…ÕÑ½µ…Ñ•QMPƒBÓBûBïBÛB×BôƒBãBóB×FF0…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”ˆ¤(€€€€€€€€€€€¥˜µ…¹Õ…±}•Ù¥‘•¹”è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôè…ÕÑ½µ…Ñ•QMPƒB÷BÔƒBÓBûBïBÛB×BôƒBãBóB×FF0µ…¹Õ…±}•Ù¥‘•¹”ˆ¤(€€€€€€€€€€€¥˜¹½ÐÉ”¹Í•…É  (€€€€€€€€€€€€€€€È‰xŒqÌ¬ üéq­p¹qÌ¨¤ÿBCBËFBûBóBÃFBãFB×FBëBãBäƒBßBÃBÿFFBéqˆˆ°(€€€€€€€€€€€€€€€‘½Œ¹‰½‘ä°(€€€€€€€€€€€€€€€É”¹5U1Q%1%9ðÉ”¹%9=IM°(€€€€€€€€€€€€¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôè…ÕÑ½µ…Ñ•QMPƒBÓBûBïBÛB×BôƒFBûBÓB×FBÛBÃFF0ƒFBÃBßBÓB×Bì€ŸBCBËFBûBóBÃFBãFB×FBëBãBäƒBßBÃBÿFFBèœˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€¥˜É”¹Í•…É  (€€€€€€€€€€€€€€€Èˆ ýµ¤¥xŒqÌ¬ üéq­p¹qÌ¨¤ü üëBBûF#BÃBÏBûBËBÃF<ƒBãB÷FFFFBëFBãF=óBSB×BçFFBËBãF<ƒBËBïBÃBÓB×BïF3FBÀ¥q‰ñxŒŒqÌ¯BKBïBÃBÓB×BïF3FFqÌ¨ˆ°(€€€€€€€€€€€€€€€‘½Œ¹‰½‘ä°(€€€€€€€€€€€€¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôè…ÕÑ½µ…Ñ•QMPƒB÷BÔƒBÓBûBïBÛB×BôƒFBûBÓB×FBÛBÃFF0ƒBãB÷FFFFBëFBãBàƒBËBïBÃBÓB×BïF3FFˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€¥˜…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”…¹…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”¹½Ð¥¸•Ù¥‘•¹•}¥‘Ìè(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèƒB÷B×BãBßBËB×FFB÷F/Bä…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”€í…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹•ôœˆ¤(€€€€€€€¥˜•á•ÕÑ¥½¸€ôô€‰µ…¹Õ…°ˆè(€€€€€€€€€€€¥˜…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèµ…¹Õ…°QMPƒB÷BÔƒBÓBûBïBÛB×BôƒBãBóB×FF0…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”ˆ¤(€€€€€€€€€€€¥˜¹½Ðµ…¹Õ…±}•Ù¥‘•¹”è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèµ…¹Õ…°QMPƒBÓBûBïBÛB×BôƒBãBóB×FF0µ…¹Õ…±}•Ù¥‘•¹”ˆ¤(€€€€€€€€€€€¥˜µ…¹Õ…±}•Ù¥‘•¹”…¹µ…¹Õ…±}•Ù¥‘•¹”¹½Ð¥¸•Ù¥‘•¹•}¥‘Ìè(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèƒB÷B×BãBßBËB×FFB÷F/Bäµ…¹Õ…±}•Ù¥‘•¹”€íµ…¹Õ…±}•Ù¥‘•¹•ôœˆ¤(€€€€€€€€€€€½Ý¹•É}ÍÑ•ÁÌ€ô}µ…É­‘½Ý¹}Í•Ñ¥½¸¡‘½Œ¹‰½‘ä°€‹BSB×BçFFBËBãF<ƒBËBïBÃBÓB×BïF3FBÀˆ¤(€€€€€€€€€€€¥˜¹½Ð½Ý¹•É}ÍÑ•ÁÌè(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèµ…¹Õ…°QMPƒBÓBûBïBÛB×BôƒFBûBÓB×FBÛBÃFF0ƒFBÃBßBÓB×Bì€ŸBSB×BçFFBËBãF<ƒBËBïBÃBÓB×BïF3FBÀœˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€Õ¹Í…™”€ôÉ”¹Í•…É  (€€€€€€€€€€€€€€€Èˆ ý¤¥qˆ üé¥ÑñÁ½Ý•ÉÍ¡•±±ñÁÝÍ ¥q‰ñ½Á•É…Ñ¥½¹Ímqp½uÍÉ¥ÁÑÍñp¹ÁÌÅqˆˆ°½Ý¹•É}ÍÑ•ÁÌ(€€€€€€€€€€€€¤(€€€€€€€€€€€¥˜Õ¹Í…™”è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèµ…¹Õ…°QMPƒB÷BÔƒBóBûBÛB×FƒFFB×BÇBûBËBÃFF0ƒBûFƒBËBïBÃBÓB×BïF3FBÀ¥Ð°A½Ý•ÉM¡•±°ƒBãBïBàƒBËB÷FFFB×B÷B÷BãBÔƒFBëFBãBÿFF,ˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€™½ÈÑ…É•Ð¥¸Ù•É¥™¥•Ìè(€€€€€€€€€€€¥˜Ñ…É•Ð¹½Ð¥¸É•½É‘Ìè(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèÙ•É¥™¥•ÌƒFFF/BïBÃB×FFF<ƒB÷BÀƒB÷B×BãBßBËB×FFB÷F/BäƒFFBÃFFBãFFB×BóF/Bä¥€íÑ…É•Ñôœˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€™½Èµ¥±•ÍÑ½¹”¥¸…•ÁÑÌè(€€€€€€€€€€€¥˜µ¥±•ÍÑ½¹”¹½Ð¥¸µ¥±•ÍÑ½¹•}¥‘Ìè(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôè…•ÁÑÌƒFFF/BïBÃB×FFF<ƒB÷BÀƒB÷B×BãBßBËB×FFB÷F/Bäµ¥±•ÍÑ½¹”€íµ¥±•ÍÑ½¹•ôœˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€™½ÈÉ•ÅÕ¥É•‘}¡•…‘¥¹œ¥¸l(€€€€€€€€€€€€‹BwBÃBßB÷BÃFB×B÷BãBÔˆ°(€€€€€€€€€€€€‹BŸFBøƒBÿFBûBËB×FF?B×FFF<ˆ°(€€€€€€€€€€€€‹BkFBãFB×FBãBäƒFFBÿB×FBÀˆ°(€€€€€€€€€€€€‹B‡BûFFBÃBÈƒBÓBûBëBÃBßBÃFB×BïF3FFBËBÀˆ°(€€€€€€€tè(€€€€€€€€€€€¥˜¹½ÐÉ”¹Í•…É  (€€€€€€€€€€€€€€€É˜‰xŒqÌ¬ üéq­p¹qÌ¬¤ýíÉ”¹•Í…Á”¡É•ÅÕ¥É•‘}¡•…‘¥¹œ¥õqˆˆ°(€€€€€€€€€€€€€€€‘½Œ¹‰½‘ä°(€€€€€€€€€€€€€€€É”¹5U1Q%1%9ðÉ”¹%9=IM°(€€€€€€€€€€€€¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèƒBûFFFFFFBËFB×FƒFBÃBßBÓB×Bì€íÉ•ÅÕ¥É•‘}¡•…‘¥¹ôœˆ¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰Ñ•ÍÑ}ÍÁ•Ìˆ°•ÉÉ½ÉÌ¤(()‘•˜¡•­}ÅÕ…±¥Ñå}É•¥ÍÑÉä¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€ÑÉäè(€€€€€€€µ¥±•ÍÑ½¹•}¥‘Ì€ôíÍÑÈ¡¥Ñ•µl‰¥‰t¤¹±½Ý•È ¤™½È¥Ñ•´¥¸½±±•Ñ}µ¥±•ÍÑ½¹•Ì¡É½½Ð¥l‰¥Ñ•µÌ‰uô(€€€•á•ÁÐá•ÁÑ¥½¸…Ì•áŒè(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰ÅÕ…±¥Ñå}É•¥ÍÑÉäˆ°mÍÑÈ¡•áŒ¥t¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰ÅÕ…±¥Ñå}É•¥ÍÑÉäˆ°Ù…±¥‘…Ñ•}ÅÕ…±¥Ñå}É•¥ÍÑÉä¡É½½Ð°µ¥±•ÍÑ½¹•}¥‘Ì¤¤(()‘•˜¡•­}…•ÁÑ…¹•}µ½‘•°¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt(€€€Ý…É¹¥¹Ìè±¥ÍÑmÍÑÉt€ômt(€€€ÑÉäè(€€€€€€€µ¥±•ÍÑ½¹•Ì€ô½±±•Ñ}µ¥±•ÍÑ½¹•Ì¡É½½Ð¤(€€€€€€€½±±•Ñ}Ñ…Í­Ì¡É½½Ð¤(€€€€€€€½±±•Ñ}Ñ•ÍÑ}ÍÁ•Ì¡É½½Ð¤(€€€€€€€É•¥ÍÑÉä€ô±½…‘}ÅÕ…±¥Ñå}É•¥ÍÑÉä¡É½½Ð¤(€€€•á•ÁÐá•ÁÑ¥½¸…Ì•áŒè(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…•ÁÑ…¹•}µ½‘•°ˆ°mÍÑÈ¡•áŒ¥t¤((€€€ÕÉÉ•¹Ð€ôµ¥±•ÍÑ½¹•Íl‰ÕÉÉ•¹Ð‰t(€€€ÕÉÉ•¹Ñ}¥€ôÍÑÈ¡ÕÉÉ•¹Ñl‰¥‰t¤(€€€ÕÉÉ•¹Ñ}Ý½É­}ÍÑ…Ñ”€ôÍÑÈ¡ÕÉÉ•¹Ð¹•Ð ‰Ý½É­}ÍÑ…Ñ”ˆ°€‰Á±…¹¹•ˆ¤¤(€€€ÁÉ½™¥±•Ì€ôÁÉ½™¥±•Í}™½É}µ¥±•ÍÑ½¹”¡É•¥ÍÑÉä°ÕÉÉ•¹Ñ}¥¤(€€€¥˜¹½ÐÁÉ½™¥±•Ìè(€€€€€€€¥˜ÕÉÉ•¹Ñ}Ý½É­}ÍÑ…Ñ”€ôô€‰Á±…¹¹•ˆè(€€€€€€€€€€€Ý…É¹¥¹Ì¹…ÁÁ•¹ (€€€€€€€€€€€€€€€˜‰íÕÉÉ•¹Ñ}¥‘ôèÅÕ…±¥ÑäÁÉ½™¥±”ƒFFBÃB÷B×FƒBûBÇF?BßBÃFB×BïF3B÷F/BðƒBÿFBàƒBÿB×FB×BËBûBÓBÔµ¥±•ÍÑ½¹”ƒBÈ¥¸µÁÉ½É•ÍÌˆ(€€€€€€€€€€€€¤(€€€€€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…•ÁÑ…¹•}µ½‘•°ˆ°•ÉÉ½ÉÌ°Ý…É¹¥¹Ì¤(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‹BSBïF<ƒBÃBëFBãBËB÷BûBÏBøµ¥±•ÍÑ½¹”íÕÉÉ•¹Ñ}¥‘ôƒBûFFFFFFBËFB×FÅÕ…±¥ÑäÁÉ½™¥±”ˆ¤(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…•ÁÑ…¹•}µ½‘•°ˆ°•ÉÉ½ÉÌ°Ý…É¹¥¹Ì¤((€€€µ½‘•Ì€ôíÍÑÈ¡É…Ü¹•Ð ‰Í½Á•}½Ù•É…”ˆ°€‰Ñ…Í­}Ñ•ÍÐˆ¤¤™½È|°É…Ü¥¸ÁÉ½™¥±•Íô((€€€¥˜€‰±½‰…±}•Ù¥‘•¹”ˆ¥¸µ½‘•Ìè(€€€€€€€™½ÈÁÉ½™¥±•}¥°É…Ü¥¸ÁÉ½™¥±•Ìè(€€€€€€€€€€€¥˜ÍÑÈ¡É…Ü¹•Ð ‰Í½Á•}½Ù•É…”ˆ°€‰Ñ…Í­}Ñ•ÍÐˆ¤¤€ôô€‰±½‰…±}•Ù¥‘•¹”ˆ…¹¹½ÐÉ…Ü¹•Ð (€€€€€€€€€€€€€€€€‰Í½Á•}•Ù¥‘•¹”ˆ(€€€€€€€€€€€€¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÁÉ½™¥±•}¥‘ôè±½‰…±}•Ù¥‘•¹”ƒBÇB×BÜÍ½Á•}•Ù¥‘•¹”ˆ¤(€€€•±Í”è(€€€€€€€•ÉÉ½ÉÌ¹•áÑ•¹¡Ù…±¥‘…Ñ•}Ñ…Í­}Í•µ…¹Ñ¥Ì¡É½½Ð°ÕÉÉ•¹Ñ}¥¤¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…•ÁÑ…¹•}µ½‘•°ˆ°•ÉÉ½ÉÌ°Ý…É¹¥¹Ì¤(()‘•˜}‰±½­}Í…±…É}•ÉÉ½ÉÌ¡Ý½É­™±½Ý}¹…µ”èÍÑÈ°Ñ•áÐèÍÑÈ¤€´ø±¥ÍÑmÍÑÉtè(€€€€ˆˆ‹BwBÃBçFBàƒFFFBûBëBàƒBóB÷BûBÏBûFFFBûFB÷BûBÏBøƒFBëFBãBÿFBÀ°ƒBËF/BÿBÃBËF#BãBÔƒBãBÜƒBÇBïBûBëBÀe50¸((€€€ƒBsB÷BûBÏBûFFFBûFB÷F/BäÉÕ¸èñ€ƒFBËFGFFF<°ƒB×FBïBàƒBÿFBûBÓBûBïBÛB×B÷BãBÔƒBûBëBÃBßF/BËBÃB×FFF<ƒB÷BÀƒBûFFFFBÿBÔ(€€€ƒB÷BÔƒBÏBïFBÇBÛBÔƒFBÃBóBûBÏBøƒBëBïF;FBÀèe50ƒBóBûBïFBÀƒBßBÃBëFF/BËBÃB×FƒBÇBïBûBè°ƒBàƒFBÃBÇBûFBãBäƒBÿFBûFB×FF(€€€ƒBÿB×FB×FFBÃFGFƒFBÃBßBÇBãFBÃFF3FF<¸ƒBBûBïB÷BûFB×B÷B÷F/BäƒFBÃBßBÇBûF e50ƒFF;BÓBÀƒB÷BÔƒFF?B÷B×FFF<°ƒFFBûBÇF,(€€€ƒB÷BÔƒBßBÃBËBûBÓBãFF0ƒBËB÷B×F#B÷F;F8ƒBßBÃBËBãFBãBóBûFFF0ƒFBÃBÓBàƒBûBÓB÷BûBÏBøƒBÿFBÃBËBãBïBÀ¸(€€€€ˆˆˆ(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt(€€€±¥¹•Ì€ôÑ•áÐ¹ÍÁ±¥Ñ±¥¹•Ì ¤(€€€™½È¥¹‘•à°±¥¹”¥¸•¹Õµ•É…Ñ”¡±¥¹•Ì¤è(€€€€€€€½Á•¹¥¹œ€ôÉ”¹µ…Ñ ¡È‰x¡qÌ¨¤´ýqÌ¨ üéÉÕ¹ñ¥™ñÍ¡•±°¤éqÌ©mðùul¬µtýqÌ¨ˆ°±¥¹”¤(€€€€€€€¥˜¹½Ð½Á•¹¥¹œè(€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€­•å}¥¹‘•¹Ð€ô±•¸¡½Á•¹¥¹œ¹É½ÕÀ Ä¤¤(€€€€€€€™½È½™™Í•Ð°™½±±½Ý¥¹œ¥¸•¹Õµ•É…Ñ”¡±¥¹•Ím¥¹‘•à€¬€Ä€ét°ÍÑ…ÉÐõ¥¹‘•à€¬€È¤è(€€€€€€€€€€€¥˜¹½Ð™½±±½Ý¥¹œ¹ÍÑÉ¥À ¤è(€€€€€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€€€€€¥¹‘•¹Ð€ô±•¸¡™½±±½Ý¥¹œ¤€´±•¸¡™½±±½Ý¥¹œ¹±ÍÑÉ¥À ¤¤(€€€€€€€€€€€¥˜¥¹‘•¹Ð€ø­•å}¥¹‘•¹Ðè(€€€€€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€€€€€¥˜É”¹µ…Ñ ¡È‰yqÌ¨ üèµqÍñqÝmqÜµt¨è¤ˆ°™½±±½Ý¥¹œ¤è(€€€€€€€€€€€€€€€‰É•…¬(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€˜‰íÝ½É­™±½Ý}¹…µ•ôéí½™™Í•ÑôèƒFFFBûBëBÀƒBóB÷BûBÏBûFFFBûFB÷BûBÏBøƒBÇBïBûBëBÀƒB÷BÔƒBÏBïFBÇBÛBÔƒBëBïF;FBÀ€ˆ(€€€€€€€€€€€€€€€˜‹BàƒFBÃBßFF/BËBÃB×FƒB×BÏBøèí™½±±½Ý¥¹œ¹ÍÑÉ¥À ¥lèØÁuôˆ(€€€€€€€€€€€€¤(€€€€€€€€€€€‰É•…¬(€€€É•ÑÕÉ¸•ÉÉ½ÉÌ(()‘•˜¡•­}…ÕÑ½µ…Ñ¥½¹}Á½±¥ä¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt(€€€ÁÉ½©•Ñ}Ý½É­™±½Ü€ôÉ•…‘}Ñ•áÐ¡É½½Ð€¼€ˆ¹¥Ñ¡Õˆ½Ý½É­™±½ÝÌ½ÁÉ½©•Ñ}¡•¬¹åµ°ˆ¤(€€€…•ÁÑ…¹”€ôÉ•…‘}Ñ•áÐ¡É½½Ð€¼€‰½Á•É…Ñ¥½¹Ì½ÍÉ¥ÁÑÌ½…•ÁÑ…¹”½…ÁÁ±ä¹Áäˆ¤((€€€¥˜¹½ÐÉ”¹Í•…É ¡Èˆ ýµÌ¥yÁ•Éµ¥ÍÍ¥½¹ÌéqÌ©q¹qÌ­½¹Ñ•¹ÑÌéqÌ©É•…‘qÌ¨ˆ°ÁÉ½©•Ñ}Ý½É­™±½Ü¤è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰ÁÉ½©•Ñ}¡•¬¹åµ°ƒBÓBûBïBÛB×BôƒBãBóB×FF0½¹Ñ•¹ÑÌèÉ•…ˆ¤(€€€¥˜É”¹Í•…É ¡Èˆ ýµÌ¥yqÌ©ÁÕ±±}É•ÅÕ•ÍÐéqÌ©q¹qÌ­Á…Ñ¡Ì üèµ¥¹½É”¤üèˆ°ÁÉ½©•Ñ}Ý½É­™±½Ü¤è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€‰AÉ½©•Ð¡•¬ƒBÓBûBïBÛB×BôƒBßBÃBÿFFBëBÃFF3FF<ƒB÷BÀƒBëBÃBÛBÓBûBðAHƒBÇB×BÜÁ…Ñ µ™¥±Ñ•È°ƒFFBûBÇF,ƒB÷BûBËF/BÔƒFBãBÿF,ƒFBÃBçBïBûBÈƒB÷BÔƒBûBÇFBûBÓBãBïBàƒBÿFBûBËB×FBëBàˆ(€€€€€€€€¤(€€€¥˜€‰½Á•É…Ñ¥½¹ÍqqÍÉ¥ÁÑÍqqÑ…Í­Íqq¡•­}¡…¹•}Í½Á”¹Áäˆ¹½Ð¥¸ÁÉ½©•Ñ}Ý½É­™±½Üè(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰AÉ½©•Ð¡•¬ƒBÓBûBïBÛB×BôƒBÿFBûBËB×FF?FF0ƒBÿBûBëFF/FBãBÔƒBãBßBóB×B÷FGB÷B÷F/FƒBÿFFB×BäQM,ˆ¤(€€€¥˜€‰ÉÕ¹Ìµ½¸èÕ‰Õ¹ÑÔµ±…Ñ•ÍÐˆ¹½Ð¥¸ÁÉ½©•Ñ}Ý½É­™±½Üè(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰AÉ½©•Ð¡•¬ƒBÓBûBïBÛB×BôƒFBûBÓB×FBÛBÃFF0ƒBÿB×FB×B÷BûFBãBóFF8ƒBÿFBûBËB×FBëFAåÑ¡½¸ƒB÷BÀ1¥¹Õàˆ¤(€€€ÁÕÍ¡}ÑÉ¥•È€ôÉ”¹Í•…É  (€€€€€€€Èˆ ý´¥x€ÁÕÍ éqÌ¨‘q¸ ý@ñ‰½‘äø üélqÑt­myq¹t©q¸¤¨¤ˆ°(€€€€€€€ÁÉ½©•Ñ}Ý½É­™±½Ü°(€€€€¤(€€€¥˜¹½ÐÁÕÍ¡}ÑÉ¥•È½È¹½ÐÉ”¹Í•…É ¡Èˆ ý´¥yqÌ¬µqÌ­µ…¥¹qÌ¨ˆ°ÁÕÍ¡}ÑÉ¥•È¹É½ÕÀ ‰‰½‘äˆ¤¤è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€‰AÉ½©•Ð¡•¬ƒBÓBûBïBÛB×BôƒBßBÃBÿFFBëBÃFF3FF<ƒBÿBøÁÕÍ ƒB÷BÀµ…¥¸èƒBïF;BÇBûBÔƒBÿFF?BóBûBÔƒBãBßBóB×B÷B×B÷BãBÔµ…¥¸ƒBÓBûBïBÛB÷Bø€ˆ(€€€€€€€€€€€€‹BÿFBûBçFBàƒFBÔƒBÛBÔƒBÿFBûBËB×FBëBà°ƒFFBøƒBàƒBßBÃBÿFBûFƒB÷BÀƒFBïBãF?B÷BãBÔ€£FBð¸½Á•É…Ñ¥½¹Ì½¡…¹•}ÁÉ½•ÍÌ¹µ¤ˆ(€€€€€€€€¤(€€€•±¥˜É”¹Í•…É ¡Èˆ ý´¥yqÌ­Á…Ñ¡Ì üèµ¥¹½É”¤üéqÌ¨ˆ°ÁÕÍ¡}ÑÉ¥•È¹É½ÕÀ ‰‰½‘äˆ¤¤è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€‹B‹FBãBÏBÏB×F ÁÕÍ ƒB÷BÀµ…¥¸ƒB÷BÔƒBóBûBÛB×FƒBãBóB×FF0Á…Ñ µ™¥±Ñ•ÈèƒBûFFBãBïF3FFBûBËBÃB÷B÷F/BäƒFFBãBÏBÏB×F ƒBóBûBïFBÀƒBÿB×FB×FFBÃFGF€ˆ(€€€€€€€€€€€€‹FFBÃBÇBÃFF/BËBÃFF0ˆ(€€€€€€€€¤(€€€¥˜€‰½µµ¥ÑÌ¼‘•¹Øé%Q!U	}M!½ÁÕ±±Ìˆ¹½Ð¥¸ÁÉ½©•Ñ}Ý½É­™±½Üè(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€‰AÉ½©•Ð¡•¬ƒBÓBûBïBÛB×BôƒBûBÇB÷BÃFFBÛBãBËBÃFF0ÁÕÍ ƒBÈµ…¥¸ƒBÇB×BÜƒFBËF?BßBÃB÷B÷BûBÏBøµ•É•ÁÕ±°É•ÅÕ•ÍÐˆ(€€€€€€€€¤(€€€Ý½É­™±½Ý}Á…Ñ¡Ì€ôÍ½ÉÑ• ¡É½½Ð€¼€ˆ¹¥Ñ¡Õˆ½Ý½É­™±½ÝÌˆ¤¹±½ˆ ˆ¨¹åµ°ˆ¤¤€¬Í½ÉÑ• (€€€€€€€€¡É½½Ð€¼€ˆ¹¥Ñ¡Õˆ½Ý½É­™±½ÝÌˆ¤¹±½ˆ ˆ¨¹å…µ°ˆ¤(€€€€¤(€€€™½ÈÝ½É­™±½Ý}Á…Ñ ¥¸Ý½É­™±½Ý}Á…Ñ¡Ìè(€€€€€€€Ý½É­™±½Ý}¹…µ”€ôÝ½É­™±½Ý}Á…Ñ ¹¹…µ”(€€€€€€€Ý½É­™±½Ý}Ñ•áÐ€ôÉ•…‘}Ñ•áÐ¡Ý½É­™±½Ý}Á…Ñ ¤(€€€€€€€•ÉÉ½ÉÌ¹•áÑ•¹¡}‰±½­}Í…±…É}•ÉÉ½ÉÌ¡Ý½É­™±½Ý}¹…µ”°Ý½É­™±½Ý}Ñ•áÐ¤¤(€€€€€€€Á•Éµ¥ÍÍ¥½¹}µ…Ñ €ôÉ”¹Í•…É  (€€€€€€€€€€€Èˆ ý´¥yÁ•Éµ¥ÍÍ¥½¹ÌéqÌ¨‘q¸ ý@ñ‰½‘äø üélqÑt­myq¹t©q¸¤¨¤ˆ°(€€€€€€€€€€€Ý½É­™±½Ý}Ñ•áÐ°(€€€€€€€€¤(€€€€€€€Á•Éµ¥ÍÍ¥½¹}‰½‘ä€ôÁ•Éµ¥ÍÍ¥½¹}µ…Ñ ¹É½ÕÀ ‰‰½‘äˆ¤¥˜Á•Éµ¥ÍÍ¥½¹}µ…Ñ •±Í”€ˆˆ(€€€€€€€¥˜¹½ÐÉ”¹Í•…É ¡Èˆ ý´¥ylqÑt­½¹Ñ•¹ÑÌéqÌ©É•…‘qÌ¨ˆ°Á•Éµ¥ÍÍ¥½¹}‰½‘ä¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€˜‰íÝ½É­™±½Ý}¹…µ•ôèÁ•ÉÍ¥ÍÑ•¹ÐÝ½É­™±½ÜƒBÓBûBïBÛB×BôƒF?BËB÷BøƒBûBÏFBÃB÷BãFBãBËBÃFF0É•Á½Í¥Ñ½ÉäÁ•Éµ¥ÍÍ¥½¸ƒBÓBø½¹Ñ•¹ÑÌèÉ•…ˆ(€€€€€€€€€€€€¤(€€€€€€€¥˜€‰½¹Ñ•¹ÑÌèÝÉ¥Ñ”ˆ¥¸Ý½É­™±½Ý}Ñ•áÐ¹±½Ý•È ¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÝ½É­™±½Ý}¹…µ•ôèÁ•ÉÍ¥ÍÑ•¹ÐÝ½É­™±½ÜƒB÷BÔƒBóBûBÛB×FƒBãBóB×FF0½¹Ñ•¹ÑÌèÝÉ¥Ñ”ˆ¤(€€€€€€€€ŒƒB£FBÃFB÷BÃF<ƒBÃBËFBûBóBÃFBãBßBÃFBãF<ƒBûFFBÃFGFFF<ƒFBãFBÃF;F'B×BäƒFB×BïBãBëBûBð°ƒBÀƒB÷BÔƒFBûBïF3BëBøƒBÿBø½¹Ñ•¹ÑÌ¸(€€€€€€€€ŒƒBcB÷BÃFBÔƒBÿBûBïB÷BûBóBûFBãF<ƒFBÃFF#BãFF?F;FFF<ƒBóBûBïFBÀ°ƒBÓBûBÇBÃBËBïB×B÷BãB×BðƒBûBÓB÷BûBäƒFFFBûBëBàƒBÈÁ•Éµ¥ÍÍ¥½¹Ì¸(€€€€€€€™½ÈÍ½Á”°Ù…±Õ”¥¸É”¹™¥¹‘…±°¡Èˆ ý´¥ylqÑt¬¡m„µèµt¬¤éqÌ¨¡m„µét¬¥qÌ¨ˆ°Á•Éµ¥ÍÍ¥½¹}‰½‘ä¤è(€€€€€€€€€€€¥˜Ù…±Õ”¹½Ð¥¸11=]}]=I-1=]}AI5%MM%=9Lè(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÝ½É­™±½Ý}¹…µ•ôèƒFBÃBßFB×F#B×B÷BãBÔ€íÍ½Á•ôèíÙ…±Õ•ôœƒFBÃFF#BãFF?B×FƒBÿBûBïB÷BûBóBûFBãF<ƒBÃBËFBûBóBÃFBãBßBÃFBãBàì€ˆ(€€€€€€€€€€€€€€€€€€€˜‹BÓBûBÿFFFBãBóF,ƒFBûBïF3BëBøíÍ½ÉÑ•¡11=]}]=I-1=]}AI5%MM%=9L¥ô€¡½Á•É…Ñ¥½¹Ì½¡…¹•}ÁÉ½•ÍÌ¹µ°ƒFBÃBßBÓB×Bì€Ô¤ˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€™½ÈÑ½­•¸¥¸l‰¥ÐÁÕÍ ˆ°€‰¥Ð½µµ¥Ð‰tè(€€€€€€€€€€€¥˜Ñ½­•¸¥¸Ý½É­™±½Ý}Ñ•áÐ¹±½Ý•È ¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÝ½É­™±½Ý}¹…µ•ôèÁ•ÉÍ¥ÍÑ•¹ÐÝ½É­™±½ÜƒFBûBÓB×FBÛBãFÉ•Á½Í¥Ñ½ÉäµÕÑ…Ñ¥½¸ÁÉ¥µ¥Ñ¥Ù”íÑ½­•¹ôˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€™½Èµ…Ñ ¥¸É”¹™¥¹‘¥Ñ•È¡Èˆ ý´¥yqÌ©ÕÍ•ÌéqÌ¨¡myqÌt¬¥ ¡myqÌt¬¤ˆ°Ý½É­™±½Ý}Ñ•áÐ¤è(€€€€€€€€€€€…Ñ¥½¸°É•˜€ôµ…Ñ ¹É½ÕÁÌ ¤(€€€€€€€€€€€¥˜…Ñ¥½¸¹ÍÑ…ÉÑÍÝ¥Ñ  ˆ¸¼ˆ¤½È…Ñ¥½¸¹ÍÑ…ÉÑÍÝ¥Ñ  ‰‘½­•Èè¼¼ˆ¤è(€€€€€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€€€€€¥˜¹½ÐÉ”¹™Õ±±µ…Ñ ¡È‰lÀ´å„µ™µuìÐÁôˆ°É•˜¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€˜‰íÝ½É­™±½Ý}¹…µ•ôè•áÑ•É¹…°Ñ¥½¸í…Ñ¥½¹õíÉ•™ôƒBÓBûBïBÛB×BôƒBÇF/FF0Á¥¹¹•ƒB÷BÀ¥µµÕÑ…‰±”€ÐÀµ¡…È½µµ¥ÐM!ˆ(€€€€€€€€€€€€€€€€¤(€€€™½ÈÑ½­•¸¥¸l‰¥ÐÁÕÍ ˆ°€‰¥Ð½µµ¥Ð‰tè(€€€€€€€¥˜Ñ½­•¸¥¸…•ÁÑ…¹”¹±½Ý•È ¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰…•ÁÑ…¹”½…ÁÁ±ä¹ÁäƒB÷BÔƒBÓBûBïBÛB×BôƒBËF/BÿBûBïB÷F?FF0íÑ½­•¹ôˆ¤(€€€¥˜€ˆ´µÍ•µ…¹Ñ¥ŒµÉ•Ù¥•Üˆ¹½Ð¥¸…•ÁÑ…¹”½È€‰Ù…±¥‘…Ñ•}Í•µ…¹Ñ¥}É•Ù¥•Üˆ¹½Ð¥¸…•ÁÑ…¹”è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰…•ÁÑ…¹”½…ÁÁ±ä¹ÁäƒBÓBûBïBÛB×BôƒFFB×BÇBûBËBÃFF0M!µ‰½Õ¹Í•µ…¹Ñ¥ŒÉ•Ù¥•ÜƒBÓBïF<´ÀÄˆ¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…ÕÑ½µ…Ñ¥½¹}Á½±¥äˆ°•ÉÉ½ÉÌ¤(()‘•˜¡•­}•¹•É…Ñ•¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt(€€€É•ÅÕ¥É•€ôl(€€€€€€€É½½Ð€¼€‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µˆ°(€€€€€€€É½½Ð€¼€‰Ñ…Í­Ì¹µˆ°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½µ…É­‘½Ý¹}¥¹‘•à¹µˆ°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½¹½¹}µ…É­‘½Ý¹}¥¹‘•à¹µˆ°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½É•Á½Í¥Ñ½Éå}ÍÑÉÕÑÕÉ”¹µˆ°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½ÑÉ…•…‰¥±¥Ñå}µ…ÑÉ¥à¹µˆ°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½Ñ•ÍÑ}…Ñ…±½œ¹µˆ°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½Á±…Ñ™É½µ}…Á…‰¥±¥Ñä¹µˆ°(€€€t(€€€™½ÈÁ…Ñ ¥¸É•ÅÕ¥É•è(€€€€€€€¥˜¹½ÐÁ…Ñ ¹•á¥ÍÑÌ ¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‹B{FFFFFFBËFB×FƒBÿFBûBãBßBËBûBÓB÷F/BäƒFBÃBçBìèíÉ•±…Ñ¥Ù•}Á½Í¥à¡Á…Ñ °É½½Ð¥ôˆ¤(€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€™¥ÉÍÐ€ôÁ…Ñ ¹É•…‘}Ñ•áÐ¡•¹½‘¥¹œô‰ÕÑ˜´àµÍ¥œˆ¤¹ÍÁ±¥Ñ±¥¹•Ì ¥lÀèÅt(€€€€€€€¥˜™¥ÉÍÐ€„ôm9IQ}!Itè(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•}Á½Í¥à¡Á…Ñ °É½½Ð¥ôèƒBûFFFFFFBËFB×Fµ…É­•È•¹•É…Ñ•ˆ¤(€€€•áÁ•Ñ•€ôì(€€€€€€€É½½Ð€¼€‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µˆèÉ•¹‘•É}É•Á½Í¥Ñ½Éå}ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¡É½½Ð¤°(€€€€€€€É½½Ð€¼€‰Ñ…Í­Ì¹µˆèÉ•¹‘•É}Ñ…Í­}¥¹‘•à¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½µ…É­‘½Ý¹}¥¹‘•à¹µˆèÉ•¹‘•É}¥¹‘•à¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½¹½¹}µ…É­‘½Ý¹}¥¹‘•à¹µˆèÉ•¹‘•É}¹½¹}µ…É­‘½Ý¹}¥¹‘•à¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½É•Á½Í¥Ñ½Éå}ÍÑÉÕÑÕÉ”¹µˆèÉ•¹‘•É}É•Á½Í¥Ñ½Éå}ÍÑÉÕÑÕÉ”¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½ÑÉ…•…‰¥±¥Ñå}µ…ÑÉ¥à¹µˆèÉ•¹‘•É}ÑÉ…•…‰¥±¥Ñä¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½Ñ•ÍÑ}…Ñ…±½œ¹µˆèÉ•¹‘•É}Ñ•ÍÑ}…Ñ…±½œ¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€€€€€É½½Ð€¼€‰•¹•É…Ñ•½Á±…Ñ™É½µ}…Á…‰¥±¥Ñä¹µˆèÉ•¹‘•É}Á±…Ñ™É½µ}…Á…‰¥±¥Ñä¡É½½Ð°€ˆÈÀÀÀ´ÀÄ´ÀÄˆ¤°(€€€ô(€€€™½ÈÁ…Ñ °É•¹‘•É•¥¸•áÁ•Ñ•¹¥Ñ•µÌ ¤è(€€€€€€€¥˜Á…Ñ ¹•á¥ÍÑÌ ¤…¹É•…‘}Ñ•áÐ¡Á…Ñ ¤¹ÍÑÉ¥À ¤€„ôÉ•¹‘•É•¹ÍÑÉ¥À ¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•}Á½Í¥à¡Á…Ñ °É½½Ð¥ôƒB÷BÔƒFBûBûFBËB×FFFBËFB×FƒBÏB×B÷B×FBÃFBûFFˆ¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰•¹•É…Ñ•ˆ°•ÉÉ½ÉÌ¤(()‘•˜¡•­}½Ý¹•É}¥¹Ñ•É™…”¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt(€€€É•¹‘•É•€ôÉ•¹‘•É}É•Á½Í¥Ñ½Éå}ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¡É½½Ð¤(€€€¥˜€ˆ”ˆ¥¸É•¹‘•É•è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µƒB÷BÔƒBÓBûBïBÛB×BôƒFBûBÓB×FBÛBÃFF0ƒBãFBëFFFFBËB×B÷B÷F/BÔƒBÿFBûFB×B÷FF,ˆ¤(€€€™½ÈÑ½­•¸¥¸l(€€€€€€€€‰mátˆ°(€€€€€€€€‰ltˆ°(€€€€€€€€‹BËF/BÿBûBïB÷B×B÷Bøˆ°(€€€€€€€€‹BûFFBÃBïBûFF0ˆ°(€€€€€€€€‹BKBÃF#BÔƒBÓB×BçFFBËBãBÔƒFB×BçFBÃFˆ°(€€€€€€€€‹B‡BïB×BÓFF;F'BãBäƒBãFBÿBûBïB÷BãFB×BïF0ˆ°(€€€€€€€€‹BGBïBûBëB×FF,ˆ°(€€€tè(€€€€€€€¥˜Ñ½­•¸¹½Ð¥¸É•¹‘•É•è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µèƒBûFFFFFFBËFB×FƒBûBÇF?BßBÃFB×BïF3B÷F/BäƒF7BïB×BóB×B÷F€íÑ½­•¹ôœˆ¤(€€€¥˜¹½Ð…¹ä (€€€€€€€Á¡É…Í”¥¸É•¹‘•É•(€€€€€€€™½ÈÁ¡É…Í”¥¸l(€€€€€€€€€€€€‹BŸFBûBÇF,ƒBÿFBûBÓBûBïBÛBãFF0°ƒBûFBÿFBÃBËF3FBÔƒBÃBÏB×B÷FFƒBûBÓB÷FƒBëBûBóBÃB÷BÓFˆ°(€€€€€€€€€€€€‹BŸFBûBÇF,ƒBÿFBûBÓBûBïBÛBãFF0°ƒBûFBëFBûBçFBÔƒB÷BûBËF/BäƒFB×BÃB÷FƒBÃBÏB×B÷FBÀˆ°(€€€€€€€€€€€€‹B‡B×BçFBÃFƒFFB×BÇFB×FFF<ƒBËBÃF#BÔƒFB×F#B×B÷BãBÔˆ°(€€€€€€€t(€€€€¤è(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µƒBÓBûBïBÛB×BôƒF?BËB÷BøƒFBûBûBÇF'BÃFF0°ƒFFB×BÇFB×FFF<ƒBïBàƒBÓB×BçFFBËBãBÔƒBËBïBÃBÓB×BïF3FBÀˆ¤(€€€™½ÈÑ½­•¸¥¸l(€€€€€€€€‰¥¸µÉ•Ù¥•Üˆ°(€€€€€€€€‰¥¸µÁÉ½É•ÍÌˆ°(€€€€€€€€‰É•…‘äµ™½Èµ…•ÁÑ…¹”ˆ°(€€€€€€€€‰½Ý¹•É}…Ñ¥½¸ˆ°(€€€€€€€€‰A½Ý•ÉM¡•±°ˆ°(€€€€€€€€‰¥ÐM!ˆ°(€€€€€€€€‰•Ù¥‘•¹”‰Õ¹‘±”ˆ°(€€€tè(€€€€€€€¥˜Ñ½­•¸¥¸É•¹‘•É•è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€˜‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µèƒBËB÷FFFB×B÷B÷F?F<ƒFB×FB÷BãFB×FBëBÃF<ƒBÓB×FBÃBïF0€íÑ½­•¹ôœƒB÷BÔƒBÓBûBïBÛB÷BÀƒBÿBûBëBÃBßF/BËBÃFF3FF<ƒBËBïBÃBÓB×BïF3FFˆ(€€€€€€€€€€€€¤(€€€¥˜É•¹‘•É•¹½Õ¹Ð ‰ðƒB‡BïB×BÓFF;F'BãBäƒBãFBÿBûBïB÷BãFB×BïF0ðˆ¤€„ô€Äè(€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ ‰ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¹µƒBÓBûBïBÛB×BôƒBÿBûBëBÃBßF/BËBÃFF0ƒFBûBËB÷BøƒBûBÓB÷BûBÏBøƒFBïB×BÓFF;F'B×BÏBøƒBãFBÿBûBïB÷BãFB×BïF<ˆ¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰½Ý¹•É}¥¹Ñ•É™…”ˆ°•ÉÉ½ÉÌ¤(()‘•˜¡•­}Í•É•ÑÌ¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt(€€€™½É‰¥‘‘•¹}¹…µ•Ì€ôìˆ¹•¹Øˆ°€‰¥‘}ÉÍ„ˆ°€‰¥‘}•ÈÔÔÄäˆ°€‰É•‘•¹Ñ¥…±Ì¹©Í½¸‰ô(€€€€ŒƒBFBûBãBßBËBûBÓB÷F/BÔƒBÿFB×BÓFFBÃBËBïB×B÷BãF<ƒFBûBÛBÔƒFBëBÃB÷BãFFF;FFF<èƒFB×BëFB×F°ƒBÿBûBÿBÃBËF#BãBäƒBÈƒBÿB×FBËBãFB÷F/BäƒBÓBûBëFBóB×B÷F°(€€€€ŒƒBëBûBÿBãFFB×FFF<ƒBÈ•¹•É…Ñ•¼ƒBàƒBûBÇF?BßBÃBôƒBûBÇB÷BÃFFBÛBãBËBÃFF3FF<ƒFBÃBðƒBÛBÔ¸(€€€™½ÈÁ…Ñ ¥¸¥Ñ•É}™¥±•Ì¡É½½Ð°¥¹±Õ‘•}•¹•É…Ñ•õQÉÕ”¤è(€€€€€€€É•±…Ñ¥Ù”€ôÉ•±…Ñ¥Ù•}Á½Í¥à¡Á…Ñ °É½½Ð¤(€€€€€€€¥˜Á…Ñ ¹¹…µ”¹±½Ý•È ¤¥¸™½É‰¥‘‘•¹}¹…µ•Ì½ÈÁ…Ñ ¹ÍÕ™™¥à¹±½Ý•È ¤¥¸ìˆ¹Á•´ˆ°€ˆ¹ÀÄÈˆ°€ˆ¹Á™à‰ôè(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‹BBûFB×B÷FBãBÃBïF3B÷F/BäƒFB×BëFB×FèíÉ•±…Ñ¥Ù•ôˆ¤(€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€¥˜Á…Ñ ¹ÍÕ™™¥à¹±½Ý•È ¤¹½Ð¥¸M99}QaQ}MU%aLè(€€€€€€€€€€€½¹Ñ¥¹Õ”(€€€€€€€Ñ•áÐ€ôÁ…Ñ ¹É•…‘}Ñ•áÐ¡•¹½‘¥¹œô‰ÕÑ˜´àµÍ¥œˆ°•ÉÉ½ÉÌô‰É•Á±…”ˆ¤(€€€€€€€¥˜…¹ä¡Á…ÑÑ•É¸¹Í•…É ¡Ñ•áÐ¤™½ÈÁ…ÑÑ•É¸¥¸MIQ}AQQI9L¤è(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôèƒB÷BÃBçBÓB×BôƒFFBÃBÏBóB×B÷F°ƒBÿBûFBûBÛBãBäƒB÷BÀƒFB×BëFB×Fˆ¤(€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰Í•É•ÑÌˆ°•ÉÉ½ÉÌ¤(()‘•˜¡•­}Ñ•ÍÑ}½Ù•É…•}ÅÕ…±¥Ñä¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€€ˆˆ‹BFBûBËB×FBëBÀƒBÿBûBëFF/FBãF<ƒFFB×BÇBûBËBÃB÷BãBäƒFB×FFBÃBóBà€£BËBëBïF;FBÃB×FFF<ƒB÷BÀ´ÀÈ¬¤¸ˆˆˆ(€€€€ŒƒBwBÀ´ÀÄƒFBûBïF3BëBøƒBÿBûBÓBÏBûFBûBËBëBÀƒBûFB÷BûBËF,°ƒFFB×BÇBûBËBÃB÷BãF<ƒBÇFBÓFFƒBÿFBûFB×FFBãFBûBËBÃB÷F,ƒB÷BÀ´ÀÈ¬(€€€€ŒƒB·FBÀƒBÿFBûBËB×FBëBÀƒBãB÷FBûFBóBÃFBãBûB÷B÷BÃF<ƒBàƒB÷BÔƒBÇBïBûBëBãFFB×FƒBÿFBãB÷F?FBãBÔ´ÀÄ(€€€ÑÉäè(€€€€€€€™É½´½Á•É…Ñ¥½¹Ì¹ÍÉ¥ÁÑÌ¹ÅÕ…±¥Ñä¹Ñ•ÍÑ}½Ù•É…”¥µÁ½ÉÐÙ…±¥‘…Ñ•}Ñ•ÍÑ}½Ù•É…”((€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰Ñ•ÍÑ}½Ù•É…”ˆ°Ù…±¥‘…Ñ•}Ñ•ÍÑ}½Ù•É…”¡É½½Ð¤¤(€€€•á•ÁÐá•ÁÑ¥½¸…Ì•áŒè(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰Ñ•ÍÑ}½Ù•É…”ˆ°m˜‹B{F#BãBÇBëBÀƒBÿFBûBËB×FBëBàèí•áô‰t¤(()‘•˜¡•­}½Ý¹•É}…Ñ¥½¹}ÅÕ…±¥Ñä¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€€ˆˆ‹BFBûBËB×FBëBÀƒBÿFBÃBëFBãFB÷BûFFBàƒBÓB×BçFFBËBãBäƒBËBïBÃBÓB×BïF3FBÀ¸ˆˆˆ(€€€ÑÉäè(€€€€€€€™É½´½Á•É…Ñ¥½¹Ì¹ÍÉ¥ÁÑÌ¹ÅÕ…±¥Ñä¹…Ñ¥½¹}ÁÉ…Ñ¥…±¥Ñä¥µÁ½ÉÐ¡•­}ÁÉ½©•Ñ}ÍÑ…ÑÕÌ((€€€€€€€•ÉÉ½ÉÌ€ô¡•­}ÁÉ½©•Ñ}ÍÑ…ÑÕÌ¡É½½Ð¤(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰½Ý¹•É}…Ñ¥½¹Ìˆ°•ÉÉ½ÉÌ¥˜•ÉÉ½ÉÌ•±Í”mt¤(€€€•á•ÁÐá•ÁÑ¥½¸…Ì•áŒè(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰½Ý¹•É}…Ñ¥½¹Ìˆ°m˜‹B{F#BãBÇBëBÀƒBÿFBûBËB×FBëBàèí•áô‰t¤(()‘•˜¡•­}…±±½Ý•‘}Á…Ñ¡Í}ÅÕ…±¥Ñä¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€€ˆˆ‹BFBûBËB×FBëBÀƒBëBûB÷FBãFFB×B÷FB÷BûFFBàƒBÿFFB×BäƒBÈ…±±½Ý•‘}Á…Ñ¡Ì¸ˆˆˆ(€€€ÑÉäè(€€€€€€€™É½´½Á•É…Ñ¥½¹Ì¹ÍÉ¥ÁÑÌ¹ÅÕ…±¥Ñä¹Á…Ñ¡Í}Ù…±¥‘…Ñ¥½¸¥µÁ½ÉÐÙ…±¥‘…Ñ•}Ñ…Í­}Á…Ñ¡Ì((€€€€€€€•ÉÉ½ÉÌ€ôÙ…±¥‘…Ñ•}Ñ…Í­}Á…Ñ¡Ì¡É½½Ð¤(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…±±½Ý•‘}Á…Ñ¡Ìˆ°•ÉÉ½ÉÌ¥˜•ÉÉ½ÉÌ•±Í”mt¤(€€€•á•ÁÐá•ÁÑ¥½¸…Ì•áŒè(€€€€€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰…±±½Ý•‘}Á…Ñ¡Ìˆ°m˜‹B{F#BãBÇBëBÀƒBÿFBûBËB×FBëBàèí•áô‰t¤(()‘•˜¡•­}™É½¹Ñµ…ÑÑ•É}ÍÑ…¹‘…É¡É½½ÐèA…Ñ ¤€´ø¡•­I•ÍÕ±Ðè(€€€€ˆˆ‹BFBûBËB×FBëBÀƒFBûBûFBËB×FFFBËBãF<™É½¹Ñµ…ÑÑ•ÈƒFFBÃB÷BÓBÃFFFƒBÿBøƒFBãBÿBÃBðƒBÓBûBëFBóB×B÷FBûBÈ¸((€€€ƒB‡BûBÏBïBÃFB÷Bø½Á•É…Ñ¥½¹Ì½¡…¹•}ÁÉ½•ÍÌ¹µŒàÈ°ƒBëBÃBÛBÓF/BäƒFBãBüƒBÓBûBëFBóB×B÷FBÀ(€€€ƒBÓBûBïBÛB×BôƒBãBóB×FF0ƒBûBÿFB×BÓB×BïFGB÷B÷F/BäƒBóBãB÷BãBóBÃBïF3B÷F/BäƒB÷BÃBÇBûF ƒBÿBûBïB×Bä¸(€€€€ˆˆˆ(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt€ômt((€€€€ŒƒBsBãB÷BãBóBÃBïF3B÷F/BÔƒFFB×BÇFB×BóF/BÔƒBÿBûBïF<ƒBÿBøƒFBãBÿBÃBðƒBÓBûBëFBóB×B÷FBûBÈ(€€€ÑåÁ•}É•ÅÕ¥É•µ•¹ÑÌ€ôì(€€€€€€€€‰…‘Èˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰‘•¥Í¥½¹}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•ˆ°€‰ÑÉ…•Í}Ñ¼‰ô°(€€€€€€€€‰Ñ…Í¬ˆèì(€€€€€€€€€€€€‰¥ˆ°(€€€€€€€€€€€€‰ÑåÁ”ˆ°(€€€€€€€€€€€€‰Ñ¥Ñ±”ˆ°(€€€€€€€€€€€€‰Ý½É­}ÍÑ…Ñ”ˆ°(€€€€€€€€€€€€‰Ù•ÉÍ¥½¸ˆ°(€€€€€€€€€€€€‰ÕÁ‘…Ñ•ˆ°(€€€€€€€€€€€€‰‘•Á•¹‘Í}½¸ˆ°(€€€€€€€€€€€€‰¹•áÑ}…Ñ½Èˆ°(€€€€€€€€€€€€‰½Ý¹•É}…Ñ¥½¸ˆ°(€€€€€€€€€€€€‰…±±½Ý•‘}Á…Ñ¡Ìˆ°(€€€€€€€€€€€€‰ÑÉ…•Í}Ñ¼ˆ°(€€€€€€€ô°(€€€€€€€€‰Ñ•ÍÐˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰ÍÁ•}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•‰ô°(€€€€€€€€‰ÅÕ…±¥Ñå}•Ù¥‘•¹”ˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰•Ù¥‘•¹•}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰É•…Ñ•‰ô°(€€€€€€€€‰•¹•É…Ñ•‘}½Ý¹•É}ÍÑ…ÑÕÌˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰•¹•É…Ñ¥½¹}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸‰ô°(€€€€€€€€ŒƒBB×FBËBãFB÷F/BÔƒBÓBûBëFBóB×B÷FF,€£BÿFBÃBËBãBïBÀ°ƒFBÿB×FBãFBãBëBÃFBãBàƒBàƒF»Bü¸¤(€€€€€€€€‰ÁÉ½©•Ñ}ÉÕ±•Ìˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•ˆ°€‰‘•Á•¹‘Í}½¸‰ô°(€€€€€€€€‰‰ÕÍ¥¹•ÍÍ}É•ÅÕ¥É•µ•¹ÑÌˆèì(€€€€€€€€€€€€‰¥ˆ°(€€€€€€€€€€€€‰ÑåÁ”ˆ°(€€€€€€€€€€€€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°(€€€€€€€€€€€€‰Ù•ÉÍ¥½¸ˆ°(€€€€€€€€€€€€‰ÕÁ‘…Ñ•ˆ°(€€€€€€€€€€€€‰‘•Á•¹‘Í}½¸ˆ°(€€€€€€€ô°(€€€€€€€€‰ÍåÍÑ•µ}ÍÁ•¥™¥…Ñ¥½¸ˆèì(€€€€€€€€€€€€‰¥ˆ°(€€€€€€€€€€€€‰ÑåÁ”ˆ°(€€€€€€€€€€€€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°(€€€€€€€€€€€€‰Ù•ÉÍ¥½¸ˆ°(€€€€€€€€€€€€‰ÕÁ‘…Ñ•ˆ°(€€€€€€€€€€€€‰‘•Á•¹‘Í}½¸ˆ°(€€€€€€€ô°(€€€€€€€€‰Ñ¡É•…Ñ}µ½‘•°ˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•ˆ°€‰‘•Á•¹‘Í}½¸‰ô°(€€€€€€€€‰…É¡¥Ñ•ÑÕÉ•}‰…Í•±¥¹”ˆèì(€€€€€€€€€€€€‰¥ˆ°(€€€€€€€€€€€€‰ÑåÁ”ˆ°(€€€€€€€€€€€€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°(€€€€€€€€€€€€‰Ù•ÉÍ¥½¸ˆ°(€€€€€€€€€€€€‰ÕÁ‘…Ñ•ˆ°(€€€€€€€€€€€€‰‘•Á•¹‘Í}½¸ˆ°(€€€€€€€ô°(€€€€€€€€‰¥¹™É…ÍÑÉÕÑÕÉ•}‰…Í•±¥¹”ˆèì(€€€€€€€€€€€€‰¥ˆ°(€€€€€€€€€€€€‰ÑåÁ”ˆ°(€€€€€€€€€€€€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°(€€€€€€€€€€€€‰Ù•ÉÍ¥½¸ˆ°(€€€€€€€€€€€€‰ÕÁ‘…Ñ•ˆ°(€€€€€€€€€€€€‰‘•Á•¹‘Í}½¸ˆ°(€€€€€€€ô°(€€€€€€€€‰…•¹Ñ}¥¹ÍÑÉÕÑ¥½¸ˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•ˆ°€‰‘•Á•¹‘Í}½¸‰ô°(€€€€€€€€‰½Á•É…Ñ¥½¹Ìˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•ˆ°€‰‘•Á•¹‘Í}½¸‰ô°(€€€€€€€€‰¡•­±¥ÍÐˆèì‰¥ˆ°€‰ÑåÁ”ˆ°€‰‘½Õµ•¹Ñ}ÍÑ…Ñ”ˆ°€‰Ù•ÉÍ¥½¸ˆ°€‰ÕÁ‘…Ñ•ˆ°€‰‘•Á•¹‘Í}½¸‰ô°(€€€ô((€€€™½ÈÉ•±…Ñ¥Ù”°‘½Œ¥¸}ÁÉ¥µ…Éå}‘½Õµ•¹ÑÌ¡É½½Ð¤è(€€€€€€€‘½}ÑåÁ”€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰ÑåÁ”ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤(€€€€€€€¥˜¹½Ð‘½}ÑåÁ”è(€€€€€€€€€€€½¹Ñ¥¹Õ”((€€€€€€€€ŒƒBFBûBÿFFBëBÃB×BðƒF#BÃBÇBïBûB÷F,ƒBàƒBÏB×B÷B×FBãFFB×BóF/BÔƒFBÃBçBïF,(€€€€€€€¥˜É•±…Ñ¥Ù”¹ÍÑ…ÉÑÍÝ¥Ñ  ‰½Á•É…Ñ¥½¹Ì½Ñ•µÁ±…Ñ•Ì¼ˆ¤½È€‰•¹•É…Ñ•ˆ¥¸É•±…Ñ¥Ù”è(€€€€€€€€€€€½¹Ñ¥¹Õ”((€€€€€€€É•ÅÕ¥É•€ôÑåÁ•}É•ÅÕ¥É•µ•¹ÑÌ¹•Ð¡‘½}ÑåÁ”¤(€€€€€€€¥˜¹½ÐÉ•ÅÕ¥É•è(€€€€€€€€€€€€ŒƒBSBïF<ƒB÷B×BãBßBËB×FFB÷F/FƒFBãBÿBûBÈƒB÷BÔƒBÿFBûBËB×FF?B×Bð(€€€€€€€€€€€½¹Ñ¥¹Õ”((€€€€€€€€ŒƒBFBûBËB×FF?B×BðƒB÷BÃBïBãFBãBÔƒFFB×BÇFB×BóF/FƒBÿBûBïB×Bä(€€€€€€€µ¥ÍÍ¥¹œ€ôÉ•ÅÕ¥É•€´Í•Ð¡‘½Œ¹µ•Ñ…‘…Ñ„¹­•åÌ ¤¤(€€€€€€€¥˜µ¥ÍÍ¥¹œè(€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèƒBÓBïF<ƒFBãBÿBÀ€í‘½}ÑåÁ•ôœƒBûFFFFFFBËFF;FƒBÿBûBïF<èìœ°€œ¹©½¥¸¡Í½ÉÑ•¡µ¥ÍÍ¥¹œ¤¥ôˆ(€€€€€€€€€€€€¤((€€€€€€€€ŒƒBFBûBËB×FF?B×BðƒFBÿB×FBãFBãFB×FBëBãBÔƒFFB×BÇBûBËBÃB÷BãF<(€€€€€€€¥˜‘½}ÑåÁ”€ôô€‰Ñ…Í¬ˆè(€€€€€€€€€€€¹•áÑ}…Ñ½È€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰¹•áÑ}…Ñ½Èˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤(€€€€€€€€€€€¥˜¹•áÑ}…Ñ½È€ôô€‰½Ý¹•Èˆè(€€€€€€€€€€€€€€€½Ý¹•É}…Ñ¥½¸€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰½Ý¹•É}…Ñ¥½¸ˆ°€ˆˆ¤¤¹ÍÑÉ¥À ¤(€€€€€€€€€€€€€€€¥˜½Ý¹•É}…Ñ¥½¸€ôô€‰¹½¹”ˆè(€€€€€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèƒBÿFBà¹•áÑ}…Ñ½Èõ½Ý¹•È°½Ý¹•É}…Ñ¥½¸ƒB÷BÔƒBÓBûBïBÛB×BôƒBÇF/FF0€¹½¹”œˆ(€€€€€€€€€€€€€€€€€€€€¤((€€€€€€€€€€€€ŒƒBFBûBËB×FF?B×Bð°ƒFFBø…±±½Ý•‘}Á…Ñ¡ÌƒBãBóB×B×FƒBßB÷BÃFB×B÷BãF<(€€€€€€€€€€€Á…Ñ¡Ì€ô‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰…±±½Ý•‘}Á…Ñ¡Ìˆ°mt¤(€€€€€€€€€€€¥˜¹½ÐÁ…Ñ¡Ì½È€¡¥Í¥¹ÍÑ…¹”¡Á…Ñ¡Ì°±¥ÍÐ¤…¹¹½Ð…¹ä¡Á…Ñ¡Ì¤¤è(€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹¡˜‰íÉ•±…Ñ¥Ù•ôè…±±½Ý•‘}Á…Ñ¡ÌƒBÓBûBïBÛB×BôƒFBûBÓB×FBÛBÃFF0ƒFBûFF<ƒBÇF,ƒBûBÓBãBôƒBÿFFF0ˆ¤((€€€€€€€¥˜‘½}ÑåÁ”€ôô€‰Ñ•ÍÐˆè(€€€€€€€€€€€•á•ÕÑ¥½¸€ôÍÑÈ¡‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰•á•ÕÑ¥½¸ˆ°€‰½Ý¹•Èˆ¤¤¹ÍÑÉ¥À ¤¹±½Ý•È ¤½È€‰½Ý¹•Èˆ(€€€€€€€€€€€¥˜•á•ÕÑ¥½¸€ôô€‰…ÕÑ½µ…Ñ•ˆè(€€€€€€€€€€€€€€€•Ù¥‘•¹”€ô‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”ˆ°€ˆˆ¤(€€€€€€€€€€€€€€€¥˜¹½Ð•Ù¥‘•¹”½ÈÍÑÈ¡•Ù¥‘•¹”¤¹ÍÑÉ¥À ¤€ôô€ˆˆè(€€€€€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèƒBÿFBà•á•ÕÑ¥½¸õ…ÕÑ½µ…Ñ•°ƒBÓBûBïBÛB÷BøƒBÇF/FF0ƒBßBÃBÿBûBïB÷B×B÷Bø…ÕÑ½µ…Ñ•‘}•Ù¥‘•¹”ˆ(€€€€€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€•±¥˜•á•ÕÑ¥½¸€ôô€‰µ…¹Õ…°ˆè(€€€€€€€€€€€€€€€•Ù¥‘•¹”€ô‘½Œ¹µ•Ñ…‘…Ñ„¹•Ð ‰µ…¹Õ…±}•Ù¥‘•¹”ˆ°€ˆˆ¤(€€€€€€€€€€€€€€€¥˜¹½Ð•Ù¥‘•¹”½ÈÍÑÈ¡•Ù¥‘•¹”¤¹ÍÑÉ¥À ¤€ôô€ˆˆè(€€€€€€€€€€€€€€€€€€€•ÉÉ½ÉÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€€€€€€€€€˜‰íÉ•±…Ñ¥Ù•ôèƒBÿFBà•á•ÕÑ¥½¸õµ…¹Õ…°°ƒBÓBûBïBÛB÷BøƒBÇF/FF0ƒBßBÃBÿBûBïB÷B×B÷Bøµ…¹Õ…±}•Ù¥‘•¹”ˆ(€€€€€€€€€€€€€€€€€€€€¤((€€€É•ÑÕÉ¸}É•ÍÕ±Ð ‰™É½¹Ñµ…ÑÑ•É}ÍÑ…¹‘…Éˆ°•ÉÉ½ÉÌ¤(()‘•˜ÉÕ¹}…±±}¡•­Ì¡É½½ÐèA…Ñ °™…ÍÐè‰½½°€ô…±Í”¤€´ø±¥ÍÑm¡•­I•ÍÕ±Ñtè(€€€€Œ…ÍÐµ½‘”èƒFBûBïF3BëBøƒBÇF/FFFF/BÔƒFFFFBëFFFB÷F/BÔƒBÿFBûBËB×FBëBà€ ðÀ¸ÉÌƒBëBÃBÛBÓBÃF<¤(€€€™…ÍÑ}¡•­Ì€ôl(€€€€€€€€ ‰ÍÑÉÕÑÕÉ”ˆ°¡•­}ÍÑÉÕÑÕÉ”¤°(€€€€€€€€ ‰µ•Ñ…‘…Ñ„ˆ°¡•­}µ•Ñ…‘…Ñ„¤°(€€€€€€€€ ‰™É½¹Ñµ…ÑÑ•É}ÍÑ…¹‘…Éˆ°¡•­}™É½¹Ñµ…ÑÑ•É}ÍÑ…¹‘…É¤°(€€€€€€€€ ‰±¥¹­Ìˆ°±…µ‰‘„ÁÉ½©•Ñ}É½½Ðè}É•ÍÕ±Ð ‰±¥¹­Ìˆ°¡•­}µ…É­‘½Ý¹}±¥¹­Ì¡ÁÉ½©•Ñ}É½½Ð¤¤¤°(€€€€€€€€ ‰Í•É•ÑÌˆ°¡•­}Í•É•ÑÌ¤°(€€€t(€€€€ŒÕ±°µ½‘”èƒBËFBÔƒBÿFBûBËB×FBëBà€£BÓBïF<$¤(€€€…±±}¡•­Ì€ôl(€€€€€€€€ ‰ÍÑÉÕÑÕÉ”ˆ°¡•­}ÍÑÉÕÑÕÉ”¤°(€€€€€€€€ ‰µ•Ñ…‘…Ñ„ˆ°¡•­}µ•Ñ…‘…Ñ„¤°(€€€€€€€€ ‰™É½¹Ñµ…ÑÑ•É}ÍÑ…¹‘…Éˆ°¡•­}™É½¹Ñµ…ÑÑ•É}ÍÑ…¹‘…É¤°(€€€€€€€€ ‰ÑÉ…•…‰¥±¥Ñäˆ°¡•­}ÑÉ…•…‰¥±¥Ñä¤°(€€€€€€€€ ‰™Õ±±}ÑÉ…•…‰¥±¥Ñäˆ°¡•­}™Õ±±}ÑÉ…•…‰¥±¥Ñä¤°(€€€€€€€€ ‰Í•µ…¹Ñ¥}½¹Í¥ÍÑ•¹äˆ°¡•­}Í•µ…¹Ñ¥}½¹Í¥ÍÑ•¹ä¤°(€€€€€€€€ ‰…ÕÑ¡½É¥Ñå}É…Á ˆ°¡•­}…ÕÑ¡½É¥Ñå}É…Á ¤°(€€€€€€€€ ‰‘½Õµ•¹Ñ}Á½±¥äˆ°¡•­}‘½Õµ•¹Ñ}Á½±¥ä¤°(€€€€€€€€ ‰µ¥±•ÍÑ½¹•Ìˆ°¡•­}µ¥±•ÍÑ½¹•Ì¤°(€€€€€€€€ ‰‰ÕÍ¥¹•ÍÍ}É•ÅÕ¥É•µ•¹ÑÍ}½Ù•É…”ˆ°¡•­}‰ÕÍ¥¹•ÍÍ}É•ÅÕ¥É•µ•¹ÑÍ}½Ù•É…”¤°(€€€€€€€€ ‰Ñ…Í­Ìˆ°¡•­}Ñ…Í­Ì¤°(€€€€€€€€ ‰Ñ•ÍÑ}ÍÁ•Ìˆ°¡•­}Ñ•ÍÑ}ÍÁ•Ì¤°(€€€€€€€€ ‰ÅÕ…±¥Ñå}É•¥ÍÑÉäˆ°¡•­}ÅÕ…±¥Ñå}É•¥ÍÑÉä¤°(€€€€€€€€ ‰…•ÁÑ…¹•}µ½‘•°ˆ°¡•­}…•ÁÑ…¹•}µ½‘•°¤°(€€€€€€€€ ‰…ÕÑ½µ…Ñ¥½¹}Á½±¥äˆ°¡•­}…ÕÑ½µ…Ñ¥½¹}Á½±¥ä¤°(€€€€€€€€ ‰±¥¹­Ìˆ°±…µ‰‘„ÁÉ½©•Ñ}É½½Ðè}É•ÍÕ±Ð ‰±¥¹­Ìˆ°¡•­}µ…É­‘½Ý¹}±¥¹­Ì¡ÁÉ½©•Ñ}É½½Ð¤¤¤°(€€€€€€€€ ‰•¹•É…Ñ•ˆ°¡•­}•¹•É…Ñ•¤°(€€€€€€€€ ‰½Ý¹•É}¥¹Ñ•É™…”ˆ°¡•­}½Ý¹•É}¥¹Ñ•É™…”¤°(€€€€€€€€ ‰Í•É•ÑÌˆ°¡•­}Í•É•ÑÌ¤°(€€€€€€€€ ‰Ñ•ÍÑ}½Ù•É…”ˆ°¡•­}Ñ•ÍÑ}½Ù•É…•}ÅÕ…±¥Ñä¤°(€€€€€€€€ ‰½Ý¹•É}…Ñ¥½¹Ìˆ°¡•­}½Ý¹•É}…Ñ¥½¹}ÅÕ…±¥Ñä¤°(€€€€€€€€ ‰…±±½Ý•‘}Á…Ñ¡Ìˆ°¡•­}…±±½Ý•‘}Á…Ñ¡Í}ÅÕ…±¥Ñä¤°(€€€t(€€€¡•­Ì€ô™…ÍÑ}¡•­Ì¥˜™…ÍÐ•±Í”…±±}¡•­Ì(€€€É•ÍÕ±ÑÌè±¥ÍÑm¡•­I•ÍÕ±Ñt€ômt(€€€™½È¹…µ”°¡•­•È¥¸¡•­Ìè(€€€€€€€ÑÉäè(€€€€€€€€€€€É•ÍÕ±ÑÌ¹…ÁÁ•¹¡¡•­•È¡É½½Ð¤¤(€€€€€€€•á•ÁÐá•ÁÑ¥½¸…Ì•áŒè(€€€€€€€€€€€É•ÍÕ±ÑÌ¹…ÁÁ•¹ (€€€€€€€€€€€€€€€}É•ÍÕ±Ð¡¹…µ”°m˜‹BwB×BÿFB×BÓBËBãBÓB×B÷B÷BÃF<ƒBûF#BãBÇBëBÀƒBÿFBûBËB×FBëBàèíÑåÁ”¡•áŒ¤¹}}¹…µ•}}ôèí•áô‰t¤(€€€€€€€€€€€€¤(€€€É•ÑÕÉ¸É•ÍÕ±ÑÌ(()±…ÍÌ¡•­I•ÍÕ±Ñ¥Ð¡QåÁ•‘¥Ð¤è(€€€¹…µ”èÍÑÈ(€€€½¬è‰½½°(€€€•ÉÉ½ÉÌè±¥ÍÑmÍÑÉt(€€€Ý…É¹¥¹Ìè±¥ÍÑmÍÑÉt(()±…ÍÌMÕµµ…Éä¡QåÁ•‘¥Ð¤è(€€€½¬è‰½½°(€€€¡•­Ìè±¥ÍÑm¡•­I•ÍÕ±Ñ¥Ñt(€€€•ÉÉ½É}½Õ¹Ðè¥¹Ð(€€€Ý…É¹¥¹}½Õ¹Ðè¥¹Ð(()‘•˜ÍÕµµ…É¥é”¡É•ÍÕ±ÑÌè±¥ÍÑm¡•­I•ÍÕ±Ñt¤€´øMÕµµ…Éäè(€€€É•ÑÕÉ¸ì(€€€€€€€€‰½¬ˆè…±°¡É•ÍÕ±Ð¹½¬™½ÈÉ•ÍÕ±Ð¥¸É•ÍÕ±ÑÌ¤°(€€€€€€€€‰¡•­Ìˆèl(€€€€€€€€€€€ì(€€€€€€€€€€€€€€€€‰¹…µ”ˆèÉ•ÍÕ±Ð¹¹…µ”°(€€€€€€€€€€€€€€€€‰½¬ˆèÉ•ÍÕ±Ð¹½¬°(€€€€€€€€€€€€€€€€‰•ÉÉ½ÉÌˆèÉ•ÍÕ±Ð¹•ÉÉ½ÉÌ°(€€€€€€€€€€€€€€€€‰Ý…É¹¥¹ÌˆèÉ•ÍÕ±Ð¹Ý…É¹¥¹Ì°(€€€€€€€€€€€ô(€€€€€€€€€€€™½ÈÉ•ÍÕ±Ð¥¸É•ÍÕ±ÑÌ(€€€€€€€t°(€€€€€€€€‰•ÉÉ½É}½Õ¹ÐˆèÍÕ´¡±•¸¡É•ÍÕ±Ð¹•ÉÉ½ÉÌ¤™½ÈÉ•ÍÕ±Ð¥¸É•ÍÕ±ÑÌ¤°(€€€€€€€€‰Ý…É¹¥¹}½Õ¹ÐˆèÍÕ´¡±•¸¡É•ÍÕ±Ð¹Ý…É¹¥¹Ì¤™½ÈÉ•ÍÕ±Ð¥¸É•ÍÕ±ÑÌ¤°(€€€ô(()‘•˜µ…¥¸ ¤€´ø¥¹Ðè(€€€Á…ÉÍ•È€ô…ÉÁ…ÉÍ”¹ÉÕµ•¹ÑA…ÉÍ•È¡‘•ÍÉ¥ÁÑ¥½¸ô‹BFBûBËB×FBëBÀÁ•ÉÍ½¹…±}…¥}Á±…Ñ™½É´ˆ¤(€€€Á…ÉÍ•È¹…‘‘}…ÉÕµ•¹Ð ˆ´µ…±°ˆ°…Ñ¥½¸ô‰ÍÑ½É•}ÑÉÕ”ˆ°¡•±Àô‹BKF/BÿBûBïB÷BãFF0ƒBËFBÔƒBÿFBûBËB×FBëBà€£BÿBøƒFBóBûBïFBÃB÷BãF8¤ˆ¤(€€€Á…ÉÍ•È¹…‘‘}…ÉÕµ•¹Ð (€€€€€€€€ˆ´µ™…ÍÐˆ°…Ñ¥½¸ô‰ÍÑ½É•}ÑÉÕ”ˆ°¡•±Àô‹BKF/BÿBûBïB÷BãFF0ƒFBûBïF3BëBøƒBÇF/FFFF/BÔƒFFFFBëFFFB÷F/BÔƒBÿFBûBËB×FBëBàˆ(€€€€¤(€€€Á…ÉÍ•È¹…‘‘}…ÉÕµ•¹Ð ˆ´µ©Í½¸ˆ°…Ñ¥½¸ô‰ÍÑ½É•}ÑÉÕ”ˆ°¡•±Àô‹BKF/BËB×FFBàƒFB×BßFBïF3FBÃFƒBÈ)M=8ˆ¤(€€€…ÉÌ€ôÁ…ÉÍ•È¹Á…ÉÍ•}…ÉÌ ¤(€€€É•ÅÕ¥É•}ÍÕÁÁ½ÉÑ•‘}ÁåÑ¡½¸ ¤(€€€É½½Ð€ô™¥¹‘}ÁÉ½©•Ñ}É½½Ð¡A…Ñ ¹Ý ¤¤(€€€™…ÍÐ€ô…ÉÌ¹™…ÍÐ…¹¹½Ð…ÉÌ¹…±°(€€€ÍÕµµ…Éä€ôÍÕµµ…É¥é”¡ÉÕ¹}…±±}¡•­Ì¡É½½Ð°™…ÍÐõ™…ÍÐ¤¤(€€€¥˜…ÉÌ¹©Í½¸è(€€€€€€€ÁÉ¥¹Ð¡©Í½¸¹‘ÕµÁÌ¡ÍÕµµ…Éä°•¹ÍÕÉ•}…Í¥¤õ…±Í”°¥¹‘•¹ÐôÈ¤¤(€€€•±Í”è(€€€€€€€™½ÈÉ•ÍÕ±Ð¥¸ÍÕµµ…Éål‰¡•­Ì‰tè(€€€€€€€€€€€ÁÉ¥¹Ð¡˜‰mìAMLœ¥˜É•ÍÕ±Ñl½¬t•±Í”€%0õtíÉ•ÍÕ±Ñl¹…µ”uôˆ¤(€€€€€€€€€€€™½ÈÝ…É¹¥¹œ¥¸É•ÍÕ±Ñl‰Ý…É¹¥¹Ì‰tè(€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€]I9%9èíÝ…É¹¥¹ôˆ¤(€€€€€€€€€€€™½È•ÉÉ½È¥¸É•ÍÕ±Ñl‰•ÉÉ½ÉÌ‰tè(€€€€€€€€€€€€€€€ÁÉ¥¹Ð¡˜ˆ€II=Hèí•ÉÉ½Éôˆ¤(€€€€€€€ÁÉ¥¹Ð¡˜‹BcFBûBÌè•ÉÉ½ÉÌõíÍÕµµ…Éål•ÉÉ½É}½Õ¹Ðuô°Ý…É¹¥¹ÌõíÍÕµµ…ÉålÝ…É¹¥¹}½Õ¹Ðuôˆ¤(€€€É•ÑÕÉ¸€À¥˜ÍÕµµ…Éål‰½¬‰t•±Í”€Ä(()¥˜}}¹…µ•}|€ôô€‰}}µ…¥¹}|ˆè(€€€É…¥Í”MåÍÑ•µá¥Ð¡µ…¥¸ ¤¤(
