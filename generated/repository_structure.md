@@ -3,6 +3,7 @@
 id: generated_repository_structure
 type: generated_document
 generation_state: generated
+generated_at: 2026-08-26T12:10:00-06:00
 version: 1.0
 ---
 
@@ -10,11 +11,10 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `263` |
+| Всего файлов | `269` |
 
 ```text
 personal_ai_platform/
-- .coverage
 - .dockerignore
 - .github/workflows/project_check.yml
 - .github/workflows/publish_health_check_report.yml
@@ -29,6 +29,7 @@ personal_ai_platform/
 - adr/adr_007_cloud_provider_selection.md
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
+- capability_summary.md
 - dockerfile
 - generated/health_check_report.md
 - generated/markdown_index.md
@@ -41,7 +42,6 @@ personal_ai_platform/
 - operations/__init__.py
 - operations/acceptance.md
 - operations/adr_lifecycle.md
-- capability_summary.md
 - operations/change_process.md
 - operations/document_frontmatter_standard.md
 - operations/examples/sample_task_lifecycle.md
@@ -156,9 +156,11 @@ personal_ai_platform/
 - operations/tests/product/test_compute_environment.py
 - operations/tests/product/test_model_gateway.py
 - operations/tests/product/test_network_policy.py
+- operations/tests/product/test_observability.py
 - operations/tests/product/test_operations_state.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
+- operations/tests/product/test_persistent_task_state.py
 - operations/tests/product/test_secrets.py
 - operations/tests/product/test_task_state.py
 - operations/tests/product/test_tool_gateway.py
@@ -220,6 +222,9 @@ personal_ai_platform/
 - src/models/base.py
 - src/models/runtime_adapter.py
 - src/models/stub_gateway.py
+- src/observability/__init__.py
+- src/observability/collector.py
+- src/observability/sqlite_store.py
 - src/operations/__init__.py
 - src/operations/health.py
 - src/operations/health_check.py
@@ -239,11 +244,11 @@ personal_ai_platform/
 - src/secrets/env_provider.py
 - src/task_state/__init__.py
 - src/task_state/base.py
+- src/task_state/sqlite_store.py
 - src/task_state/store.py
 - src/tools/__init__.py
 - src/tools/base.py
 - src/tools/registry.py
-- tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
 - work/m01_final_report.md
@@ -277,4 +282,6 @@ personal_ai_platform/
 - work/tests/test_014.md
 - work/tests/test_015.md
 - work/tests/test_016.md
+- work/tests/test_017.md
+- work/tests/test_018.md
 ```
