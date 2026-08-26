@@ -3,19 +3,32 @@ id: TASK_012
 type: task
 title: Реализация INF_CMP_007
 component: INF_CMP_007
-work_state: planned
-version: 1.6
-updated: 2026-08-25
+work_state: in-progress
+version: 1.7
+updated: 2026-08-26
 next_actor: agent
 owner_action: none
 depends_on:
   - TASK_011
 allowed_paths:
   - work/tasks/task_012_inf_007.md
+  - work/tests/test_018.md
+  - src/observability/__init__.py
+  - src/observability/collector.py
+  - src/observability/sqlite_store.py
+  - operations/tests/product/test_observability.py
+  - project_status.md
+  - tasks.md
+  - generated/markdown_index.md
+  - generated/repository_structure.md
+  - generated/test_catalog.md
+  - generated/traceability_matrix.md
 traces_to:
   - m02
 implements:
   - INF_CMP_007
+tests:
+  - TEST_018
 ---
 
 # TASK_012 — Реализация INF_CMP_007
@@ -30,36 +43,30 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007) определяет требования ([`INF_REQ_012`](../../specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](../../specifications/infrastructure_baseline.md#inf_req_013)). Реализации нет. Зависит от [`TASK_011`](task_011_inf_005.md) (постоянное хранилище) — метрики и события сами нуждаются в постоянном хранении для последующего анализа.
+Спецификация [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007) определяет требования ([`INF_REQ_012`](../../specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](../../specifications/infrastructure_baseline.md#inf_req_013)). Реализуется переносимый журнал наблюдений на SQLite, используя уже введённый в [`TASK_011`](task_011_inf_005.md) подход к постоянному локальному хранилищу. Он не требует отдельного сервиса и не меняет прикладные контракты.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Реализовать и проверить компонент по плану ниже.
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)
+- [x] Дополнить allowed_paths фактическими путями
+- [x] Спроектировать переносимый журнал наблюдений
+- [x] Реализовать компонент
+- [x] Написать [`TEST_018`](../tests/test_018.md), связанный с TASK и требованиями компонента
+- [ ] Проверить покрытие путей в allowed_paths и полный quality-suite
 
 ## 6. Состав
 
-**В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `src/observability/`), добавит их в `allowed_paths` и создаст связанную карточку TEST.
+ObservabilityCollector в `src/observability/collector.py` принимает отчёт HealthReport, измерения ресурсов, счётчики внешнего потребления и числовые технические события. В запись попадают только технический идентификатор, время и числа/логические значения: свободный текст, секреты, пользовательские идентификаторы, задачи и ответы не имеют поля хранения и отклоняются валидацией.
 
-**Ожидаемые файлы:**
-- `src/observability/logging.py` — структурированное логирование технических событий
-- `src/observability/metrics.py` — сбор метрик работоспособности
-- `work/tests/test_00X.md` — описание проверок
+SQLiteObservabilityStore в `src/observability/sqlite_store.py` хранит эти записи в переносимой SQLite-базе. Это минимально достаточная реализация для [`m02`](../../milestones.md#m02): она переживает перезапуск, не требует сетевого сервиса и может быть заменена через малый контракт ObservationSink без изменения сборщика.
+
+[`TEST_018`](../tests/test_018.md) проверяет локализацию отказа критичной зависимости без её текстового описания, сохранение ресурсов и стоимости, а также запрет свободного текста и отрицательных величин.
 
 ## 7. Проверки и доказательства
 
