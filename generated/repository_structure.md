@@ -243,7 +243,6 @@ personal_ai_platform/
 - src/tools/__init__.py
 - src/tools/base.py
 - src/tools/registry.py
-- tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
 - work/m01_final_report.md

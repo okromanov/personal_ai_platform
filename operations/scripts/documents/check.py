@@ -51,7 +51,7 @@ from operations.scripts.status.generate_project_status import (
     v1_milestone_ids,
 )
 from operations.scripts.status.human_status import render_repository_project_status
-from operations.scripts.tasks.generate import TASK_ID_PATTERN, collect_tasks, render_task_index
+from operations.scripts.tasks.generate import TASK_ID_PATTERN, collect_tasks
 from operations.scripts.tasks.semantics import validate_task_semantics
 from operations.scripts.traceability.full_traceability import validate_full_traceability
 from operations.scripts.traceability.semantic_consistency import validate_semantic_consistency
@@ -191,7 +191,6 @@ def check_structure(root: Path) -> CheckResult:
         "specifications/architecture_baseline.md",
         "specifications/infrastructure_baseline.md",
         "project_status.md",
-        "tasks.md",
         "operations/acceptance.md",
         "operations/semantic_review.md",
         "AGENTS.md",
@@ -870,11 +869,6 @@ def check_tasks(root: Path) -> CheckResult:
         state = collect_tasks(root)
     except Exception as exc:
         return _result("tasks", [str(exc)])
-    index_path = root / "tasks.md"
-    if not index_path.exists():
-        errors.append("Отсутствует tasks.md")
-    elif render_task_index(root, "2000-01-01").strip() != read_text(index_path).strip():
-        errors.append("tasks.md не соответствует карточкам TASK/TEST")
     required_headings = [
         "Зачем это делаем",
         "Результат",
@@ -1284,7 +1278,6 @@ def check_generated(root: Path) -> CheckResult:
     errors: list[str] = []
     required = [
         root / "project_status.md",
-        root / "tasks.md",
         root / "generated/markdown_index.md",
         root / "generated/non_markdown_index.md",
         root / "generated/repository_structure.md",
@@ -1301,7 +1294,6 @@ def check_generated(root: Path) -> CheckResult:
             errors.append(f"{relative_posix(path, root)}: отсутствует marker generated")
     expected = {
         root / "project_status.md": render_repository_project_status(root),
-        root / "tasks.md": render_task_index(root, "2000-01-01"),
         root / "generated/markdown_index.md": render_index(root, "2000-01-01"),
         root / "generated/non_markdown_index.md": render_non_markdown_index(root, "2000-01-01"),
         root / "generated/repository_structure.md": render_repository_structure(root, "2000-01-01"),

@@ -359,7 +359,6 @@ def validate_semantic_review(root: Path, path: Path, milestone_id: str) -> dict[
         "operations/change_process.md",
         "milestones.md",
         "project_status.md",
-        "tasks.md",
         "specifications/",
         "adr/",
         "operations/",

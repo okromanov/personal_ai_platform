@@ -22,7 +22,6 @@ from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import render_traceability
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.status.human_status import render_repository_project_status
-from operations.scripts.tasks.generate import render_task_index
 
 
 def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
@@ -41,7 +40,6 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
     # landed on disk. Rendering it earlier would snapshot a file listing one
     # generation cycle stale whenever a new generated file is introduced.
     outputs = [
-        (root / "tasks.md", render_task_index(root, date)),
         (root / "project_status.md", render_repository_project_status(root)),
         (root / "generated" / "markdown_index.md", render_index(root, date)),
         (root / "generated" / "non_markdown_index.md", render_non_markdown_index(root, date)),

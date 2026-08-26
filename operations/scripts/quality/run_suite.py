@@ -175,7 +175,7 @@ def run_fast(root: Path, python: str) -> None:
     run_step(
         root,
         "Generated drift",
-        ["git", "diff", "--exit-code", "--", "project_status.md", "tasks.md", "generated"],
+        ["git", "diff", "--exit-code", "--", "project_status.md", "generated"],
     )
 
 

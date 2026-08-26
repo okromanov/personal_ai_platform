@@ -1,6 +1,6 @@
 #!/bin/bash
 # Pre-commit hook: regenerate dashboards if any tracked Markdown doc changed
-# Triggered before commit to ensure project_status.md, tasks.md and
+# Triggered before commit to ensure project_status.md and
 # generated/* stay in sync
 #
 # This hook is intentionally non-blocking (a failure here must not stop a
@@ -58,7 +58,7 @@ if [ "${#modified_md[@]}" -gt 0 ]; then
 
     if [ -n "$PYTHON" ]; then
         # documents/generate.py --all is the single entry point that rebuilds
-        # project_status.md, tasks.md and generated/*; there's nothing
+        # project_status.md and generated/*; there's nothing
         # further to call.
         if ! "$PYTHON" operations/scripts/documents/generate.py --all; then
             echo "⚠️  documents/generate.py --all failed (see output above) — generated/ may be stale" >&2
@@ -66,10 +66,9 @@ if [ "${#modified_md[@]}" -gt 0 ]; then
 
         # Auto-add regenerated files if they changed
         if ! git diff --quiet project_status.md 2>/dev/null || \
-           ! git diff --quiet tasks.md 2>/dev/null || \
            ! git diff --quiet generated/ 2>/dev/null; then
             echo "⚡ Dashboard changes detected, adding to commit..."
-            git add project_status.md tasks.md generated/
+            git add project_status.md generated/
         fi
     fi
 fi

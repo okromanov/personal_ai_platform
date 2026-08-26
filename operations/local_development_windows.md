@@ -20,7 +20,7 @@ traces_to:
 - текущий этап: [`milestones.md`](../milestones.md);
 - инструкция агенту разработки: [`AGENTS.md`](../AGENTS.md);
 - переход принятия: [`acceptance.md`](acceptance.md);
-- индекс задач: [`tasks.md`](../tasks.md);
+- текущий экран владельца: [`project_status.md`](../project_status.md);
 - операционные проверки: [`work/tests/`](../work/tests/).
 
 ## 2. Требования к компьютеру
