@@ -46,23 +46,23 @@ version: 1.0
 
 | Задача | Компонент | Проверка | Состояние |
 |---|---|---|---|
-| [`TASK_001`](work/tasks/task_001_arc_001.md) | `ARC_CMP_001` | [`TEST_007`](work/tests/test_007.md) | выполнена |
-| [`TASK_002`](work/tasks/task_002_arc_002.md) | `ARC_CMP_002` | [`TEST_008`](work/tests/test_008.md) | выполнена |
-| [`TASK_003`](work/tasks/task_003_arc_003.md) | `ARC_CMP_003` | [`TEST_009`](work/tests/test_009.md) | выполнена |
-| [`TASK_004`](work/tasks/task_004_arc_004.md) | `ARC_CMP_004` | [`TEST_010`](work/tests/test_010.md) | выполнена |
-| [`TASK_005`](work/tasks/task_005_arc_005.md) | `ARC_CMP_005` | [`TEST_011`](work/tests/test_011.md) | выполнена |
-| [`TASK_006`](work/tasks/task_006_arc_007.md) | `ARC_CMP_007` | [`TEST_012`](work/tests/test_012.md) | выполнена |
-| [`TASK_007`](work/tasks/task_007_arc_009.md) | `ARC_CMP_009` | [`TEST_013`](work/tests/test_013.md) | выполнена |
-| [`TASK_008`](work/tasks/task_008_inf_001.md) | `INF_CMP_001` | [`TEST_014`](work/tests/test_014.md) | выполнена |
-| [`TASK_009`](work/tasks/task_009_inf_002.md) | `INF_CMP_002` | [`TEST_015`](work/tests/test_015.md) | выполнена |
-| [`TASK_010`](work/tasks/task_010_inf_003.md) | `INF_CMP_003` | [`TEST_016`](work/tests/test_016.md) | выполнена |
-| [`TASK_011`](work/tasks/task_011_inf_005.md) | `INF_CMP_005` | — | запланирована |
-| [`TASK_012`](work/tasks/task_012_inf_007.md) | `INF_CMP_007` | — | запланирована |
-| [`TASK_013`](work/tasks/task_013_inf_008.md) | `INF_CMP_008` | — | запланирована |
+| [`TASK_001`](work/tasks/task_001_arc_001.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#ARC_CMP_001) | [`TEST_007`](work/tests/test_007.md) | выполнена |
+| [`TASK_002`](work/tasks/task_002_arc_002.md) | [`ARC_CMP_002`](specifications/architecture_baseline.md#ARC_CMP_002) | [`TEST_008`](work/tests/test_008.md) | выполнена |
+| [`TASK_003`](work/tasks/task_003_arc_003.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#ARC_CMP_003) | [`TEST_009`](work/tests/test_009.md) | выполнена |
+| [`TASK_004`](work/tasks/task_004_arc_004.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#ARC_CMP_004) | [`TEST_010`](work/tests/test_010.md) | выполнена |
+| [`TASK_005`](work/tasks/task_005_arc_005.md) | [`ARC_CMP_005`](specifications/architecture_baseline.md#ARC_CMP_005) | [`TEST_011`](work/tests/test_011.md) | выполнена |
+| [`TASK_006`](work/tasks/task_006_arc_007.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#ARC_CMP_007) | [`TEST_012`](work/tests/test_012.md) | выполнена |
+| [`TASK_007`](work/tasks/task_007_arc_009.md) | [`ARC_CMP_009`](specifications/architecture_baseline.md#ARC_CMP_009) | [`TEST_013`](work/tests/test_013.md) | выполнена |
+| [`TASK_008`](work/tasks/task_008_inf_001.md) | [`INF_CMP_001`](specifications/infrastructure_baseline.md#INF_CMP_001) | [`TEST_014`](work/tests/test_014.md) | выполнена |
+| [`TASK_009`](work/tasks/task_009_inf_002.md) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#INF_CMP_002) | [`TEST_015`](work/tests/test_015.md) | выполнена |
+| [`TASK_010`](work/tasks/task_010_inf_003.md) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#INF_CMP_003) | [`TEST_016`](work/tests/test_016.md) | выполнена |
+| [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005) | — | запланирована |
+| [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#INF_CMP_007) | — | запланирована |
+| [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#INF_CMP_008) | — | запланирована |
 
 ## Шаги текущей работы
 
-- [ ] Изучить требования к [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005)
+- [ ] Изучить требования к [[`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005)](specifications/infrastructure_baseline.md#inf_cmp_005)
 - [ ] Дополнить `allowed_paths` фактическими путями реализации
 - [ ] Спроектировать реализацию
 - [ ] Реализовать компонент
@@ -81,5 +81,5 @@ GitHub Actions не запускаются до 1 сентября 2026 года
 
 ## Что будет дальше
 
-[`TASK_011`](work/tasks/task_011_inf_005.md) реализует Постоянное хранилище ([`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005)).
+[`TASK_011`](work/tasks/task_011_inf_005.md) реализует Постоянное хранилище ([[`INF_CMP_005`](specifications/infrastructure_baseline.md#INF_CMP_005)](specifications/infrastructure_baseline.md#inf_cmp_005)).
 
