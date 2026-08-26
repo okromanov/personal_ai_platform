@@ -17,7 +17,7 @@ allowed_paths:
   - src/task_state/__init__.py
   - src/task_state/store.py
   - operations/tests/product/test_persistent_task_state.py
-  - operations/capability_summary.md
+  - capability_summary.md
   - project_status.md
 traces_to:
   - m02
