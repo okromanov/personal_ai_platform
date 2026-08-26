@@ -83,7 +83,7 @@ version: 1.0
 | [`work/tasks/task_006_arc_007.md`](../work/tasks/task_006_arc_007.md) | `TASK_006` | `task` | `work_state` | `completed` | `2.0` | TASK_006 — Реализация ARC_CMP_007 |
 | [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `completed` | `2.0` | TASK_007 — Реализация ARC_CMP_009 |
 | [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.0` | TASK_008 — Реализация INF_CMP_001 |
-| [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `completed` | `1.6` | TASK_009 — Реализация INF_CMP_002 |
+| [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `completed` | `1.7` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `planned` | `1.6` | TASK_010 — Реализация INF_CMP_003 |
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `planned` | `1.7` | TASK_011 — Реализация INF_CMP_005 |
 | [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `planned` | `1.6` | TASK_012 — Реализация INF_CMP_007 |

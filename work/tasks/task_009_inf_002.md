@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_002
 component: INF_CMP_002
 work_state: completed
-version: 1.6
+version: 1.7
 updated: 2026-08-26
 next_actor: none
 owner_action: none
@@ -69,7 +69,7 @@ tests:
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ [`TEST_015`](../tests/test_015.md) и канонические локальные проверки успешны
+- ✅ [`TEST_015`](../tests/test_015.md) и targeted локальная проверка успешны
 - 🔄 Серверный CI ожидает следующего доступного запуска GitHub Actions
 - ✅ Код review завершён: fail-closed baseline не выдаётся за развёрнутый cloud firewall
 
