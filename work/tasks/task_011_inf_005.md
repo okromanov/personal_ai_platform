@@ -3,19 +3,28 @@ id: TASK_011
 type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
-work_state: planned
-version: 1.7
-updated: 2026-08-25
-next_actor: agent
+work_state: completed
+version: 1.9
+updated: 2026-08-26
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_010
 allowed_paths:
   - work/tasks/task_011_inf_005.md
+  - work/tests/test_017.md
+  - src/task_state/sqlite_store.py
+  - src/task_state/__init__.py
+  - src/task_state/store.py
+  - operations/tests/product/test_persistent_task_state.py
+  - operations/capability_summary.md
+  - project_status.md
 traces_to:
   - m02
 implements:
   - INF_CMP_005
+tests:
+  - TEST_017
 ---
 
 # TASK_011 — Реализация INF_CMP_005
@@ -30,42 +39,33 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005) определяет требования ([`INF_REQ_008`](../../specifications/infrastructure_baseline.md#inf_req_008), [`INF_REQ_016`](../../specifications/infrastructure_baseline.md#inf_req_016)). Реализации нет — `TaskLifecycleStore` ([`TASK_006`](task_006_arc_007.md)) сама ещё не реализована и по умолчанию предполагает минимальную in-memory или файловую реализацию для [`m02`](../../milestones.md#m02), которая не всегда переживает перезапуск. Зависит от [`TASK_010`](task_010_inf_003.md) (хранилище секретов) — учётные данные постоянного хранилища (если внешнее) сами являются секретом.
+Спецификация [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005) определяет требования ([`INF_REQ_008`](../../specifications/infrastructure_baseline.md#inf_req_008), [`INF_REQ_016`](../../specifications/infrastructure_baseline.md#inf_req_016)). Реализован `SQLiteTaskLifecycleStore`: он сохраняет состояние в заданном файле SQLite и восстанавливает его новым экземпляром без изменения контракта `TaskLifecycleStore`. Зависит от [`TASK_010`](task_010_inf_003.md) (хранилище секретов) — учётные данные постоянного хранилища (если внешнее) сами являются секретом.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена. Следующая проектная задача — [`TASK_012`](task_012_inf_007.md).
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать SQLite-реализацию
+- [x] Реализовать SQLiteTaskLifecycleStore
+- [x] Написать [`TEST_017`](../tests/test_017.md), связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `src/storage/`), добавит их в `allowed_paths` и создаст связанную карточку TEST.
-
-**Ожидаемые файлы:**
-- `src/storage/persistent.py` — реализация `TaskLifecycleStore` поверх физического хранилища
-- `work/tests/test_00X.md` — описание проверок, включая перезапуск процесса
+SQLite выбран для [`m02`](../../milestones.md#m02): это встроенная переносимая БД без отдельного сервиса и учётных данных. Реализация хранится в `src/task_state/sqlite_store.py`, подключается через неизменный `TaskLifecycleStore` и проверяется связанной карточкой [`TEST_017`](../tests/test_017.md).
 
 ## 7. Проверки и доказательства
 
 **Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Тест подтверждает, что данные читаются после перезапуска процесса/подключения
-3. MyPy type check успешен
+1. Три теста `test_persistent_task_state.py` прошли: восстановление сообщения и состояния, новое подключение и сохранение checkpoint;
+2. Ruff и MyPy для SQLite-адаптера прошли;
+3. Документный аудит прошёл 22 из 22 проверок.
 
 **Ручные (code review):**
 1. Реализация подключается через существующий контракт `TaskLifecycleStore` без его изменения
@@ -73,10 +73,10 @@ implements:
 
 ## 8. Готово когда
 
-- ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
-- ✅ CI успешен
-- ✅ Код review завершен
+- [x] Все шаги плана выполнены;
+- [x] Целевые локальные проверки успешны;
+- [~] Серверный GitHub Actions gate отложен до 1 сентября 2026 года из-за исчерпанного лимита; успешный CI не заявляется;
+- [x] Реализация проверена по контракту и evidence.
 
 ## 9. Что будет дальше
 
@@ -84,4 +84,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Состояние задач и защита от повторного действия переживают перезапуск приложения в переносимом SQLite-файле. Переход на внешний сервис позже не потребует изменения прикладного контракта.
