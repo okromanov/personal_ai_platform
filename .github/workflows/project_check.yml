@@ -61,12 +61,7 @@ jobs:
           $pulls = gh api "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/pulls" | ConvertFrom-Json
           $mergedToMain = @($pulls | Where-Object { $_.merged_at -and $_.base.ref -eq "main" })
 
-          # Get commit message to detect initial setup/deployment
-          $commitMessage = git log -1 --pretty=%B $env:GITHUB_SHA
-          $isInitialSetup = $commitMessage -match "(ground zero|initial deployment)" -or $commitMessage -match "^[A-Z][^:]*:.*deployment"
-
-          # Allow commits that are from merged PRs or are part of initial setup
-          if ($mergedToMain.Count -eq 0 -and -not $isInitialSetup) {
+          if ($mergedToMain.Count -eq 0) {
             throw "Direct update of main detected: publish changes through a merged pull request"
           }
 
@@ -143,7 +138,7 @@ jobs:
             runtime/code_analysis.json
             runtime/dead_code.txt
             tasks.md
-            generated/document_index.md
+            generated/markdown_index.md
             generated/repository_structure.md
             generated/traceability_matrix.md
 
@@ -276,6 +271,8 @@ jobs:
             --artifact runtime/mypy_baseline.txt \
             --artifact runtime/coverage.txt \
             --artifact runtime/coverage_policy.txt \
+            --artifact runtime/health_check_report.md \
+            --artifact runtime/health_check.json \
             --artifact runtime/actionlint.txt \
             --artifact runtime/shellcheck.txt \
             --artifact runtime/pip_audit.json \
@@ -309,6 +306,9 @@ jobs:
             runtime/coverage.txt
             runtime/coverage.json
             runtime/coverage_policy.txt
+            runtime/health_check_report.md
+            runtime/health_check.json
+            runtime/health_check_output.txt
             runtime/actionlint.txt
             runtime/shellcheck.txt
             runtime/pip_audit.json

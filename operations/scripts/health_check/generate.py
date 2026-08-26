@@ -29,7 +29,7 @@ def main() -> int:
         "--output",
         type=Path,
         default=None,
-        help="Output file for report (default: generated/health_check_report.md)",
+        help="Output file for report (default: runtime/health_check_report.md)",
     )
     parser.add_argument(
         "--summary",
@@ -89,18 +89,23 @@ def main() -> int:
                     "git_size_kb": health.repository.git_size_kb,
                     "project_size_mb": health.repository.project_size_mb,
                     "working_tree_clean": health.repository.working_tree_clean,
+                    "branch_name": health.repository.branch_name,
+                    "head_sha": health.repository.head_sha,
+                    "collected_at_utc": health.repository.collected_at_utc,
                 },
                 "tests": {
                     "total_passed": health.tests.total_passed,
                     "total_failed": health.tests.total_failed,
                     "execution_time_sec": health.tests.execution_time_sec,
                     "coverage_percent": health.tests.coverage_percent,
+                    "collection_error": health.tests.collection_error,
                 },
                 "code_quality": {
                     "mypy_issues": health.code_quality.mypy_issues,
                     "ruff_issues": health.code_quality.ruff_issues,
                     "formatting_compliant": health.code_quality.formatting_compliant,
                     "type_safe": health.code_quality.type_safe,
+                    "collection_errors": health.code_quality.collection_errors,
                 },
                 "coverage_policy": {
                     "passed": health.coverage_policy.passed,
@@ -113,7 +118,7 @@ def main() -> int:
             args.json.write_text(json.dumps(metrics_dict, indent=2))
             print(f"✅ Metrics saved to {args.json}", file=sys.stderr)
 
-        output_path = args.output or root / "generated" / "health_check_report.md"
+        output_path = args.output or root / "runtime" / "health_check_report.md"
         report = generate_report(health)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)

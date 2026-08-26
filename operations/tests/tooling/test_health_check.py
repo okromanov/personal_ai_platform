@@ -10,12 +10,13 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
+from operations.scripts.health_check import generate as health_generate
 from operations.scripts.health_check.metrics import (
     CodeQualityMetrics,
     CoveragePolicyMetrics,
     RepositoryHealth,
     RepositoryMetrics,
-    TestMetrics,
+    UnitTestMetrics,
     assess_health,
     collect_code_quality_metrics,
     collect_coverage_policy,
@@ -51,6 +52,8 @@ class CollectGitMetricsTests(unittest.TestCase):
             self.assertTrue(metrics.working_tree_clean)
             self.assertEqual(metrics.python_files, 1)
             self.assertGreaterEqual(metrics.lines_of_code, 1)
+            self.assertEqual(metrics.branch_name, "main")
+            self.assertRegex(metrics.head_sha, r"^[0-9a-f]{40}$")
 
     def test_dirty_working_tree_is_reported_as_not_clean(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -80,7 +83,7 @@ class CollectCodeQualityMetricsTests(unittest.TestCase):
         self,
     ) -> None:
         def fake_run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[str]:
-            if cmd[0] == "mypy":
+            if cmd[:3] == [sys.executable, "-m", "mypy"]:
                 # Real mypy --show-error-codes output: one "error:" line per
                 # finding, each ending in a bracketed error code.
                 stdout = (
@@ -88,7 +91,7 @@ class CollectCodeQualityMetricsTests(unittest.TestCase):
                     "operations/scripts/a.py:2: error: also bad [assignment]\n"
                 )
                 return subprocess.CompletedProcess(cmd, 1, stdout=stdout, stderr="")
-            if cmd[:2] == ["ruff", "check"]:
+            if cmd[2:4] == ["ruff", "check"]:
                 # Real ruff output is multi-line per finding (code context,
                 # "-->" locations, "|" gutters, each containing ":") with a
                 # trailing "Found N error(s)." summary - only that summary
@@ -103,7 +106,7 @@ class CollectCodeQualityMetricsTests(unittest.TestCase):
                     "[*] 1 fixable with the `--fix` option.\n"
                 )
                 return subprocess.CompletedProcess(cmd, 1, stdout=stdout)
-            if cmd[:2] == ["ruff", "format"]:
+            if cmd[2:4] == ["ruff", "format"]:
                 return subprocess.CompletedProcess(cmd, 1, stdout="")
             raise AssertionError(f"unexpected command: {cmd}")
 
@@ -117,11 +120,11 @@ class CollectCodeQualityMetricsTests(unittest.TestCase):
 
     def test_ruff_output_with_no_findings_counts_zero(self) -> None:
         def fake_run(cmd: list[str], **_: object) -> subprocess.CompletedProcess[str]:
-            if cmd[0] == "mypy":
+            if cmd[:3] == [sys.executable, "-m", "mypy"]:
                 return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
-            if cmd[:2] == ["ruff", "check"]:
+            if cmd[2:4] == ["ruff", "check"]:
                 return subprocess.CompletedProcess(cmd, 0, stdout="All checks passed!\n")
-            if cmd[:2] == ["ruff", "format"]:
+            if cmd[2:4] == ["ruff", "format"]:
                 return subprocess.CompletedProcess(cmd, 0, stdout="3 files already formatted\n")
             raise AssertionError(f"unexpected command: {cmd}")
 
@@ -133,16 +136,17 @@ class CollectCodeQualityMetricsTests(unittest.TestCase):
         self.assertEqual(quality.ruff_issues, 0)
         self.assertTrue(quality.formatting_compliant)
 
-    def test_missing_tools_leave_safe_defaults(self) -> None:
+    def test_missing_tools_fail_closed(self) -> None:
         with (
             tempfile.TemporaryDirectory() as tmp,
             patch("subprocess.run", side_effect=FileNotFoundError),
         ):
             quality = collect_code_quality_metrics(Path(tmp))
 
-        self.assertTrue(quality.type_safe)
+        self.assertFalse(quality.type_safe)
         self.assertEqual(quality.ruff_issues, 0)
-        self.assertTrue(quality.formatting_compliant)
+        self.assertFalse(quality.formatting_compliant)
+        self.assertEqual(len(quality.collection_errors), 3)
 
 
 class CollectTestMetricsTests(unittest.TestCase):
@@ -262,7 +266,7 @@ class CollectCoveragePolicyTests(unittest.TestCase):
 
 def _make_health(
     repo: RepositoryMetrics | None = None,
-    tests: TestMetrics | None = None,
+    tests: UnitTestMetrics | None = None,
     quality: CodeQualityMetrics | None = None,
     coverage: CoveragePolicyMetrics | None = None,
 ) -> RepositoryHealth:
@@ -278,9 +282,12 @@ def _make_health(
             remote_url="origin",
             last_commits=["abc initial"],
             working_tree_clean=True,
+            branch_name="main",
+            head_sha="a" * 40,
+            collected_at_utc="2026-08-26T06:00:00+00:00",
         ),
         tests=tests
-        or TestMetrics(
+        or UnitTestMetrics(
             total_passed=1, total_failed=0, execution_time_sec=0.1, coverage_percent=100.0
         ),
         code_quality=quality
@@ -295,6 +302,93 @@ def _make_health(
     )
 
 
+class HealthCheckCliTests(unittest.TestCase):
+    def test_main_writes_revision_bound_report_and_json_to_runtime_paths(self) -> None:
+        health = _make_health()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            report_path = root / "runtime" / "health.md"
+            json_path = root / "runtime" / "health.json"
+            with (
+                patch.object(health_generate, "find_project_root", return_value=root),
+                patch.object(
+                    health_generate, "collect_git_metrics", return_value=health.repository
+                ),
+                patch.object(health_generate, "collect_test_metrics", return_value=health.tests),
+                patch.object(
+                    health_generate,
+                    "collect_code_quality_metrics",
+                    return_value=health.code_quality,
+                ),
+                patch.object(
+                    health_generate,
+                    "collect_coverage_policy",
+                    return_value=health.coverage_policy,
+                ),
+                patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "generate.py",
+                        "--output",
+                        str(report_path),
+                        "--json",
+                        str(json_path),
+                    ],
+                ),
+            ):
+                result = health_generate.main()
+
+            payload = json.loads(json_path.read_text(encoding="utf-8"))
+            self.assertEqual(result, 0)
+            self.assertEqual(payload["repository"]["head_sha"], "a" * 40)
+            self.assertEqual(payload["repository"]["branch_name"], "main")
+            self.assertEqual(payload["overall_status"], "✅ HEALTHY")
+            self.assertIn("`" + "a" * 40 + "`", report_path.read_text(encoding="utf-8"))
+
+    def test_main_defaults_to_uncommitted_runtime_report(self) -> None:
+        health = _make_health()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with (
+                patch.object(health_generate, "find_project_root", return_value=root),
+                patch.object(
+                    health_generate, "collect_git_metrics", return_value=health.repository
+                ),
+                patch.object(health_generate, "collect_test_metrics", return_value=health.tests),
+                patch.object(
+                    health_generate,
+                    "collect_code_quality_metrics",
+                    return_value=health.code_quality,
+                ),
+                patch.object(
+                    health_generate,
+                    "collect_coverage_policy",
+                    return_value=health.coverage_policy,
+                ),
+                patch.object(sys, "argv", ["generate.py"]),
+            ):
+                result = health_generate.main()
+
+            report_path = root / "runtime" / "health_check_report.md"
+            self.assertEqual(result, 0)
+            self.assertTrue(report_path.is_file())
+            self.assertIn("✅ HEALTHY", report_path.read_text(encoding="utf-8"))
+
+    def test_main_fails_closed_when_repository_metrics_are_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                patch.object(health_generate, "find_project_root", return_value=Path(tmp)),
+                patch.object(
+                    health_generate,
+                    "collect_git_metrics",
+                    side_effect=RuntimeError("missing git history"),
+                ),
+                patch.object(sys, "argv", ["generate.py"]),
+            ):
+                self.assertEqual(health_generate.main(), 1)
+
+
 class AssessHealthTests(unittest.TestCase):
     def test_healthy_when_everything_clean(self) -> None:
         health = _make_health()
@@ -302,11 +396,23 @@ class AssessHealthTests(unittest.TestCase):
 
     def test_needs_attention_when_tests_fail(self) -> None:
         health = _make_health(
-            tests=TestMetrics(
+            tests=UnitTestMetrics(
                 total_passed=1, total_failed=1, execution_time_sec=0.1, coverage_percent=100.0
             )
         )
         self.assertEqual(assess_health(health), "⚠️ NEEDS ATTENTION")
+
+    def test_incomplete_when_required_tool_is_unavailable(self) -> None:
+        health = _make_health(
+            quality=CodeQualityMetrics(
+                mypy_issues=0,
+                ruff_issues=0,
+                formatting_compliant=False,
+                type_safe=False,
+                collection_errors=["mypy unavailable"],
+            )
+        )
+        self.assertEqual(assess_health(health), "❌ INCOMPLETE")
 
     def test_needs_attention_when_working_tree_dirty(self) -> None:
         repo = RepositoryMetrics(
@@ -319,6 +425,9 @@ class AssessHealthTests(unittest.TestCase):
             remote_url="origin",
             last_commits=["abc initial"],
             working_tree_clean=False,
+            branch_name="main",
+            head_sha="a" * 40,
+            collected_at_utc="2026-08-26T06:00:00+00:00",
         )
         health = _make_health(repo=repo)
         self.assertEqual(assess_health(health), "⚠️ NEEDS ATTENTION")
@@ -346,8 +455,11 @@ class ReportRenderingTests(unittest.TestCase):
             remote_url="https://github.com/okromanov/personal_ai_platform",
             last_commits=["abc123 initial commit"],
             working_tree_clean=True,
+            branch_name="main",
+            head_sha="a" * 40,
+            collected_at_utc="2026-08-26T06:00:00+00:00",
         )
-        tests = TestMetrics(
+        tests = UnitTestMetrics(
             total_passed=284, total_failed=0, execution_time_sec=11.6, coverage_percent=80.0
         )
         quality = CodeQualityMetrics(
@@ -372,6 +484,7 @@ class ReportRenderingTests(unittest.TestCase):
         self.assertIn("284", report)
         self.assertIn("okromanov/personal_ai_platform", report)
         self.assertIn("✅ HEALTHY", report)
+        self.assertIn("`" + "a" * 40 + "`", report)
         self.assertIn("<!-- generated file: do not edit manually -->", report)
 
     def test_generate_report_recommends_nothing_critical_when_healthy(self) -> None:

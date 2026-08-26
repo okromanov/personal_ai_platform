@@ -4,13 +4,15 @@ import json
 import re
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.quality.check_coverage import evaluate_coverage, load_policy
+from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS
 
 
 @dataclass
@@ -26,16 +28,20 @@ class RepositoryMetrics:
     remote_url: str
     last_commits: list[str]
     working_tree_clean: bool
+    branch_name: str
+    head_sha: str
+    collected_at_utc: str
 
 
 @dataclass
-class TestMetrics:
+class UnitTestMetrics:
     """Test execution metrics."""
 
     total_passed: int
     total_failed: int
     execution_time_sec: float
     coverage_percent: float
+    collection_error: str | None = None
 
 
 @dataclass
@@ -46,6 +52,7 @@ class CodeQualityMetrics:
     ruff_issues: int
     formatting_compliant: bool
     type_safe: bool
+    collection_errors: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -68,64 +75,52 @@ class RepositoryHealth:
     """Overall repository health status."""
 
     repository: RepositoryMetrics
-    tests: TestMetrics
+    tests: UnitTestMetrics
     code_quality: CodeQualityMetrics
     coverage_policy: CoveragePolicyMetrics
     overall_status: str
 
 
-def collect_git_metrics(root: Path) -> RepositoryMetrics:
-    """Collect Git repository metrics."""
+def _run_git(root: Path, *args: str, required: bool = True) -> subprocess.CompletedProcess[str]:
     try:
         result = subprocess.run(
-            ["git", "log", "--oneline", "--all"],
+            ["git", *args],
             cwd=root,
             capture_output=True,
             text=True,
             timeout=10,
         )
-        total_commits = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        raise RuntimeError(f"Git metrics collection failed: {exc}") from exc
+    if required and result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "unknown git error"
+        raise RuntimeError(f"Git metrics collection failed: git {' '.join(args)}: {detail}")
+    return result
 
-        result = subprocess.run(
-            ["git", "log", "--oneline", "-10"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        last_commits = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
-        result = subprocess.run(
-            ["git", "branch", "-a"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        branches = [
-            b.strip().removeprefix("* ").strip() for b in result.stdout.split("\n") if b.strip()
-        ]
+def collect_git_metrics(root: Path) -> RepositoryMetrics:
+    """Collect Git repository metrics tied to one exact revision."""
+    result = _run_git(root, "log", "--oneline", "--all")
+    total_commits = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
 
-        result = subprocess.run(
-            ["git", "config", "--get", "remote.origin.url"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        remote_url = result.stdout.strip()
+    result = _run_git(root, "log", "--oneline", "-10")
+    last_commits = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
-        result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        working_tree_clean = not result.stdout.strip()
+    result = _run_git(root, "branch", "-a")
+    branches = [
+        branch.strip().removeprefix("* ").strip()
+        for branch in result.stdout.split("\n")
+        if branch.strip()
+    ]
+    branch_name = _run_git(root, "branch", "--show-current").stdout.strip() or "detached"
+    head_sha = _run_git(root, "rev-parse", "HEAD").stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", head_sha):
+        raise RuntimeError("Git metrics collection failed: HEAD is not a full commit SHA")
 
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-        raise RuntimeError(f"Git metrics collection failed: {e}") from e
+    remote_url = _run_git(
+        root, "config", "--get", "remote.origin.url", required=False
+    ).stdout.strip()
+    working_tree_clean = not _run_git(root, "status", "--porcelain").stdout.strip()
 
     return RepositoryMetrics(
         total_commits=total_commits,
@@ -137,14 +132,18 @@ def collect_git_metrics(root: Path) -> RepositoryMetrics:
         remote_url=remote_url,
         last_commits=last_commits[:10],
         working_tree_clean=working_tree_clean,
+        branch_name=branch_name,
+        head_sha=head_sha,
+        collected_at_utc=datetime.now(UTC).isoformat(),
     )
 
 
-def collect_test_metrics(root: Path) -> TestMetrics:
+def collect_test_metrics(root: Path) -> UnitTestMetrics:
     """Collect test execution metrics."""
     passed = failed = 0
     exec_time = 0.0
     coverage_percent = 0.0
+    collection_error: str | None = None
 
     try:
         result = subprocess.run(
@@ -164,7 +163,7 @@ def collect_test_metrics(root: Path) -> TestMetrics:
             text=True,
             timeout=120,
         )
-        output = result.stdout + result.stderr
+        output = (result.stdout or "") + (result.stderr or "")
 
         passed_match = re.search(r"(\d+) passed", output)
         if passed_match:
@@ -178,28 +177,41 @@ def collect_test_metrics(root: Path) -> TestMetrics:
         if time_match:
             exec_time = float(time_match.group(1))
 
+        if result.returncode != 0 and failed == 0:
+            collection_error = (
+                f"pytest exited with {result.returncode} without a parseable failure summary"
+            )
+        elif passed == 0 and failed == 0:
+            collection_error = "pytest produced no parseable test result"
+
         # Export a fresh runtime/coverage.json from the run above instead of
         # trusting whatever (possibly stale, possibly absent) file happens
         # to already be on disk - collect_coverage_policy() depends on this
         # reflecting the coverage this exact invocation just measured.
         (root / "runtime").mkdir(parents=True, exist_ok=True)
-        subprocess.run(
+        coverage_result = subprocess.run(
             [sys.executable, "-m", "coverage", "json", "-o", "runtime/coverage.json"],
             cwd=root,
             capture_output=True,
             text=True,
             timeout=30,
         )
-        coverage_percent = _get_coverage_percent(root)
+        if coverage_result.returncode != 0:
+            collection_error = collection_error or (
+                f"coverage json exited with {coverage_result.returncode}"
+            )
+        else:
+            coverage_percent = _get_coverage_percent(root)
 
-    except subprocess.TimeoutExpired:
-        raise RuntimeError("Test execution timed out") from None
+    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        collection_error = f"test metrics unavailable: {type(exc).__name__}"
 
-    return TestMetrics(
+    return UnitTestMetrics(
         total_passed=passed,
         total_failed=failed,
         execution_time_sec=exec_time,
         coverage_percent=coverage_percent,
+        collection_error=collection_error,
     )
 
 
@@ -214,16 +226,17 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
     """
     mypy_issues = 0
     ruff_issues = 0
-    formatting_compliant = True
-    type_safe = True
+    formatting_compliant = False
+    type_safe = False
+    collection_errors: list[str] = []
 
     try:
         result = subprocess.run(
             [
+                sys.executable,
+                "-m",
                 "mypy",
-                "operations/scripts",
-                "operations/tests",
-                "src",
+                *PYTHON_QUALITY_PATHS,
                 "--show-error-codes",
                 "--no-error-summary",
             ],
@@ -232,14 +245,17 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
             text=True,
             timeout=60,
         )
-        output = result.stdout + result.stderr
+        output = (result.stdout or "") + (result.stderr or "")
         mypy_issues = len(
             re.findall(r"^.+:\d+(?::\d+)?: error:.*\[[^\]]+\]$", output, re.MULTILINE)
         )
         type_safe = mypy_issues == 0
+        if result.returncode not in {0, 1} or (result.returncode == 1 and mypy_issues == 0):
+            type_safe = False
+            collection_errors.append(f"mypy failed with exit code {result.returncode}")
 
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
+    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        collection_errors.append(f"mypy unavailable: {type(exc).__name__}")
 
     try:
         # No --select override: this must see the same pyproject.toml
@@ -247,7 +263,7 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
         # ignored project-wide) that the canonical "Ruff lint" step does,
         # or the two will disagree on what counts as an issue.
         result = subprocess.run(
-            ["ruff", "check", "operations/scripts", "operations/tests"],
+            [sys.executable, "-m", "ruff", "check", *PYTHON_QUALITY_PATHS],
             cwd=root,
             capture_output=True,
             text=True,
@@ -256,15 +272,18 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
         # Ruff's default output is multi-line per finding (code context,
         # "-->" locations, "|" gutters); counting lines containing ":"
         # overcounts wildly. Its own summary line is the real count.
-        found = re.search(r"^Found (\d+) error", result.stdout, re.MULTILINE)
+        output = (result.stdout or "") + (result.stderr or "")
+        found = re.search(r"^Found (\d+) error", output, re.MULTILINE)
         ruff_issues = int(found.group(1)) if found else 0
+        if result.returncode not in {0, 1} or (result.returncode == 1 and found is None):
+            collection_errors.append(f"ruff check failed with exit code {result.returncode}")
 
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
+    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        collection_errors.append(f"ruff check unavailable: {type(exc).__name__}")
 
     try:
         result = subprocess.run(
-            ["ruff", "format", "--check", "operations/scripts", "operations/tests"],
+            [sys.executable, "-m", "ruff", "format", "--check", *PYTHON_QUALITY_PATHS],
             cwd=root,
             capture_output=True,
             text=True,
@@ -272,14 +291,15 @@ def collect_code_quality_metrics(root: Path) -> CodeQualityMetrics:
         )
         formatting_compliant = result.returncode == 0
 
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
+    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
+        collection_errors.append(f"ruff format unavailable: {type(exc).__name__}")
 
     return CodeQualityMetrics(
         mypy_issues=mypy_issues,
         ruff_issues=ruff_issues,
         formatting_compliant=formatting_compliant,
         type_safe=type_safe,
+        collection_errors=collection_errors,
     )
 
 
@@ -360,6 +380,9 @@ def collect_coverage_policy(root: Path) -> CoveragePolicyMetrics:
 def assess_health(health: RepositoryHealth) -> str:
     """Assess overall repository health status."""
     issues = []
+
+    if health.tests.collection_error or health.code_quality.collection_errors:
+        return "❌ INCOMPLETE"
 
     if health.tests.total_failed > 0:
         issues.append(f"Tests failing: {health.tests.total_failed}")

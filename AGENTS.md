@@ -2,8 +2,8 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 2.6
-updated: 2026-08-25
+version: 2.7
+updated: 2026-08-26
 depends_on:
   - project_rules
   - project_milestones
@@ -44,7 +44,7 @@ depends_on:
 9. **Опубликовать:** создать PR с полным описанием.
 10. **Дождаться:** серверной проверки и проверить её результат.
 
-`Project check` запускает отдельную Windows-проверку переносимости и канонический полный Linux quality-suite на каждом push во все ветки, каждом PR, в merge queue, вручную и еженедельно. Слияние или принятие этапа запрещено, пока общий gate не подтверждён для точного SHA.
+`Project check` запускает отдельную Windows-проверку переносимости и канонический полный Linux quality-suite на каждом push во все ветки, каждом PR, в merge queue и вручную. Слияние или принятие этапа запрещено, пока общий gate не подтверждён для точного SHA.
 
 ### Чек-лист перед публикацией PR
 

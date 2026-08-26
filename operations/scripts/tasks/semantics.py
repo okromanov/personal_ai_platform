@@ -6,17 +6,10 @@ from pathlib import Path
 
 from operations.scripts.documents.traceability import collect_traceable_elements
 from operations.scripts.tasks.generate import collect_tasks
+from operations.scripts.traceability.relations import relation_targets
 
 COMPONENT_FAMILIES = {"ARC_CMP", "ARC_FLOW", "INF_CMP", "INF_FLOW"}
 DELIVERY_RELATIONS = {"traces_to", "implements", "mitigates"}
-
-
-def _targets(record: dict[str, object], relation: str) -> set[str]:
-    relations = record.get("relations", {})
-    if not isinstance(relations, dict):
-        return set()
-    values = relations.get(relation, [])
-    return {str(value) for value in values} if isinstance(values, list) else set()
 
 
 def delivery_closure(records: dict[str, dict[str, object]], identifiers: set[str]) -> set[str]:
@@ -29,7 +22,7 @@ def delivery_closure(records: dict[str, dict[str, object]], identifiers: set[str
         if not record:
             continue
         for relation in DELIVERY_RELATIONS:
-            for target in _targets(record, relation):
+            for target in relation_targets(record, relation):
                 if target not in result:
                     result.add(target)
                     queue.append(target)
@@ -40,14 +33,16 @@ def milestone_test_coverage_semantic(root: Path, milestone_id: str) -> tuple[set
     """Return milestone scope and the scope semantically covered by accepting TESTs."""
     records = collect_traceable_elements(root)
     milestone = records.get(milestone_id.lower(), {})
-    required = _targets(milestone, "scope")
+    required = relation_targets(milestone, "scope")
     verified: set[str] = set()
     for record in records.values():
         if record.get("family") != "TEST":
             continue
-        if milestone_id.lower() not in {value.lower() for value in _targets(record, "accepts")}:
+        if milestone_id.lower() not in {
+            value.lower() for value in relation_targets(record, "accepts")
+        }:
             continue
-        verified.update(_targets(record, "verifies"))
+        verified.update(relation_targets(record, "verifies"))
     return required, required & delivery_closure(records, verified)
 
 
@@ -55,7 +50,7 @@ def validate_task_semantics(root: Path, milestone_id: str) -> list[str]:
     """Reject TASK declarations that claim requirements outside their component closure."""
     records = collect_traceable_elements(root)
     milestone = records.get(milestone_id.lower(), {})
-    milestone_scope = _targets(milestone, "scope")
+    milestone_scope = relation_targets(milestone, "scope")
     raw_tasks = collect_tasks(root)["tasks"]
     task_rows = raw_tasks if isinstance(raw_tasks, list) else []
     tasks = [
@@ -95,7 +90,7 @@ def validate_task_semantics(root: Path, milestone_id: str) -> list[str]:
             if not isinstance(test, dict):
                 continue
             test_record = records.get(str(test.get("id", "")), {})
-            verified = _targets(test_record, "verifies")
+            verified = relation_targets(test_record, "verifies")
             unrelated_verified = sorted(verified - closure)
             if unrelated_verified:
                 errors.append(

@@ -88,7 +88,7 @@ DESCRIPTIONS: dict[str, str] = {
         "Публикует результаты проверок комментарием к Pull Request на GitHub."
     ),
     "operations/scripts/health_check/generate.py": (
-        "Генерирует generated/health_check_report.md — отчёт о состоянии репозитория."
+        "Генерирует runtime health-report и JSON, привязанные к точному Git SHA."
     ),
     "operations/scripts/health_check/metrics.py": (
         "Собирает метрики репозитория: git-статистику, тесты, качество кода."

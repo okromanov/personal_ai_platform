@@ -12,6 +12,7 @@ if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import find_project_root
+from operations.scripts.requirements.prompting import ask_question as _ask_question
 
 
 @dataclass
@@ -79,31 +80,6 @@ ARCHITECTURE_PATTERNS = {
     "automation": ["Task Queue", "Scheduler", "State Machine"],
     "security": ["Auth Service", "Vault", "Audit Logger"],
 }
-
-
-def _ask_question(question: str, question_type: str = "text") -> Any:
-    """Ask user a question and return the answer."""
-    print(f"\n❓ {question}")
-
-    if question_type == "text":
-        return input("→ ").strip()
-    elif question_type == "multiline":
-        print("   (Введите текст, затем пустую строку для завершения)")
-        lines = []
-        while True:
-            line = input("→ ").strip()
-            if not line:
-                break
-            lines.append(line)
-        return "\n".join(lines)
-    elif question_type == "list":
-        print("   (Через запятую, или Enter для пропуска)")
-        return [x.strip() for x in input("→ ").split(",") if x.strip()]
-    elif question_type == "choice":
-        # question_type передаёт варианты через |
-        return input("→ ").strip().lower()
-
-    return ""
 
 
 def collect_requirement_info() -> RequirementContext:

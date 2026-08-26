@@ -13,6 +13,7 @@ if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import find_project_root
+from operations.scripts.requirements.prompting import ask_question as _ask_question
 from operations.scripts.status.generate_project_status import collect_milestones
 
 
@@ -66,31 +67,6 @@ AREA_TEMPLATES = {
         "risks": ["Privilege escalation", "Data breaches", "Compliance violations"],
     },
 }
-
-
-def _ask_question(question: str, question_type: str = "text") -> Any:
-    """Ask user a question and return the answer."""
-    print(f"\n❓ {question}")
-
-    if question_type == "text":
-        return input("→ ").strip()
-    elif question_type == "multiline":
-        print("   (Введите текст, затем пустую строку для завершения)")
-        lines = []
-        while True:
-            line = input("→ ").strip()
-            if not line:
-                break
-            lines.append(line)
-        return "\n".join(lines)
-    elif question_type == "list":
-        print("   (Через запятую, или Enter для пропуска)")
-        return [x.strip() for x in input("→ ").split(",") if x.strip()]
-    elif question_type == "checkbox":
-        print("   (Несколько вариантов, через пробел: 0 1 2 / через запятую: a, b, c)")
-        return [x.strip() for x in input("→ ").replace(",", " ").split() if x.strip()]
-
-    return ""
 
 
 def _get_next_stage(root: Path) -> tuple[str, str]:
