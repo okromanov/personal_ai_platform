@@ -18,7 +18,7 @@ allowed_paths:
   - src/secrets/env_provider.py
   - src/channels/telegram.py
   - operations/tests/product/test_secrets.py
-  - operations/capability_summary.md
+  - capability_summary.md
   - operations/scripts/documents/generate.py
   - operations/scripts/status/human_status.py
   - project_status.md
