@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-26T13:39:25Z
+generated_at: 2026-08-26T13:39:59Z
 version: 1.0
 ---
 
@@ -46,19 +46,19 @@ version: 1.0
 
 | Задача | Компонент | Проверка | Состояние |
 |---|---|---|---|
-| [`TEST_007`](work/tests/test_007.md) | [`TASK_001` — Реализация ARC_CMP_001](work/tasks/task_001_arc_001.md) | выполнена | $5 |
-| [`TEST_008`](work/tests/test_008.md) | [`TASK_002` — Реализация ARC_CMP_002](work/tasks/task_002_arc_002.md) | выполнена | $5 |
-| [`TEST_009`](work/tests/test_009.md) | [`TASK_003` — Реализация ARC_CMP_003](work/tasks/task_003_arc_003.md) | выполнена | $5 |
-| [`TEST_010`](work/tests/test_010.md) | [`TASK_004` — Реализация ARC_CMP_004](work/tasks/task_004_arc_004.md) | выполнена | $5 |
-| [`TEST_011`](work/tests/test_011.md) | [`TASK_005` — Реализация ARC_CMP_005](work/tasks/task_005_arc_005.md) | выполнена | $5 |
-| [`TEST_012`](work/tests/test_012.md) | [`TASK_006` — Реализация ARC_CMP_007](work/tasks/task_006_arc_007.md) | выполнена | $5 |
-| [`TEST_013`](work/tests/test_013.md) | [`TASK_007` — Реализация ARC_CMP_009](work/tasks/task_007_arc_007.md) | выполнена | $5 |
-| [`TEST_014`](work/tests/test_014.md) | [`TASK_008` — Реализация INF_CMP_001](work/tasks/task_008_inf_001.md) | выполнена | $5 |
-| [`TEST_015`](work/tests/test_015.md) | [`TASK_009` — Реализация INF_CMP_002](work/tasks/task_009_inf_002.md) | выполнена | $5 |
-| [`TEST_016`](work/tests/test_016.md) | [`TASK_010` — Реализация INF_CMP_003](work/tasks/task_010_inf_003.md) | выполнена | $5 |
-| — | [`TASK_011` — Реализация INF_CMP_005](work/tasks/task_011_inf_005.md) | запланирована | $5 |
-| — | [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md) | запланирована | $5 |
-| — | [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md) | запланирована | $5 |
+| [`TASK_001`](work/tasks/task_001_arc_001.md) | `ARC_CMP_001` | [`TEST_007`](work/tests/test_007.md) | выполнена |
+| [`TASK_002`](work/tasks/task_002_arc_002.md) | `ARC_CMP_002` | [`TEST_008`](work/tests/test_008.md) | выполнена |
+| [`TASK_003`](work/tasks/task_003_arc_003.md) | `ARC_CMP_003` | [`TEST_009`](work/tests/test_009.md) | выполнена |
+| [`TASK_004`](work/tasks/task_004_arc_004.md) | `ARC_CMP_004` | [`TEST_010`](work/tests/test_010.md) | выполнена |
+| [`TASK_005`](work/tasks/task_005_arc_005.md) | `ARC_CMP_005` | [`TEST_011`](work/tests/test_011.md) | выполнена |
+| [`TASK_006`](work/tasks/task_006_arc_007.md) | `ARC_CMP_007` | [`TEST_012`](work/tests/test_012.md) | выполнена |
+| [`TASK_007`](work/tasks/task_007_arc_009.md) | `ARC_CMP_009` | [`TEST_013`](work/tests/test_013.md) | выполнена |
+| [`TASK_008`](work/tasks/task_008_inf_001.md) | `INF_CMP_001` | [`TEST_014`](work/tests/test_014.md) | выполнена |
+| [`TASK_009`](work/tasks/task_009_inf_002.md) | `INF_CMP_002` | [`TEST_015`](work/tests/test_015.md) | выполнена |
+| [`TASK_010`](work/tasks/task_010_inf_003.md) | `INF_CMP_003` | [`TEST_016`](work/tests/test_016.md) | выполнена |
+| [`TASK_011`](work/tasks/task_011_inf_005.md) | `INF_CMP_005` | — | запланирована |
+| [`TASK_012`](work/tasks/task_012_inf_007.md) | `INF_CMP_007` | — | запланирована |
+| [`TASK_013`](work/tasks/task_013_inf_008.md) | `INF_CMP_008` | — | запланирована |
 
 ## Шаги текущей работы
 
