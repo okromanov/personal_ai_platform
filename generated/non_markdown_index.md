@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `160` |
+| Всего файлов | `162` |
 
 > Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).
 
@@ -100,6 +100,7 @@ version: 1.0
 | [`operations/tests/product/test_channels.py`](../operations/tests/product/test_channels.py) | [`TASK_001`](../work/tasks/task_001_arc_001.md) | Unit-тесты компонента Channels (ARC_CMP_001). |
 | [`operations/tests/product/test_compute_environment.py`](../operations/tests/product/test_compute_environment.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`operations/tests/product/test_model_gateway.py`](../operations/tests/product/test_model_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
+| [`operations/tests/product/test_network_policy.py`](../operations/tests/product/test_network_policy.py) | [`TASK_009`](../work/tasks/task_009_inf_002.md) | — |
 | [`operations/tests/product/test_operations_state.py`](../operations/tests/product/test_operations_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`operations/tests/product/test_owner_control.py`](../operations/tests/product/test_owner_control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
@@ -157,6 +158,7 @@ version: 1.0
 | [`src/operations/__init__.py`](../src/operations/__init__.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/operations/health.py`](../src/operations/health.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/operations/health_check.py`](../src/operations/health_check.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
+| [`src/operations/network_policy.py`](../src/operations/network_policy.py) | [`TASK_009`](../work/tasks/task_009_inf_002.md) | — |
 | [`src/operations/scheduler_state.py`](../src/operations/scheduler_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/orchestration/__init__.py`](../src/orchestration/__init__.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`src/orchestration/orchestrator.py`](../src/orchestration/orchestrator.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
