@@ -5,15 +5,15 @@ document_state: current
 version: 1.5
 updated: 2026-08-26
 depends_on:
-  - [TASK_001](../work/tasks/task_001_arc_001.md#task_001)
-  - [TASK_002](../work/tasks/task_002_arc_002.md#task_002)
-  - [TASK_003](../work/tasks/task_003_arc_003.md#task_003)
-  - [TASK_004](../work/tasks/task_004_arc_004.md#task_004)
-  - [TASK_005](../work/tasks/task_005_arc_005.md#task_005)
-  - [TASK_006](../work/tasks/task_006_arc_007.md#task_006)
-  - [TASK_007](../work/tasks/task_007_arc_009.md#task_007)
-  - [TASK_008](../work/tasks/task_008_inf_001.md#task_008)
-  - [TASK_009](../work/tasks/task_009_inf_002.md#task_009)
+  - TASK_001
+  - TASK_002
+  - TASK_003
+  - TASK_004
+  - TASK_005
+  - TASK_006
+  - TASK_007
+  - TASK_008
+  - TASK_009
 ---
 
 # Исходные данные карты компетенций
