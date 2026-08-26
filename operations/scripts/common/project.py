@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import tempfile
@@ -109,6 +110,37 @@ def atomic_write(path: Path, content: str) -> bool:
             os.unlink(temp_name)
         raise
     return True
+
+_GENERATED_AT_PATTERN = re.compile(r"(?m)^generated_at: .+\n")
+
+
+def _normalized_generated_content(content: str) -> str:
+    normalized = content.replace("\r\n", "\n").replace("\r", "\n")
+    if not normalized.endswith("\n"):
+        normalized += "\n"
+    return _GENERATED_AT_PATTERN.sub("", normalized)
+
+
+def generated_content_matches(existing: str, rendered: str) -> bool:
+    """Compare generated content while ignoring its creation snapshot."""
+    return _normalized_generated_content(existing) == _normalized_generated_content(rendered)
+
+
+def _with_generated_snapshot(content: str, timestamp: str) -> str:
+    normalized = _normalized_generated_content(content)
+    marker = "generation_state: generated\n"
+    if marker not in normalized:
+        return normalized
+    return normalized.replace(marker, f"{marker}generated_at: {timestamp}\n", 1)
+
+
+def atomic_write_generated(path: Path, content: str) -> bool:
+    """Write a generated document with a stable creation timestamp."""
+    existing = read_text(path) if path.exists() else None
+    has_snapshot = bool(existing and _GENERATED_AT_PATTERN.search(existing))
+    if existing is not None and has_snapshot and generated_content_matches(existing, content):
+        return False
+    return atomic_write(path, _with_generated_snapshot(content, now_iso_minutes()))
 
 
 def relative_posix(path: Path, root: Path) -> str:

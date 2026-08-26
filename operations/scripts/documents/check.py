@@ -14,6 +14,7 @@ if __package__ in {None, ""}:
 from operations.scripts.common.project import (
     IGNORED_DIRS,
     find_project_root,
+    generated_content_matches,
     iter_files,
     read_text,
     relative_posix,
@@ -1309,7 +1310,7 @@ def check_generated(root: Path) -> CheckResult:
         root / "generated/platfrom_capability.md": render_platfrom_capability(root, "2000-01-01"),
     }
     for path, rendered in expected.items():
-        if path.exists() and read_text(path).strip() != rendered.strip():
+        if path.exists() and not generated_content_matches(read_text(path), rendered):
             errors.append(f"{relative_posix(path, root)} не соответствует генератору")
     return _result("generated", errors)
 

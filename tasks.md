@@ -3,6 +3,7 @@
 id: task_index
 type: generated_task_index
 generation_state: generated
+generated_at: 2026-08-26T12:06:13Z
 version: 1.0
 ---
 

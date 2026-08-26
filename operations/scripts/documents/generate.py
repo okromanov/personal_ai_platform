@@ -8,7 +8,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import (
-    atomic_write,
+    atomic_write_generated,
     find_project_root,
     require_supported_python,
     today_iso,
@@ -50,7 +50,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
         (root / "generated" / "platfrom_capability.md", render_platfrom_capability(root, date)),
     ]
     for path, rendered in outputs:
-        if atomic_write(path, rendered):
+        if atomic_write_generated(path, rendered):
             changed.append(path.relative_to(root).as_posix())
 
     # Remove semantic_review_v1.md when moving past m01
@@ -62,7 +62,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
         changed.append(semantic_review.relative_to(root).as_posix())
 
     repository_structure_path = root / "generated" / "repository_structure.md"
-    if atomic_write(repository_structure_path, render_repository_structure(root, date)):
+    if atomic_write_generated(repository_structure_path, render_repository_structure(root, date)):
         changed.append(repository_structure_path.relative_to(root).as_posix())
 
     return changed

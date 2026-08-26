@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from operations.scripts.common.project import atomic_write
+from operations.scripts.common.project import atomic_write_generated
 from operations.scripts.common.status_types import TaskItem
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
@@ -303,4 +303,4 @@ version: 1.0
 
 
 def generate_repository_project_status(root: Path) -> bool:
-    return atomic_write(root / "project_status.md", render_repository_project_status(root))
+    return atomic_write_generated(root / "project_status.md", render_repository_project_status(root))
