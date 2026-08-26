@@ -3,7 +3,7 @@
 id: generated_traceability_matrix
 type: generated_report
 generation_state: generated
-generated_at: 2026-08-26T12:06:13Z
+generated_at: 2026-08-26T12:07:00-06:00
 version: 1.0
 ---
 
@@ -11,7 +11,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Отслеживаемых элементов | `201` |
+| Отслеживаемых элементов | `203` |
 
 > Производное представление канонических исходящих связей. Входящие связи однозначно выводятся из тех же рёбер и здесь не дублируются.
 
@@ -211,6 +211,8 @@ version: 1.0
 | `TEST_014` | `TEST` | `accepts`: `m02`<br>`depends_on`: `TEST_013`<br>`traces_to`: `TASK_008`, `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_010` | `quality_suite` |
 | `TEST_015` | `TEST` | `accepts`: `m02`<br>`depends_on`: `TEST_014`<br>`traces_to`: `TASK_009`<br>`verifies`: `INF_REQ_003`, `INF_REQ_004`, `INF_REQ_005` | `quality_suite` |
 | `TEST_016` | `TEST` | `accepts`: `m02`<br>`depends_on`: `TEST_015`<br>`traces_to`: `TASK_010`<br>`verifies`: `INF_REQ_006` | `quality_suite` |
+| `TEST_017` | `TEST` | `accepts`: `m02`<br>`depends_on`: `TEST_016`<br>`traces_to`: `TASK_011`<br>`verifies`: `INF_REQ_008`, `INF_REQ_016` | `quality_suite` |
+| `TEST_018` | `TEST` | `accepts`: `m02`<br>`depends_on`: `TEST_017`<br>`traces_to`: `TASK_012`<br>`verifies`: `INF_REQ_012`, `INF_REQ_013` | `quality_suite` |
 | `m01` | `MILESTONE` | — | — |
 | `m02` | `MILESTONE` | `scope`: `BR_001`, `BR_004`, `BR_005`, `BR_006`, `BR_033`, `BR_036`, `SYS_001`, `SYS_002`, `SYS_003`, `SYS_004`, `SYS_006`, `SYS_020`, `SYS_024`, `SYS_027`, `SEC_CTL_001`, `SEC_CTL_002`, `SEC_CTL_003`, `SEC_CTL_005`, `SEC_CTL_008`, `SEC_CTL_020`, `INF_REQ_001`, `INF_REQ_002`, `INF_REQ_003`, `INF_REQ_006`, `INF_REQ_010`, `INF_REQ_012`, `INF_REQ_013`, `INF_REQ_015`, `INF_REQ_016` | — |
 | `m03` | `MILESTONE` | `scope`: `BR_003`, `BR_011`, `BR_012`, `BR_026`, `BR_027`, `BR_028`, `SYS_008`, `SYS_009`, `SYS_010`, `SYS_022`, `SYS_023`, `SEC_CTL_004`, `SEC_CTL_007`, `SEC_CTL_009`, `SEC_CTL_010`, `SEC_CTL_012`, `INF_REQ_004`, `INF_REQ_005`, `INF_REQ_007` | — |
