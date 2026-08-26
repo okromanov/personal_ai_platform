@@ -260,11 +260,6 @@ def render_repository_project_status(root: Path) -> str:
 >
 > `{next_action["commands"][0]["value"]}`"""
 
-    # Build remaining work summary
-    remaining_summary = ""
-    if steps_remaining > 0:
-        remaining_summary = f"\n\n**Осталось:** {steps_remaining} шаг(ов) в текущей работе."
-
     return f"""<!-- generated file: do not edit manually -->
 ---
 id: project_status_current
@@ -279,7 +274,7 @@ version: 1.0
 
 ## Ваше действие сейчас
 
-{owner_guidance}{remaining_summary}
+{owner_guidance}
 
 Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную.
 

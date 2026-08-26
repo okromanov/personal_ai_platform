@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-26T16:19:42Z
+generated_at: 2026-08-26T16:24:03Z
 version: 1.0
 ---
 
@@ -16,8 +16,6 @@ version: 1.0
 > **Чтобы продолжить, отправьте агенту одну команду.**
 >
 > `ПРОДОЛЖАЙ TASK_012`
-
-**Осталось:** 6 шаг(ов) в текущей работе.
 
 Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную.
 
