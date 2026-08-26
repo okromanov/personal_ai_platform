@@ -16,6 +16,7 @@ from operations.scripts.common.project import (
 from operations.scripts.documents.auto_generate_tasks import auto_generate_tasks
 from operations.scripts.documents.index import render_index
 from operations.scripts.documents.non_markdown_index import render_non_markdown_index
+from operations.scripts.documents.platform_capability import render_platfrom_capability
 from operations.scripts.documents.repository_tree import render_repository_structure
 from operations.scripts.documents.test_catalog import render_test_catalog
 from operations.scripts.documents.traceability import render_traceability
@@ -44,6 +45,7 @@ def generate_all(root: Path, generated_date: str | None = None) -> list[str]:
         (root / "generated" / "non_markdown_index.md", render_non_markdown_index(root, date)),
         (root / "generated" / "traceability_matrix.md", render_traceability(root, date)),
         (root / "generated" / "test_catalog.md", render_test_catalog(root, date)),
+        (root / "generated" / "platfrom_capability.md", render_platfrom_capability(root, date)),
     ]
     for path, rendered in outputs:
         if atomic_write_generated(path, rendered):
