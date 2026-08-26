@@ -10,7 +10,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `263` |
+| Всего файлов | `267` |
 
 ```text
 personal_ai_platform/
@@ -261,6 +261,10 @@ personal_ai_platform/
 - work/tasks/task_011_inf_005.md
 - work/tasks/task_012_inf_007.md
 - work/tasks/task_013_inf_008.md
+- work/tasks/task_014_real_runtime.md
+- work/tasks/task_015_real_model_provider.md
+- work/tasks/task_016_real_telegram.md
+- work/tasks/task_017_m02_live_e2e.md
 - work/tests/test_001.md
 - work/tests/test_002.md
 - work/tests/test_003.md
