@@ -79,6 +79,14 @@ def _task_context(tasks: list[TaskItem], milestone_id: str) -> TaskItem | None:
 def _checkbox(done: bool) -> str:
     return "[x]" if done else "[ ]"
 
+
+def _component_link(component: str) -> str:
+    if component.startswith("ARC_"):
+        return f"[`{component}`](specifications/architecture_baseline.md#{component.lower()})"
+    if component.startswith("INF_"):
+        return f"[`{component}`](specifications/infrastructure_baseline.md#{component.lower()})"
+    return f"`{component}`"
+
 def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
     """Build the component-to-evidence table from TASK and TEST metadata."""
     tests_by_task: dict[str, list[tuple[str, str]]] = {}
@@ -100,7 +108,7 @@ def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
         linked = tests_by_task.get(str(task["id"]), [])
         evidence = ", ".join(f"[`{test_id}`]({path})" for test_id, path in linked) or "—"
         state = labels.get(str(task.get("work_state", "")), str(task.get("work_state", "")))
-        rows.append(f"| {task_link} | `{component}` | {evidence} | {state} |")
+        rows.append(f"| {task_link} | {_component_link(component)} | {evidence} | {state} |")
     return "\n".join(rows) or "| — | — | — | — |"
 
 
