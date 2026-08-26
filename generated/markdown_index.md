@@ -3,7 +3,7 @@
 id: generated_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-26T14:10:00Z
+generated_at: 2026-08-26T12:07:00-06:00
 version: 1.0
 ---
 
@@ -11,7 +11,7 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `87` |
+| Всего документов | `89` |
 
 > Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
@@ -27,11 +27,11 @@ version: 1.0
 | [`adr/adr_007_cloud_provider_selection.md`](../adr/adr_007_cloud_provider_selection.md) | `ADR_007` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_007 — Выбор облачного провайдера |
 | [`adr/adr_008_data_storage_schema.md`](../adr/adr_008_data_storage_schema.md) | `ADR_008` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_008 — Выбор схемы хранилища данных |
 | [`adr/adr_009_secret_management_strategy.md`](../adr/adr_009_secret_management_strategy.md) | `ADR_009` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_009 — Стратегия управления секретами и ключами |
+| [`capability_summary.md`](../capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `1.8` | Карта компетенций |
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.5` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.2` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.1` | Жизненный цикл архитектурных решений (ADR) |
-| [`capability_summary.md`](../capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `1.8` | Карта компетенций |
-| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.7` | Процедуры изменений и публикации |
+| [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.8` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.1` | Локальная разработка в Windows |
@@ -85,8 +85,8 @@ version: 1.0
 | [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.1` | TASK_008 — Реализация INF_CMP_001 |
 | [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `completed` | `1.7` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `completed` | `1.8` | TASK_010 — Реализация INF_CMP_003 |
-| [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `planned` | `1.7` | TASK_011 — Реализация INF_CMP_005 |
-| [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `planned` | `1.6` | TASK_012 — Реализация INF_CMP_007 |
+| [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `completed` | `1.9` | TASK_011 — Реализация INF_CMP_005 |
+| [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `in-progress` | `1.7` | TASK_012 — Реализация INF_CMP_007 |
 | [`work/tasks/task_013_inf_008.md`](../work/tasks/task_013_inf_008.md) | `TASK_013` | `task` | `work_state` | `planned` | `1.5` | TASK_013 — Реализация INF_CMP_008 |
 | [`work/tests/test_001.md`](../work/tests/test_001.md) | `TEST_001` | `test` | `spec_state` | `current` | `1.3` | TEST_001 — Проверка модели документов и трассировки |
 | [`work/tests/test_002.md`](../work/tests/test_002.md) | `TEST_002` | `test` | `spec_state` | `current` | `1.2` | TEST_002 — Проверка качества, доказательств и автоматизации принятия |
@@ -104,3 +104,5 @@ version: 1.0
 | [`work/tests/test_014.md`](../work/tests/test_014.md) | `TEST_014` | `test` | `spec_state` | `current` | `1.1` | TEST_014 — Вычислительная среда выполнения: health-check CLI и структура образа |
 | [`work/tests/test_015.md`](../work/tests/test_015.md) | `TEST_015` | `test` | `spec_state` | `current` | `1.0` | TEST_015 — Сеть: fail-closed ingress, egress, DNS и обязательный туннель |
 | [`work/tests/test_016.md`](../work/tests/test_016.md) | `TEST_016` | `test` | `spec_state` | `current` | `1.0` | TEST_016 — Секреты вне репозитория и выдача по логическому имени |
+| [`work/tests/test_017.md`](../work/tests/test_017.md) | `TEST_017` | `test` | `spec_state` | `current` | `1.0` | TEST_017 — SQLite-постоянное состояние задачи |
+| [`work/tests/test_018.md`](../work/tests/test_018.md) | `TEST_018` | `test` | `spec_state` | `current` | `1.0` | TEST_018 — Наблюдаемость без пользовательского содержимого |
