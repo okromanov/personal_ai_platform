@@ -18,11 +18,11 @@ allowed_paths:
   - src/observability/sqlite_store.py
   - operations/tests/product/test_observability.py
   - project_status.md
-  - tasks.md
   - generated/markdown_index.md
   - generated/repository_structure.md
   - generated/test_catalog.md
   - generated/traceability_matrix.md
+  - generated/platfrom_capability.md
 traces_to:
   - m02
 implements:
