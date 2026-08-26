@@ -97,7 +97,7 @@ V1 — первый регулярно используемый персонал
 
 ### Очередь, закрывающая пользовательский результат
 
-`TASK_012` и `TASK_013` завершают наблюдаемость и управляемое развёртывание. Затем обязательны: `TASK_014` — выбранная среда агента, `TASK_015` — реальный поставщик модели, `TASK_016` — реальный Telegram Bot API, `TASK_017` — независимое сквозное доказательство. Компонентные TASK, использующие только stub-реализации, не могут заменить эти четыре результата.
+[`TASK_012`](work/tasks/task_012_inf_007.md) и [`TASK_013`](work/tasks/task_013_inf_008.md) завершают наблюдаемость и управляемое развёртывание. Затем обязательны: [`TASK_014`](work/tasks/task_014_real_runtime.md) — выбранная среда агента, [`TASK_015`](work/tasks/task_015_real_model_provider.md) — реальный поставщик модели, [`TASK_016`](work/tasks/task_016_real_telegram.md) — реальный Telegram Bot API, [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) — независимое сквозное доказательство. Компонентные TASK, использующие только stub-реализации, не могут заменить эти четыре результата.
 
 Полное резервное копирование, восстановление ценного состояния, памяти и проектов по [`SYS_025`](specifications/system_specification.md#sys_025), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013) и [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009)–[`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014) доказывается в [`m04`](#m04)/[`m06`](#m06). [`m02`](#m02) не подменяет это требование облегчённым smoke-тестом.
 
