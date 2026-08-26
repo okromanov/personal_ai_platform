@@ -36,7 +36,7 @@ milestone: m01
 - [`milestones.md`](../milestones.md)
 - [`operations/quality_registry.json`](../operations/quality_registry.json)
 - [`project_status.md`](../project_status.md)
-- [`tasks.md`](../tasks.md)
+- [`project_status.md`](../project_status.md)
 
 ## 4. Задачи и тесты этапа
 
