@@ -9,7 +9,7 @@ updated: 2026-08-26
 next_actor: none
 owner_action: none
 owner_followups:
-  - "[open] Собрать Docker-образ по инструкции в разделе 11."
+  - "[done] Docker-образ собран владельцем 2026-08-26."
 depends_on:
   - TASK_007
 allowed_paths:
