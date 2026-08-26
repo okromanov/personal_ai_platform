@@ -79,4 +79,4 @@ def render_platfrom_capability(root: Path, generated_date: str | None = None) ->
                 f"**Новая функциональность:** {description}",
             ]
         )
-    return "\n".join(lines) + "\n"
+    return "\n".join(lines) + "\n\n"
