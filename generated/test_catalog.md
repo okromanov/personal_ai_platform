@@ -10,13 +10,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `445` |
+| Всего тестов | `453` |
 | Core logic (acceptance, governance, lifecycle) | `134` |
 | Tooling (quality scripts, registries, traceability) | `179` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
 | Stress / scalability | `6` |
-| Product | `116` |
+| Product | `124` |
 
 > Все тесты обнаруживаются рекурсивно из `operations/tests/` через `operations/scripts/quality/run_unittests.py` и запускаются по единому триггеру: push / pull_request / merge_group / manual dispatch (CI, both jobs). Локальный `pre-commit` запускает быстрый профиль без coverage; `pre-push` (опционально) и CI запускают полный профиль.
 
@@ -388,6 +388,14 @@ version: 1.0
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_registered_response_is_returned` | Registered response is returned |
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_simulated_unavailable_raises_model_gateway_error` | Simulated unavailable raises model gateway error |
 | Product | `operations/tests/product/test_model_gateway.py` | `StubModelGatewayTests` | `test_usage_metrics_are_populated_on_success` | Usage metrics are populated on success |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_current_baseline_denies_egress_and_dns` | Current baseline denies egress and dns |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_current_baseline_exposes_no_public_ingress` | Current baseline exposes no public ingress |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_direct_rule_requires_exact_service_target_and_port` | Direct rule requires exact service target and port |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_dns_requires_a_declared_dns_rule` | Dns requires a declared dns rule |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_dns_resolver_without_dns_egress_rule_is_rejected` | Dns resolver without dns egress rule is rejected |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_duplicate_egress_rule_is_rejected` | Duplicate egress rule is rejected |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_invalid_ingress_and_egress_ports_are_rejected` | Invalid ingress and egress ports are rejected |
+| Product | `operations/tests/product/test_network_policy.py` | `NetworkPolicyTests` | `test_secure_tunnel_rule_denies_traffic_when_the_tunnel_is_down` | Secure tunnel rule denies traffic when the tunnel is down |
 | Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_a_raising_check_is_isolated_as_that_dependencys_failure` | A raising check is isolated as that dependencys failure |
 | Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_registering_the_same_name_twice_replaces_the_check` | Registering the same name twice replaces the check |
 | Product | `operations/tests/product/test_operations_state.py` | `HealthAggregatorTests` | `test_report_is_healthy_when_every_check_is_healthy` | Report is healthy when every check is healthy |

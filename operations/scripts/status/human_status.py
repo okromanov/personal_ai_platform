@@ -5,7 +5,6 @@ from pathlib import Path
 
 from operations.scripts.common.project import atomic_write
 from operations.scripts.common.status_types import TaskItem
-from operations.scripts.documents.metadata import load_document
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -78,30 +77,6 @@ def _task_context(tasks: list[TaskItem], milestone_id: str) -> TaskItem | None:
 
 def _checkbox(done: bool) -> str:
     return "[x]" if done else "[ ]"
-
-
-_CAPABILITY_SUMMARY_PATH = "operations/capability_summary.md"
-_CAPABILITY_SUMMARY_FALLBACK = (
-    "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
-)
-
-
-def _capability_summary(root: Path) -> str:
-    """A hand-maintained narrative synthesis of what completed TASKs add up
-    to, not a per-TASK list: `operations/capability_summary.md` is rewritten
-    by whoever completes a TASK when it changes the picture, and its
-    "Текущая сводка" section is inlined here verbatim. Individual TASK cards
-    keep their own "Что это даёт владельцу" text unchanged -- this
-    summarizes them, it does not replace them."""
-    path = root / _CAPABILITY_SUMMARY_PATH
-    if not path.exists():
-        return _CAPABILITY_SUMMARY_FALLBACK
-    try:
-        doc = load_document(path)
-    except ValueError:
-        return _CAPABILITY_SUMMARY_FALLBACK
-    summary = _section(doc.body, "Текущая сводка")
-    return summary or _CAPABILITY_SUMMARY_FALLBACK
 
 
 def render_repository_project_status(root: Path) -> str:
@@ -324,11 +299,6 @@ version: 1.0
 
 {next_text}
 
-## Что уже умеет решение
-
-> Связная сводка того, что уже дают вместе завершённые проектные TASK — не список по отдельным TASK. Полный текст по каждой TASK остаётся в её собственной карточке в `work/tasks/`.
-
-{_capability_summary(root)}
 """
 
 
