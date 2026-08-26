@@ -100,7 +100,7 @@ def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
         linked = tests_by_task.get(str(task["id"]), [])
         evidence = ", ".join(f"[`{test_id}`]({path})" for test_id, path in linked) or "—"
         state = labels.get(str(task.get("work_state", "")), str(task.get("work_state", "")))
-        rows.append(f"| {_checkbox(str(task.get('work_state')) == 'completed')} | `{component}` | {task_link} | {evidence} | {state} |")
+        rows.append(f"| {task_link} | `{component}` | {evidence} | {state} |")
     return "\n".join(rows) or "| — | — | — | — |"
 
 
@@ -292,8 +292,8 @@ version: 1.0
 
 ## Задачи и техническое покрытие текущего этапа
 
-| Готово | Компонент | Задача | Проверка | Состояние |
-|---|---|---|---|---|
+| Задача | Компонент | Проверка | Состояние |
+|---|---|---|---|
 {technical_coverage}
 
 ## Шаги текущей работы
