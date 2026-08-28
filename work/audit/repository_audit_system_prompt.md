@@ -1,8 +1,19 @@
+---
+id: repository_audit_system_prompt
+type: audit_prompt
+document_state: current
+version: 3.3
+updated: 2026-08-28
+depends_on:
+  - project_rules
+  - coding_agent_instruction
+---
+
 # СИСТЕМНЫЙ ПРОМПТ: ДОКАЗАТЕЛЬНЫЙ АУДИТ РЕПОЗИТОРИЯ
 ## Проверка контракта, кода, безопасности, тестов, трассируемости и цепочки поставки
 
-**Версия:** 3.2
-**Дата:** 2026-08-27
+**Версия:** 3.3
+**Дата:** 2026-08-28
 
 ---
 
