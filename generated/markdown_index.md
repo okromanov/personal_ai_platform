@@ -3,7 +3,7 @@
 id: generated_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-28T08:52:00+02:00
+generated_at: 2026-08-28T12:20:00+03:00
 version: 1.0
 ---
 
@@ -75,7 +75,7 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.2` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.3` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.1` | Модель угроз personal_ai_platform |
-| [`work/audit_baseline.md`](../work/audit_baseline.md) | `audit_baseline` | `audit_register` | `document_state` | `current` | `1.0` | Реестр результатов аудита |
+| [`work/audit_baseline.md`](../work/audit_baseline.md) | `audit_baseline` | `audit_register` | `document_state` | `current` | `1.1` | Реестр результатов аудита |
 | [`work/m01_final_report.md`](../work/m01_final_report.md) | `m01_final_report` | `milestone_completion_report` | `document_state` | `` | `1.0` | M01 — Итоговый отчёт |
 | [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `2.0` | TASK_001 — Реализация ARC_CMP_001 |
 | [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `completed` | `1.7` | TASK_002 — Реализация ARC_CMP_002 |
