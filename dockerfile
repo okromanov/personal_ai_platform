@@ -16,7 +16,7 @@
 # Named lower_snake_case (`dockerfile`, not `Dockerfile`) per this
 # repository's naming convention -- unlike `docker build .`, this is not
 # picked up implicitly; build it with `docker build -f dockerfile .`.
-FROM python:3.12-slim
+FROM python:3.12.14-slim-trixie@sha256:7a8b475003c4fe15a2cd4e55e5cfc2f3560bdc9333d624f24cdd6d4340fd7a17
 
 ARG APP_VERSION=unknown
 ENV APP_VERSION=${APP_VERSION} \
