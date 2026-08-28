@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
+from os import name as os_name
 from pathlib import Path
+from unittest import mock
 
 from src.owner_control import (
     ActionClass,
@@ -17,6 +20,7 @@ from src.owner_control import (
     OwnerControlGate,
     OwnerControlStateError,
 )
+from src.owner_control.state_io import atomic_write_json
 
 
 def _action(
@@ -127,6 +131,46 @@ class EmergencySwitchDirectTests(unittest.TestCase):
         self.switch.activate(reason="atomic")
         leftovers = list(self.switch._path.parent.glob(f".{self.switch._path.name}.*.tmp"))
         self.assertEqual(leftovers, [])
+
+    @unittest.skipIf(os_name == "nt", "directory fsync is a POSIX durability primitive")
+    def test_atomic_write_fsyncs_parent_after_replace(self) -> None:
+        target = self.switch._path
+        events: list[str] = []
+        real_replace = os.replace
+        real_fsync = os.fsync
+
+        def recording_replace(source: str | Path, destination: str | Path) -> None:
+            real_replace(source, destination)
+            events.append("replace")
+
+        def recording_fsync(descriptor: int) -> None:
+            real_fsync(descriptor)
+            events.append("fsync")
+
+        with (
+            mock.patch("src.owner_control.state_io.os.replace", side_effect=recording_replace),
+            mock.patch("src.owner_control.state_io.os.fsync", side_effect=recording_fsync),
+        ):
+            atomic_write_json(target, {"active": True})
+
+        self.assertEqual(events, ["fsync", "replace", "fsync"])
+
+    @unittest.skipIf(os_name == "nt", "directory fsync is a POSIX durability primitive")
+    def test_directory_fsync_failure_is_not_reported_as_success(self) -> None:
+        target = self.switch._path
+        real_fsync = os.fsync
+        calls = 0
+
+        def fail_second_fsync(descriptor: int) -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("simulated directory durability failure")
+            real_fsync(descriptor)
+
+        with mock.patch("src.owner_control.state_io.os.fsync", side_effect=fail_second_fsync):
+            with self.assertRaisesRegex(OSError, "directory durability"):
+                atomic_write_json(target, {"active": True})
 
 
 class OwnerControlGateSensitiveActionTests(unittest.TestCase):
