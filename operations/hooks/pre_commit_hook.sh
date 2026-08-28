@@ -69,6 +69,11 @@ echo "  [4/5] Canonical fast quality suite"
 "$PYTHON" operations/scripts/quality/run_suite.py fast
 
 echo "  [5/5] Auto-regenerate dashboards and increment versions"
-bash operations/hooks/pre_commit_regenerate_dashboards.sh || true
+bash operations/hooks/pre_commit_regenerate_dashboards.sh
+
+# The previous step mutates staged Markdown metadata and generated views.
+# Re-run the canonical fast profile so exit 0 proves the post-mutation state
+# has no generated drift.
+"$PYTHON" operations/scripts/quality/run_suite.py fast
 
 echo "Pre-commit validation passed."
