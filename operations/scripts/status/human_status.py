@@ -14,6 +14,11 @@ from operations.scripts.status.generate_project_status import (
 from operations.scripts.tasks.generate import ACTOR_LABELS, collect_tasks, select_current_task
 
 _LINK_TARGET_PATTERN = re.compile(r"(\[[^\]]*\]\()([^)]+)(\))")
+_AUDIT_ROW_PATTERN = re.compile(
+    r"^\|\s*AUD-\d{3}\s*\|\s*(critical|high|medium|low)\s*\|\s*"
+    r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
+    r"\d{4}-\d{2}-\d{2}\s*\|\s*(\d{4}-\d{2}-\d{2}|—)\s*\|"
+)
 
 
 def _rebase_relative_links(text: str, source_dir: Path, root: Path) -> str:
@@ -42,6 +47,24 @@ def _section(body: str, title: str) -> str:
     pattern = re.compile(rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(title)}\s*$\n(.*?)(?=^##\s|\Z)")
     match = pattern.search(body)
     return match.group(1).strip() if match else ""
+
+
+def _capability_summary(root: Path) -> str:
+    """Read the hand-maintained owner summary without duplicating TASK prose."""
+    candidates = (
+        root / "capability_summary.md",
+        root / "operations" / "capability_summary.md",
+    )
+    for path in candidates:
+        if path.is_file():
+            document = load_document(path)
+            summary = _section(document.body, "Текущая сводка")
+            if summary:
+                return summary
+            capability_blocks = re.findall(r"(?ms)^###\s+.+?(?=^###\s|\Z)", document.body)
+            if capability_blocks:
+                return "\n\n".join(block.strip() for block in capability_blocks)
+    return "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
 
 
 def _open_followups(tasks: list[TaskItem]) -> list[tuple[TaskItem, str]]:
@@ -87,6 +110,56 @@ def _component_link(component: str) -> str:
         return f"[`{component}`](specifications/infrastructure_baseline.md#{component.lower()})"
     return f"`{component}`"
 
+
+def _audit_status(root: Path) -> str:
+    """Render owner-facing aggregate state from the canonical AUD register."""
+    baseline = root / "work" / "audit_baseline.md"
+    records: list[tuple[str, str, str]] = []
+    for line in baseline.read_text(encoding="utf-8-sig").splitlines():
+        match = _AUDIT_ROW_PATTERN.match(line)
+        if match:
+            records.append(match.groups())
+
+    state_counts = {
+        state: sum(record_state == state for _, record_state, _ in records)
+        for state in (
+            "open",
+            "remediated_pending_verification",
+            "resolved",
+            "accepted_risk",
+        )
+    }
+    severity_counts = {
+        severity: sum(record_severity == severity for record_severity, _, _ in records)
+        for severity in ("critical", "high", "medium", "low")
+    }
+    active_review_dates = sorted(
+        review_date
+        for _, state, review_date in records
+        if state != "resolved" and review_date != "—"
+    )
+    severity_text = (
+        ", ".join(
+            f"{severity}: **{count}**" for severity, count in severity_counts.items() if count
+        )
+        or "нет"
+    )
+    review_text = active_review_dates[0] if active_review_dates else "не требуется"
+
+    return f"""## Контроль результатов аудита
+
+| Параметр | Значение |
+|---|---|
+| Всего замечаний | **{len(records)}** |
+| Исправлены, ожидают проверки | **{state_counts["remediated_pending_verification"]}** |
+| Открыты | **{state_counts["open"]}** |
+| Риски приняты владельцем | **{state_counts["accepted_risk"]}** |
+| Закрыты | **{state_counts["resolved"]}** |
+| Критичность | {severity_text} |
+| Ближайшая дата проверки | **{review_text}** |
+| Полное описание и доказательства | [`work/audit_baseline.md`](work/audit_baseline.md) |"""
+
+
 def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
     """Build the component-to-evidence table from TASK and TEST metadata."""
     tests_by_task: dict[str, list[tuple[str, str]]] = {}
@@ -99,7 +172,12 @@ def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
         for task_id in document.metadata.get("traces_to", []):
             tests_by_task.setdefault(str(task_id), []).append((test_id, relative))
 
-    labels = {"completed": "выполнена", "in-progress": "выполняется", "planned": "запланирована", "blocked": "заблокирована"}
+    labels = {
+        "completed": "выполнена",
+        "in-progress": "выполняется",
+        "planned": "запланирована",
+        "blocked": "заблокирована",
+    }
     rows: list[str] = []
     for task in tasks:
         component = str(task.get("component", "—"))
@@ -149,6 +227,8 @@ def render_repository_project_status(root: Path) -> str:
         for item in milestones
     )
     technical_coverage = _technical_coverage(current_tasks, root)
+    audit_status = _audit_status(root)
+    capability_summary = _capability_summary(root)
 
     if current_task:
         task_link = (
@@ -293,7 +373,7 @@ version: 1.0
 
 {milestone_lines}
 
-## Задачи и техническое покрытие текущего этапа
+## Проектные задачи текущего этапа
 
 | Задача | Компонент | Проверка | Состояние |
 |---|---|---|---|
@@ -306,6 +386,12 @@ version: 1.0
 ## Блокеры
 
 {blocker_text}
+
+{audit_status}
+
+## Что уже умеет решение
+
+{capability_summary}
 
 ## Незакрытые действия владельца (необязательные)
 
@@ -321,4 +407,6 @@ version: 1.0
 
 
 def generate_repository_project_status(root: Path) -> bool:
-    return atomic_write_generated(root / "project_status.md", render_repository_project_status(root))
+    return atomic_write_generated(
+        root / "project_status.md", render_repository_project_status(root)
+    )
