@@ -32,7 +32,10 @@ DESCRIPTIONS: dict[str, str] = {
     ),
     "operations/project_config.json": "Общие настройки репозитория: часовой пояс и адрес на GitHub.",
     "operations/quality/requirements_dev.txt": (
-        "Зафиксированные версии dev-инструментов для локального и серверного quality suite."
+        "Полный транзитивный lock dev-инструментов с SHA-256 хешами для локального и серверного quality suite."
+    ),
+    "operations/quality/requirements_dev.in": (
+        "Прямые версии dev-инструментов — вход для воспроизводимой генерации requirements_dev.txt."
     ),
     "operations/quality_baseline.json": (
         "Эталонный список известных ошибок mypy: gate не даёт их числу расти."
