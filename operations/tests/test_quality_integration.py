@@ -1,3 +1,5 @@
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -49,6 +51,11 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertNotIn("generated/document_index.md", workflow)
         self.assertIn("runtime/health_check_report.md", workflow)
         self.assertIn("runtime/health_check.json", workflow)
+        self.assertIn("docker build --pull -f dockerfile", workflow)
+        self.assertIn("runtime/container_sbom.spdx.json", workflow)
+        self.assertIn("anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610", workflow)
+        self.assertIn("--require-hashes", workflow)
+        self.assertFalse((ROOT / ".github/workflows/publish_health_check_report.yml").exists())
 
     def test_quality_scope_includes_product_source_everywhere(self) -> None:
         self.assertIn("src", PYTHON_SOURCE_PATHS)
@@ -97,6 +104,48 @@ class QualityIntegrationTests(unittest.TestCase):
     def test_pre_commit_hook_contains_validation_logic(self) -> None:
         canonical = (ROOT / "operations/hooks/pre_commit_hook.sh").read_text(encoding="utf-8")
         self.assertIn("operations/scripts/quality/run_suite.py fast", canonical)
+        self.assertNotIn("pre_commit_regenerate_dashboards.sh || true", canonical)
+        self.assertGreaterEqual(canonical.count("operations/scripts/quality/run_suite.py fast"), 2)
+
+    def test_dashboard_regeneration_is_fail_closed(self) -> None:
+        helper = (ROOT / "operations/hooks/pre_commit_regenerate_dashboards.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("set -euo pipefail", helper)
+        self.assertNotIn("failed (see output above)", helper)
+        self.assertNotIn("exit 0", helper)
+
+    @unittest.skipIf(os.name == "nt", "the canonical helper is a Bash script")
+    def test_dashboard_regeneration_propagates_generator_failure(self) -> None:
+        helper = ROOT / "operations/hooks/pre_commit_regenerate_dashboards.sh"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            document = root / "document.md"
+            document.write_text("---\nversion: 1.0\n---\n# Test\n", encoding="utf-8")
+            subprocess.run(["git", "add", "document.md"], cwd=root, check=True)
+
+            fake_bin = root / "fake_bin"
+            fake_bin.mkdir()
+            fake_python = fake_bin / "python3.12"
+            fake_python.write_text(
+                '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n',
+                encoding="utf-8",
+            )
+            fake_python.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
+
+            completed = subprocess.run(
+                ["bash", str(helper)],
+                cwd=root,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+        self.assertEqual(completed.returncode, 23)
 
     def test_final_report_matches_current_repository_state(self) -> None:
         """work/m01_final_report.md is fully computed by render_final_report()

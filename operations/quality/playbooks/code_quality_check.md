@@ -2,8 +2,8 @@
 id: code_quality_check
 type: guide
 document_state: current
-version: 1.0
-updated: 2026-08-25
+version: 1.1
+updated: 2026-08-28
 ---
 
 # Code Quality Check Skill
@@ -69,7 +69,7 @@ Verifies:
 
 5. **Run deterministic security and workflow checks:**
    ```bash
-   python3.12 -m pip_audit --no-deps --requirement operations/quality/requirements_dev.txt
+   python3.12 -m pip_audit --requirement operations/quality/requirements_dev.txt
    actionlint -shellcheck=shellcheck
    shellcheck operations/hooks/pre_commit_hook.sh operations/hooks/pre_push_hook.sh
    gitleaks dir . --redact --no-banner

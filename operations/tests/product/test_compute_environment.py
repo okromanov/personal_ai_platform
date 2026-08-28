@@ -90,8 +90,11 @@ class DockerfileStructureTests(unittest.TestCase):
     def setUp(self) -> None:
         self.dockerfile = (REPO_ROOT / "dockerfile").read_text(encoding="utf-8")
 
-    def test_base_image_is_pinned_to_a_supported_python_version(self) -> None:
-        self.assertRegex(self.dockerfile, r"(?m)^FROM python:3\.12-slim\b")
+    def test_base_image_is_pinned_to_an_immutable_supported_digest(self) -> None:
+        self.assertRegex(
+            self.dockerfile,
+            r"(?m)^FROM python:3\.12\.\d+-slim-[a-z]+@sha256:[0-9a-f]{64}$",
+        )
 
     def test_runs_as_a_non_root_application_user(self) -> None:
         self.assertIn("useradd", self.dockerfile)

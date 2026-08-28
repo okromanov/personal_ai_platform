@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_001
 component: INF_CMP_001
 work_state: completed
-version: 2.2
-updated: 2026-08-26
+version: 2.3
+updated: 2026-08-28
 next_actor: none
 owner_action: none
 owner_followups:
@@ -42,7 +42,7 @@ tests:
 
 ## 3. Где мы сейчас
 
-Спецификация и реализация [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001) завершены и покрыты [`TEST_014`](../tests/test_014.md): корневой [`dockerfile`](../../dockerfile) определяет воспроизводимую вычислительную среду (образ на Python 3.12, непривилегированный пользователь приложения, идентифицируемая версия сборки, цикл проверки работоспособности через [`HealthAggregator`](../../src/operations/health.py) из [`TASK_007`](task_007_arc_009.md)). Выбор конкретного облачного провайдера ([`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), `proposed`) и среды агента ([`ADR_006`](../../adr/adr_006_agent_environment_framework.md), `proposed`) остаются открытыми — эта TASK не привязывается ни к одному из них: образ переносим и не содержит специфики облачного провайдера или SDK среды агента.
+Спецификация и реализация [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001) завершены и покрыты [`TEST_014`](../tests/test_014.md): корневой [`dockerfile`](../../dockerfile) определяет воспроизводимую вычислительную среду (Python 3.12.14 slim-trixie, закреплённый OCI digest, непривилегированный пользователь приложения, идентифицируемая версия сборки, цикл проверки работоспособности через [`HealthAggregator`](../../src/operations/health.py) из [`TASK_007`](task_007_arc_009.md)). Канонический CI выполняет реальную build/run/health-проверку, фиксирует base/image digest и SPDX SBOM. Выбор конкретного облачного провайдера ([`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), `proposed`) и среды агента ([`ADR_006`](../../adr/adr_006_agent_environment_framework.md), `proposed`) остаются открытыми — эта TASK не привязывается ни к одному из них: образ переносим и не содержит специфики облачного провайдера или SDK среды агента.
 
 ## 4. Что делать сейчас
 
@@ -61,7 +61,7 @@ tests:
 
 ## 6. Состав
 
-[`dockerfile`](../../dockerfile) — воспроизводимая вычислительная среда: закреплённый базовый образ `python:3.12-slim` ([`INF_REQ_001`](../../specifications/infrastructure_baseline.md#inf_req_001)), непривилегированный пользователь `app` без административных прав ([`INF_REQ_002`](../../specifications/infrastructure_baseline.md#inf_req_002)), аргумент сборки `APP_VERSION`, встроенный в образ как идентифицируемая версия развёртывания ([`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010)), и `HEALTHCHECK`, вызывающий [`src/operations/health_check.py`](../../src/operations/health_check.py) — тонкий CLI поверх [`HealthAggregator`](../../src/operations/health.py) ([`TASK_007`](task_007_arc_009.md)). Файл назван строчными буквами по соглашению репозитория (все пути — `lower_snake_case`, без исключений) — из-за этого Docker не находит его автоматически по `docker build .`, сборка требует явного `docker build -f dockerfile .`. [`.dockerignore`](../../.dockerignore) исключает служебные и документные пути из образа. [`work/tests/test_014.md`](../tests/test_014.md) — описание проверок компонента. [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py) — юнит-тесты CLI и статическая проверка структуры файла сборки образа.
+[`dockerfile`](../../dockerfile) — воспроизводимая вычислительная среда: базовый образ `python:3.12.14-slim-trixie` закреплён полным OCI digest ([`INF_REQ_001`](../../specifications/infrastructure_baseline.md#inf_req_001)), непривилегированный пользователь `app` не имеет административных прав ([`INF_REQ_002`](../../specifications/infrastructure_baseline.md#inf_req_002)), аргумент сборки `APP_VERSION` встроен в образ как идентифицируемая версия развёртывания ([`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010)), а `HEALTHCHECK` вызывает [`src/operations/health_check.py`](../../src/operations/health_check.py) — тонкий CLI поверх [`HealthAggregator`](../../src/operations/health.py) ([`TASK_007`](task_007_arc_009.md)). Обновление digest выполняется отдельным reviewable PR вместе с build/run/health и SBOM evidence. Файл назван строчными буквами по соглашению репозитория (все пути — `lower_snake_case`, без исключений) — из-за этого Docker не находит его автоматически по `docker build .`, сборка требует явного `docker build -f dockerfile .`. [`.dockerignore`](../../.dockerignore) исключает служебные и документные пути из образа. [`work/tests/test_014.md`](../tests/test_014.md) — описание проверок компонента. [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py) — юнит-тесты CLI и статическая проверка структуры файла сборки образа.
 
 Разделение сред разработки и рабочего контура ([`INF_REQ_015`](../../specifications/infrastructure_baseline.md#inf_req_015)) задокументировано прямо в `dockerfile`: успешный локальный прогон `run_suite.py` (среда разработчика) не подтверждает эту рабочую среду — только собранный, версионированный образ является собственным доказательством рабочего контура.
 
@@ -69,7 +69,7 @@ tests:
 
 Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_014`](../tests/test_014.md): юнит-тесты [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py), часть обязательного gate `Quality skills`.
 
-Реальная сборка образа (`docker build`) не может быть выполнена в этой изолированной среде разработки — здесь нет запущенного демона Docker, а CI сейчас не запускается автоматически (минуты GitHub Actions исчерпаны). Автоматический тест покрывает то, что проверяемо без демона: поведение CLI `health_check.py` и статическую структуру `dockerfile` (закреплённый образ, непривилегированный пользователь, `HEALTHCHECK`, аргумент версии). Детерминированная воспроизводимость сборки пока подтверждена структурой и автоматическими тестами без Docker-демона; реальную сборку образа выполняет владелец по инструкции в разделе 11.
+Локальная среда без Docker daemon выполняет статическую проверку digest, непривилегированного пользователя, `HEALTHCHECK` и аргумента версии. Канонический Linux CI дополнительно собирает образ на точном SHA, запускает встроенную проверку работоспособности, сверяет `APP_VERSION` с source SHA и сохраняет base digest, image digest и SPDX JSON SBOM в evidence artifact. До восстановления GitHub Actions minutes этот серверный слой остаётся ожидающей внешней проверкой и не выдаётся за пройденный.
 
 **Ручные (code review):**
 1. `dockerfile` не содержит секретов или конкретных учётных данных — подтверждено сканером секретов ([`check.py`](../../operations/scripts/documents/check.py))

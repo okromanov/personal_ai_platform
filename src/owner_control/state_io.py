@@ -9,6 +9,23 @@ from pathlib import Path
 from typing import Any
 
 
+def _fsync_parent_directory(path: Path) -> None:
+    """Persist the directory entry created by ``os.replace`` on POSIX.
+
+    Windows does not expose a portable directory-fsync primitive through
+    Python. There ``os.replace`` retains the platform's documented semantics;
+    POSIX filesystems get the additional directory durability barrier.
+    """
+    if os.name == "nt":
+        return
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    directory_fd = os.open(path.parent, flags)
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+
+
 def read_json_object(path: Path) -> dict[str, Any]:
     """Read a JSON object; callers decide whether a missing file is valid."""
     try:
@@ -36,6 +53,7 @@ def atomic_write_json(path: Path, value: dict[str, Any]) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary_path, path)
+        _fsync_parent_directory(path)
     except Exception:
         temporary_path.unlink(missing_ok=True)
         raise

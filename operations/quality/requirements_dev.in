@@ -1,0 +1,12 @@
+# Direct development-tool constraints. Regenerate requirements_dev.txt with:
+# uv pip compile operations/quality/requirements_dev.in --generate-hashes \
+#   --no-emit-index-url --output-file operations/quality/requirements_dev.txt
+coverage==7.15.4
+mypy==2.3.1
+pip-audit==2.10.1
+ruff==0.16.3
+bandit==1.7.5
+pbr==7.0.3
+vulture==2.11
+radon==6.0.1
+pytest-benchmark==4.0.0

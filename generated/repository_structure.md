@@ -3,6 +3,7 @@
 id: generated_repository_structure
 type: generated_document
 generation_state: generated
+generated_at: 2026-08-28T08:53:00+02:00
 version: 1.0
 ---
 
@@ -10,14 +11,12 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего файлов | `267` |
+| Всего файлов | `270` |
 
 ```text
 personal_ai_platform/
-- .coverage
 - .dockerignore
 - .github/workflows/project_check.yml
-- .github/workflows/publish_health_check_report.yml
 - .gitignore
 - AGENTS.md
 - adr/adr_001_language_and_runtime.md
@@ -29,11 +28,11 @@ personal_ai_platform/
 - adr/adr_007_cloud_provider_selection.md
 - adr/adr_008_data_storage_schema.md
 - adr/adr_009_secret_management_strategy.md
+- capability_summary.md
 - dockerfile
 - generated/health_check_report.md
 - generated/markdown_index.md
 - generated/non_markdown_index.md
-- generated/platfrom_capability.md
 - generated/repository_structure.md
 - generated/test_catalog.md
 - generated/traceability_matrix.md
@@ -41,7 +40,6 @@ personal_ai_platform/
 - operations/__init__.py
 - operations/acceptance.md
 - operations/adr_lifecycle.md
-- capability_summary.md
 - operations/change_process.md
 - operations/document_frontmatter_standard.md
 - operations/examples/sample_task_lifecycle.md
@@ -49,6 +47,7 @@ personal_ai_platform/
 - operations/hooks/pre_commit_hook.sh
 - operations/hooks/pre_commit_regenerate_dashboards.sh
 - operations/hooks/pre_push_hook.sh
+- operations/license_policy.md
 - operations/local_development_windows.md
 - operations/procedure_map.md
 - operations/procedures/file_update_dependencies.md
@@ -65,6 +64,7 @@ personal_ai_platform/
 - operations/quality/playbooks/readme.md
 - operations/quality/playbooks/security_audit.md
 - operations/quality/playbooks/unit_tests.md
+- operations/quality/requirements_dev.in
 - operations/quality/requirements_dev.txt
 - operations/quality_baseline.json
 - operations/quality_registry.json
@@ -82,7 +82,6 @@ personal_ai_platform/
 - operations/scripts/documents/links.py
 - operations/scripts/documents/metadata.py
 - operations/scripts/documents/non_markdown_index.py
-- operations/scripts/documents/platform_capability.py
 - operations/scripts/documents/repository_tree.py
 - operations/scripts/documents/test_catalog.py
 - operations/scripts/documents/traceability.py
@@ -156,9 +155,11 @@ personal_ai_platform/
 - operations/tests/product/test_compute_environment.py
 - operations/tests/product/test_model_gateway.py
 - operations/tests/product/test_network_policy.py
+- operations/tests/product/test_observability.py
 - operations/tests/product/test_operations_state.py
 - operations/tests/product/test_orchestration.py
 - operations/tests/product/test_owner_control.py
+- operations/tests/product/test_persistent_task_state.py
 - operations/tests/product/test_secrets.py
 - operations/tests/product/test_task_state.py
 - operations/tests/product/test_tool_gateway.py
@@ -220,6 +221,9 @@ personal_ai_platform/
 - src/models/base.py
 - src/models/runtime_adapter.py
 - src/models/stub_gateway.py
+- src/observability/__init__.py
+- src/observability/collector.py
+- src/observability/sqlite_store.py
 - src/operations/__init__.py
 - src/operations/health.py
 - src/operations/health_check.py
@@ -234,18 +238,16 @@ personal_ai_platform/
 - src/owner_control/control.py
 - src/owner_control/emergency_switch.py
 - src/owner_control/state_io.py
-- src/secrets/__init__.py
-- src/secrets/base.py
-- src/secrets/env_provider.py
 - src/task_state/__init__.py
 - src/task_state/base.py
+- src/task_state/sqlite_store.py
 - src/task_state/store.py
 - src/tools/__init__.py
 - src/tools/base.py
 - src/tools/registry.py
-- tasks.md
 - work/acceptance/.gitkeep
 - work/acceptance/m01.json
+- work/audit_baseline.md
 - work/m01_final_report.md
 - work/tasks/.gitkeep
 - work/tasks/task_001_arc_001.md
@@ -281,4 +283,6 @@ personal_ai_platform/
 - work/tests/test_014.md
 - work/tests/test_015.md
 - work/tests/test_016.md
+- work/tests/test_017.md
+- work/tests/test_018.md
 ```

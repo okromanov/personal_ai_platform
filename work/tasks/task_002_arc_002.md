@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_002
 component: ARC_CMP_002
 work_state: completed
-version: 1.6
-updated: 2026-08-25
+version: 1.7
+updated: 2026-08-28
 next_actor: none
 owner_action: none
 depends_on:
@@ -48,7 +48,7 @@ tests:
 
 ## 3. Где мы сейчас
 
-Спецификация и реализация [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) завершены и покрыты [`TEST_008`](../tests/test_008.md), включая отрицательные сценарии повреждения состояния, подмены ресурса и повторного исполнения после перезапуска.
+Спецификация и реализация [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) завершены и покрыты [`TEST_008`](../tests/test_008.md), включая отрицательные сценарии повреждения состояния, подмены ресурса и повторного исполнения после перезапуска. Запись критичного JSON-состояния синхронизирует сначала файл, затем замену directory entry на POSIX; ошибка любого durability barrier не маскируется как успешная запись. На Windows используется доступная платформе семантика `os.replace`, поскольку переносимого directory-fsync API в Python нет.
 
 ## 4. Что делать сейчас
 

@@ -48,7 +48,7 @@ jobs:
 
       - name: Install pinned development tools
         shell: pwsh
-        run: py -m pip install --disable-pip-version-check -r operations/quality/requirements_dev.txt
+        run: py -m pip install --disable-pip-version-check --require-hashes -r operations/quality/requirements_dev.txt
 
       - name: Reject a direct update of main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -145,7 +145,7 @@ jobs:
   quality-skills:
     name: Quality skills
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       PYTHONUTF8: "1"
     steps:
@@ -172,7 +172,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 --version
-          python3 -m pip install --disable-pip-version-check \
+          python3 -m pip install --disable-pip-version-check --require-hashes \
             -r operations/quality/requirements_dev.txt
 
       - name: Fetch default branch and full history
@@ -230,7 +230,6 @@ jobs:
           set -euo pipefail
           python3 -m pip_audit \
             --cache-dir "$RUNNER_TEMP/pip-audit-cache" \
-            --no-deps \
             --requirement operations/quality/requirements_dev.txt \
             --format json \
             --output runtime/pip_audit.json
@@ -248,6 +247,37 @@ jobs:
             coverage_base="$(git rev-parse HEAD^)"
           fi
           python3 operations/scripts/quality/run_suite.py full --coverage-base "$coverage_base"
+
+      - name: Build and verify the immutable runtime image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image="personal_ai_platform:$GITHUB_SHA"
+          docker build --pull -f dockerfile --build-arg "APP_VERSION=$GITHUB_SHA" --tag "$image" .
+          docker image inspect "$image" --format '{{.Id}}' > runtime/container_image_digest.txt
+          sed -n 's/^FROM .*@\(sha256:[0-9a-f]\{64\}\)$/\1/p' dockerfile \
+            > runtime/container_base_digest.txt
+          test -s runtime/container_base_digest.txt
+          docker run --rm "$image" | tee runtime/container_health.json
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path("runtime/container_health.json").read_text(encoding="utf-8"))
+          if report.get("healthy") is not True:
+              raise SystemExit("container health check did not report healthy=true")
+          if report.get("version") != os.environ["GITHUB_SHA"]:
+              raise SystemExit("container health check version is not the source SHA")
+          PY
+
+      - name: Generate the container SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: personal_ai_platform:${{ github.sha }}
+          format: spdx-json
+          output-file: runtime/container_sbom.spdx.json
+          upload-artifact: false
 
       - name: Build canonical quality evidence
         shell: bash
@@ -276,7 +306,11 @@ jobs:
             --artifact runtime/actionlint.txt \
             --artifact runtime/shellcheck.txt \
             --artifact runtime/pip_audit.json \
-            --artifact runtime/gitleaks.txt
+            --artifact runtime/gitleaks.txt \
+            --artifact runtime/container_base_digest.txt \
+            --artifact runtime/container_image_digest.txt \
+            --artifact runtime/container_health.json \
+            --artifact runtime/container_sbom.spdx.json
           python3 operations/scripts/evidence/generate_bundle.py \
             --check-summary runtime/check_summary.json \
             --test-returncode 0 \
@@ -313,6 +347,10 @@ jobs:
             runtime/shellcheck.txt
             runtime/pip_audit.json
             runtime/gitleaks.txt
+            runtime/container_base_digest.txt
+            runtime/container_image_digest.txt
+            runtime/container_health.json
+            runtime/container_sbom.spdx.json
             runtime/evidence/quality_suite.json
             runtime/evidence/latest.json
 

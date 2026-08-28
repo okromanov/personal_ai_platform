@@ -2,8 +2,8 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 2.8
-updated: 2026-08-26
+version: 2.9
+updated: 2026-08-28
 depends_on:
   - project_rules
   - project_milestones
@@ -36,7 +36,7 @@ depends_on:
 5. **Внести изменение:** создать связное изменение вместе с проверками.
 6. **Выполнить полный локальный прогон:**
    ```bash
-   python3.12 -m pip install -r operations/quality/requirements_dev.txt
+   python3.12 -m pip install --require-hashes -r operations/quality/requirements_dev.txt
    python3.12 operations/scripts/quality/run_suite.py full
    bash operations/hooks/pre_commit_hook.sh
    ```

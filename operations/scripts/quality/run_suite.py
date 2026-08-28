@@ -25,6 +25,14 @@ EXACT_REQUIREMENT = re.compile(
     r"^(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)==(?P<version>[A-Za-z0-9][A-Za-z0-9._+!-]*)$"
 )
 DEV_REQUIREMENTS_PATH = Path("operations/quality/requirements_dev.txt")
+DEV_REQUIREMENTS_INPUT_PATH = Path("operations/quality/requirements_dev.in")
+DEFAULT_STEP_TIMEOUT_SECONDS = 300
+AUDIT_BASELINE_PATH = Path("work/audit_baseline.md")
+AUDIT_ROW = re.compile(
+    r"^\|\s*(AUD-\d{3})\s*\|\s*(critical|high|medium|low)\s*\|\s*"
+    r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
+    r"(\d{4}-\d{2}-\d{2})\s*\|\s*(\d{4}-\d{2}-\d{2}|—)\s*\|\s*([^|]+?)\s*\|"
+)
 # Function parameters Vulture flags as unused (100% confidence) but that are
 # kept intentionally: evidence_ref/semantic_review_ref preserve caller
 # clarity in acceptance/apply.py's apply_acceptance() even though only their
@@ -60,14 +68,15 @@ def validate_toml_files(root: Path) -> None:
 
 
 def validate_development_requirements(root: Path) -> None:
-    path = root / DEV_REQUIREMENTS_PATH
-    if not path.is_file():
-        raise QualityFailure(f"Missing {DEV_REQUIREMENTS_PATH.as_posix()}")
+    input_path = root / DEV_REQUIREMENTS_INPUT_PATH
+    lock_path = root / DEV_REQUIREMENTS_PATH
+    for path in (input_path, lock_path):
+        if not path.is_file():
+            raise QualityFailure(f"Missing {path.relative_to(root).as_posix()}")
 
-    packages: dict[str, int] = {}
-    pin_count = 0
+    direct_packages: dict[str, tuple[str, int]] = {}
     for line_number, raw_line in enumerate(
-        path.read_text(encoding="utf-8-sig").splitlines(), start=1
+        input_path.read_text(encoding="utf-8-sig").splitlines(), start=1
     ):
         line = raw_line.strip()
         if not line or line.startswith("#"):
@@ -75,27 +84,96 @@ def validate_development_requirements(root: Path) -> None:
         match = EXACT_REQUIREMENT.fullmatch(line)
         if match is None:
             raise QualityFailure(
-                f"{DEV_REQUIREMENTS_PATH.as_posix()}:{line_number}: "
+                f"{DEV_REQUIREMENTS_INPUT_PATH.as_posix()}:{line_number}: "
                 "dependency must use exact name==version pin"
             )
         normalized = re.sub(r"[-_.]+", "-", match.group("name")).lower()
-        if normalized in packages:
+        if normalized in direct_packages:
             raise QualityFailure(
-                f"{DEV_REQUIREMENTS_PATH.as_posix()}:{line_number}: duplicate dependency "
-                f"{match.group('name')} (first declared on line {packages[normalized]})"
+                f"{DEV_REQUIREMENTS_INPUT_PATH.as_posix()}:{line_number}: duplicate dependency "
+                f"{match.group('name')} (first declared on line "
+                f"{direct_packages[normalized][1]})"
             )
-        packages[normalized] = line_number
-        pin_count += 1
-    if pin_count == 0:
+        direct_packages[normalized] = (match.group("version"), line_number)
+    if not direct_packages:
         raise QualityFailure(
-            f"{DEV_REQUIREMENTS_PATH.as_posix()} must contain at least one pinned dependency"
+            f"{DEV_REQUIREMENTS_INPUT_PATH.as_posix()} must contain at least one pinned dependency"
         )
+
+    lock_text = lock_path.read_text(encoding="utf-8-sig")
+    if "--index-url" in lock_text or "--extra-index-url" in lock_text:
+        raise QualityFailure(f"{DEV_REQUIREMENTS_PATH.as_posix()} must not embed package indexes")
+    locked_packages: dict[str, tuple[str, int, int]] = {}
+    current_name: str | None = None
+    for line_number, raw_line in enumerate(lock_text.splitlines(), start=1):
+        if raw_line and not raw_line[0].isspace() and not raw_line.startswith("#"):
+            header = raw_line.removesuffix(" \\").strip()
+            match = EXACT_REQUIREMENT.fullmatch(header)
+            if match is None:
+                raise QualityFailure(
+                    f"{DEV_REQUIREMENTS_PATH.as_posix()}:{line_number}: invalid locked pin"
+                )
+            current_name = re.sub(r"[-_.]+", "-", match.group("name")).lower()
+            if current_name in locked_packages:
+                raise QualityFailure(
+                    f"{DEV_REQUIREMENTS_PATH.as_posix()}:{line_number}: duplicate locked dependency"
+                )
+            locked_packages[current_name] = (match.group("version"), line_number, 0)
+        elif "--hash=sha256:" in raw_line and current_name is not None:
+            version, header_line, hash_count = locked_packages[current_name]
+            locked_packages[current_name] = (version, header_line, hash_count + 1)
+
+    if not locked_packages:
+        raise QualityFailure(f"{DEV_REQUIREMENTS_PATH.as_posix()} contains no locked dependencies")
+    unhashed = sorted(name for name, (_, _, hashes) in locked_packages.items() if hashes == 0)
+    if unhashed:
+        raise QualityFailure(
+            f"{DEV_REQUIREMENTS_PATH.as_posix()} dependencies without SHA-256 hashes: "
+            + ", ".join(unhashed)
+        )
+    for name, (version, _) in direct_packages.items():
+        locked = locked_packages.get(name)
+        if locked is None or locked[0] != version:
+            raise QualityFailure(
+                f"{DEV_REQUIREMENTS_PATH.as_posix()} is stale for direct dependency "
+                f"{name}=={version}"
+            )
 
 
 def validate_configuration_files(root: Path) -> None:
     validate_json_files(root)
     validate_toml_files(root)
     validate_development_requirements(root)
+    validate_audit_baseline(root)
+
+
+def validate_audit_baseline(root: Path) -> None:
+    path = root / AUDIT_BASELINE_PATH
+    if not path.is_file():
+        raise QualityFailure(f"Missing {AUDIT_BASELINE_PATH.as_posix()}")
+    records: dict[str, tuple[str, str, str]] = {}
+    for line_number, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
+        if not line.lstrip().startswith("| AUD-"):
+            continue
+        match = AUDIT_ROW.match(line)
+        if match is None:
+            raise QualityFailure(
+                f"{AUDIT_BASELINE_PATH.as_posix()}:{line_number}: invalid audit record"
+            )
+        finding_id, _severity, state, _first_seen, review_date, owner = match.groups()
+        if finding_id in records:
+            raise QualityFailure(
+                f"{AUDIT_BASELINE_PATH.as_posix()}:{line_number}: duplicate {finding_id}"
+            )
+        owner = owner.strip().strip("`")
+        if state != "resolved" and (owner in {"", "none", "—"} or review_date == "—"):
+            raise QualityFailure(
+                f"{AUDIT_BASELINE_PATH.as_posix()}:{line_number}: {finding_id} requires owner "
+                "and review date"
+            )
+        records[finding_id] = (state, owner, review_date)
+    if not records:
+        raise QualityFailure(f"{AUDIT_BASELINE_PATH.as_posix()} contains no AUD records")
 
 
 def validate_python_permissions(root: Path) -> None:
@@ -118,18 +196,35 @@ def run_step(
     command: list[str],
     *,
     artifact: str | None = None,
+    timeout_seconds: int = DEFAULT_STEP_TIMEOUT_SECONDS,
 ) -> None:
     print(f"\n== {name} ==")
-    completed = subprocess.run(
-        command,
-        cwd=root,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=root,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout or ""
+        if isinstance(output, bytes):
+            output = output.decode("utf-8", errors="replace")
+        if output:
+            print(output, end="" if output.endswith("\n") else "\n")
+        if artifact:
+            target = root / artifact
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                output or f"{name}: timed out after {timeout_seconds} seconds\n",
+                encoding="utf-8",
+            )
+        raise QualityFailure(f"{name} timed out after {timeout_seconds} seconds") from exc
     output = completed.stdout
     if output:
         print(output, end="" if output.endswith("\n") else "\n")
