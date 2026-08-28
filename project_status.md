@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-28T12:32:00+03:00
+generated_at: 2026-08-28T14:06:00+02:00
 version: 1.0
 ---
 
@@ -15,7 +15,7 @@ version: 1.0
 
 > **Чтобы продолжить, отправьте агенту одну команду.**
 >
-> `ПРОДОЛЖАЙ TASK_012`
+> `ПРОДОЛЖАЙ TASK_013`
 
 Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную.
 
@@ -25,9 +25,9 @@ version: 1.0
 |---|---|
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
-| Текущая проектная задача | [`TASK_012` — Реализация INF_CMP_007](work/tasks/task_012_inf_007.md) |
-| Место в очереди проекта | **12 из 17** |
-| Шаги текущей задачи | **0** из **6** |
+| Текущая проектная задача | [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md) |
+| Место в очереди проекта | **13 из 17** |
+| Шаги текущей задачи | **1** из **7** |
 | Следующий исполнитель | **агент** |
 
 ## Этапы V1
@@ -55,8 +55,8 @@ version: 1.0
 | [`TASK_009`](work/tasks/task_009_inf_002.md) | [`INF_CMP_002`](specifications/infrastructure_baseline.md#inf_cmp_002) | [`TEST_015`](work/tests/test_015.md) | выполнена |
 | [`TASK_010`](work/tasks/task_010_inf_003.md) | [`INF_CMP_003`](specifications/infrastructure_baseline.md#inf_cmp_003) | [`TEST_016`](work/tests/test_016.md) | выполнена |
 | [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
-| [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | [`TEST_018`](work/tests/test_018.md) | запланирована |
-| [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — | запланирована |
+| [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | [`TEST_018`](work/tests/test_018.md) | выполнена |
+| [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — | выполняется |
 | [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — | запланирована |
 | [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована |
 | [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована |
@@ -64,12 +64,13 @@ version: 1.0
 
 ## Шаги текущей работы
 
-- [ ] Изучить требования к [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007)
+- [x] Подтвердить завершение [`TASK_012`](work/tasks/task_012_inf_007.md) и собрать критерии решения
+- [ ] Завершить сравнение площадок и подготовить решение [`ADR_007`](adr/adr_007_cloud_provider_selection.md)
+- [ ] Получить решение владельца и обновить ADR
 - [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [ ] Реализовать развёртывание, контрольную проверку и откат
+- [ ] Написать TEST с реальным evidence
+- [ ] Проверить развёрнутый контур и покрытие путей
 
 ## Блокеры
 
@@ -102,11 +103,11 @@ version: 1.0
 - **Описание:** Состояние шага, повтора, отмены и защиты от повторного действия хранится отдельно от цикла выполнения и может быть корректно восстановлено.
 - **Сформирована задачами:** [TASK_006](work/tasks/task_006_arc_007.md).
 
-### Эксплуатационная проверка
+### Наблюдаемость и контроль работоспособности
 
 - **Тип:** системная
-- **Описание:** Платформа возвращает изолированный технический health-результат и логическое состояние планировщика без пользовательского содержимого; сбор постоянных метрик и событий появится после завершения наблюдаемости.
-- **Сформирована задачами:** [TASK_007](work/tasks/task_007_arc_009.md).
+- **Описание:** Платформа сохраняет между перезапусками только технические сведения о работоспособности, ресурсах, внешнем потреблении и числовых событиях. Текст задач, ответов, секретов и деталей ошибок не имеет поля хранения.
+- **Сформирована задачами:** [TASK_007](work/tasks/task_007_arc_009.md), [TASK_012](work/tasks/task_012_inf_007.md).
 
 ### Минимальная вычислительная среда
 
@@ -140,5 +141,5 @@ version: 1.0
 
 ## Что будет дальше
 
-[`TASK_013`](work/tasks/task_013_inf_008.md) реализует Управление развёртыванием ([`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008)) и фиксирует выбранную площадку размещения. Затем очередь переходит к реальным интеграциям, необходимым для пользовательского результата [`m02`](milestones.md#m02).
+[`TASK_014`](work/tasks/task_014_real_runtime.md) выбирает и подключает реальную среду агента к уже развёрнутому контуру. Она не может быть заменена существующим StubRuntime.
 

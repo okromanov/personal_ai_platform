@@ -3,7 +3,7 @@
 id: generated_non_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-28T08:53:00+02:00
+generated_at: 2026-08-28T14:06:00+02:00
 version: 1.0
 ---
 
@@ -102,7 +102,7 @@ version: 1.0
 | [`operations/tests/product/test_compute_environment.py`](../operations/tests/product/test_compute_environment.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |
 | [`operations/tests/product/test_model_gateway.py`](../operations/tests/product/test_model_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`operations/tests/product/test_network_policy.py`](../operations/tests/product/test_network_policy.py) | [`TASK_009`](../work/tasks/task_009_inf_002.md) | — |
-| [`operations/tests/product/test_observability.py`](../operations/tests/product/test_observability.py) | — | — |
+| [`operations/tests/product/test_observability.py`](../operations/tests/product/test_observability.py) | [`TASK_012`](../work/tasks/task_012_inf_007.md) | — |
 | [`operations/tests/product/test_operations_state.py`](../operations/tests/product/test_operations_state.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`operations/tests/product/test_orchestration.py`](../operations/tests/product/test_orchestration.py) | [`TASK_003`](../work/tasks/task_003_arc_003.md) | — |
 | [`operations/tests/product/test_owner_control.py`](../operations/tests/product/test_owner_control.py) | [`TASK_002`](../work/tasks/task_002_arc_002.md) | — |
@@ -159,9 +159,9 @@ version: 1.0
 | [`src/models/base.py`](../src/models/base.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`src/models/runtime_adapter.py`](../src/models/runtime_adapter.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
 | [`src/models/stub_gateway.py`](../src/models/stub_gateway.py) | [`TASK_004`](../work/tasks/task_004_arc_004.md) | — |
-| [`src/observability/__init__.py`](../src/observability/__init__.py) | — | — |
-| [`src/observability/collector.py`](../src/observability/collector.py) | — | — |
-| [`src/observability/sqlite_store.py`](../src/observability/sqlite_store.py) | — | — |
+| [`src/observability/__init__.py`](../src/observability/__init__.py) | [`TASK_012`](../work/tasks/task_012_inf_007.md) | — |
+| [`src/observability/collector.py`](../src/observability/collector.py) | [`TASK_012`](../work/tasks/task_012_inf_007.md) | — |
+| [`src/observability/sqlite_store.py`](../src/observability/sqlite_store.py) | [`TASK_012`](../work/tasks/task_012_inf_007.md) | — |
 | [`src/operations/__init__.py`](../src/operations/__init__.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/operations/health.py`](../src/operations/health.py) | [`TASK_007`](../work/tasks/task_007_arc_009.md) | — |
 | [`src/operations/health_check.py`](../src/operations/health_check.py) | [`TASK_008`](../work/tasks/task_008_inf_001.md) | — |

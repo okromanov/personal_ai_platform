@@ -3,7 +3,7 @@
 id: generated_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-28T12:32:00+03:00
+generated_at: 2026-08-28T14:06:00+02:00
 version: 1.0
 ---
 
@@ -27,7 +27,7 @@ version: 1.0
 | [`adr/adr_007_cloud_provider_selection.md`](../adr/adr_007_cloud_provider_selection.md) | `ADR_007` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_007 — Выбор облачного провайдера |
 | [`adr/adr_008_data_storage_schema.md`](../adr/adr_008_data_storage_schema.md) | `ADR_008` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_008 — Выбор схемы хранилища данных |
 | [`adr/adr_009_secret_management_strategy.md`](../adr/adr_009_secret_management_strategy.md) | `ADR_009` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_009 — Стратегия управления секретами и ключами |
-| [`capability_summary.md`](../capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `2.1` | Карта компетенций |
+| [`capability_summary.md`](../capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `2.2` | Карта компетенций |
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.6` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.2` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.1` | Жизненный цикл архитектурных решений (ADR) |
@@ -88,8 +88,8 @@ version: 1.0
 | [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `completed` | `1.7` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `completed` | `1.8` | TASK_010 — Реализация INF_CMP_003 |
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `completed` | `1.9` | TASK_011 — Реализация INF_CMP_005 |
-| [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `planned` | `1.7` | TASK_012 — Реализация INF_CMP_007 |
-| [`work/tasks/task_013_inf_008.md`](../work/tasks/task_013_inf_008.md) | `TASK_013` | `task` | `work_state` | `planned` | `1.6` | TASK_013 — Реализация INF_CMP_008 |
+| [`work/tasks/task_012_inf_007.md`](../work/tasks/task_012_inf_007.md) | `TASK_012` | `task` | `work_state` | `completed` | `1.8` | TASK_012 — Реализация INF_CMP_007 |
+| [`work/tasks/task_013_inf_008.md`](../work/tasks/task_013_inf_008.md) | `TASK_013` | `task` | `work_state` | `in-progress` | `1.7` | TASK_013 — Реализация INF_CMP_008 |
 | [`work/tasks/task_014_real_runtime.md`](../work/tasks/task_014_real_runtime.md) | `TASK_014` | `task` | `work_state` | `planned` | `1.0` | TASK_014 — Реальная среда агента для ARC_CMP_003 |
 | [`work/tasks/task_015_real_model_provider.md`](../work/tasks/task_015_real_model_provider.md) | `TASK_015` | `task` | `work_state` | `planned` | `1.0` | TASK_015 — Реальный поставщик модели для ARC_CMP_004 |
 | [`work/tasks/task_016_real_telegram.md`](../work/tasks/task_016_real_telegram.md) | `TASK_016` | `task` | `work_state` | `planned` | `1.0` | TASK_016 — Реальный Telegram Bot API для ARC_CMP_001 |
