@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -64,7 +65,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             if isinstance(raw_tasks, list)
             else []
         )
-        rendered = (self.root / "tasks.md").read_text(encoding="utf-8-sig")
+        rendered = (self.root / "project_status.md").read_text(encoding="utf-8-sig")
         current = collect_milestones(self.root)["current"]
         self.assertIsInstance(current, dict)
         current_id = str(current["id"]) if isinstance(current, dict) else ""
@@ -86,7 +87,8 @@ class OwnerUsabilityTests(unittest.TestCase):
         current_id = str(collect_milestones(self.root)["current"]["id"])
         current_task = select_current_task(collect_tasks(self.root)["tasks"], current_id)
         resume_target = str(current_task["id"]) if current_task else current_id
-        self.assertEqual(tracked.strip(), rendered.strip())
+        tracked_without_generated_at = re.sub(r"(?m)^generated_at: .+\n", "", tracked)
+        self.assertEqual(tracked_without_generated_at.strip(), rendered.strip())
         for text in [
             "Ваше действие сейчас",
             f"ПРОДОЛЖАЙ {resume_target}",
@@ -94,6 +96,9 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Этапы V1",
             "Проектные задачи текущего этапа",
             "Шаги текущей работы",
+            "Контроль результатов аудита",
+            "Исправлены, ожидают проверки",
+            "work/audit_baseline.md",
             "Что уже умеет решение",
             "выполнено",
             "осталось",
@@ -134,9 +139,13 @@ class OwnerUsabilityTests(unittest.TestCase):
         self,
     ) -> None:
         rendered = render_repository_project_status(self.root)
-        section = rendered[rendered.index("## Что уже умеет решение") :]
-        summary_doc = load_document(self.root / "operations/capability_summary.md")
-        expected = _section(summary_doc.body, "Текущая сводка")
+        section = rendered[
+            rendered.index("## Что уже умеет решение") : rendered.index(
+                "## Незакрытые действия владельца"
+            )
+        ]
+        summary_doc = load_document(self.root / "capability_summary.md")
+        expected = _section(summary_doc.body, "Текущая сводка") or _capability_summary(self.root)
         self.assertTrue(expected)
         self.assertIn(expected, section)
         # This is a synthesis, not a per-TASK list: it must not name TASKs.
@@ -360,8 +369,8 @@ class RebaseRelativeLinksTests(unittest.TestCase):
             text = "[вне репозитория](../../../outside.md)"
             self.assertEqual(_rebase_relative_links(text, source_dir, root), text)
 
-
     def test_queue_position_counts_the_entire_milestone_backlog(self) -> None:
+        root = Path(__file__).resolve().parents[2]
         milestones = [
             {"id": "m01", "title": "Основа", "work_state": "completed", "scope": []},
             {"id": "m02", "title": "Живой помощник", "work_state": "in-progress", "scope": []},
@@ -389,7 +398,7 @@ class RebaseRelativeLinksTests(unittest.TestCase):
                 return_value="| — | — | — | — |",
             ),
         ):
-            rendered = render_repository_project_status(self.root)
+            rendered = render_repository_project_status(root)
 
         self.assertIn("| Место в очереди проекта | **13 из 17** |", rendered)
 

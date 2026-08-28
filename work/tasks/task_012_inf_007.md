@@ -3,19 +3,27 @@ id: TASK_012
 type: task
 title: Реализация INF_CMP_007
 component: INF_CMP_007
-work_state: planned
-version: 1.7
-updated: 2026-08-26
-next_actor: agent
+work_state: completed
+version: 1.8
+updated: 2026-08-28
+next_actor: none
 owner_action: none
 depends_on:
   - TASK_011
 allowed_paths:
   - work/tasks/task_012_inf_007.md
+  - work/tests/test_018.md
+  - src/observability/__init__.py
+  - src/observability/collector.py
+  - src/observability/sqlite_store.py
+  - operations/tests/product/test_observability.py
+  - capability_summary.md
 traces_to:
   - m02
 implements:
   - INF_CMP_007
+tests:
+  - TEST_018
 ---
 
 # TASK_012 — Реализация INF_CMP_007
@@ -30,54 +38,44 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007) определяет требования ([`INF_REQ_012`](../../specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](../../specifications/infrastructure_baseline.md#inf_req_013)). Реализации нет. Зависит от [`TASK_011`](task_011_inf_005.md) (постоянное хранилище) — метрики и события сами нуждаются в постоянном хранении для последующего анализа.
+Спецификация [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007) реализована: `ObservabilityCollector` формирует только технические измерения, а `SQLiteObservabilityStore` сохраняет их между экземплярами приложения. Свободный текст задач, ответов, секретов и деталей ошибок в модель наблюдений не допускается. Требования [`INF_REQ_012`](../../specifications/infrastructure_baseline.md#inf_req_012) и [`INF_REQ_013`](../../specifications/infrastructure_baseline.md#inf_req_013) проверяет [`TEST_018`](../tests/test_018.md).
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Изучить спецификацию [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
+Работа завершена. Следующая проектная задача — [`TASK_013`](task_013_inf_008.md).
 
 ## 5. План выполнения
 
-- [ ] Изучить требования к [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
+- [x] Изучить требования к [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007)
+- [x] Дополнить allowed_paths реальными путями
+- [x] Спроектировать privacy-preserving модель наблюдений
+- [x] Реализовать сбор и SQLite-хранение технических измерений
+- [x] Написать [`TEST_018`](../tests/test_018.md), связанный с TASK и требованиями компонента
+- [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав
 
-**В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `src/observability/`), добавит их в `allowed_paths` и создаст связанную карточку TEST.
-
-**Ожидаемые файлы:**
-- `src/observability/logging.py` — структурированное логирование технических событий
-- `src/observability/metrics.py` — сбор метрик работоспособности
-- `work/tests/test_00X.md` — описание проверок
+Реализация находится в `src/observability/`: типизированный collector принимает health, resource, external-usage и numeric technical events, а SQLite-адаптер хранит только числа, булевы значения, технический идентификатор компонента и время. Проверка и описание evidence находятся в [`test_observability.py`](../../operations/tests/product/test_observability.py) и [`TEST_018`](../tests/test_018.md).
 
 ## 7. Проверки и доказательства
 
 **Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Тесты подтверждают отсутствие пользовательских данных в собираемых метриках/логах
-3. MyPy type check успешен
+1. [`test_observability.py`](../../operations/tests/product/test_observability.py): 5/5 тестов прошли локально 2026-08-28;
+2. новый экземпляр SQLite-хранилища восстанавливает resource и external-usage observations;
+3. свободный текст и отрицательные измерения отклоняются;
+4. health failure локализуется по зависимости без сохранения detail.
 
-**Ручные (code review):**
-1. Логи не содержат секретов (см. [`TASK_010`](task_010_inf_003.md)) и содержимого пользовательских сообщений
-2. Собираемые метрики согласуются с состоянием эксплуатационных функций ([`TASK_007`](task_007_arc_009.md))
+**Ручные (code review):** модель хранения не имеет поля для текста пользователя или секрета и использует стабильные технические идентификаторы.
 
 ## 8. Готово когда
 
-- ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
-- ✅ CI успешен
-- ✅ Код review завершен
+- [x] Все шаги плана выполнены;
+- [x] [`TEST_018`](../tests/test_018.md) связан с TASK и требованиями компонента;
+- [x] 5/5 целевых тестов прошли локально;
+- [~] серверный GitHub Actions gate ожидает восстановления квоты после 1 сентября 2026 года; успешный CI не заявляется;
+- [x] реализация и evidence проверены по контракту.
 
 ## 9. Что будет дальше
 
@@ -85,4 +83,4 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Платформа сохраняет технические сведения о работоспособности, ресурсах и внешнем потреблении между перезапусками, не копируя пользовательские сообщения, ответы, секреты и тексты ошибок.

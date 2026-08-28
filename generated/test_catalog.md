@@ -3,7 +3,7 @@
 id: generated_test_catalog
 type: generated_report
 generation_state: generated
-generated_at: 2026-08-28T08:52:00+02:00
+generated_at: 2026-08-28T12:31:00+03:00
 version: 1.0
 ---
 
@@ -11,8 +11,8 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего тестов | `460` |
-| Core logic (acceptance, governance, lifecycle) | `122` |
+| Всего тестов | `476` |
+| Core logic (acceptance, governance, lifecycle) | `138` |
 | Tooling (quality scripts, registries, traceability) | `182` |
 | Integration (quality pipeline end-to-end) | `6` |
 | Performance regression | `4` |
@@ -114,6 +114,23 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_publication_and_acceptance_rules_are_consistent` | Правила публикации и принятия этапа согласованы между собой. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_governance_hardening.py` | `GovernanceHardeningTests` | `test_workflow_block_scalar_break_is_detected` | Обнаруживается многострочный блок workflow, закрывающийся молча из-за нулевого отступа. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_lifecycle_matrix.py` | `LifecycleMatrixTests` | `test_m01_accept_m02_start_premature_reject_and_m02_accept` | Полный цикл: принятие m01, старт m02, отказ при преждевременном принятии, затем принятие m02. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_falls_back_when_the_summary_file_is_missing` | Falls back when the summary file is missing |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `CapabilitySummaryTests` | `test_reads_the_current_summary_section_from_the_hand_maintained_file` | Reads the current summary section from the hand maintained file |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_absent_field_parses_to_empty_list` | Absent field parses to empty list |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_entry_missing_the_status_prefix_is_rejected` | Entry missing the status prefix is rejected |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_non_list_value_is_rejected` | Non list value is rejected |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerFollowupParsingTests` | `test_open_and_done_entries_parse_status_and_action` | Open and done entries parse status and action |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_capabilities_section_embeds_the_hand_maintained_synthesis` | Capabilities section embeds the hand maintained synthesis |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_first_unfinished_task_is_selected_by_queue_order` | Первой выбирается незавершённая TASK по порядку очереди. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_detailed_without_artificial_percentages` | project_status.md подробен и не содержит искусственных процентов. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_is_the_only_owner_entrypoint` | project_status.md — единственная точка входа для владельца. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_project_status_shows_exact_decision_when_owner_is_next` | project_status.md показывает точную команду, когда очередь за владельцем. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_repository_maintenance_does_not_remain_in_project_task_queue` | Служебные задачи по репозиторию не остаются в очереди проектных TASK. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_technical_status_has_one_russian_owner_action_and_real_foundation_count` | Техническая сводка содержит одно русскоязычное действие владельца и реальное число фундаментальных элементов. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `OwnerUsabilityTests` | `test_test_specs_keep_owner_steps_safe_and_only_when_manual` | Шаги владельца в TEST безопасны и присутствуют только для ручных проверок. |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `RebaseRelativeLinksTests` | `test_leaves_external_and_anchor_only_links_unchanged` | Leaves external and anchor only links unchanged |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `RebaseRelativeLinksTests` | `test_leaves_link_escaping_repository_root_unchanged` | Leaves link escaping repository root unchanged |
+| Core logic (acceptance, governance, lifecycle) | `operations/tests/test_owner_usability.py` | `RebaseRelativeLinksTests` | `test_queue_position_counts_the_entire_milestone_backlog` | Queue position counts the entire milestone backlog |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_dashboard_regeneration_is_fail_closed` | Dashboard regeneration is fail closed |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_dashboard_regeneration_propagates_generator_failure` | Dashboard regeneration propagates generator failure |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_quality_integration.py` | `QualityIntegrationTests` | `test_event_gate_covers_push_pr_and_manual` | Событийный gate покрывает push, PR и ручной запуск. |
@@ -144,7 +161,6 @@ version: 1.0
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_security_extended.py` | `SubprocessInjectionSafetyTest` | `test_command_substitution_syntax_is_inert` | Синтаксис подстановки команд обезврежен и не выполняется. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_security_extended.py` | `SubprocessInjectionSafetyTest` | `test_nonexistent_binary_fails_closed_not_open` | Несуществующий исполняемый файл приводит к отказу, а не к молчаливому пропуску. |
 | Core logic (acceptance, governance, lifecycle) | `operations/tests/test_security_extended.py` | `SubprocessInjectionSafetyTest` | `test_shell_metacharacters_in_argument_are_treated_literally` | Спецсимволы shell в аргументе обрабатываются как обычный текст. |
-| Core logic (acceptance, governance, lifecycle) | `operations/tests/unittest/loader.py` | `_FailedTest` | `test_owner_usability` | Owner usability |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_auxiliary_quality_tools.py` | `AutoGenerateTaskTests` | `test_component_parser_and_document_are_deterministic` | Разбор компонента и генерация документа детерминированы. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_auxiliary_quality_tools.py` | `AutoGenerateTaskTests` | `test_generates_only_in_scope_uncovered_components` | Автогенерация создаёт TASK только для непокрытых компонентов в рамках scope. |
 | Tooling (quality scripts, registries, traceability) | `operations/tests/tooling/test_auxiliary_quality_tools.py` | `AutoGenerateTaskTests` | `test_generation_is_blocked_before_an_active_scoped_stage` | Автогенерация блокируется до наступления активного этапа с заданным scope. |

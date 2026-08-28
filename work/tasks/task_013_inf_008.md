@@ -3,15 +3,16 @@ id: TASK_013
 type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
-work_state: planned
-version: 1.6
-updated: 2026-08-26
+work_state: in-progress
+version: 1.7
+updated: 2026-08-28
 next_actor: agent
 owner_action: none
 depends_on:
   - TASK_012
 allowed_paths:
   - work/tasks/task_013_inf_008.md
+  - adr/adr_007_cloud_provider_selection.md
 traces_to:
   - m02
 implements:
@@ -30,20 +31,23 @@ implements:
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008) определяет требования ([`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011), [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014)). [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) пока proposed: сначала агент сравнивает подходящие площадки и получает решение владельца, затем фиксирует его и реализует развёртывание. Зависит от [`TASK_012`](task_012_inf_007.md) (наблюдаемость) — контрольная проверка развёртывания использует собранные метрики работоспособности.
+[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются и выбираются решения для ADR; прежде всего площадка размещения для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md). Текущий текст ADR описывает AWS только как раннего кандидата и ещё не отражает итоговый выбор владельца. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Сравнить подходящие площадки и представить владельцу выбор для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
-2. После решения владельца дополнить `allowed_paths` фактическими путями реализации
-3. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
-4. Написать TEST с реальным evidence и проверить развёрнутый контур
+1. Завершить сравнение вариантов и представить владельцу итоговую рекомендацию для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
+2. После решения владельца зафиксировать выбранный вариант и обоснование в ADR
+3. Дополнить `allowed_paths` фактическими путями реализации
+4. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
+5. Написать TEST с реальным evidence и проверить развёрнутый контур
 
 ## 5. План выполнения
 
-- [ ] Сравнить площадки, подготовить и принять [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
+- [x] Подтвердить завершение [`TASK_012`](task_012_inf_007.md) и собрать критерии решения
+- [ ] Завершить сравнение площадок и подготовить решение [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
+- [ ] Получить решение владельца и обновить ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
 - [ ] Написать TEST с реальным evidence
