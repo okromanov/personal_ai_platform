@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Render and update work/m0X_final_report.md from real repository state.
+Render and update work/acceptance/m0X_final_report.md from real repository state.
 
 Unlike a hand-filled template, every section here is computed: which files
 were actually added/changed since the milestone started, which TASK/TEST
@@ -38,7 +38,7 @@ def _link(target_path: str) -> str:
     """Repo-root-relative path (optionally with a #anchor) rewritten relative
     to work/, where final_report.md itself lives."""
     path_part, sep, anchor = target_path.partition("#")
-    relative = posixpath.relpath(path_part, start="work")
+    relative = posixpath.relpath(path_part, start="work/acceptance")
     return f"{relative}{sep}{anchor}"
 
 
@@ -112,6 +112,7 @@ def _milestone_start(root: Path, milestone_id: str) -> tuple[str, str] | None:
     candidates = [
         candidate
         for candidate in (
+            _earliest_add(root, f"work/acceptance/{milestone_id}_final_report.md"),
             _earliest_add(root, f"work/{milestone_id}_final_report.md"),
             _earliest_add(root, f"work/{milestone_id}/final_report.md"),
         )
@@ -226,7 +227,7 @@ def _preserved_or_placeholder(root: Path, milestone_id: str, heading: str) -> st
     owner/agent has filled them in, re-running this function must not
     silently wipe that judgment back to the placeholder.
     """
-    path = root / "work" / f"{milestone_id}_final_report.md"
+    path = root / "work" / "acceptance" / f"{milestone_id}_final_report.md"
     if not path.is_file():
         return _UNFILLED_PLACEHOLDER
     existing = _existing_section(path.read_text(encoding="utf-8"), heading)
@@ -379,11 +380,11 @@ def render_final_report(root: Path, milestone_id: str) -> str:
 
 
 def update_completion_report(milestone_id: str, root: Path | None = None) -> bool:
-    """Regenerate work/m0X_final_report.md from current repository state."""
+    """Regenerate work/acceptance/m0X_final_report.md from current repository state."""
     if root is None:
         root = Path.cwd()
 
-    report_path = root / "work" / f"{milestone_id}_final_report.md"
+    report_path = root / "work" / "acceptance" / f"{milestone_id}_final_report.md"
     if not report_path.exists():
         return False
 
