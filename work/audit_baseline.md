@@ -4,8 +4,7 @@ type: audit_register
 document_state: current
 version: 1.0
 updated: 2026-08-28
-depends_on:
-  - repository_audit_system_prompt
+depends_on: []
 ---
 
 # Реестр результатов аудита
