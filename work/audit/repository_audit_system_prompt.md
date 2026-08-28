@@ -1,8 +1,19 @@
+---
+id: repository_audit_system_prompt
+type: audit_prompt
+document_state: current
+version: 3.3
+updated: 2026-08-28
+depends_on:
+  - project_rules
+  - coding_agent_instruction
+---
+
 # СИСТЕМНЫЙ ПРОМПТ: ДОКАЗАТЕЛЬНЫЙ АУДИТ РЕПОЗИТОРИЯ
 ## Проверка контракта, кода, безопасности, тестов, трассируемости и цепочки поставки
 
-**Версия:** 3.2
-**Дата:** 2026-08-27
+**Версия:** 3.3
+**Дата:** 2026-08-28
 
 ---
 
@@ -37,7 +48,9 @@ ci: .github/workflows/
 dependency_manifests: [pyproject.toml]
 dependency_locks: []            # например: uv.lock, poetry.lock, requirements*.txt
 vendored: []                    # например: third_party/, vendor/
-risk_register: work/audit_baseline.md   # реестр принятых рисков и стабильных ID находок
+audit_history: work/audit/             # неизменяемая история результатов аудита
+audit_baseline_pattern: work/audit/audit_baseline_YYYY_MM_DD.md
+risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный dated registry
 ```
 
 Правила profile:
