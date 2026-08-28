@@ -27,7 +27,8 @@ EXACT_REQUIREMENT = re.compile(
 DEV_REQUIREMENTS_PATH = Path("operations/quality/requirements_dev.txt")
 DEV_REQUIREMENTS_INPUT_PATH = Path("operations/quality/requirements_dev.in")
 DEFAULT_STEP_TIMEOUT_SECONDS = 300
-AUDIT_BASELINE_PATH = Path("work/audit_baseline.md")
+AUDIT_BASELINE_DIRECTORY = Path("work/audit")
+AUDIT_BASELINE_NAME = re.compile(r"^audit_baseline_(\\d{4}_\\d{2}_\\d{2})\\.md$")
 AUDIT_ROW = re.compile(
     r"^\|\s*(AUD-\d{3})\s*\|\s*(critical|high|medium|low)\s*\|\s*"
     r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
@@ -147,10 +148,27 @@ def validate_configuration_files(root: Path) -> None:
     validate_audit_baseline(root)
 
 
+def latest_audit_baseline(root: Path) -> Path:
+    directory = root / AUDIT_BASELINE_DIRECTORY
+    candidates = sorted(
+        (
+            path
+            for path in directory.glob("audit_baseline_*.md")
+            if AUDIT_BASELINE_NAME.fullmatch(path.name)
+        ),
+        key=lambda path: path.name,
+    )
+    if not candidates:
+        raise QualityFailure(
+            "Missing dated audit baseline under "
+            f"{AUDIT_BASELINE_DIRECTORY.as_posix()}/"
+        )
+    return candidates[-1]
+
+
 def validate_audit_baseline(root: Path) -> None:
-    path = root / AUDIT_BASELINE_PATH
-    if not path.is_file():
-        raise QualityFailure(f"Missing {AUDIT_BASELINE_PATH.as_posix()}")
+    path = latest_audit_baseline(root)
+    relative_path = path.relative_to(root).as_posix()
     records: dict[str, tuple[str, str, str]] = {}
     for line_number, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
         if not line.lstrip().startswith("| AUD-"):
@@ -158,22 +176,22 @@ def validate_audit_baseline(root: Path) -> None:
         match = AUDIT_ROW.match(line)
         if match is None:
             raise QualityFailure(
-                f"{AUDIT_BASELINE_PATH.as_posix()}:{line_number}: invalid audit record"
+                f"{relative_path}:{line_number}: invalid audit record"
             )
         finding_id, _severity, state, _first_seen, review_date, owner = match.groups()
         if finding_id in records:
             raise QualityFailure(
-                f"{AUDIT_BASELINE_PATH.as_posix()}:{line_number}: duplicate {finding_id}"
+                f"{relative_path}:{line_number}: duplicate {finding_id}"
             )
         owner = owner.strip().strip("`")
         if state != "resolved" and (owner in {"", "none", "—"} or review_date == "—"):
             raise QualityFailure(
-                f"{AUDIT_BASELINE_PATH.as_posix()}:{line_number}: {finding_id} requires owner "
+                f"{relative_path}:{line_number}: {finding_id} requires owner "
                 "and review date"
             )
         records[finding_id] = (state, owner, review_date)
     if not records:
-        raise QualityFailure(f"{AUDIT_BASELINE_PATH.as_posix()} contains no AUD records")
+        raise QualityFailure(f"{relative_path} contains no AUD records")
 
 
 def validate_python_permissions(root: Path) -> None:
