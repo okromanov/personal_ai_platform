@@ -29,7 +29,7 @@ depends_on: []
 | AUD-003 | medium | remediated_pending_verification | 2026-08-27 | 2026-09-02 | repository_owner | [`dockerfile`](../dockerfile), [`project_check.yml`](../.github/workflows/project_check.yml) | Base image закреплён digest; CI выполняет build/run/health и создаёт SBOM. |
 | AUD-004 | medium | remediated_pending_verification | 2026-08-27 | 2026-09-02 | repository_owner | [`state_io.py`](../src/owner_control/state_io.py), [`test_owner_control.py`](../operations/tests/product/test_owner_control.py) | После replace выполняется POSIX directory fsync; отказ durability barrier распространяется вызывающему коду. |
 | AUD-005 | low | remediated_pending_verification | 2026-08-27 | 2026-09-02 | repository_owner | [`run_suite.py`](../operations/scripts/quality/run_suite.py), [`test_quality_runner.py`](../operations/tests/tooling/test_quality_runner.py) | Каждый шаг gate ограничен 300 секундами и выдаёт локализованную ошибку timeout. |
-| AUD-006 | low | remediated_pending_verification | 2026-08-27 | 2026-09-02 | repository_owner | [`audit_baseline.md`](audit_baseline.md), [`run_suite.py`](../operations/scripts/quality/run_suite.py) | Реестр создан; gate проверяет ID, состояния, owner и review date. |
+| AUD-006 | low | remediated_pending_verification | 2026-08-27 | 2026-09-02 | repository_owner | [Раздел 3](#3-реестр), [`run_suite.py`](../operations/scripts/quality/run_suite.py) | Реестр создан; gate проверяет ID, состояния, owner и review date. |
 
 ## 4. Правило обновления
 
