@@ -53,7 +53,19 @@ class QualityRunnerTests(unittest.TestCase):
             )
             requirements = root / run_suite.DEV_REQUIREMENTS_PATH
             requirements.parent.mkdir(parents=True)
-            requirements.write_text("ruff==0.16.3\nmypy==2.3.1\n", encoding="utf-8")
+            requirements_input = root / run_suite.DEV_REQUIREMENTS_INPUT_PATH
+            requirements_input.write_text("ruff==0.16.3\nmypy==2.3.1\n", encoding="utf-8")
+            requirements.write_text(
+                "ruff==0.16.3 \\\n    --hash=sha256:" + "a" * 64 + "\n"
+                "mypy==2.3.1 \\\n    --hash=sha256:" + "b" * 64 + "\n",
+                encoding="utf-8",
+            )
+            audit_baseline = root / run_suite.AUDIT_BASELINE_PATH
+            audit_baseline.parent.mkdir(parents=True)
+            audit_baseline.write_text(
+                "| AUD-001 | low | resolved | 2026-08-27 | — | none | evidence | done |\n",
+                encoding="utf-8",
+            )
             (root / "valid.json").write_text(json.dumps({"ok": True}), encoding="utf-8")
             run_suite.validate_configuration_files(root)
             (root / "broken.json").write_text("{", encoding="utf-8")
@@ -66,18 +78,56 @@ class QualityRunnerTests(unittest.TestCase):
                 run_suite.validate_toml_files(root)
             (root / "broken.toml").unlink()
 
-            requirements.write_text("ruff>=0.16.3\n", encoding="utf-8")
+            requirements_input.write_text("ruff>=0.16.3\n", encoding="utf-8")
             with self.assertRaisesRegex(run_suite.QualityFailure, "exact name==version"):
                 run_suite.validate_development_requirements(root)
-            requirements.write_text("my_pkg==1.0\nmy-pkg==1.1\n", encoding="utf-8")
+            requirements_input.write_text("my_pkg==1.0\nmy-pkg==1.1\n", encoding="utf-8")
             with self.assertRaisesRegex(run_suite.QualityFailure, "duplicate dependency"):
                 run_suite.validate_development_requirements(root)
-            requirements.write_text("# no dependencies\n", encoding="utf-8")
+            requirements_input.write_text("# no dependencies\n", encoding="utf-8")
             with self.assertRaisesRegex(run_suite.QualityFailure, "at least one"):
                 run_suite.validate_development_requirements(root)
-            requirements.unlink()
+            requirements_input.unlink()
             with self.assertRaisesRegex(run_suite.QualityFailure, "Missing"):
                 run_suite.validate_development_requirements(root)
+
+    def test_development_lock_rejects_missing_hash_and_stale_direct_pin(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_path = root / run_suite.DEV_REQUIREMENTS_INPUT_PATH
+            lock_path = root / run_suite.DEV_REQUIREMENTS_PATH
+            input_path.parent.mkdir(parents=True)
+            input_path.write_text("ruff==0.16.3\n", encoding="utf-8")
+            lock_path.write_text("ruff==0.16.3\n", encoding="utf-8")
+            with self.assertRaisesRegex(run_suite.QualityFailure, "without SHA-256 hashes"):
+                run_suite.validate_development_requirements(root)
+
+            lock_path.write_text(
+                "ruff==0.16.2 \\\n    --hash=sha256:" + "a" * 64 + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(run_suite.QualityFailure, "stale"):
+                run_suite.validate_development_requirements(root)
+
+    def test_audit_baseline_rejects_duplicate_and_unowned_open_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / run_suite.AUDIT_BASELINE_PATH
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "| AUD-001 | medium | open | 2026-08-27 | — | none | evidence | fix |\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(run_suite.QualityFailure, "requires owner"):
+                run_suite.validate_audit_baseline(root)
+
+            row = (
+                "| AUD-001 | medium | open | 2026-08-27 | 2026-09-02 | "
+                "repository_owner | evidence | fix |\n"
+            )
+            path.write_text(row + row, encoding="utf-8")
+            with self.assertRaisesRegex(run_suite.QualityFailure, "duplicate AUD-001"):
+                run_suite.validate_audit_baseline(root)
 
             script = root / "operations/scripts/a.py"
             script.parent.mkdir(parents=True)
@@ -115,6 +165,29 @@ class QualityRunnerTests(unittest.TestCase):
                 )
             content = (root / "runtime/dead_code.txt").read_text("utf-8")
             self.assertTrue(content.strip())
+
+    def test_run_step_fails_with_step_name_after_timeout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            timeout = run_suite.subprocess.TimeoutExpired(
+                cmd=["hung-command"], timeout=2, output="partial output\n"
+            )
+            with patch.object(run_suite.subprocess, "run", side_effect=timeout) as run:
+                with self.assertRaisesRegex(
+                    run_suite.QualityFailure, "Hung check timed out after 2 seconds"
+                ):
+                    run_suite.run_step(
+                        root,
+                        "Hung check",
+                        ["hung-command"],
+                        artifact="runtime/hung.txt",
+                        timeout_seconds=2,
+                    )
+            self.assertEqual(
+                (root / "runtime/hung.txt").read_text(encoding="utf-8"),
+                "partial output\n",
+            )
+            self.assertEqual(run.call_args.kwargs["timeout"], 2)
 
     def test_fast_and_full_profiles_use_canonical_nonduplicated_steps(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
