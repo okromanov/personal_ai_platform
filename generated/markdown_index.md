@@ -3,7 +3,7 @@
 id: generated_markdown_index
 type: generated_document
 generation_state: generated
-generated_at: 2026-08-26T21:41:31Z
+generated_at: 2026-08-28T08:52:00+02:00
 version: 1.0
 ---
 
@@ -11,13 +11,13 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего документов | `91` |
+| Всего документов | `95` |
 
 > Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).
 
 | Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |
 |---|---|---|---|---|---|---|
-| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.8` | Инструкция агенту разработки |
+| [`AGENTS.md`](../AGENTS.md) | `coding_agent_instruction` | `agent_instruction` | `document_state` | `current` | `2.9` | Инструкция агенту разработки |
 | [`adr/adr_001_language_and_runtime.md`](../adr/adr_001_language_and_runtime.md) | `ADR_001` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_001 — Основной язык реализации |
 | [`adr/adr_002_core_runtime_boundary.md`](../adr/adr_002_core_runtime_boundary.md) | `ADR_002` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_002 — Граница платформы и среды агента |
 | [`adr/adr_003_model_provider_interface.md`](../adr/adr_003_model_provider_interface.md) | `ADR_003` | `adr` | `decision_state` | `proposed` | `1.0` | ADR_003 — Интерфейс поставщика моделей |
@@ -27,17 +27,18 @@ version: 1.0
 | [`adr/adr_007_cloud_provider_selection.md`](../adr/adr_007_cloud_provider_selection.md) | `ADR_007` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_007 — Выбор облачного провайдера |
 | [`adr/adr_008_data_storage_schema.md`](../adr/adr_008_data_storage_schema.md) | `ADR_008` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_008 — Выбор схемы хранилища данных |
 | [`adr/adr_009_secret_management_strategy.md`](../adr/adr_009_secret_management_strategy.md) | `ADR_009` | `adr` | `decision_state` | `proposed` | `1.1` | ADR_009 — Стратегия управления секретами и ключами |
+| [`capability_summary.md`](../capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `2.0` | Карта компетенций |
 | [`milestones.md`](../milestones.md) | `project_milestones` | `roadmap` | `document_state` | `current` | `1.6` | Этапы развития personal_ai_platform |
 | [`operations/acceptance.md`](../operations/acceptance.md) | `owner_acceptance_procedure` | `operations` | `document_state` | `current` | `1.2` | Процедура принятия этапа |
 | [`operations/adr_lifecycle.md`](../operations/adr_lifecycle.md) | `operations_adr_lifecycle` | `operations` | `document_state` | `current` | `1.1` | Жизненный цикл архитектурных решений (ADR) |
-| [`capability_summary.md`](../capability_summary.md) | `capability_summary` | `guide` | `document_state` | `current` | `1.8` | Карта компетенций |
 | [`operations/change_process.md`](../operations/change_process.md) | `operations_change_process` | `operations` | `document_state` | `current` | `1.8` | Процедуры изменений и публикации |
 | [`operations/document_frontmatter_standard.md`](../operations/document_frontmatter_standard.md) | `document_frontmatter_standard` | `guide` | `document_state` | `current` | `1.3` | Стандарт frontmatter для документов |
 | [`operations/examples/sample_task_lifecycle.md`](../operations/examples/sample_task_lifecycle.md) | `operations_sample_task_lifecycle` | `guide` | `document_state` | `current` | `1.2` | SAMPLE_TASK_001 — Пример полного цикла задачи |
+| [`operations/license_policy.md`](../operations/license_policy.md) | `license_policy` | `operations` | `document_state` | `current` | `1.0` | Политика лицензирования и распространения |
 | [`operations/local_development_windows.md`](../operations/local_development_windows.md) | `operations_local_development_windows` | `operations_guide` | `document_state` | `current` | `1.1` | Локальная разработка в Windows |
 | [`operations/procedure_map.md`](../operations/procedure_map.md) | `operations_procedure_map` | `operations` | `document_state` | `current` | `1.5` | Карта операционных процедур |
 | [`operations/procedures/file_update_dependencies.md`](../operations/procedures/file_update_dependencies.md) | `file_update_dependencies` | `procedure_reference` | `document_state` | `current` | `1.4` | Матрица зависимостей обновления файлов |
-| [`operations/quality/playbooks/code_quality_check.md`](../operations/quality/playbooks/code_quality_check.md) | `code_quality_check` | `guide` | `document_state` | `current` | `1.0` | Code Quality Check Skill |
+| [`operations/quality/playbooks/code_quality_check.md`](../operations/quality/playbooks/code_quality_check.md) | `code_quality_check` | `guide` | `document_state` | `current` | `1.1` | Code Quality Check Skill |
 | [`operations/quality/playbooks/dead_code_audit.md`](../operations/quality/playbooks/dead_code_audit.md) | `dead_code_audit` | `guide` | `document_state` | `current` | `1.0` | Dead Code and Duplication Audit |
 | [`operations/quality/playbooks/documentation_audit.md`](../operations/quality/playbooks/documentation_audit.md) | `documentation_audit` | `guide` | `document_state` | `current` | `1.0` | Documentation Audit Skill |
 | [`operations/quality/playbooks/documentation_rules_detailed.md`](../operations/quality/playbooks/documentation_rules_detailed.md) | `documentation_rules_detailed` | `guide` | `document_state` | `current` | `1.0` | Documentation Audit Rules - Detailed Reference |
@@ -74,15 +75,16 @@ version: 1.0
 | [`specifications/infrastructure_baseline.md`](../specifications/infrastructure_baseline.md) | `infrastructure_baseline` | `infrastructure` | `document_state` | `current` | `1.2` | Базовая инфраструктура personal_ai_platform |
 | [`specifications/system_specification.md`](../specifications/system_specification.md) | `system_specification` | `system_specification` | `document_state` | `current` | `1.3` | Системная спецификация personal_ai_platform |
 | [`specifications/threat_model.md`](../specifications/threat_model.md) | `threat_model` | `threat_model` | `document_state` | `current` | `1.1` | Модель угроз personal_ai_platform |
+| [`work/audit_baseline.md`](../work/audit_baseline.md) | `audit_baseline` | `audit_register` | `document_state` | `current` | `1.0` | Реестр результатов аудита |
 | [`work/m01_final_report.md`](../work/m01_final_report.md) | `m01_final_report` | `milestone_completion_report` | `document_state` | `` | `1.0` | M01 — Итоговый отчёт |
 | [`work/tasks/task_001_arc_001.md`](../work/tasks/task_001_arc_001.md) | `TASK_001` | `task` | `work_state` | `completed` | `2.0` | TASK_001 — Реализация ARC_CMP_001 |
-| [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `completed` | `1.6` | TASK_002 — Реализация ARC_CMP_002 |
+| [`work/tasks/task_002_arc_002.md`](../work/tasks/task_002_arc_002.md) | `TASK_002` | `task` | `work_state` | `completed` | `1.7` | TASK_002 — Реализация ARC_CMP_002 |
 | [`work/tasks/task_003_arc_003.md`](../work/tasks/task_003_arc_003.md) | `TASK_003` | `task` | `work_state` | `completed` | `2.0` | TASK_003 — Реализация ARC_CMP_003 |
 | [`work/tasks/task_004_arc_004.md`](../work/tasks/task_004_arc_004.md) | `TASK_004` | `task` | `work_state` | `completed` | `2.0` | TASK_004 — Реализация ARC_CMP_004 |
 | [`work/tasks/task_005_arc_005.md`](../work/tasks/task_005_arc_005.md) | `TASK_005` | `task` | `work_state` | `completed` | `2.1` | TASK_005 — Реализация ARC_CMP_005 |
 | [`work/tasks/task_006_arc_007.md`](../work/tasks/task_006_arc_007.md) | `TASK_006` | `task` | `work_state` | `completed` | `2.0` | TASK_006 — Реализация ARC_CMP_007 |
 | [`work/tasks/task_007_arc_009.md`](../work/tasks/task_007_arc_009.md) | `TASK_007` | `task` | `work_state` | `completed` | `2.0` | TASK_007 — Реализация ARC_CMP_009 |
-| [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.1` | TASK_008 — Реализация INF_CMP_001 |
+| [`work/tasks/task_008_inf_001.md`](../work/tasks/task_008_inf_001.md) | `TASK_008` | `task` | `work_state` | `completed` | `2.3` | TASK_008 — Реализация INF_CMP_001 |
 | [`work/tasks/task_009_inf_002.md`](../work/tasks/task_009_inf_002.md) | `TASK_009` | `task` | `work_state` | `completed` | `1.7` | TASK_009 — Реализация INF_CMP_002 |
 | [`work/tasks/task_010_inf_003.md`](../work/tasks/task_010_inf_003.md) | `TASK_010` | `task` | `work_state` | `completed` | `1.8` | TASK_010 — Реализация INF_CMP_003 |
 | [`work/tasks/task_011_inf_005.md`](../work/tasks/task_011_inf_005.md) | `TASK_011` | `task` | `work_state` | `completed` | `1.9` | TASK_011 — Реализация INF_CMP_005 |
@@ -108,3 +110,5 @@ version: 1.0
 | [`work/tests/test_014.md`](../work/tests/test_014.md) | `TEST_014` | `test` | `spec_state` | `current` | `1.1` | TEST_014 — Вычислительная среда выполнения: health-check CLI и структура образа |
 | [`work/tests/test_015.md`](../work/tests/test_015.md) | `TEST_015` | `test` | `spec_state` | `current` | `1.0` | TEST_015 — Сеть: fail-closed ingress, egress, DNS и обязательный туннель |
 | [`work/tests/test_016.md`](../work/tests/test_016.md) | `TEST_016` | `test` | `spec_state` | `current` | `1.0` | TEST_016 — Секреты вне репозитория и выдача по логическому имени |
+| [`work/tests/test_017.md`](../work/tests/test_017.md) | `TEST_017` | `test` | `spec_state` | `current` | `1.0` | TEST_017 — SQLite-постоянное состояние задачи |
+| [`work/tests/test_018.md`](../work/tests/test_018.md) | `TEST_018` | `test` | `spec_state` | `current` | `1.0` | TEST_018 — Наблюдаемость без пользовательского содержимого |
