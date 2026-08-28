@@ -132,7 +132,6 @@ class EmergencySwitchDirectTests(unittest.TestCase):
         leftovers = list(self.switch._path.parent.glob(f".{self.switch._path.name}.*.tmp"))
         self.assertEqual(leftovers, [])
 
-    @unittest.skipIf(os_name == "nt", "directory fsync is a POSIX durability primitive")
     def test_atomic_write_fsyncs_parent_after_replace(self) -> None:
         target = self.switch._path
         events: list[str] = []
@@ -153,11 +152,15 @@ class EmergencySwitchDirectTests(unittest.TestCase):
         ):
             atomic_write_json(target, {"active": True})
 
-        self.assertEqual(events, ["fsync", "replace", "fsync"])
+        expected = ["fsync", "replace"] if os_name == "nt" else ["fsync", "replace", "fsync"]
+        self.assertEqual(events, expected)
 
-    @unittest.skipIf(os_name == "nt", "directory fsync is a POSIX durability primitive")
     def test_directory_fsync_failure_is_not_reported_as_success(self) -> None:
         target = self.switch._path
+        if os_name == "nt":
+            atomic_write_json(target, {"active": True})
+            self.assertTrue(target.is_file())
+            return
         real_fsync = os.fsync
         calls = 0
 
