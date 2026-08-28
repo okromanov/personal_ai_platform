@@ -148,7 +148,7 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 23)
 
     def test_final_report_matches_current_repository_state(self) -> None:
-        """work/m01_final_report.md is fully computed by render_final_report()
+        """work/acceptance/m01_final_report.md is fully computed by render_final_report()
         (see operations/scripts/milestones/update_completion_report.py), so it
         can never carry a stale hand-edited claim left over from an earlier
         quality report: regenerating it must reproduce the committed file
@@ -162,7 +162,7 @@ class QualityIntegrationTests(unittest.TestCase):
         def strip_updated(text: str) -> str:
             return "\n".join(line for line in text.splitlines() if not line.startswith("updated: "))
 
-        report = (ROOT / "work/m01_final_report.md").read_text(encoding="utf-8")
+        report = (ROOT / "work/acceptance/m01_final_report.md").read_text(encoding="utf-8")
         rendered = render_final_report(ROOT, "m01")
         self.assertEqual(strip_updated(report), strip_updated(rendered))
         for stale_claim in ("70/70", "21/21", "38 требований", "100%", "evidence_state:"):
