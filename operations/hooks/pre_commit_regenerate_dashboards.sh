@@ -3,11 +3,11 @@
 # Triggered before commit to ensure project_status.md and
 # generated/* stay in sync
 #
-# This hook is intentionally non-blocking (a failure here must not stop a
-# commit), but non-blocking must never mean invisible: every failure is
-# printed to stderr so the developer sees it locally instead of only in CI.
+# This is an integrity step, not a best-effort convenience: a failed version
+# bump or regeneration must block the commit rather than leave plausible but
+# stale generated files behind.
 
-set -uo pipefail
+set -euo pipefail
 
 # ADR_001 requires Python 3.12+; a bare `python3` can resolve to an older
 # system interpreter (e.g. 3.11), under which documents/generate.py's own
@@ -24,7 +24,7 @@ find_python() {
     done
     return 1
 }
-PYTHON="$(find_python || true)"
+PYTHON="$(find_python)"
 
 # Increment file versions for modified .md files first. Dashboards below embed
 # each document's version number, so they must be regenerated *after* this
@@ -33,18 +33,12 @@ PYTHON="$(find_python || true)"
 # nothing to version-bump or re-add, so exclude them (git diff --cached lists
 # them too).
 modified_md=()
-if [ -n "$PYTHON" ]; then
-    while IFS= read -r path; do
-        [ -f "$path" ] && modified_md+=("$path")
-    done < <(git diff --cached --name-only -- '*.md' 2>/dev/null)
-    if [ "${#modified_md[@]}" -gt 0 ]; then
-        if ! "$PYTHON" operations/scripts/versioning/increment_file_version.py "${modified_md[@]}"; then
-            echo "⚠️  increment_file_version.py failed (see output above) — versions may not be bumped" >&2
-        fi
-        git add "${modified_md[@]}"
-    fi
-else
-    echo "⚠️  No Python 3.12+ interpreter found — version bump and dashboard regeneration skipped" >&2
+while IFS= read -r path; do
+    [ -f "$path" ] && modified_md+=("$path")
+done < <(git diff --cached --name-only -- '*.md' 2>/dev/null)
+if [ "${#modified_md[@]}" -gt 0 ]; then
+    "$PYTHON" operations/scripts/versioning/increment_file_version.py "${modified_md[@]}"
+    git add "${modified_md[@]}"
 fi
 
 # Regenerate whenever any staged Markdown doc changed. generated/*
@@ -56,21 +50,14 @@ fi
 if [ "${#modified_md[@]}" -gt 0 ]; then
     echo "📊 Detected changes in tracked Markdown docs, regenerating dashboards..."
 
-    if [ -n "$PYTHON" ]; then
-        # documents/generate.py --all is the single entry point that rebuilds
-        # project_status.md and generated/*; there's nothing
-        # further to call.
-        if ! "$PYTHON" operations/scripts/documents/generate.py --all; then
-            echo "⚠️  documents/generate.py --all failed (see output above) — generated/ may be stale" >&2
-        fi
+    # documents/generate.py --all is the single entry point that rebuilds
+    # project_status.md and generated/*; there's nothing further to call.
+    "$PYTHON" operations/scripts/documents/generate.py --all
 
-        # Auto-add regenerated files if they changed
-        if ! git diff --quiet project_status.md 2>/dev/null || \
-           ! git diff --quiet generated/ 2>/dev/null; then
-            echo "⚡ Dashboard changes detected, adding to commit..."
-            git add project_status.md generated/
-        fi
+    # Auto-add regenerated files if they changed.
+    if ! git diff --quiet project_status.md 2>/dev/null || \
+       ! git diff --quiet generated/ 2>/dev/null; then
+        echo "⚡ Dashboard changes detected, adding to commit..."
+        git add project_status.md generated/
     fi
 fi
-
-exit 0
