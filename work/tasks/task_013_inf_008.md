@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 1.8
-updated: 2026-08-28
+version: 1.9
+updated: 2026-08-29
 next_actor: agent
 owner_action: none
 depends_on:
@@ -13,10 +13,14 @@ depends_on:
 allowed_paths:
   - work/tasks/task_013_inf_008.md
   - adr/adr_007_cloud_provider_selection.md
+  - adr/adr_009_secret_management_strategy.md
   - milestones.md
   - work/audit/audit_register.md
 traces_to:
   - m02
+decides:
+  - ADR_007
+  - ADR_009
 implements:
   - INF_CMP_008
 ---
@@ -29,26 +33,26 @@ implements:
 
 ## 2. Результат
 
-Выбранная площадка размещения, зафиксированная в [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), и механизм развёртывания с явной привязкой к версии (Git SHA или тег), контрольной проверкой после развёртывания и управляемым откатом. Замыкает цепочку инфраструктурных компонентов: среда ([`TASK_008`](task_008_inf_001.md)) → сеть ([`TASK_009`](task_009_inf_002.md)) → секреты ([`TASK_010`](task_010_inf_003.md)) → хранилище ([`TASK_011`](task_011_inf_005.md)) → наблюдаемость ([`TASK_012`](task_012_inf_007.md)) → развёртывание (эта TASK).
+Выбранная площадка размещения, зафиксированная в [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), согласованная с ней стратегия runtime-секретов из [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) и механизм развёртывания с явной привязкой к версии (Git SHA или тег), контрольной проверкой после развёртывания и управляемым откатом. Замыкает цепочку инфраструктурных компонентов: среда ([`TASK_008`](task_008_inf_001.md)) → сеть ([`TASK_009`](task_009_inf_002.md)) → секреты ([`TASK_010`](task_010_inf_003.md)) → хранилище ([`TASK_011`](task_011_inf_005.md)) → наблюдаемость ([`TASK_012`](task_012_inf_007.md)) → развёртывание (эта TASK).
 
 ## 3. Где мы сейчас
 
-[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются и выбираются решения для ADR; прежде всего площадка размещения для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md). Текущий текст ADR описывает AWS только как раннего кандидата и ещё не отражает итоговый выбор владельца. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
+[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются и выбираются площадка размещения для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и совместимая с ней стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: AWS и AWS Secrets Manager в них являются ранними кандидатами, а текущая практическая проверка Hetzner ещё не превращена в решение владельца. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. Завершить сравнение вариантов и представить владельцу итоговую рекомендацию для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
-2. После решения владельца зафиксировать выбранный вариант и обоснование в ADR
+1. На одной scorecard завершить сравнение площадок и совместимых способов хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+2. После решения владельца зафиксировать выбранные варианты и обоснование в обоих ADR
 3. Дополнить `allowed_paths` фактическими путями реализации
 4. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
 5. Написать TEST с реальным evidence и проверить развёрнутый контур
 
 ## 5. План выполнения
 
-- [ ] Завершить сравнение площадок и подготовить решение [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
-- [ ] Получить решение владельца и обновить ADR
+- [ ] Завершить сравнение площадок и runtime-secret вариантов; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+- [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
 - [ ] Написать TEST с реальным evidence
@@ -77,6 +81,7 @@ implements:
 
 ## 8. Готово когда
 
+- ✅ [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) приняты или отклонены владельцем с зафиксированным обоснованием
 - ✅ Все шаги плана выполнены
 - ✅ Локальные проверки успешны
 - ✅ CI успешен
