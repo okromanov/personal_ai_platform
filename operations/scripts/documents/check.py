@@ -1007,6 +1007,57 @@ def check_acceptance_model(root: Path) -> CheckResult:
     return _result("acceptance_model", errors, warnings)
 
 
+def check_acceptance_adr_transitions(root: Path) -> CheckResult:
+    """A milestone acceptance record's claimed ADR transitions must match the
+    real decision_state on disk (see AUD-009: a hand-authored acceptance
+    record once claimed 9 ADR transitions to `accepted` while none of the
+    files were ever touched — apply.py's real transition writes the ADR
+    files themselves, so a record that claims a transition without a
+    matching file is evidence the record bypassed the script)."""
+    errors: list[str] = []
+    acceptance_dir = root / "work" / "acceptance"
+    if not acceptance_dir.is_dir():
+        return _result("acceptance_adr_transitions", errors)
+
+    adr_states: dict[str, str] = {}
+    for path in sorted((root / "adr").glob("adr_*.md")):
+        try:
+            doc = load_document(path)
+        except ValueError:
+            continue
+        doc_id = str(doc.metadata.get("id", "")).strip().upper()
+        if doc_id:
+            adr_states[doc_id] = str(doc.metadata.get("decision_state", "")).strip()
+
+    for path in sorted(acceptance_dir.glob("m*.json")):
+        relative = relative_posix(path, root)
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(record, dict):
+            continue
+        transitions = record.get("adr_transitions", [])
+        if not isinstance(transitions, list):
+            continue
+        for entry in transitions:
+            if not isinstance(entry, dict):
+                continue
+            adr_id = str(entry.get("adr_id", "")).strip().upper()
+            state_change = str(entry.get("state_change", ""))
+            if not adr_id or "accepted" not in state_change:
+                continue
+            actual = adr_states.get(adr_id)
+            if actual is None:
+                errors.append(f"{relative}: заявляет переход {adr_id}, но такого ADR нет в adr/")
+            elif actual != "accepted":
+                errors.append(
+                    f"{relative}: заявляет переход {adr_id} → accepted, "
+                    f"но decision_state в adr/ остаётся '{actual}'"
+                )
+    return _result("acceptance_adr_transitions", errors)
+
+
 def _block_scalar_errors(workflow_name: str, text: str) -> list[str]:
     """Найти строки многострочного скрипта, выпавшие из блока YAML.
 
@@ -1374,6 +1425,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("test_specs", check_test_specs),
         ("quality_registry", check_quality_registry),
         ("acceptance_model", check_acceptance_model),
+        ("acceptance_adr_transitions", check_acceptance_adr_transitions),
         ("automation_policy", check_automation_policy),
         ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
         ("generated", check_generated),

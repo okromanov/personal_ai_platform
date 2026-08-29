@@ -41,27 +41,12 @@
     {
       "adr_id": "ADR_004",
       "state_change": "proposed → accepted"
-    },
-    {
-      "adr_id": "ADR_005",
-      "state_change": "proposed → accepted"
-    },
-    {
-      "adr_id": "ADR_006",
-      "state_change": "proposed → accepted"
-    },
-    {
-      "adr_id": "ADR_007",
-      "state_change": "proposed → accepted"
-    },
-    {
-      "adr_id": "ADR_008",
-      "state_change": "proposed → accepted"
-    },
-    {
-      "adr_id": "ADR_009",
-      "state_change": "proposed → accepted"
     }
   ],
+  "adr_transitions_correction": {
+    "corrected_on": "2026-08-29",
+    "finding": "AUD-009",
+    "note": "Исходная запись (коммит a7831af) заявляла переход всех 9 ADR в accepted, была создана не через operations/scripts/acceptance/apply.py (форма JSON не соответствовала схеме скрипта) и ни разу не выполняла реальное изменение файлов adr/*.md. Аудит 2026-08-29 подтвердил, что все 9 ADR оставались proposed. Исправлено: adr_transitions теперь содержит только ADR_001-004 (единственные с traces_to: m01, по правилу operations/adr_lifecycle.md#специальный-случай-adr-для-m01); их decision_state переведён в accepted этим же исправлением (updated: 2026-08-29 в каждом файле). ADR_005-009 остаются proposed — они трассируются на m02/m04/m06, а не на m01, и transition для них никогда не был корректен. См. work/audit/audit_register.md#aud-009."
+  },
   "next_milestone": "m02 — Выбор ключевых технологий и первый живой помощник"
 }

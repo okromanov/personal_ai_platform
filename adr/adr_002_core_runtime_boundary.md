@@ -1,9 +1,9 @@
 ---
 id: ADR_002
 type: adr
-decision_state: proposed
+decision_state: accepted
 version: 1.0
-updated: 2026-08-22
+updated: 2026-08-29
 traces_to:
   - m01
   - SYS_003

@@ -7,6 +7,7 @@ from typing import Any
 from unittest.mock import patch
 
 from operations.scripts.documents.check import (
+    check_acceptance_adr_transitions,
     check_acceptance_model,
     check_authority_graph,
     check_automation_policy,
@@ -393,6 +394,52 @@ class CheckerNegativePathTests(unittest.TestCase):
             missing = check_acceptance_model(Path("."))
         self.assertIn("scope не покрыт", "\n".join(missing.errors))
         self.assertIn("не связан ни с одним TEST", "\n".join(missing.errors))
+
+    def test_acceptance_adr_transitions_rejects_unmatched_claim(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "adr" / "adr_001_x.md").write_text(
+                "---\nid: ADR_001\ntype: adr\ndecision_state: proposed\n"
+                "version: 1.0\nupdated: 2026-08-22\ntraces_to:\n  - m01\n---\n\n# ADR_001\n",
+                encoding="utf-8",
+            )
+            (root / "work" / "acceptance").mkdir(parents=True)
+            (root / "work" / "acceptance" / "m01.json").write_text(
+                '{"adr_transitions": [{"adr_id": "ADR_001", '
+                '"state_change": "proposed → accepted"}]}',
+                encoding="utf-8",
+            )
+
+            mismatch = check_acceptance_adr_transitions(root)
+            self.assertIn(
+                "заявляет переход ADR_001 → accepted, но decision_state в adr/ остаётся 'proposed'",
+                "\n".join(mismatch.errors),
+            )
+
+            (root / "adr" / "adr_001_x.md").write_text(
+                "---\nid: ADR_001\ntype: adr\ndecision_state: accepted\n"
+                "version: 1.0\nupdated: 2026-08-29\ntraces_to:\n  - m01\n---\n\n# ADR_001\n",
+                encoding="utf-8",
+            )
+            matching = check_acceptance_adr_transitions(root)
+            self.assertEqual(matching.errors, [])
+
+    def test_acceptance_adr_transitions_rejects_unknown_adr_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "work" / "acceptance").mkdir(parents=True)
+            (root / "work" / "acceptance" / "m01.json").write_text(
+                '{"adr_transitions": [{"adr_id": "ADR_999", '
+                '"state_change": "proposed → accepted"}]}',
+                encoding="utf-8",
+            )
+            result = check_acceptance_adr_transitions(root)
+            self.assertIn(
+                "work/acceptance/m01.json: заявляет переход ADR_999, но такого ADR нет в adr/",
+                result.errors,
+            )
 
     def test_automation_policy_rejects_bypasses_and_mutating_workflows(self) -> None:
         workflow = """\

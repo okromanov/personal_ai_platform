@@ -107,7 +107,7 @@ def _audit_status(root: Path) -> str:
     for line in register.read_text(encoding="utf-8-sig").splitlines():
         match = _AUDIT_ROW_PATTERN.match(line)
         if match:
-            records.append(match.groups())
+            records.append((match.group(1), match.group(2), match.group(3)))
 
     state_counts = {
         state: sum(record_state == state for _, record_state, _ in records)
