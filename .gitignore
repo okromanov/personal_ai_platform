@@ -53,12 +53,5 @@ backups/local/
 archives/local/
 exports/local/
 
-# generated cache only; versioned generated markdown stays in git
-generated/cache/
-generated/tmp/
-generated/temp/
-generated/reports/daily/*.md
-!generated/reports/daily/.gitkeep
-
 # dependencies
 node_modules/

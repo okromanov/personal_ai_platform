@@ -5,8 +5,8 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.8
-updated: 2026-08-24
+version: 1.9
+updated: 2026-08-29
 accepts:
   - m02
 traces_to:
@@ -69,7 +69,7 @@ python3 -m unittest operations.tests.product.test_channels -v
 
 ## 5. Состав доказательства
 
-`automated_evidence: quality_suite`. Каждый запуск верификационного скрипта создаёт доказательство выполнения всех 8 модульных тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
+`automated_evidence: quality_suite`. Каждый запуск верификационного скрипта создаёт доказательство выполнения всех 16 модульных тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
 
 ## 6. Реализованные компоненты
 
@@ -129,7 +129,7 @@ operations/tests/product/
 
 ## 10. Готово когда
 
-- ✅ 8 тестов пройдено
+- ✅ 16 тестов пройдено
 - ✅ Архитектура Channel определена и используется
 - ✅ TelegramChannel реализован для базового сценария
 - ✅ TaskMessage нормализует ввод с метаданными

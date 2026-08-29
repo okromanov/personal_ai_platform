@@ -63,6 +63,7 @@
       ]
     },
     "m02_development": {
+      "note": "m02_security_tests/m02_e2e_tests/m02_infrastructure_tests are registered in evidence_catalog but deliberately absent from required_evidence below: they cover TASK_014-017 (real runtime/model/Telegram/e2e), still planned. Add them here once those TASKs land, not before.",
       "milestones": [
         "m02"
       ],
