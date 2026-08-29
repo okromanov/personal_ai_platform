@@ -5,7 +5,7 @@ title: Реальная среда агента для ARC_CMP_003
 component: ARC_CMP_003
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.1
+version: 1.2
 updated: 2026-08-29
 next_actor: agent
 owner_action: none
@@ -15,6 +15,8 @@ allowed_paths:
   - work/tasks/task_014_real_runtime.md
 traces_to:
   - m02
+decides:
+  - ADR_006
 implements:
   - ARC_CMP_003
 ---
@@ -37,14 +39,14 @@ implements:
 
 ### Агенту
 
-1. Сравнить 2–3 актуальные среды на одном минимальном сценарии
+1. Сравнить на одном минимальном сценарии Hermes Agent, Claude Agent SDK и минимальный native loop как контроль сложности
 2. Представить владельцу решение для [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
 3. После решения добавить фактические пути и реализовать адаптер
 4. Доказать работу через RuntimePort без обхода OwnerControl
 
 ## 5. План выполнения
 
-- [ ] Сравнить варианты и принять [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
+- [ ] Сравнить Hermes Agent, Claude Agent SDK и минимальный native loop по RuntimePort, отмене, состоянию, секретам, tool boundary и Kill Switch; принять [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Подключить выбранную среду через RuntimePort
 - [ ] Написать TEST с реальным evidence
