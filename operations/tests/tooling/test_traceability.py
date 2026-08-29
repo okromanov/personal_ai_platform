@@ -44,6 +44,12 @@ class TraceabilityTests(unittest.TestCase):
         self.assertEqual(records["THR_001"]["relations"], {"mitigated_by": ["SEC_CTL_001"]})
         self.assertEqual(records["SEC_CTL_001"]["relations"], {"traces_to": ["SYS_002"]})
         self.assertEqual(records["SYS_013"]["relations"], {"traces_to": ["BR_013"]})
+        self.assertEqual(
+            _relations(records["TASK_013"]).get("decides"),
+            ["ADR_007", "ADR_009"],
+        )
+        self.assertEqual(_relations(records["TASK_014"]).get("decides"), ["ADR_006"])
+        self.assertEqual(_relations(records["TASK_015"]).get("decides"), ["ADR_005"])
         self.assertEqual(records["SYS_030"]["relations"], {"traces_to": ["BR_013", "BR_028"]})
         self.assertEqual(
             records["SYS_036"]["relations"],
@@ -58,6 +64,7 @@ class TraceabilityTests(unittest.TestCase):
         self.assertIn("| `THR_001` | `THR` | `mitigated_by`: `SEC_CTL_001` | — |", matrix)
         self.assertIn("| `SYS_030` | `SYS` | `traces_to`: `BR_013`, `BR_028` | — |", matrix)
         self.assertIn("| `TEST_003` | `TEST` |", matrix)
+        self.assertIn("`decides`: `ADR_006`", matrix)
         self.assertIn("`m02_contract_tests` |", matrix)
         self.assertNotIn("Входящие ссылки", matrix)
 
