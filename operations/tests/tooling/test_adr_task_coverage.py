@@ -19,7 +19,11 @@ class AdrDecisionTaskCoverageTests(unittest.TestCase):
         return root
 
     @staticmethod
-    def _milestones(root: Path, m02_state: str = "in-progress", m04_state: str = "planned") -> None:
+    def _milestones(
+        root: Path,
+        m02_state: str = "in-progress",
+        m04_state: str = "planned",
+    ) -> None:
         (root / "milestones.md").write_text(
             f"## m02 — Current\n\n- work_state: `{m02_state}`\n"
             f"\n## m04 — Future\n\n- work_state: `{m04_state}`\n",
@@ -71,7 +75,10 @@ class AdrDecisionTaskCoverageTests(unittest.TestCase):
         root = self._root()
         self._milestones(root)
         self._adr(root, "ADR_006", "m02")
-        self.assertRegex(validate_adr_decision_tasks(root)[0], "ровно одну незавершённую TASK")
+        self.assertRegex(
+            validate_adr_decision_tasks(root)[0],
+            "ровно одну незавершённую TASK",
+        )
 
     def test_active_proposed_adr_with_one_matching_task_passes(self) -> None:
         root = self._root()
@@ -86,8 +93,12 @@ class AdrDecisionTaskCoverageTests(unittest.TestCase):
         self._adr(root, "ADR_006", "m02")
         self._task(root, "TASK_014", "m02", state="completed", decides=("ADR_006",))
         errors = validate_adr_decision_tasks(root)
-        self.assertTrue(any("ровно одну незавершённую TASK" in error for error in errors))
-        self.assertTrue(any("не может оставлять ADR_006" in error for error in errors))
+        self.assertTrue(
+            any("ровно одну незавершённую TASK" in error for error in errors)
+        )
+        self.assertTrue(
+            any("не может оставлять ADR_006" in error for error in errors)
+        )
 
     def test_duplicate_decision_owners_are_rejected(self) -> None:
         root = self._root()
