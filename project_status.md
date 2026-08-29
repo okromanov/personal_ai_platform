@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-29T15:32:00+00:00
+generated_at: 2026-08-29T16:01:00+00:00
 version: 1.0
 ---
 
@@ -79,12 +79,12 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего замечаний | **19** |
+| Всего замечаний | **20** |
 | Исправлены, ожидают проверки | **6** |
-| Открыты | **13** |
+| Открыты | **14** |
 | Риски приняты владельцем | **0** |
 | Закрыты | **0** |
-| Критичность | critical: **1**, high: **3**, medium: **9**, low: **6** |
+| Критичность | critical: **1**, high: **3**, medium: **10**, low: **6** |
 | Ближайшая дата проверки | **2026-09-02** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |
 

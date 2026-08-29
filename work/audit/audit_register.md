@@ -45,6 +45,7 @@ depends_on: []
 | AUD-017 | low | open | 2026-08-29 | 2026-09-19 | repository_owner | [`test_quality_integration.py`](../../operations/tests/test_quality_integration.py), [`run_unittests.py`](../../operations/scripts/quality/run_unittests.py) | Тест генератора хрупок к порядку установленных версий Python на PATH; gate «без skip» отдельно не выделяет unexpectedSuccesses (xpass). |
 | AUD-018 | low | open | 2026-08-29 | 2026-09-19 | repository_owner | [`test_007.md`](../tests/test_007.md), [`quality_registry.json`](../../operations/quality_registry.json) | TEST_007 противоречит сам себе по числу тестов (16 vs 8); [`quality_registry.json`](../../operations/quality_registry.json) перечисляет 3 evidence-типа в каталоге, но не в `required_evidence` без объяснения; устаревший комментарий в `.gitignore`. |
 | AUD-019 | low | open | 2026-08-29 | 2026-09-19 | repository_owner | [`sqlite_store.py`](../../src/task_state/sqlite_store.py) | Пути обработки повреждённых данных SQLite-хранилища задач не тестируются — в отличие от эквивалентной проверки в `owner_control` для того же класса риска. |
+| AUD-020 | medium | open | 2026-08-29 | 2026-09-12 | repository_owner | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 | Фреймворк аудита и репозиторий не содержат ни одной проверки наличия eval/regression-набора для качества выхода модели; пробел останется незамеченным до появления реального провайдера ([`TASK_015`](../tasks/task_015_real_model_provider.md)). |
 
 ## 4. Карточки findings
 
@@ -229,6 +230,18 @@ depends_on: []
 - **Наблюдаемое поведение:** измеренное покрытие подтверждает, что эти строки (обработка `JSONDecodeError`, не-dict значений, неизвестного `state`) никогда не исполняются; `test_persistent_task_state.py` содержит только 3 теста, ни один не пишет напрямую повреждённый `metadata_json`/`checkpoint_data_json` в SQLite-файл. Контрастирует с гораздо более строгой проверкой того же класса риска (JSON-в-хранилище, повреждение) в `owner_control`.
 - **Рекомендованное исправление:** добавить тесты по образцу `test_owner_control.py` — напрямую записать невалидный JSON/не-dict/неизвестный `state` в строку SQLite и подтвердить, что `TaskLifecycleError` поднимается.
 - **Как проверить исправление:** новые тесты проходят; строки из отчёта покрытия перестают быть missing.
+
+<a id="aud-020"></a>
+### AUD-020 — Фреймворк аудита не проверяет наличие eval/regression-набора для качества выхода модели
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Файл:** [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) (весь документ, включая §7.5 «Тестирование»); репозиторий целиком
+- **Ожидаемый контракт:** для продукта, чья основная ценность — поведение LLM-агента, полный аудит качества (пилар 7.5) должен включать проверку наличия и актуальности eval-набора (golden-задачи, регрессия ответов, LLM-judge или эквивалент), отдельно от обычных unit/coverage-тестов.
+- **Наблюдаемое поведение:** исчерпывающий поиск (`grep -in "eval"`) по [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) целиком не дал ни одного совпадения — ни в §6 (канонические проверки), ни в §7.5 (тестирование), ни где-либо ещё. Поиск по всему репозиторию терминов eval/evals/evaluation-suite/prompt-regression/llm-judge также не дал ни одного реального совпадения (только ложные срабатывания по подстроке, например `evaluate_coverage`). На проверенном SHA это не является дефектом реализации: `ModelGateway`/`RuntimePort` остаются эхо-заглушками ([`TASK_015`](../tasks/task_015_real_model_provider.md) не выполнена), поэтому оценивать пока нечего — но сам факт, что фреймворк аудита прошёл 7 столпов и не поднял этот вопрос, означает, что пробел останется незамеченным и после появления реального провайдера, если фреймворк не обновить заранее.
+- **Воздействие и достижимость:** сегодня — нулевое (нет модели, нечего оценивать). Как только [`TASK_015`](../tasks/task_015_real_model_provider.md) заменит эхо-заглушку реальным провайдером, у репозитория не будет ни одного канонического механизма отследить регрессию качества ответов между изменениями промптов/логики — только структурные unit-тесты, которые эту категорию рисков в принципе не покрывают.
+- **Как воспроизвести:** `grep -in "eval" work/audit/repository_audit_system_prompt.md` (пусто); `grep -rin "evaluation-suite\|llm-judge\|prompt-regression" --include=*.py --include=*.md .` (пусто, кроме подстрочных ложных срабатываний).
+- **Рекомендованное исправление:** владелец решает — либо (а) добавить в §7.5 фреймворка явный пункт «наличие и актуальность eval/regression-набора для LLM-выхода, если репозиторий содержит реальный model provider», либо (б) явно задокументировать это как осознанно отложенное до [`TASK_015`](../tasks/task_015_real_model_provider.md) решение (не пробел, а фаза). Само внедрение eval-набора — отдельная задача, вне рамок текущего аудита.
+- **Как проверить исправление:** обновлённый [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 явно упоминает eval/regression-проверку (или явное фазирование до [`TASK_015`](../tasks/task_015_real_model_provider.md) задокументировано в этом же разделе).
 
 ## 5. Правило обновления
 
