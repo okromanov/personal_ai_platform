@@ -45,6 +45,7 @@ from operations.scripts.status.generate_project_status import (
 from operations.scripts.status.human_status import render_repository_project_status
 from operations.scripts.tasks.generate import TASK_ID_PATTERN, collect_tasks
 from operations.scripts.tasks.semantics import validate_task_semantics
+from operations.scripts.traceability.adr_task_coverage import validate_adr_decision_tasks
 from operations.scripts.traceability.full_traceability import validate_full_traceability
 from operations.scripts.traceability.semantic_consistency import validate_semantic_consistency
 
@@ -59,6 +60,7 @@ REFERENCE_KEYS = (
     "implemented_by",
     "verifies",
     "accepts",
+    "decides",
 )
 TEST_FILE_PATTERN = re.compile(r"^test_\d{3}\.md$")
 TEST_ID_PATTERN = re.compile(r"^TEST_\d{3}$")
@@ -462,6 +464,10 @@ def check_traceability(root: Path) -> CheckResult:
 
 def check_full_traceability(root: Path) -> CheckResult:
     return _result("full_traceability", validate_full_traceability(root))
+
+
+def check_adr_decision_tasks(root: Path) -> CheckResult:
+    return _result("adr_decision_tasks", validate_adr_decision_tasks(root))
 
 
 def check_semantic_consistency(root: Path) -> CheckResult:
@@ -1477,6 +1483,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("metadata", check_metadata),
         ("frontmatter_standard", check_frontmatter_standard),
         ("traceability", check_traceability),
+        ("adr_decision_tasks", check_adr_decision_tasks),
         ("full_traceability", check_full_traceability),
         ("semantic_consistency", check_semantic_consistency),
         ("authority_graph", check_authority_graph),
