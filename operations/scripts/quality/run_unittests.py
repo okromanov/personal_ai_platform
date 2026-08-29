@@ -27,6 +27,16 @@ def run_tests(root: Path, *, start_dir: str = "operations/tests", verbosity: int
         for test, reason in result.skipped:
             print(f"- {test}: {reason}", file=sys.stderr)
         return 2
+    if result.unexpectedSuccesses:
+        # wasSuccessful() already treats this as a failure, but folded into
+        # a generic exit 1 it's indistinguishable from an assertion failure
+        # -- an @expectedFailure test that started passing needs its
+        # decorator removed, not a debugging session over a stack trace
+        # that doesn't exist.
+        print("\nExpectedFailure tests unexpectedly passed:", file=sys.stderr)
+        for test in result.unexpectedSuccesses:
+            print(f"- {test}", file=sys.stderr)
+        return 3
     return 0 if result.wasSuccessful() else 1
 
 

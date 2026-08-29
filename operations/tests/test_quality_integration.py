@@ -125,14 +125,23 @@ class QualityIntegrationTests(unittest.TestCase):
             document.write_text("---\nversion: 1.0\n---\n# Test\n", encoding="utf-8")
             subprocess.run(["git", "add", "document.md"], cwd=root, check=True)
 
+            # find_python() in the helper tries python3.14, python3.13,
+            # python3.12, python3, python in that order and picks the first
+            # one that satisfies its own `>= 3.12` check via `-c`. Shimming
+            # only "python3.12" let whichever of those names the real
+            # environment's PATH already provides (e.g. a pre-installed
+            # python3.13) win the search instead of this fake, making the
+            # test pass or fail depending on what happens to be installed.
+            # Shim every name the loop tries so this is deterministic.
             fake_bin = root / "fake_bin"
             fake_bin.mkdir()
-            fake_python = fake_bin / "python3.12"
-            fake_python.write_text(
-                '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n',
-                encoding="utf-8",
-            )
-            fake_python.chmod(0o755)
+            for name in ("python3.14", "python3.13", "python3.12", "python3", "python"):
+                fake_python = fake_bin / name
+                fake_python.write_text(
+                    '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n',
+                    encoding="utf-8",
+                )
+                fake_python.chmod(0o755)
             environment = os.environ.copy()
             environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
 
