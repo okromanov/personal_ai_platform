@@ -99,7 +99,9 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
     for task in tasks:
         for adr_id in sorted(task["decides"]):
             if adr_id not in adrs:
-                errors.append(f"{task['id']}: decides ссылается на неизвестный {adr_id}")
+                errors.append(
+                    f"{task['id']}: decides ссылается на неизвестный {adr_id}"
+                )
 
     for adr_id, adr in sorted(adrs.items()):
         if adr["state"] != "proposed":
@@ -117,8 +119,9 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
         if len(owners) != 1 or len(unfinished) != 1:
             owner_ids = ", ".join(task["id"] for task in owners) or "нет"
             errors.append(
-                f"{adr_id}: proposed ADR для {', '.join(sorted(relevant))} должен иметь "
-                f"ровно одну незавершённую TASK с decides; найдено: {owner_ids}"
+                f"{adr_id}: proposed ADR для {', '.join(sorted(relevant))} "
+                "должен иметь ровно одну незавершённую TASK с decides; "
+                f"найдено: {owner_ids}"
             )
             continue
 
@@ -136,8 +139,8 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
             adr = adrs.get(adr_id)
             if adr and adr["state"] == "proposed":
                 errors.append(
-                    f"{task['id']}: завершённая/отменённая TASK не может оставлять "
-                    f"{adr_id} в decision_state proposed"
+                    f"{task['id']}: завершённая/отменённая TASK не может "
+                    f"оставлять {adr_id} в decision_state proposed"
                 )
 
     return errors
