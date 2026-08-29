@@ -2,7 +2,7 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 1.2
+version: 1.3
 updated: 2026-08-29
 depends_on: []
 ---
@@ -46,6 +46,7 @@ depends_on: []
 | AUD-018 | low | remediated_pending_verification | 2026-08-29 | 2026-09-19 | repository_owner | [`test_007.md`](../tests/test_007.md), [`quality_registry.json`](../../operations/quality_registry.json), `.gitignore` | [`TEST_007`](../tests/test_007.md) приведён к единому числу (17, с учётом нового теста AUD-016); в [`quality_registry.json`](../../operations/quality_registry.json) добавлено пояснение фазирования; устаревший блок `generated/` удалён из `.gitignore`. |
 | AUD-019 | low | remediated_pending_verification | 2026-08-29 | 2026-09-19 | repository_owner | [`sqlite_store.py`](../../src/task_state/sqlite_store.py), [`test_persistent_task_state.py`](../../operations/tests/product/test_persistent_task_state.py) | Добавлены тесты по образцу `test_owner_control.py`: невалидный/не-dict JSON и неизвестный `state`, записанные напрямую в SQLite, подтверждают `TaskLifecycleError`. |
 | AUD-020 | medium | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5, [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py) | §7.5 теперь требует проверки eval/regression-набора; добавлен golden-case harness для model gateway, провайдер-независимый (работает со StubModelGateway сегодня, с реальным providers после TASK_015 без изменений раннера). |
+| AUD-021 | high | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`adr_content_traceability_audit_2026_08_29.md`](adr_content_traceability_audit_2026_08_29.md), [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`TASK_013`](../tasks/task_013_inf_008.md)–[`TASK_015`](../tasks/task_015_real_model_provider.md) | Введено `TASK.decides`, active proposed ADR назначены незавершённым TASK, планирование и аудит требуют обратного прохода ADR → TASK; отрицательные tests блокируют потерю и дублирование владельца решения. |
 
 ## 4. Карточки findings
 
@@ -257,6 +258,18 @@ depends_on: []
 - **Как проверить исправление:** обновлённый [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 явно упоминает eval/regression-проверку (или явное фазирование до [`TASK_015`](../tasks/task_015_real_model_provider.md) задокументировано в этом же разделе).
 - **Исправление (2026-08-29):** реализовано и (а), и внедрение самого набора, по отдельному решению владельца выходящее за исходную рекомендацию раздела выше. [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 требует проверки eval/regression-набора и явно описывает переходное состояние-заглушку как не-находку. [`operations/eval/golden_cases.json`](../../operations/eval/golden_cases.json) (5 golden-задач) и [`operations/scripts/eval/run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py) — provider-agnostic harness (`ModelGateway` контракт, [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004)): сегодня со `StubModelGateway` проверяет только сквозную работу конвейера запрос→ответ→проверка, а после [`TASK_015`](../tasks/task_015_real_model_provider.md) начнёт измерять реальное качество ответов без изменений в раннере — только обновлением самих golden-задач (см. `note` в файле). 16 тестов харнесса в [`operations/tests/tooling/test_eval_suite.py`](../../operations/tests/tooling/test_eval_suite.py). Пока НЕ зарегистрирован как формальный evidence-тип в [`quality_registry.json`](../../operations/quality_registry.json) — это требует CI evidence-writer, соответствующего схеме `test_evidence` (`validate_evidence_record()`), которого ещё нет; отмечено в `note` профиля `m02_development` как следующий шаг, в идеале вместе с [`TASK_015`](../tasks/task_015_real_model_provider.md).
 - **Критерий закрытия:** зелёный `Project check` на точном SHA подтверждает `python3 -m operations.scripts.eval.run_eval_suite` и связанные unit-тесты; переход в `resolved` — как и для остальных findings этого запуска, недостижим, пока не разрешён [`AUD-007`](#aud-007).
+
+<a id="aud-021"></a>
+### AUD-021 — Proposed ADR активного этапа не имели машинного владельца решения
+
+- **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Файл:** [`milestones.md`](../../milestones.md), [`TASK_013`](../tasks/task_013_inf_008.md)–[`TASK_015`](../tasks/task_015_real_model_provider.md), [`check.py`](../../operations/scripts/documents/check.py), [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md)
+- **Ожидаемый контракт:** каждый `proposed` ADR активного/заблокированного milestone имеет ровно одну незавершённую TASK, которая собирает сравнение/evidence и получает решение владельца. TASK и ADR относятся к одному milestone; завершить TASK при ADR в `proposed` нельзя.
+- **Наблюдаемое поведение:** `ADR_005`–`ADR_009` имели только `traces_to` и текстовые упоминания. `ADR_006` был описан в `TASK_014`, но parser/checker не знал отношения принятия решения, поэтому не существовало машинного ребра и отрицательной проверки. `ADR_007` и `ADR_009` также не имели структурированного owner TASK. `ADR_008` относится только к planned `m04`.
+- **Почему аудит пропустил:** checker обходил граф в одну сторону и проверял лишь непустой `ADR.traces_to`; relation model не содержала `decides`; строка «ADR этого этапа» создавала ложное ощущение покрытия; защита от преждевременных TASK для будущих требований не имела исключения для ADR активного milestone; отрицательного fixture не было.
+- **Риск:** TASK или milestone можно было завершить, оставив решение `proposed`, без владельца, evidence и явного решения владельца; структура при этом оставалась «зелёной».
+- **Исправление:** `TASK_013.decides = [ADR_007, ADR_009]`, `TASK_014.decides = [ADR_006]`, `TASK_015.decides = [ADR_005]`; `ADR_008` обязан получить TASK при декомпозиции `m04` до старта. Обновлены lifecycle, change process, шаблоны и audit prompt. Добавлен исполняемый checker и negative tests.
+- **Критерий закрытия:** новый check `adr_decision_tasks`, unit tests, полный project gate и CI успешны на одном SHA; traceability matrix показывает все четыре связи активного `m02`.
 
 ## 5. Правило обновления
 

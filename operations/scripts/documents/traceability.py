@@ -21,7 +21,7 @@ MILESTONE_HEADING_PATTERN = re.compile(
 )
 SCOPE_LINE_PATTERN = re.compile(r"(?m)^-\s+состав:\s*(.+?)\s*$", re.IGNORECASE)
 RELATION_LINE_PATTERN = re.compile(
-    r"^-\s+`?(traces_to|implements|mitigates|mitigated_by|implemented_by|depends_on|verifies|accepts)`?:\s*(.+?)\s*$",
+    r"^-\s+`?(traces_to|implements|mitigates|mitigated_by|implemented_by|depends_on|verifies|accepts|decides)`?:\s*(.+?)\s*$",
     re.MULTILINE,
 )
 REFERENCE_PATTERN = re.compile(
@@ -42,6 +42,7 @@ METADATA_RELATION_KEYS = (
     "depends_on",
     "verifies",
     "accepts",
+    "decides",
 )
 EVIDENCE_METADATA_KEYS = ("automated_evidence", "manual_evidence")
 FAMILY_ORDER = {

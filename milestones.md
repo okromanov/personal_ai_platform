@@ -2,7 +2,7 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 1.7
+version: 1.8
 updated: 2026-08-29
 depends_on:
   - business_requirements
@@ -80,6 +80,7 @@ V1 — первый регулярно используемый персонал
 - результат: владелец отправляет сообщение через Telegram и получает реальный ответ модели из постоянно работающей выбранной среды. Границы платформы остаются под контролем владельца.
 - состав: [`BR_001`](specifications/business_requirements.md#br_001), [`BR_004`](specifications/business_requirements.md#br_004), [`BR_005`](specifications/business_requirements.md#br_005), [`BR_006`](specifications/business_requirements.md#br_006), [`BR_033`](specifications/business_requirements.md#br_033), [`BR_036`](specifications/business_requirements.md#br_036), [`SYS_001`](specifications/system_specification.md#sys_001), [`SYS_002`](specifications/system_specification.md#sys_002), [`SYS_003`](specifications/system_specification.md#sys_003), [`SYS_004`](specifications/system_specification.md#sys_004), [`SYS_006`](specifications/system_specification.md#sys_006), [`SYS_020`](specifications/system_specification.md#sys_020), [`SYS_024`](specifications/system_specification.md#sys_024), [`SYS_027`](specifications/system_specification.md#sys_027), [`SEC_CTL_001`](specifications/system_specification.md#sec_ctl_001), [`SEC_CTL_002`](specifications/system_specification.md#sec_ctl_002), [`SEC_CTL_003`](specifications/system_specification.md#sec_ctl_003), [`SEC_CTL_005`](specifications/system_specification.md#sec_ctl_005), [`SEC_CTL_008`](specifications/system_specification.md#sec_ctl_008), [`SEC_CTL_020`](specifications/system_specification.md#sec_ctl_020), [`INF_REQ_001`](specifications/infrastructure_baseline.md#inf_req_001), [`INF_REQ_002`](specifications/infrastructure_baseline.md#inf_req_002), [`INF_REQ_003`](specifications/infrastructure_baseline.md#inf_req_003), [`INF_REQ_006`](specifications/infrastructure_baseline.md#inf_req_006), [`INF_REQ_010`](specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_012`](specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](specifications/infrastructure_baseline.md#inf_req_013), [`INF_REQ_015`](specifications/infrastructure_baseline.md#inf_req_015), [`INF_REQ_016`](specifications/infrastructure_baseline.md#inf_req_016).
 - ADR этого этапа: [`ADR_005`](adr/adr_005_first_model_provider_selection.md#adr_005), [`ADR_006`](adr/adr_006_agent_environment_framework.md#adr_006), [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007), [`ADR_009`](adr/adr_009_secret_management_strategy.md#adr_009).
+- карта решений: [`ADR_005`](adr/adr_005_first_model_provider_selection.md#adr_005) → [`TASK_015`](work/tasks/task_015_real_model_provider.md), [`ADR_006`](adr/adr_006_agent_environment_framework.md#adr_006) → [`TASK_014`](work/tasks/task_014_real_runtime.md), [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007) и [`ADR_009`](adr/adr_009_secret_management_strategy.md#adr_009) → [`TASK_013`](work/tasks/task_013_inf_008.md).
 
 ### Обязательный пользовательский результат
 
@@ -128,6 +129,7 @@ V1 — первый регулярно используемый персонал
 - результат: система сохраняет полезный контекст между сессиями и формирует статус проектов, решений, обязательств, рисков и следующих действий.
 - состав: [`BR_002`](specifications/business_requirements.md#br_002), [`BR_010`](specifications/business_requirements.md#br_010), [`BR_022`](specifications/business_requirements.md#br_022), [`BR_023`](specifications/business_requirements.md#br_023), [`BR_024`](specifications/business_requirements.md#br_024), [`SYS_010`](specifications/system_specification.md#sys_010), [`SYS_011`](specifications/system_specification.md#sys_011), [`SYS_012`](specifications/system_specification.md#sys_012), [`SYS_029`](specifications/system_specification.md#sys_029), [`SEC_CTL_006`](specifications/system_specification.md#sec_ctl_006), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013), [`SEC_CTL_019`](specifications/system_specification.md#sec_ctl_019), [`INF_REQ_008`](specifications/infrastructure_baseline.md#inf_req_008), [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009), [`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014).
 - ADR этого этапа: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007), [`ADR_008`](adr/adr_008_data_storage_schema.md#adr_008).
+- карта решений: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007) уже назначен [`TASK_013`](work/tasks/task_013_inf_008.md); для [`ADR_008`](adr/adr_008_data_storage_schema.md#adr_008) TASK-владелец создаётся при декомпозиции `m04` и обязателен до перехода этапа в `in-progress`.
 
 ### Подэтапы
 
