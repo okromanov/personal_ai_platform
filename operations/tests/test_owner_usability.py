@@ -98,7 +98,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Шаги текущей работы",
             "Контроль результатов аудита",
             "Исправлены, ожидают проверки",
-            "work/audit/audit_baseline_2026_08_28.md",
+            "work/audit/audit_register.md",
             "Что уже умеет решение",
             "выполнено",
             "осталось",

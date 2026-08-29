@@ -105,7 +105,7 @@ class TemplateContractTests(unittest.TestCase):
     def test_owner_status_keeps_capability_and_dated_audit_sections(self) -> None:
         rendered = render_repository_project_status(ROOT)
         self.assertIn("Что уже умеет решение", rendered)
-        self.assertIn("audit_baseline_2026_08_28.md", rendered)
+        self.assertIn("audit_register.md", rendered)
 
 
 if __name__ == "__main__":

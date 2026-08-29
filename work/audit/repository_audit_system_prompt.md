@@ -49,8 +49,8 @@ ci: .github/workflows/
 dependency_manifests: [pyproject.toml]
 dependency_locks: []            # например: uv.lock, poetry.lock, requirements*.txt
 vendored: []                    # например: third_party/, vendor/
-audit_baseline_pattern: work/audit/audit_baseline_YYYY_MM_DD.md
-risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный dated registry
+audit_baseline_pattern: work/audit/audit_baseline_YYYY_MM_DD.md  # только новые находки одного запуска, неизменяемый после публикации
+risk_register: work/audit/audit_register.md  # единственный источник текущего состояния всех AUD-NNN; читают gate и owner dashboard
 ```
 
 Правила profile:
