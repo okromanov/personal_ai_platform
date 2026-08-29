@@ -13,6 +13,8 @@ depends_on:
 allowed_paths:
   - work/tasks/task_013_inf_008.md
   - adr/adr_007_cloud_provider_selection.md
+  - milestones.md
+  - work/audit/audit_register.md
 traces_to:
   - m02
 implements:
@@ -55,6 +57,8 @@ implements:
 ## 6. Состав
 
 **В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `infrastructure/deploy/` или конфигурации существующего CI), добавит их в `allowed_paths` и создаст связанную карточку TEST.
+
+По прямому запросу владельца, не относящемуся к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008): в [`milestones.md`](../../milestones.md) добавлена строка «ADR этого этапа» для каждого `mXX` и убран необязательный текст из раздела «Готовность этапа [`m01`](../../milestones.md#m01)»; в [`work/audit/audit_register.md`](../audit/audit_register.md) убрана вспомогательная запись, ссылавшаяся на этот текст. Оба файла добавлены в `allowed_paths` этой TASK, поскольку она сейчас единственная активная — правки не относятся к её собственному результату.
 
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
