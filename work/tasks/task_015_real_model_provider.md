@@ -5,7 +5,7 @@ title: Реальный поставщик модели для ARC_CMP_004
 component: ARC_CMP_004
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.1
+version: 1.2
 updated: 2026-08-29
 next_actor: agent
 owner_action: none
@@ -15,6 +15,8 @@ allowed_paths:
   - work/tasks/task_015_real_model_provider.md
 traces_to:
   - m02
+decides:
+  - ADR_005
 implements:
   - ARC_CMP_004
 ---
@@ -37,7 +39,7 @@ implements:
 
 ### Агенту
 
-1. Сравнить актуальных поставщиков и получить решение по [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)
+1. Сравнить актуальных поставщиков на одной scorecard: качество, задержка, стоимость, доступность из выбранной сети, правила данных и обработка отказов; получить решение по [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)
 2. Дополнить allowed_paths и реализовать адаптер выбранного provider
 3. Проверить timeout, budget и отказ provider
 4. Создать TEST с evidence реального вызова без раскрытия секрета
