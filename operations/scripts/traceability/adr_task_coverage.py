@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import TypedDict
 
 from operations.scripts.documents.metadata import load_document, metadata_list
 
@@ -17,6 +18,20 @@ MILESTONE_STATE_PATTERN = re.compile(
 ACTIVE_OR_FINISHED_MILESTONE_STATES = {"in-progress", "blocked", "completed"}
 UNFINISHED_TASK_STATES = {"planned", "in-progress", "blocked"}
 TERMINAL_TASK_STATES = {"completed", "cancelled"}
+
+
+class AdrRecord(TypedDict):
+    state: str
+    milestones: set[str]
+    path: str
+
+
+class TaskRecord(TypedDict):
+    id: str
+    state: str
+    milestones: set[str]
+    decides: set[str]
+    path: str
 
 
 def _milestone_states(root: Path) -> dict[str, str]:
@@ -45,7 +60,7 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
     """
 
     milestone_states = _milestone_states(root)
-    adrs: dict[str, dict[str, object]] = {}
+    adrs: dict[str, AdrRecord] = {}
     for path in sorted((root / "adr").glob("adr_*.md")):
         doc = load_document(path)
         adr_id = str(doc.metadata.get("id", "")).strip().upper()
@@ -61,7 +76,7 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
             "path": path.relative_to(root).as_posix(),
         }
 
-    tasks: list[dict[str, object]] = []
+    tasks: list[TaskRecord] = []
     for path in sorted((root / "work" / "tasks").glob("task_*.md")):
         doc = load_document(path)
         tasks.append(
@@ -100,7 +115,7 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
         owners = [task for task in tasks if adr_id in task["decides"]]
         unfinished = [task for task in owners if task["state"] in UNFINISHED_TASK_STATES]
         if len(owners) != 1 or len(unfinished) != 1:
-            owner_ids = ", ".join(str(task["id"]) for task in owners) or "нет"
+            owner_ids = ", ".join(task["id"] for task in owners) or "нет"
             errors.append(
                 f"{adr_id}: proposed ADR для {', '.join(sorted(relevant))} должен иметь "
                 f"ровно одну незавершённую TASK с decides; найдено: {owner_ids}"
