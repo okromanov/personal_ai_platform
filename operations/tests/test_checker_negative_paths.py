@@ -15,6 +15,7 @@ from operations.scripts.documents.check import (
     check_document_policy,
     check_metadata,
     check_tasks,
+    check_terminal_outcome_delivery_role,
     check_test_specs,
     check_traceability,
 )
@@ -440,6 +441,73 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "work/acceptance/m01.json: заявляет переход ADR_999, но такого ADR нет в adr/",
                 result.errors,
             )
+
+    def test_terminal_outcome_delivery_role_rejects_mismatched_queue_task(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "milestones.md").write_text(
+                "## m02 — Пример\n\n"
+                "### Очередь, закрывающая пользовательский результат\n\n"
+                "Затем обязательны: [`TASK_001`](work/tasks/task_001_x.md) — пример.\n",
+                encoding="utf-8",
+            )
+            (root / "work" / "tasks").mkdir(parents=True)
+            (root / "work" / "tasks" / "task_001_x.md").write_text(
+                "---\nid: TASK_001\ntype: task\ntitle: X\ncomponent: ARC_CMP_001\n"
+                "work_state: planned\nversion: 1.0\nupdated: 2026-08-29\ndepends_on: []\n"
+                "next_actor: agent\nowner_action: none\nallowed_paths:\n  - a\n"
+                "traces_to:\n  - m02\nimplements:\n  - ARC_CMP_001\n---\n\n# TASK_001\n",
+                encoding="utf-8",
+            )
+            mismatch = check_terminal_outcome_delivery_role(root)
+            self.assertIn(
+                "TASK_001: указана в очереди, закрывающей пользовательский результат, "
+                "но delivery_role не terminal_outcome",
+                mismatch.errors,
+            )
+
+            (root / "work" / "tasks" / "task_001_x.md").write_text(
+                "---\nid: TASK_001\ntype: task\ntitle: X\ncomponent: ARC_CMP_001\n"
+                "delivery_role: terminal_outcome\nwork_state: planned\nversion: 1.0\n"
+                "updated: 2026-08-29\ndepends_on: []\nnext_actor: agent\nowner_action: none\n"
+                "allowed_paths:\n  - a\ntraces_to:\n  - m02\nimplements:\n  - ARC_CMP_001\n"
+                "---\n\n# TASK_001\n",
+                encoding="utf-8",
+            )
+            matching = check_terminal_outcome_delivery_role(root)
+            self.assertEqual(matching.errors, [])
+
+    def test_terminal_outcome_delivery_role_ignores_prerequisite_mentions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "milestones.md").write_text(
+                "## m02 — Пример\n\n"
+                "### Очередь, закрывающая пользовательский результат\n\n"
+                "[`TASK_001`](work/tasks/task_001_x.md) завершает подготовку. "
+                "Затем обязателен: [`TASK_002`](work/tasks/task_002_x.md) — пример.\n",
+                encoding="utf-8",
+            )
+            (root / "work" / "tasks").mkdir(parents=True)
+            for task_id, num, depends_on in (
+                ("TASK_001", "001", "[]"),
+                ("TASK_002", "002", "\n  - TASK_001"),
+            ):
+                (root / "work" / "tasks" / f"task_{num}_x.md").write_text(
+                    f"---\nid: {task_id}\ntype: task\ntitle: X\ncomponent: ARC_CMP_001\n"
+                    f"work_state: planned\nversion: 1.0\nupdated: 2026-08-29\n"
+                    f"depends_on: {depends_on}\n"
+                    "next_actor: agent\nowner_action: none\nallowed_paths:\n  - a\n"
+                    "traces_to:\n  - m02\nimplements:\n  - ARC_CMP_001\n"
+                    f"---\n\n# {task_id}\n",
+                    encoding="utf-8",
+                )
+            result = check_terminal_outcome_delivery_role(root)
+            self.assertIn(
+                "TASK_002: указана в очереди, закрывающей пользовательский результат, "
+                "но delivery_role не terminal_outcome",
+                result.errors,
+            )
+            self.assertFalse(any("TASK_001" in error for error in result.errors))
 
     def test_automation_policy_rejects_bypasses_and_mutating_workflows(self) -> None:
         workflow = """\

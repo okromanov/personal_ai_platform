@@ -134,6 +134,16 @@ def _audit_status(root: Path) -> str:
         or "нет"
     )
     review_text = active_review_dates[0] if active_review_dates else "не требуется"
+    critical_open = sum(
+        record_severity == "critical" and record_state != "resolved"
+        for record_severity, record_state, _ in records
+    )
+    gate_text = (
+        f"**ЕСТЬ незакрытые критические замечания ({critical_open})** — "
+        "не полагайтесь на статус CI/gate без проверки карточек ниже"
+        if critical_open
+        else "критических незакрытых замечаний нет"
+    )
 
     return f"""## Контроль результатов аудита
 
@@ -145,6 +155,7 @@ def _audit_status(root: Path) -> str:
 | Риски приняты владельцем | **{state_counts["accepted_risk"]}** |
 | Закрыты | **{state_counts["resolved"]}** |
 | Критичность | {severity_text} |
+| Состояние gate/CI | {gate_text} |
 | Ближайшая дата проверки | **{review_text}** |
 | Полное описание и доказательства | [`{relative_baseline}`]({relative_baseline}) |"""
 
@@ -175,6 +186,8 @@ def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
         linked = tests_by_task.get(str(task["id"]), [])
         evidence = ", ".join(f"[`{test_id}`]({path})" for test_id, path in linked) or "—"
         state = labels.get(str(task.get("work_state", "")), str(task.get("work_state", "")))
+        if str(task.get("delivery_role", "component")) == "terminal_outcome":
+            state = f"{state} — закрывает результат этапа"
         rows.append(f"| {task_link} | {_component_link(component)} | {evidence} | {state} |")
     return "\n".join(rows) or "| — | — | — | — |"
 

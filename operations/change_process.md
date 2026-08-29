@@ -2,8 +2,8 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.9
-updated: 2026-08-28
+version: 2.0
+updated: 2026-08-29
 depends_on:
   - project_rules
 ---
@@ -203,6 +203,7 @@ traces_to:
 
 Опциональные поля:
 - `blocker` — если `work_state: blocked`, причина блокировки
+- `delivery_role` — допустимые значения: `component` (по умолчанию, задача поставляет внутренний компонент, заменима эквивалентной задачей) или `terminal_outcome` (задача из раздела этапа «Очередь, закрывающая пользовательский результат» — заменить её задачей со значением `component` нельзя, см. [`task_template.md`](../operations/templates/task_template.md)). Каждая TASK, упомянутая в таком разделе [`milestones.md`](../milestones.md), обязана иметь `delivery_role: terminal_outcome` — проверяется автоматически.
 
 Пример:
 ```yaml

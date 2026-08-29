@@ -3,10 +3,10 @@ id: TASK_015
 type: task
 title: Реальный поставщик модели для ARC_CMP_004
 component: ARC_CMP_004
-delivery_role: component
+delivery_role: terminal_outcome
 work_state: planned
-version: 1.0
-updated: 2026-08-26
+version: 1.1
+updated: 2026-08-29
 next_actor: agent
 owner_action: none
 depends_on:

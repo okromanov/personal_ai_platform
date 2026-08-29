@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-29T18:51:00+00:00
+generated_at: 2026-08-29T19:36:00+00:00
 version: 1.0
 ---
 
@@ -57,10 +57,10 @@ version: 1.0
 | [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
 | [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | [`TEST_018`](work/tests/test_018.md) | выполнена |
 | [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — | выполняется |
-| [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — | запланирована |
-| [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована |
-| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована |
-| [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована |
+| [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — | запланирована — закрывает результат этапа |
+| [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована — закрывает результат этапа |
+| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована — закрывает результат этапа |
+| [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована — закрывает результат этапа |
 
 ## Шаги текущей работы
 
@@ -85,6 +85,7 @@ version: 1.0
 | Риски приняты владельцем | **0** |
 | Закрыты | **0** |
 | Критичность | critical: **1**, high: **3**, medium: **10**, low: **6** |
+| Состояние gate/CI | **ЕСТЬ незакрытые критические замечания (1)** — не полагайтесь на статус CI/gate без проверки карточек ниже |
 | Ближайшая дата проверки | **2026-09-02** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |
 

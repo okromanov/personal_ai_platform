@@ -768,6 +768,51 @@ def check_milestones(root: Path) -> CheckResult:
     return _result("milestones", errors)
 
 
+_TERMINAL_QUEUE_PATTERN = re.compile(
+    r"(?ms)^###\s+Очередь, закрывающая пользовательский результат\s*$\n(.*?)(?=^##\s|\Z)"
+)
+# Only a TASK immediately followed by "-- description" is claimed as one of
+# the queue's own outcomes; other TASKs are commonly named nearby purely as
+# already-completed prerequisites (e.g. "TASK_012 и TASK_013 завершают
+# наблюдаемость...") and must not be swept in as terminal-outcome claims.
+_TASK_ID_MENTION = re.compile(r"`(TASK_\d{3})`\]\([^)]*\)\s*[—-]")
+
+
+def check_terminal_outcome_delivery_role(root: Path) -> CheckResult:
+    """Every TASK named in a milestone's "closes the user-facing outcome"
+    queue must be marked delivery_role: terminal_outcome (AUD-012): a
+    component-role TASK cannot substitute for one, per milestones.md's own
+    prose, but nothing previously verified the frontmatter field agreed
+    with that prose."""
+    errors: list[str] = []
+    milestones_path = root / "milestones.md"
+    if not milestones_path.is_file():
+        return _result("terminal_outcome_delivery_role", errors)
+    text = read_text(milestones_path)
+    queue_task_ids: set[str] = set()
+    for section in _TERMINAL_QUEUE_PATTERN.findall(text):
+        queue_task_ids.update(_TASK_ID_MENTION.findall(section))
+    if not queue_task_ids:
+        return _result("terminal_outcome_delivery_role", errors)
+
+    try:
+        tasks = {str(task["id"]): task for task in collect_tasks(root)["tasks"]}
+    except Exception as exc:
+        return _result("terminal_outcome_delivery_role", [str(exc)])
+
+    for task_id in sorted(queue_task_ids):
+        task = tasks.get(task_id)
+        if task is None:
+            errors.append(f"milestones.md: очередь ссылается на неизвестную {task_id}")
+            continue
+        if str(task.get("delivery_role", "component")) != "terminal_outcome":
+            errors.append(
+                f"{task_id}: указана в очереди, закрывающей пользовательский результат, "
+                "но delivery_role не terminal_outcome"
+            )
+    return _result("terminal_outcome_delivery_role", errors)
+
+
 def _markdown_section(body: str, heading: str) -> str:
     match = re.search(
         rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(heading)}\s*$\n(.*?)(?=^##\s|\Z)",
@@ -1420,6 +1465,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("authority_graph", check_authority_graph),
         ("document_policy", check_document_policy),
         ("milestones", check_milestones),
+        ("terminal_outcome_delivery_role", check_terminal_outcome_delivery_role),
         ("business_requirements_coverage", check_business_requirements_coverage),
         ("tasks", check_tasks),
         ("test_specs", check_test_specs),

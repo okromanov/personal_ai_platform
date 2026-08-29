@@ -165,6 +165,9 @@ def collect_tasks(root: Path) -> TasksReport:
             raise ValueError(
                 f"{relative}: owner_action_required устарело; используйте owner_action"
             )
+        delivery_role = str(doc.metadata.get("delivery_role", "")).strip() or "component"
+        if delivery_role not in {"component", "terminal_outcome"}:
+            raise ValueError(f"{relative}: delivery_role должен быть component или terminal_outcome")
         blocker = str(doc.metadata.get("blocker", "")).strip()
         if work_state == "blocked" and not blocker:
             raise ValueError(f"{relative}: заблокированная TASK требует поле blocker")
@@ -188,6 +191,7 @@ def collect_tasks(root: Path) -> TasksReport:
                 "traces_to": [x.strip() for x in metadata_list(doc.metadata, "traces_to")],
                 "implements": [x.strip() for x in metadata_list(doc.metadata, "implements")],
                 "component": str(doc.metadata.get("component", "")).strip().upper(),
+                "delivery_role": delivery_role,
                 "allowed_paths": [
                     x.strip() for x in metadata_list(doc.metadata, "allowed_paths") if x.strip()
                 ],
