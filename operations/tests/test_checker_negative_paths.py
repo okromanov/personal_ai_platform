@@ -7,6 +7,7 @@ from typing import Any
 from unittest.mock import patch
 
 from operations.scripts.documents.check import (
+    _known_reference_ids,
     check_acceptance_adr_transitions,
     check_acceptance_model,
     check_authority_graph,
@@ -508,6 +509,35 @@ class CheckerNegativePathTests(unittest.TestCase):
                 result.errors,
             )
             self.assertFalse(any("TASK_001" in error for error in result.errors))
+
+    def test_known_reference_ids_still_swallows_expected_input_errors(self) -> None:
+        with (
+            patch(
+                "operations.scripts.documents.check.collect_traceable_elements",
+                side_effect=ValueError("malformed document"),
+            ),
+            patch(
+                "operations.scripts.documents.check.collect_milestones",
+                side_effect=ValueError("malformed document"),
+            ),
+        ):
+            self.assertEqual(_known_reference_ids(Path("."), {}), set())
+
+    def test_known_reference_ids_no_longer_swallows_a_real_bug(self) -> None:
+        with patch(
+            "operations.scripts.documents.check.collect_traceable_elements",
+            side_effect=TypeError("real bug in the collector"),
+        ):
+            with self.assertRaises(TypeError):
+                _known_reference_ids(Path("."), {})
+
+    def test_check_test_specs_no_longer_swallows_a_real_bug(self) -> None:
+        with patch(
+            "operations.scripts.documents.check.collect_traceable_elements",
+            side_effect=AttributeError("real bug in the collector"),
+        ):
+            with self.assertRaises(AttributeError):
+                check_test_specs(Path("."))
 
     def test_automation_policy_rejects_bypasses_and_mutating_workflows(self) -> None:
         workflow = """\

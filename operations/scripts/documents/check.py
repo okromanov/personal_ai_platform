@@ -267,15 +267,23 @@ def _document_ids(root: Path) -> dict[str, str]:
 
 
 def _known_reference_ids(root: Path, document_ids: dict[str, str]) -> set[str]:
+    """Falls back to `document_ids` alone on a genuinely malformed input
+    document (ValueError from the collectors' own validation, or OSError
+    reading it) -- that under-counts known IDs, which only produces more
+    false "unknown reference" errors, never fewer. Any other exception
+    (AttributeError, TypeError, ...) is a real bug in this function or its
+    collectors and must not be swallowed as if it were just missing data."""
     known = set(document_ids)
     try:
         known.update(identifier.lower() for identifier in collect_traceable_elements(root))
-    except Exception:
-        pass
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_traceable_elements failed, known IDs under-counted: {exc}",
+              file=sys.stderr)
     try:
         known.update(str(item["id"]).lower() for item in collect_milestones(root)["items"])
-    except Exception:
-        pass
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_milestones failed, known IDs under-counted: {exc}",
+              file=sys.stderr)
     return known
 
 
@@ -899,21 +907,30 @@ def check_tasks(root: Path) -> CheckResult:
 
 
 def check_test_specs(root: Path) -> CheckResult:
+    # Each fallback below only shrinks the known-ID/evidence sets on a
+    # genuinely malformed input (ValueError/OSError from the collector's own
+    # validation), which can only produce more false "unknown" errors, never
+    # mask a real one. Any other exception is a bug in this function or its
+    # collectors and must surface, not be swallowed as "just no data".
     errors: list[str] = []
     try:
         records = collect_traceable_elements(root)
-    except Exception:
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_traceable_elements failed in check_test_specs: {exc}",
+              file=sys.stderr)
         records = {}
     try:
         milestone_ids = {str(item["id"]).lower() for item in collect_milestones(root)["items"]}
-    except Exception:
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_milestones failed in check_test_specs: {exc}", file=sys.stderr)
         milestone_ids = set()
     try:
         raw_catalog = load_quality_registry(root).get("evidence_catalog", {})
         evidence_ids = (
             {str(value) for value in raw_catalog} if isinstance(raw_catalog, dict) else set()
         )
-    except Exception:
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: load_quality_registry failed in check_test_specs: {exc}", file=sys.stderr)
         evidence_ids = set()
     tests_dir = root / "work/tests"
     seen: set[str] = set()
