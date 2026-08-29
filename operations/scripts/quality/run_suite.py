@@ -290,6 +290,19 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     validate_configuration_files(root)
     validate_python_permissions(root)
     (root / "runtime").mkdir(exist_ok=True)
+    if base:
+        run_step(
+            root,
+            "Change scope and immutable audit history",
+            [
+                python,
+                "operations/scripts/tasks/check_change_scope.py",
+                "--base",
+                base,
+                "--head",
+                "HEAD",
+            ],
+        )
     run_step(
         root,
         "Regenerate derived documents",

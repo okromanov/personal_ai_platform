@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import fnmatch
 import json
 import re
@@ -14,8 +15,10 @@ from operations.scripts.common.project import find_project_root, read_text
 
 REGISTRY_PATH = Path("operations/template_registry.json")
 TEMPLATE_DIRECTORY = Path("operations/templates")
+CODEOWNERS_PATH = Path(".github/CODEOWNERS")
 _MARKDOWN_FENCE = re.compile(r"(?ms)^\x60\x60\x60markdown\s*$\n(.*?)^\x60\x60\x60\s*$")
 _TOKEN = re.compile(r"\{\{([a-z][a-z0-9_]*)\}\}")
+_CONTRACT_API = frozenset({"assert_registered_output", "render_contract"})
 
 
 class TemplateContractError(ValueError):
@@ -33,6 +36,57 @@ def load_template_registry(root: Path) -> dict[str, object]:
     return data
 
 
+def _codeowner_patterns(root: Path, owner: str) -> list[str]:
+    path = root / CODEOWNERS_PATH
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    patterns: list[str] = []
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        fields = line.split()
+        if len(fields) >= 2 and owner in fields[1:]:
+            patterns.append(fields[0])
+    return patterns
+
+
+def _codeowner_pattern_matches(path: str, pattern: str) -> bool:
+    normalized = pattern.removeprefix("/")
+    if normalized.endswith("/"):
+        return path.startswith(normalized)
+    return fnmatch.fnmatchcase(path, normalized)
+
+
+def _generator_uses_contract_api(path: Path) -> bool:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except (OSError, SyntaxError):
+        return False
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        function = node.func
+        name = function.id if isinstance(function, ast.Name) else None
+        if isinstance(function, ast.Attribute):
+            name = function.attr
+        if name in _CONTRACT_API:
+            return True
+    return False
+
+
+def _output_matches(path: str, pattern: str) -> bool:
+    """Match one path segment at a time so `*` cannot cross directories."""
+    path_parts = Path(path).parts
+    pattern_parts = Path(pattern).parts
+    return len(path_parts) == len(pattern_parts) and all(
+        fnmatch.fnmatchcase(value, expected)
+        for value, expected in zip(path_parts, pattern_parts, strict=True)
+    )
+
+
 def validate_template_registry(root: Path) -> list[str]:
     errors: list[str] = []
     try:
@@ -40,9 +94,27 @@ def validate_template_registry(root: Path) -> list[str]:
     except TemplateContractError as exc:
         return [str(exc)]
 
+    owner = registry.get("required_owner")
+    if not isinstance(owner, str) or not owner.startswith("@"):
+        errors.append("required_owner должен содержать GitHub owner вида @login")
+        owner = ""
+    protected_paths = registry.get("protected_paths")
+    if not isinstance(protected_paths, list) or any(
+        not isinstance(value, str) or not value for value in protected_paths
+    ):
+        errors.append("protected_paths должен быть списком непустых строк")
+        protected_paths = []
+    enforcement_tests = registry.get("enforcement_tests")
+    if not isinstance(enforcement_tests, list) or any(
+        not isinstance(value, str) or not value for value in enforcement_tests
+    ):
+        errors.append("enforcement_tests должен быть списком непустых строк")
+        enforcement_tests = []
+
     contracts = registry["contracts"]
     assert isinstance(contracts, dict)
     registered_templates: set[str] = set()
+    registered_generators: set[str] = set()
     for contract_id, raw in contracts.items():
         if not isinstance(raw, dict):
             errors.append(f"{contract_id}: контракт должен быть object")
@@ -63,8 +135,12 @@ def validate_template_registry(root: Path) -> list[str]:
             errors.append(f"{contract_id}: generators должен быть списком")
         else:
             for generator in generators:
-                if not (root / str(generator)).is_file():
-                    errors.append(f"{contract_id}: отсутствует generator {generator}")
+                generator_path = str(generator)
+                registered_generators.add(generator_path)
+                if not (root / generator_path).is_file():
+                    errors.append(f"{contract_id}: отсутствует generator {generator_path}")
+                elif not _generator_uses_contract_api(root / generator_path):
+                    errors.append(f"{contract_id}: generator {generator_path} обходит contract API")
 
     actual_templates = {
         path.relative_to(root).as_posix() for path in (root / TEMPLATE_DIRECTORY).glob("*.md")
@@ -73,6 +149,19 @@ def validate_template_registry(root: Path) -> list[str]:
         errors.append(f"Шаблон не зарегистрирован: {template}")
     for template in sorted(registered_templates - actual_templates):
         errors.append(f"В реестре указан отсутствующий шаблон: {template}")
+
+    protected = {
+        *[str(value) for value in protected_paths],
+        *[str(value) for value in enforcement_tests],
+        *registered_templates,
+        *registered_generators,
+    }
+    patterns = _codeowner_patterns(root, owner) if owner else []
+    for path in sorted(protected):
+        if not (root / path).is_file():
+            errors.append(f"Защищённый путь отсутствует: {path}")
+        if not any(_codeowner_pattern_matches(path, pattern) for pattern in patterns):
+            errors.append(f"CODEOWNERS не защищает {path} владельцем {owner or '<invalid>'}")
     return errors
 
 
@@ -117,7 +206,7 @@ def assert_registered_output(root: Path, contract_id: str, output: Path) -> None
     contract = _contract(root, contract_id)
     relative = output.resolve().relative_to(root.resolve()).as_posix()
     patterns = [str(value) for value in contract.get("outputs", [])]
-    if not any(fnmatch.fnmatchcase(relative, pattern) for pattern in patterns):
+    if not any(_output_matches(relative, pattern) for pattern in patterns):
         raise TemplateContractError(f"{contract_id}: путь {relative} не разрешён реестром шаблонов")
 
 

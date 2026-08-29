@@ -1,5 +1,23 @@
 {
   "version": 1,
+  "required_owner": "@okromanov",
+  "protected_paths": [
+    ".github/CODEOWNERS",
+    ".github/workflows/project_check.yml",
+    "operations/template_registry.json",
+    "operations/scripts/documents/template_contracts.py",
+    "operations/scripts/quality/run_suite.py",
+    "operations/scripts/tasks/check_change_scope.py"
+  ],
+  "enforcement_tests": [
+    "operations/tests/test_generation_safety.py",
+    "operations/tests/test_quality_integration.py",
+    "operations/tests/tooling/test_health_check.py",
+    "operations/tests/tooling/test_milestone_lifecycle.py",
+    "operations/tests/tooling/test_requirement_tooling.py",
+    "operations/tests/tooling/test_change_scope.py",
+    "operations/tests/tooling/test_template_contracts.py"
+  ],
   "contracts": {
     "architecture_component": {
       "template": "operations/templates/architecture_component_template.md",

@@ -7,6 +7,7 @@ from pathlib import Path
 from operations.scripts.common.project import run_command
 from operations.scripts.tasks.check_change_scope import (
     changed_paths_between,
+    validate_audit_history,
     validate_change_scope,
     validate_document_metadata,
 )
@@ -100,6 +101,35 @@ class ChangeScopeTests(unittest.TestCase):
                 ),
                 [],
             )
+
+    def test_dated_audit_history_is_append_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.assertTrue(run_command(["git", "init", "-q"], cwd=root).ok)
+            self.assertTrue(run_command(["git", "config", "user.name", "Test"], cwd=root).ok)
+            self.assertTrue(
+                run_command(["git", "config", "user.email", "test@example.invalid"], cwd=root).ok
+            )
+            audit_dir = root / "work/audit"
+            audit_dir.mkdir(parents=True)
+            baseline = audit_dir / "audit_baseline_2026_08_28.md"
+            baseline.write_text("first\n", encoding="utf-8")
+            self.assertTrue(run_command(["git", "add", "."], cwd=root).ok)
+            self.assertTrue(run_command(["git", "commit", "-qm", "base"], cwd=root).ok)
+            base = run_command(["git", "rev-parse", "HEAD"], cwd=root).stdout.strip()
+
+            baseline.write_text("rewritten\n", encoding="utf-8")
+            self.assertTrue(run_command(["git", "add", "."], cwd=root).ok)
+            self.assertTrue(run_command(["git", "commit", "-qm", "rewrite"], cwd=root).ok)
+            rewritten = run_command(["git", "rev-parse", "HEAD"], cwd=root).stdout.strip()
+            self.assertTrue(validate_audit_history(root, base, rewritten))
+
+            self.assertTrue(run_command(["git", "reset", "--hard", base], cwd=root).ok)
+            (audit_dir / "audit_baseline_2026_08_29.md").write_text("second\n", encoding="utf-8")
+            self.assertTrue(run_command(["git", "add", "."], cwd=root).ok)
+            self.assertTrue(run_command(["git", "commit", "-qm", "append"], cwd=root).ok)
+            appended = run_command(["git", "rev-parse", "HEAD"], cwd=root).stdout.strip()
+            self.assertEqual(validate_audit_history(root, base, appended), [])
 
     def test_repository_maintenance_does_not_require_project_task(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

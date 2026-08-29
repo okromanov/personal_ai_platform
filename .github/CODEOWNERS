@@ -1,9 +1,23 @@
 # Protected document contracts require owner review.
+/.github/CODEOWNERS @okromanov
+/.github/workflows/project_check.yml @okromanov
 /operations/templates/ @okromanov
 /operations/template_registry.json @okromanov
 /operations/scripts/documents/template_contracts.py @okromanov
+/operations/scripts/documents/generate.py @okromanov
 /operations/scripts/documents/auto_generate_tasks.py @okromanov
+/operations/scripts/health_check/generate.py @okromanov
 /operations/scripts/status/human_status.py @okromanov
+/operations/scripts/milestones/init_milestone.py @okromanov
 /operations/scripts/milestones/update_completion_report.py @okromanov
 /operations/scripts/health_check/reporter.py @okromanov
-
+/operations/scripts/requirements/apply_requirements.py @okromanov
+/operations/scripts/quality/run_suite.py @okromanov
+/operations/scripts/tasks/check_change_scope.py @okromanov
+/operations/tests/test_generation_safety.py @okromanov
+/operations/tests/test_quality_integration.py @okromanov
+/operations/tests/tooling/test_health_check.py @okromanov
+/operations/tests/tooling/test_milestone_lifecycle.py @okromanov
+/operations/tests/tooling/test_requirement_tooling.py @okromanov
+/operations/tests/tooling/test_change_scope.py @okromanov
+/operations/tests/tooling/test_template_contracts.py @okromanov
