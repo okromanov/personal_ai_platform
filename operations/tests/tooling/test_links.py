@@ -77,6 +77,42 @@ class LinkTests(unittest.TestCase):
             errors = check_markdown_links(root)
             self.assertTrue(any("упоминание BR_001" in error for error in errors))
 
+    def test_rejects_range_shorthand_that_drops_second_endpoint_prefix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "adr" / "adr_001_a.md").write_text(
+                "---\nid: ADR_001\ntype: adr\n---\n\n# ADR_001\n", encoding="utf-8"
+            )
+            (root / "adr" / "adr_004_b.md").write_text(
+                "---\nid: ADR_004\ntype: adr\n---\n\n# ADR_004\n", encoding="utf-8"
+            )
+            (root / "source.md").write_text(
+                "---\nid: TASK_001\ntype: task\n---\n\n"
+                "См. переход [`ADR_001`](adr/adr_001_a.md)–004 отдельным PR.\n",
+                encoding="utf-8",
+            )
+            errors = check_markdown_links(root)
+            self.assertTrue(any("диапазон ADR_001–004" in error for error in errors))
+
+    def test_rejects_range_shorthand_sharing_one_code_span(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "work" / "tasks").mkdir(parents=True)
+            (root / "work" / "tasks" / "task_014_a.md").write_text(
+                "---\nid: TASK_014\ntype: task\n---\n\n# TASK_014\n", encoding="utf-8"
+            )
+            (root / "work" / "tasks" / "task_017_b.md").write_text(
+                "---\nid: TASK_017\ntype: task\n---\n\n# TASK_017\n", encoding="utf-8"
+            )
+            (root / "source.md").write_text(
+                "---\nid: ADR_001\ntype: adr\n---\n\n"
+                "Оставшиеся задачи (`TASK_014-017`) несут риск.\n",
+                encoding="utf-8",
+            )
+            errors = check_markdown_links(root)
+            self.assertTrue(any("в одном code span" in error for error in errors))
+
     def test_accepts_linked_identifier_mention(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -191,6 +227,55 @@ class FixLinksTests(unittest.TestCase):
             self.assertIn(
                 "[`TEST_008`](../tests/test_008.md)", task_path.read_text(encoding="utf-8")
             )
+            self.assertEqual(check_markdown_links(root), [])
+
+
+    def test_fixes_range_shorthand_dropped_prefix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "adr" / "adr_001_a.md").write_text(
+                "---\nid: ADR_001\ntype: adr\n---\n\n# ADR_001\n", encoding="utf-8"
+            )
+            (root / "adr" / "adr_004_b.md").write_text(
+                "---\nid: ADR_004\ntype: adr\n---\n\n# ADR_004\n", encoding="utf-8"
+            )
+            source = root / "source.md"
+            source.write_text(
+                "---\nid: TASK_001\ntype: task\n---\n\n"
+                "См. переход [`ADR_001`](adr/adr_001_a.md)–004 отдельным PR.\n",
+                encoding="utf-8",
+            )
+            fixed = fix_markdown_links(root)
+            self.assertEqual(fixed, ["source.md"])
+            text = source.read_text(encoding="utf-8")
+            self.assertIn("[`ADR_001`](adr/adr_001_a.md)–[`ADR_004`](adr/adr_004_b.md)", text)
+            self.assertEqual(check_markdown_links(root), [])
+
+    def test_fixes_range_shorthand_sharing_one_code_span(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "work" / "tasks").mkdir(parents=True)
+            (root / "work" / "tasks" / "task_014_a.md").write_text(
+                "---\nid: TASK_014\ntype: task\n---\n\n# TASK_014\n", encoding="utf-8"
+            )
+            (root / "work" / "tasks" / "task_017_b.md").write_text(
+                "---\nid: TASK_017\ntype: task\n---\n\n# TASK_017\n", encoding="utf-8"
+            )
+            source = root / "source.md"
+            source.write_text(
+                "---\nid: ADR_001\ntype: adr\n---\n\n"
+                "Оставшиеся задачи (`TASK_014-017`) несут риск.\n",
+                encoding="utf-8",
+            )
+            fixed = fix_markdown_links(root)
+            self.assertEqual(fixed, ["source.md"])
+            text = source.read_text(encoding="utf-8")
+            self.assertIn(
+                "[`TASK_014`](work/tasks/task_014_a.md)-[`TASK_017`](work/tasks/task_017_b.md)",
+                text,
+            )
+            self.assertNotIn("`TASK_014-017`", text)
             self.assertEqual(check_markdown_links(root), [])
 
 

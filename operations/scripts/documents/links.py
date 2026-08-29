@@ -23,6 +23,35 @@ _BARE_ID_ERROR = re.compile(
     r"^(?P<file>[^:]+):(?P<line>\d+): упоминание (?P<id>\S+) "
     r"должно быть кликабельной ссылкой на (?P<target>\S+)$"
 )
+_SHORTHAND_RANGE_ERROR = re.compile(
+    r"^(?P<file>[^:]+):(?P<line>\d+): "
+    r"диапазон (?P<family>[A-Z_]+)_(?P<num1>\d{3})[–—-](?P<num2>\d{3}) "
+    r"сокращает (?P<id>\S+) — должно быть кликабельной ссылкой на (?P<target>\S+)$"
+)
+_SHORTHAND_RANGE_SPAN_ERROR = re.compile(
+    r"^(?P<file>[^:]+):(?P<line>\d+): "
+    r"диапазон (?P<family>[A-Z_]+)_(?P<num1>\d{3})[–—-](?P<num2>\d{3}) в одном code span "
+    r"сокращает \S+ — должны быть отдельными кликабельными ссылками "
+    r"(?P<id1>\S+) на (?P<target1>\S+) и (?P<id2>\S+) на (?P<target2>\S+)$"
+)
+_TRACEABLE_FAMILIES = (
+    "BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW|ADR|TASK|TEST"
+)
+# `[`ADR_005`](...)–009` drops the family prefix on the range's second
+# endpoint, so it never matches REFERENCE_PATTERN (which requires the full
+# `FAMILY_NNN` form) and the ordinary bare-identifier check below can't see
+# it at all — the digits alone just look like plain text. Match the
+# shorthand directly, in each of the three ways the first endpoint can be
+# written (linked, inline-code, or bare word).
+SHORTHAND_RANGE_TAIL_PATTERN = re.compile(
+    rf"(?:"
+    rf"\[`(?P<family_linked>{_TRACEABLE_FAMILIES})_(?P<num1_linked>\d{{3}})`\]\([^)]*\)"
+    rf"|`(?P<family_coded>{_TRACEABLE_FAMILIES})_(?P<num1_coded>\d{{3}})`"
+    rf"|\b(?P<family_bare>{_TRACEABLE_FAMILIES})_(?P<num1_bare>\d{{3}})\b"
+    rf")"
+    rf"[ \t]*[–—-][ \t]*"
+    rf"(?P<num2>\d{{3}})\b"
+)
 _CLICKABLE_REF_ERROR = re.compile(
     r"^(?P<file>[^:]+):(?P<line>\d+): "
     r"ссылка на существующий документ должна быть кликабельной: (?P<reference>.+)$"
@@ -247,6 +276,88 @@ def _check_bare_identifier_references(
     return errors
 
 
+def _check_shorthand_range_tail_references(
+    root: Path, path: Path, text: str, records: dict[str, dict[str, object]]
+) -> list[str]:
+    """Range shorthand like `[`ADR_005`](...)–009` or `` `TASK_014-017` ``
+    must spell out and link its second endpoint too, exactly like the first.
+    Runs on the raw line (unlike _check_bare_identifier_references, it does
+    not scrub existing links or mask code spans first) because the bug is
+    precisely that the second endpoint has no family prefix to strip."""
+    errors: list[str] = []
+    if text.lstrip("﻿").startswith("<!-- generated file"):
+        return errors
+    frontmatter_match = FRONTMATTER_PATTERN.match(text)
+    frontmatter_lines = frontmatter_match.group(0).count("\n") if frontmatter_match else 0
+    in_fence = False
+    fence_marker = ""
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        if line_number <= frontmatter_lines:
+            continue
+        stripped = line.lstrip()
+        marker = stripped[:3]
+        if marker in {"```", "~~~"}:
+            if not in_fence:
+                in_fence = True
+                fence_marker = marker
+            elif marker == fence_marker:
+                in_fence = False
+                fence_marker = ""
+            continue
+        if in_fence:
+            continue
+        if HEADING_PATTERN.match(line) or stripped.startswith("|"):
+            continue
+        if EXPLICIT_ANCHOR_PATTERN.search(line):
+            continue
+        for match in SHORTHAND_RANGE_TAIL_PATTERN.finditer(line):
+            family = (
+                match.group("family_linked")
+                or match.group("family_coded")
+                or match.group("family_bare")
+            ).upper()
+            num1 = match.group("num1_linked") or match.group("num1_coded") or match.group(
+                "num1_bare"
+            )
+            num2 = match.group("num2")
+            identifier2 = f"{family}_{num2}"
+            record2 = records.get(identifier2)
+            if record2 is None:
+                continue
+            # `` `TASK_014-017` `` wraps BOTH endpoints in one shared code
+            # span (only family_bare matches here — family_linked/coded each
+            # require their own closing delimiter right after num1). Fixing
+            # just the tail would leave a stray, now-orphaned backtick on
+            # each side once num2 becomes its own link, so this case needs
+            # the whole span rebuilt instead of a tail-only patch.
+            shared_span = (
+                match.group("family_bare") is not None
+                and match.start() > 0
+                and line[match.start() - 1] == "`"
+                and match.end() < len(line)
+                and line[match.end()] == "`"
+            )
+            if shared_span:
+                identifier1 = f"{family}_{num1}"
+                record1 = records.get(identifier1)
+                if record1 is None:
+                    continue
+                errors.append(
+                    f"{relative_posix(path, root)}:{line_number}: "
+                    f"диапазон {family}_{num1}–{num2} в одном code span сокращает {identifier2} — "
+                    f"должны быть отдельными кликабельными ссылками {identifier1} на "
+                    f"{record1['path']}#{record1['anchor']} и {identifier2} на "
+                    f"{record2['path']}#{record2['anchor']}"
+                )
+                continue
+            errors.append(
+                f"{relative_posix(path, root)}:{line_number}: "
+                f"диапазон {family}_{num1}–{num2} сокращает {identifier2} — "
+                f"должно быть кликабельной ссылкой на {record2['path']}#{record2['anchor']}"
+            )
+    return errors
+
+
 def check_markdown_links(root: Path) -> list[str]:
     errors: list[str] = []
     anchor_cache: dict[Path, set[str]] = {}
@@ -294,6 +405,7 @@ def check_markdown_links(root: Path) -> list[str]:
                 )
         errors.extend(_check_clickable_document_references(root, path, text))
         errors.extend(_check_bare_identifier_references(root, path, text, records))
+        errors.extend(_check_shorthand_range_tail_references(root, path, text, records))
     return errors
 
 
@@ -365,6 +477,116 @@ def _fix_bare_identifier_references(
     return changed
 
 
+def _fix_shorthand_range_tail_references(
+    root: Path,
+    errors: list[str],
+    records: dict[str, dict[str, object]],
+    only_files: set[str] | None,
+) -> set[str]:
+    changed: set[str] = set()
+    by_file: dict[str, list[re.Match[str]]] = {}
+    for error in errors:
+        match = _SHORTHAND_RANGE_ERROR.match(error)
+        if match and (only_files is None or match.group("file") in only_files):
+            by_file.setdefault(match.group("file"), []).append(match)
+
+    for file, matches in by_file.items():
+        path = root / file
+        text = path.read_text(encoding="utf-8-sig")
+        lines = text.split("\n")
+        by_line: dict[int, list[re.Match[str]]] = {}
+        for match in matches:
+            by_line.setdefault(int(match.group("line")), []).append(match)
+        for line_no_1based, line_matches in sorted(by_line.items()):
+            idx = line_no_1based - 1
+            if idx >= len(lines):
+                continue
+            line = lines[idx]
+            # Rightmost first so an earlier replacement's inserted text
+            # cannot shift the span of a later match on the same line.
+            for match in sorted(
+                line_matches, key=lambda m: int(m.group("num2")), reverse=True
+            ):
+                identifier = match.group("id")
+                record = records.get(identifier)
+                if record is None:
+                    continue
+                href = _href_for_record(record, path, root)
+                num2 = match.group("num2")
+                tail = re.search(rf"(?<=[–—-])[ \t]*{re.escape(num2)}\b", line)
+                if not tail:
+                    continue
+                replacement = f"[`{identifier}`]({href})"
+                line = line[: tail.start()] + replacement + line[tail.end() :]
+            lines[idx] = line
+        new_text = "\n".join(lines)
+        if new_text != text and atomic_write(path, new_text):
+            changed.add(file)
+    return changed
+
+
+def _fix_shorthand_range_span_references(
+    root: Path,
+    errors: list[str],
+    records: dict[str, dict[str, object]],
+    only_files: set[str] | None,
+) -> set[str]:
+    """`` `TASK_014-017` `` shares one code span between both endpoints, so
+    fixing only the tail would leave a stray, orphaned backtick on each
+    side. Rebuild the whole span instead: drop the shared backticks and
+    link both endpoints independently, dash left bare between them."""
+    changed: set[str] = set()
+    by_file: dict[str, list[re.Match[str]]] = {}
+    for error in errors:
+        match = _SHORTHAND_RANGE_SPAN_ERROR.match(error)
+        if match and (only_files is None or match.group("file") in only_files):
+            by_file.setdefault(match.group("file"), []).append(match)
+
+    for file, matches in by_file.items():
+        path = root / file
+        text = path.read_text(encoding="utf-8-sig")
+        lines = text.split("\n")
+        by_line: dict[int, list[re.Match[str]]] = {}
+        for match in matches:
+            by_line.setdefault(int(match.group("line")), []).append(match)
+        for line_no_1based, line_matches in sorted(by_line.items()):
+            idx = line_no_1based - 1
+            if idx >= len(lines):
+                continue
+            line = lines[idx]
+            for match in sorted(
+                line_matches, key=lambda m: int(m.group("num2")), reverse=True
+            ):
+                identifier1 = match.group("id1")
+                identifier2 = match.group("id2")
+                record1 = records.get(identifier1)
+                record2 = records.get(identifier2)
+                if record1 is None or record2 is None:
+                    continue
+                href1 = _href_for_record(record1, path, root)
+                href2 = _href_for_record(record2, path, root)
+                family = match.group("family")
+                num1 = match.group("num1")
+                num2 = match.group("num2")
+                span = re.search(
+                    rf"`{re.escape(family)}_{re.escape(num1)}[ \t]*[–—-][ \t]*{re.escape(num2)}`",
+                    line,
+                )
+                if not span:
+                    continue
+                sep_match = re.search(r"[–—-]", span.group(0))
+                separator = sep_match.group(0) if sep_match else "–"
+                replacement = (
+                    f"[`{identifier1}`]({href1}){separator}[`{identifier2}`]({href2})"
+                )
+                line = line[: span.start()] + replacement + line[span.end() :]
+            lines[idx] = line
+        new_text = "\n".join(lines)
+        if new_text != text and atomic_write(path, new_text):
+            changed.add(file)
+    return changed
+
+
 def _fix_clickable_document_references(
     root: Path, errors: list[str], only_files: set[str] | None
 ) -> set[str]:
@@ -426,6 +648,8 @@ def fix_markdown_links(
         errors = check_markdown_links(root)
         records = collect_traceable_elements(root)
         progressed = _fix_bare_identifier_references(root, errors, records, only_files)
+        progressed |= _fix_shorthand_range_span_references(root, errors, records, only_files)
+        progressed |= _fix_shorthand_range_tail_references(root, errors, records, only_files)
         progressed |= _fix_clickable_document_references(root, errors, only_files)
         if not progressed:
             break

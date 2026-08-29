@@ -113,13 +113,12 @@ def _component_link(component: str) -> str:
 
 def _audit_status(root: Path) -> str:
     """Render owner-facing aggregate state from the canonical AUD register."""
-    candidates = sorted((root / "work" / "audit").glob("audit_baseline_????_??_??.md"))
-    if not candidates:
-        raise ValueError("Отсутствует датированный audit baseline в work/audit/")
-    baseline = candidates[-1]
-    relative_baseline = baseline.relative_to(root).as_posix()
+    register = root / "work" / "audit" / "audit_register.md"
+    if not register.is_file():
+        raise ValueError("Отсутствует audit_register.md в work/audit/")
+    relative_baseline = register.relative_to(root).as_posix()
     records: list[tuple[str, str, str]] = []
-    for line in baseline.read_text(encoding="utf-8-sig").splitlines():
+    for line in register.read_text(encoding="utf-8-sig").splitlines():
         match = _AUDIT_ROW_PATTERN.match(line)
         if match:
             records.append(match.groups())
