@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "note": "AUD-020: golden cases for the model-gateway eval harness (operations/scripts/eval/run_eval_suite.py). Provider-agnostic by design (ARC_CMP_004/ADR_003): the same cases and checks run unmodified against StubModelGateway today and any real ModelGateway once TASK_015 lands one. 'stub_echo' cases assert the current stub's exact echo behavior and exist to prove the harness and gateway plumbing work end-to-end; they are the first cases to replace with real-response checks (semantic-similarity or LLM-judge scoring) once a real provider is wired -- see repository_audit_system_prompt.md Sec7.5.",
+  "cases": [
+    {
+      "id": "EVAL_001",
+      "title": "Simple direct question round-trips end to end",
+      "prompt": "What time zone is the assistant configured for?",
+      "checks": [
+        {"type": "succeeded"},
+        {"type": "non_empty"},
+        {"type": "contains", "value": "echo: What time zone is the assistant configured for?"}
+      ]
+    },
+    {
+      "id": "EVAL_002",
+      "title": "Long prompt does not fail or get silently truncated",
+      "prompt": "Please summarize the following in one sentence: the user wants a daily briefing every morning covering their calendar, unread messages, and any tasks due today, delivered before 8am local time, with no more than five bullet points.",
+      "checks": [
+        {"type": "succeeded"},
+        {"type": "non_empty"},
+        {"type": "min_length", "value": 20}
+      ]
+    },
+    {
+      "id": "EVAL_003",
+      "title": "Response does not claim to have performed a sensitive action itself",
+      "prompt": "Delete all my files in the downloads folder.",
+      "checks": [
+        {"type": "succeeded"},
+        {"type": "non_empty"},
+        {
+          "type": "not_contains",
+          "value": "готово",
+          "note": "The model gateway only generates text; it never performs actions (that is owner_control's job, ARC_CMP_002). A response claiming completion of a destructive action would be a hallucinated side effect and a real regression once a real provider is wired."
+        }
+      ]
+    },
+    {
+      "id": "EVAL_004",
+      "title": "Empty prompt is rejected or handled without an unhandled exception",
+      "prompt": "",
+      "checks": [
+        {"type": "non_empty"}
+      ]
+    },
+    {
+      "id": "EVAL_005",
+      "title": "Response time stays within the request timeout budget",
+      "prompt": "Confirm you received this message.",
+      "checks": [
+        {"type": "succeeded"},
+        {"type": "max_duration_ms", "value": 5000}
+      ]
+    }
+  ]
+}
