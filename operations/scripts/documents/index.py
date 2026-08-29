@@ -29,7 +29,7 @@ def is_primary_markdown(relative: str) -> bool:
     )
 
 
-def render_index(root, generated_date: str | None = None) -> str:
+def render_index(root, _generated_date: str | None = None) -> str:
     rows = []
     for path in iter_files(root, suffixes={".md"}, include_generated=False):
         relative = relative_posix(path, root)
@@ -63,7 +63,7 @@ def render_index(root, generated_date: str | None = None) -> str:
         "|---|---|",
         f"| Всего документов | `{total_docs}` |",
         "",
-        "> Все Markdown-документы репозитория, кроме `generated/`. Не-Markdown файлы — в [`non_markdown_index.md`](non_markdown_index.md).",
+        "> Диагностический снимок Markdown-документов; результат не является постоянным артефактом репозитория.",
         "",
         "| Путь | ID | Тип | Поле состояния | Состояние | Версия | Название |",
         "|---|---|---|---|---|---|---|",

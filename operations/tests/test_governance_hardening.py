@@ -168,15 +168,19 @@ class GovernanceHardeningTests(unittest.TestCase):
         ]
         self.assertEqual(uncovered_paths(profiles, [".github/workflows/project_check.yml"]), [])
 
-    def test_derived_paths_do_not_block_profile_coverage(self) -> None:
+    def test_runtime_evidence_does_not_block_profile_coverage(self) -> None:
         profiles: list[tuple[str, QualityProfile]] = [
             ("foundation", _profile(paths=["operations/**"]))
         ]
         self.assertEqual(
             uncovered_paths(
-                profiles, ["generated/traceability_matrix.md", "runtime/evidence/x.json"]
+                profiles, ["runtime/evidence/x.json", "runtime/health_check_report.md"]
             ),
             [],
+        )
+        self.assertEqual(
+            uncovered_paths(profiles, ["generated/traceability_matrix.md"]),
+            ["generated/traceability_matrix.md"],
         )
 
     def test_accepts_and_empty_product_scope_never_produce_empty_evidence_targets(self) -> None:

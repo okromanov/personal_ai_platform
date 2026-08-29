@@ -2,8 +2,8 @@
 id: documentation_rules_detailed
 type: guide
 document_state: current
-version: 1.0
-updated: 2026-08-25
+version: 1.1
+updated: 2026-08-28
 ---
 
 # Documentation Audit Rules - Detailed Reference
@@ -139,15 +139,11 @@ isn't parsed as a real link to a nonexistent path):
 
 **Current generated files:**
 - [`project_status.md`](../../../project_status.md) - Auto-generated from status script
-- [`tasks.md`](../../../tasks.md) - Auto-generated from task registry
-- [`generated/markdown_index.md`](../../../generated/markdown_index.md) - Index of all Markdown docs
-- [`generated/non_markdown_index.md`](../../../generated/non_markdown_index.md) - Index of all non-Markdown files
-- [`generated/repository_structure.md`](../../../generated/repository_structure.md) - Directory tree
-- [`generated/traceability_matrix.md`](../../../generated/traceability_matrix.md) - Requirement traceability
+- `runtime/health_check_report.md` - SHA-bound runtime/CI artifact, not committed
 
 **Rule:** Generated files must be bit-identical with last run
 
-**Check:** `git diff --exit-code -- project_status.md tasks.md generated`
+**Check:** `git diff --exit-code -- project_status.md`
 
 ## Traceability Rules
 

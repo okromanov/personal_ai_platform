@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -26,6 +27,16 @@ from operations.scripts.traceability.auto_link import (
 
 
 class AutoGenerateTaskTests(unittest.TestCase):
+    @staticmethod
+    def _install_task_contract(root: Path) -> None:
+        source_root = Path(__file__).resolve().parents[3]
+        (root / "operations/templates").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_root / "operations/template_registry.json", root / "operations")
+        shutil.copy2(
+            source_root / "operations/templates/task_template.md",
+            root / "operations/templates",
+        )
+
     def test_component_parser_and_document_are_deterministic(self) -> None:
         parsed = _extract_components_with_targets(
             "### ARC_CMP_001 — One\n\n`traces_to`: SYS_002, BR_001\n"
@@ -36,6 +47,7 @@ class AutoGenerateTaskTests(unittest.TestCase):
         self.assertEqual(parsed["ARC_CMP_002"], set())
 
         text = _generate_task_document(
+            Path(__file__).resolve().parents[3],
             7,
             "ARC_CMP_001",
             "m02",
@@ -49,6 +61,7 @@ class AutoGenerateTaskTests(unittest.TestCase):
     def test_generates_only_in_scope_uncovered_components(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            self._install_task_contract(root)
             (root / "specifications").mkdir()
             (root / "work" / "tasks").mkdir(parents=True)
             (root / "specifications" / "architecture_baseline.md").write_text(

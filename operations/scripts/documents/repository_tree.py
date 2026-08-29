@@ -9,7 +9,7 @@ SELF_PATH = "generated/repository_structure.md"
 PROJECT_ROOT_LABEL = "personal_ai_platform"
 
 
-def render_repository_structure(root: Path, generated_date: str | None = None) -> str:
+def render_repository_structure(root: Path, _generated_date: str | None = None) -> str:
     files = [relative_posix(path, root) for path in iter_files(root)]
     files = sorted(set(files) | {SELF_PATH})
     file_count = len(files)

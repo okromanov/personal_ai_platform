@@ -4,7 +4,7 @@ import re
 from collections import Counter
 from pathlib import Path
 
-from operations.scripts.common.project import atomic_write, relative_posix
+from operations.scripts.common.project import relative_posix
 from operations.scripts.common.status_types import (
     ChecklistItem,
     OwnerFollowup,
@@ -262,7 +262,7 @@ def _linked_ids(records: dict[str, dict[str, object]], values: list[str]) -> str
     return "<br>".join(rendered)
 
 
-def render_task_index(root: Path, generated_date: str | None = None) -> str:
+def render_task_index(root: Path, _generated_date: str | None = None) -> str:
     state = collect_tasks(root)
     records = collect_traceable_elements(root)
     current = select_current_task(state["tasks"])
@@ -369,7 +369,3 @@ version: 1.0
 
 {queue}
 """
-
-
-def generate_task_index(root: Path, generated_date: str | None = None) -> bool:
-    return atomic_write(root / "tasks.md", render_task_index(root, generated_date))

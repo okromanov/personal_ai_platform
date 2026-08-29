@@ -47,8 +47,8 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn("pip_audit", workflow)
         self.assertNotIn("isInitialSetup", workflow)
         self.assertNotIn("ground zero|initial deployment", workflow)
-        self.assertIn("generated/markdown_index.md", workflow)
-        self.assertNotIn("generated/document_index.md", workflow)
+        self.assertNotIn("generated/", workflow)
+        self.assertIn("operations\\scripts\\documents\\template_contracts.py", workflow)
         self.assertIn("runtime/health_check_report.md", workflow)
         self.assertIn("runtime/health_check.json", workflow)
         self.assertIn("docker build --pull -f dockerfile", workflow)
@@ -158,6 +158,14 @@ class QualityIntegrationTests(unittest.TestCase):
         from operations.scripts.milestones.update_completion_report import (
             render_final_report,
         )
+
+        if subprocess.run(
+            ["git", "rev-parse", "--verify", "origin/main^{commit}"],
+            cwd=ROOT,
+            capture_output=True,
+            check=False,
+        ).returncode:
+            self.skipTest("origin/main недоступен в локальном snapshot")
 
         def strip_updated(text: str) -> str:
             return "\n".join(line for line in text.splitlines() if not line.startswith("updated: "))

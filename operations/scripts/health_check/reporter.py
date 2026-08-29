@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import re
 import sys
-from datetime import datetime
 from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from operations.scripts.common.project import find_project_root
+from operations.scripts.documents.template_contracts import render_contract
 from operations.scripts.health_check.metrics import RepositoryHealth
 
 _COVERAGE_ROW = re.compile(r"^(?P<label>.+): (?P<actual>[\d.]+)% \(minimum (?P<floor>[\d.]+)%\)$")
@@ -93,7 +94,7 @@ def _build_recommendations(health: RepositoryHealth) -> str:
     return "\n".join(lines)
 
 
-def generate_report(health: RepositoryHealth) -> str:
+def generate_report(health: RepositoryHealth, root: Path | None = None) -> str:
     """Render a compact snapshot of already collected audit evidence."""
     repo = health.repository
     tests = health.tests
@@ -101,32 +102,47 @@ def generate_report(health: RepositoryHealth) -> str:
     coverage = health.coverage_policy
     pillars = [
         ("Контракт и трассируемость", "CONFIRMED"),
-        ("Реализация и тесты", "CONFIRMED" if not tests.collection_error and tests.total_failed == 0 else "REFUTED"),
-        ("Качество кода", "CONFIRMED" if quality.type_safe and quality.formatting_compliant else "REFUTED"),
+        (
+            "Реализация и тесты",
+            "CONFIRMED" if not tests.collection_error and tests.total_failed == 0 else "REFUTED",
+        ),
+        (
+            "Качество кода",
+            "CONFIRMED" if quality.type_safe and quality.formatting_compliant else "REFUTED",
+        ),
         ("Безопасность", "UNAVAILABLE"),
         ("Надёжность и coverage", "CONFIRMED" if coverage.passed else "REFUTED"),
         ("Evidence и generated drift", "CONFIRMED"),
     ]
     rows = "\n".join(f"| {name} | {state} |" for name, state in pillars)
-    return f"""<!-- generated file: do not edit manually -->
----
-id: health_check_latest
-type: generated_health_check
-generation_state: generated
-version: 2.0
----
+    contract_root = root or find_project_root(Path.cwd())
+    return render_contract(
+        contract_root,
+        "health_check_report",
+        {
+            "remote_url": repo.remote_url,
+            "branch_name": repo.branch_name,
+            "head_sha": repo.head_sha,
+            "collected_at": repo.collected_at_utc,
+            "overall_status": health.overall_status,
+            "total_commits": repo.total_commits,
+            "python_files": repo.python_files,
+            "lines_of_code": repo.lines_of_code,
+            "project_size_mb": repo.project_size_mb,
+            "working_tree_clean": "да" if repo.working_tree_clean else "нет",
+            "tests_passed": tests.total_passed,
+            "tests_failed": tests.total_failed,
+            "coverage_percent": tests.coverage_percent,
+            "test_duration": f"{tests.execution_time_sec:.2f}",
+            "mypy_issues": quality.mypy_issues,
+            "ruff_issues": quality.ruff_issues,
+            "formatting_compliant": "да" if quality.formatting_compliant else "нет",
+            "coverage_policy": "passed" if coverage.passed else "failed",
+            "rows": rows,
+            "recommendations": _build_recommendations(health),
+        },
+    )
 
-# Repository health snapshot
-
-## Слепок комплексного аудита
-
-| Столп | Evidence status |
-|---|---|
-{rows}
-
-Проверено для SHA `{repo.head_sha}`. Отчёт агрегирует результаты комплексной
-проверки; отсутствие отдельного artifact означает `UNAVAILABLE`, а не успех.
-"""
 
 def print_summary(health: RepositoryHealth) -> None:
     """Print a brief health check summary to stdout."""

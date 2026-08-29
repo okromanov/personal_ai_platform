@@ -241,7 +241,7 @@ def _compact_relation_cell(relations: dict[str, list[str]]) -> str:
     return "<br>".join(chunks) if chunks else "—"
 
 
-def render_traceability(root: Path, generated_date: str | None = None) -> str:
+def render_traceability(root: Path, _generated_date: str | None = None) -> str:
     """Render canonical outgoing edges; incoming edges are derivable and are not duplicated."""
     records = collect_traceable_elements(root)
     element_count = len(records)

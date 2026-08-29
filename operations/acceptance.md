@@ -2,8 +2,8 @@
 id: owner_acceptance_procedure
 type: operations
 document_state: current
-version: 1.2
-updated: 2026-08-24
+version: 1.3
+updated: 2026-08-28
 depends_on: []
 ---
 
@@ -96,7 +96,7 @@ py operations\scripts\acceptance\apply.py --milestone mXX --owner-confirmation "
 
 После успешного слияния коммита принятия этапа в `main` система готова к планированию следующего этапа.
 
-Единственный материал для владельца, который создаётся и обновляется автоматически для каждого этапа, — `work/m0X_final_report.md` (например, [`work/m01_final_report.md`](../work/m01_final_report.md)): его генерирует `init_milestone.py` при переходе `planned → in-progress` и пересобирает `update_completion_report.py` после принятия (см. шаг 2 выше). Отдельная папка на этап не заводится: такой файл — единственный регулярный артефакт на этап, и плоский список рядом со сквозными `work/tasks/` и `work/tests/` проще, чем папка ради одного файла. Дополнительная запись сверх того, что уже описывают эта процедура и [`operations/semantic_review.md`](semantic_review.md), пишется вручную только когда этапу это действительно нужно — под своим именем в `work/` (например, `work/m0X_semantic_review.md`), а не как заглушка, повторяющая канонические документы без уникального содержания.
+Единственный итоговый материал для владельца, который создаётся и обновляется автоматически для каждого этапа, — `work/acceptance/m0X_final_report.md` (например, [`work/acceptance/m01_final_report.md`](../work/acceptance/m01_final_report.md)). Его создаёт `init_milestone.py` при переходе `planned → in-progress` и пересобирает `update_completion_report.py` после принятия (см. шаг 2 выше), всегда из зарегистрированного шаблона. Дополнительная запись сверх того, что уже описывают эта процедура и [`operations/semantic_review.md`](semantic_review.md), создаётся только при наличии уникального содержания и хранится рядом с доказательствами принятия в `work/acceptance/`.
 
 **Важно:** Этапы [`m02`](../milestones.md#m02)–[`m06`](../milestones.md#m06) составляют V1. После [`m06`](../milestones.md#m06) завершается версия 1 и начинается планирование V2.
 

@@ -14,37 +14,17 @@ class GenerationSafetyTests(unittest.TestCase):
     def test_renderer_failure_does_not_partially_write_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            real_root = Path(__file__).resolve().parents[2]
-            # Copy required source files to temp directory
-            (root / "milestones.md").write_text(
-                (real_root / "milestones.md").read_text(encoding="utf-8-sig"), encoding="utf-8"
-            )
-            (root / "tasks.md").write_text("old tasks\n", encoding="utf-8")
             (root / "project_status.md").write_text("old status\n", encoding="utf-8")
-            (root / "generated").mkdir(parents=True, exist_ok=True)
-            with (
-                patch(
-                    "operations.scripts.documents.generate.render_task_index",
-                    return_value="new tasks\n",
-                ),
-                patch(
-                    "operations.scripts.documents.generate.render_repository_project_status",
-                    return_value="new status\n",
-                ),
-                patch(
-                    "operations.scripts.documents.generate.render_index", return_value="new index\n"
-                ),
-                patch(
-                    "operations.scripts.documents.generate.render_traceability",
-                    side_effect=ValueError("duplicate"),
-                ),
+            with patch(
+                "operations.scripts.documents.generate.render_repository_project_status",
+                side_effect=ValueError("duplicate"),
             ):
                 with self.assertRaisesRegex(ValueError, "duplicate"):
                     generate_all(root)
-            self.assertEqual((root / "tasks.md").read_text(encoding="utf-8"), "old tasks\n")
             self.assertEqual(
                 (root / "project_status.md").read_text(encoding="utf-8"), "old status\n"
             )
+            self.assertFalse((root / "generated").exists())
 
     def test_generated_snapshot_is_stable_until_content_changes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

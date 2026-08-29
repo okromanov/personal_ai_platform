@@ -1,0 +1,9 @@
+# Protected document contracts require owner review.
+/operations/templates/ @okromanov
+/operations/template_registry.json @okromanov
+/operations/scripts/documents/template_contracts.py @okromanov
+/operations/scripts/documents/auto_generate_tasks.py @okromanov
+/operations/scripts/status/human_status.py @okromanov
+/operations/scripts/milestones/update_completion_report.py @okromanov
+/operations/scripts/health_check/reporter.py @okromanov
+

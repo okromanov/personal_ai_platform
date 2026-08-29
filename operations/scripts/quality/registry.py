@@ -10,10 +10,9 @@ from typing import TypedDict, cast
 REGISTRY_PATH = "operations/quality_registry.json"
 COVERAGE_MODES = {"task_test", "global_evidence"}
 DERIVED_PATH_PATTERNS = (
-    "generated/**",
     "runtime/**",
     "project_status.md",
-    "work/m*_final_report.md",
+    "work/acceptance/m*_final_report.md",
 )
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")

@@ -52,9 +52,10 @@ class ChangeScopeTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(
-                validate_change_scope(root, ["specifications/system_specification.md", "tasks.md"]),
+                validate_change_scope(root, ["specifications/system_specification.md"]),
                 [],
             )
+            self.assertTrue(validate_change_scope(root, ["tasks.md"]))
             self.assertEqual(validate_change_scope(root, [".github/workflows/check.yml"]), [])
             self.assertTrue(validate_change_scope(root, ["src/product.py"]))
 
@@ -148,17 +149,11 @@ class DocumentMetadataHonestyTests(unittest.TestCase):
         в поверхностном клоне, используются origin/main и HEAD, которые всегда доступны.
         """
         root = Path(__file__).resolve().parents[3]
-        # This test verifies that the validation infrastructure works without
-        # requiring specific commits that may not exist in shallow clones.
-        # The test passes if validate_document_metadata can be called successfully.
-        try:
-            changed = changed_paths_between(root, "origin/main", "HEAD")
-            errors = validate_document_metadata(root, "origin/main", "HEAD", changed)
-            # If we get here, the validation infrastructure is working.
-            # We don't assert specific errors since branch state may vary.
-            self.assertIsInstance(errors, list)
-        except Exception as e:
-            self.fail(f"Metadata validation infrastructure should work: {e}")
+        if not run_command(["git", "rev-parse", "--verify", "origin/main^{commit}"], cwd=root).ok:
+            self.skipTest("origin/main недоступен в локальном snapshot")
+        changed = changed_paths_between(root, "origin/main", "HEAD")
+        errors = validate_document_metadata(root, "origin/main", "HEAD", changed)
+        self.assertIsInstance(errors, list)
 
 
 if __name__ == "__main__":

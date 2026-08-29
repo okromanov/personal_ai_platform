@@ -32,10 +32,9 @@ class MarkdownIndexTests(unittest.TestCase):
             )
 
     def test_no_longer_filters_by_primary_document_status(self) -> None:
-        # project_status.md and tasks.md used to be excluded as "not primary";
-        # the index now covers every tracked .md file with no such filter.
+        # The diagnostic view covers tracked Markdown without a primary-document filter.
         self.assertIn("[`project_status.md`]", self.rendered)
-        self.assertIn("[`tasks.md`]", self.rendered)
+        self.assertNotIn("[`tasks.md`]", self.rendered)
 
     def test_generated_directory_is_excluded(self) -> None:
         self.assertNotIn("[`generated/markdown_index.md`]", self.rendered)

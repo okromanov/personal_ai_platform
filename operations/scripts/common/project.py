@@ -111,6 +111,7 @@ def atomic_write(path: Path, content: str) -> bool:
         raise
     return True
 
+
 _GENERATED_AT_PATTERN = re.compile(r"(?m)^generated_at: .+\n")
 
 
@@ -154,7 +155,7 @@ def _git_visible_relative_paths(root: Path) -> set[str] | None:
     Локальные артефакты вроде .claude/settings.local.json или
     .claude/scheduled_tasks.lock существуют только в рабочей копии конкретной
     сессии — их не видит ни один другой клон, включая CI. Голый обход
-    файловой системы этого не знает и включает их в generated/*, из-за чего
+    файловой системы этого не знает и включает их в производные представления, из-за чего
     коммит с локального клона расходится с результатом на чистом checkout.
     Возвращает None, если git недоступен (например, не git-репозиторий) —
     тогда вызывающий код возвращается к обходу файловой системы напрямую.

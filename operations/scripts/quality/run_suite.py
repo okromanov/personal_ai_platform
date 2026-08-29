@@ -28,7 +28,7 @@ DEV_REQUIREMENTS_PATH = Path("operations/quality/requirements_dev.txt")
 DEV_REQUIREMENTS_INPUT_PATH = Path("operations/quality/requirements_dev.in")
 DEFAULT_STEP_TIMEOUT_SECONDS = 300
 AUDIT_BASELINE_DIRECTORY = Path("work/audit")
-AUDIT_BASELINE_NAME = re.compile(r"^audit_baseline_(\\d{4}_\\d{2}_\\d{2})\\.md$")
+AUDIT_BASELINE_NAME = re.compile(r"^audit_baseline_(\d{4}_\d{2}_\d{2})\.md$")
 AUDIT_ROW = re.compile(
     r"^\|\s*(AUD-\d{3})\s*\|\s*(critical|high|medium|low)\s*\|\s*"
     r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
@@ -160,8 +160,7 @@ def latest_audit_baseline(root: Path) -> Path:
     )
     if not candidates:
         raise QualityFailure(
-            "Missing dated audit baseline under "
-            f"{AUDIT_BASELINE_DIRECTORY.as_posix()}/"
+            f"Missing dated audit baseline under {AUDIT_BASELINE_DIRECTORY.as_posix()}/"
         )
     return candidates[-1]
 
@@ -175,19 +174,14 @@ def validate_audit_baseline(root: Path) -> None:
             continue
         match = AUDIT_ROW.match(line)
         if match is None:
-            raise QualityFailure(
-                f"{relative_path}:{line_number}: invalid audit record"
-            )
+            raise QualityFailure(f"{relative_path}:{line_number}: invalid audit record")
         finding_id, _severity, state, _first_seen, review_date, owner = match.groups()
         if finding_id in records:
-            raise QualityFailure(
-                f"{relative_path}:{line_number}: duplicate {finding_id}"
-            )
+            raise QualityFailure(f"{relative_path}:{line_number}: duplicate {finding_id}")
         owner = owner.strip().strip("`")
         if state != "resolved" and (owner in {"", "none", "—"} or review_date == "—"):
             raise QualityFailure(
-                f"{relative_path}:{line_number}: {finding_id} requires owner "
-                "and review date"
+                f"{relative_path}:{line_number}: {finding_id} requires owner and review date"
             )
         records[finding_id] = (state, owner, review_date)
     if not records:
@@ -408,8 +402,13 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     run_step(root, "Coverage policy", coverage_command, artifact="runtime/coverage_policy.txt")
     run_step(
         root,
+        "Template registry",
+        [python, "operations/scripts/documents/template_contracts.py"],
+    )
+    run_step(
+        root,
         "Generated drift",
-        ["git", "diff", "--exit-code", "--", "project_status.md", "tasks.md", "generated"],
+        ["git", "diff", "--exit-code", "--", "project_status.md"],
     )
     run_step(
         root,

@@ -42,6 +42,8 @@ def update_file_version(file_path: str) -> bool:
         # by the next generate.py run, producing permanent drift between the two.
         if content.startswith("<!-- generated file: do not edit manually -->"):
             return False
+        if re.search(r"(?m)^type:\s*milestone_completion_report\s*$", content):
+            return False
 
         # Find version field in frontmatter
         version_match = re.search(r"^version:\s*([0-9.]+)", content, re.MULTILINE)

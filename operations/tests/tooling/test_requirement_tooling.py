@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -219,6 +220,23 @@ class StageWizardTests(unittest.TestCase):
 
 
 class ApplyRequirementsTests(unittest.TestCase):
+    @staticmethod
+    def _install_contracts(root: Path) -> None:
+        source_root = Path(__file__).resolve().parents[3]
+        (root / "operations/templates").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_root / "operations/template_registry.json", root / "operations")
+        shutil.copy2(source_root / "operations/quality_registry.json", root / "operations")
+        for name in (
+            "architecture_component_template.md",
+            "business_requirement_template.md",
+            "security_control_template.md",
+            "system_requirement_template.md",
+            "task_template.md",
+            "test_template.md",
+            "threat_template.md",
+        ):
+            shutil.copy2(source_root / "operations/templates" / name, root / "operations/templates")
+
     def test_number_and_yaml_helpers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "spec.md"
@@ -231,6 +249,7 @@ class ApplyRequirementsTests(unittest.TestCase):
     def test_apply_writes_specifications_tests_tasks_and_milestone(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            self._install_contracts(root)
             specs = root / "specifications"
             specs.mkdir()
             (specs / "business_requirements.md").write_text("BR_018\n", encoding="utf-8")

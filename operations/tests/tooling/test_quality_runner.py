@@ -60,7 +60,9 @@ class QualityRunnerTests(unittest.TestCase):
                 "mypy==2.3.1 \\\n    --hash=sha256:" + "b" * 64 + "\n",
                 encoding="utf-8",
             )
-            audit_baseline = root / run_suite.AUDIT_BASELINE_PATH
+            audit_baseline = (
+                root / run_suite.AUDIT_BASELINE_DIRECTORY / "audit_baseline_2026_08_28.md"
+            )
             audit_baseline.parent.mkdir(parents=True)
             audit_baseline.write_text(
                 "| AUD-001 | low | resolved | 2026-08-27 | — | none | evidence | done |\n",
@@ -112,7 +114,7 @@ class QualityRunnerTests(unittest.TestCase):
     def test_audit_baseline_rejects_duplicate_and_unowned_open_findings(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            path = root / run_suite.AUDIT_BASELINE_PATH
+            path = root / run_suite.AUDIT_BASELINE_DIRECTORY / "audit_baseline_2026_08_28.md"
             path.parent.mkdir(parents=True)
             path.write_text(
                 "| AUD-001 | medium | open | 2026-08-27 | — | none | evidence | fix |\n",

@@ -4,7 +4,7 @@ type: milestone_completion_report
 completion_state: completed
 version: 1.0
 created: 2026-08-22
-updated: 2026-08-24
+updated: 2026-08-28
 milestone: m01
 ---
 
@@ -30,13 +30,12 @@ milestone: m01
 
 - [`work/m01.json`](m01.json)
 
-### Изменённые файлы (5)
+### Изменённые файлы (4)
 
 - [`.github/workflows/project_check.yml`](../../.github/workflows/project_check.yml)
 - [`milestones.md`](../../milestones.md)
 - [`operations/quality_registry.json`](../../operations/quality_registry.json)
 - [`project_status.md`](../../project_status.md)
-- [`tasks.md`](../../tasks.md)
 
 ## 4. Задачи и тесты этапа
 

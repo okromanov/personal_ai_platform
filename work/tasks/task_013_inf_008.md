@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 1.7
+version: 1.8
 updated: 2026-08-28
 next_actor: agent
 owner_action: none
@@ -45,7 +45,6 @@ implements:
 
 ## 5. План выполнения
 
-- [x] Подтвердить завершение [`TASK_012`](task_012_inf_007.md) и собрать критерии решения
 - [ ] Завершить сравнение площадок и подготовить решение [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md)
 - [ ] Получить решение владельца и обновить ADR
 - [ ] Дополнить allowed_paths реальными путями

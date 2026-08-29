@@ -2,8 +2,8 @@
 id: operations_sample_task_lifecycle
 type: guide
 document_state: current
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-08-28
 depends_on:
   - operations_change_process
   - operations_procedure_map
@@ -78,7 +78,7 @@ TASK переводится в `completed` только когда:
 
 6. Проверить рабочую разницу
    ├─ git status (разница понятна)
-   └─ generated/ файлы не меняются повторно
+   └─ project_status.md не меняется при повторной регенерации
 
 7. Коммит
    └─ git commit -m "пример: описание изменения"

@@ -1,4 +1,4 @@
-"""Render generated/test_catalog.md: a per-test catalog with descriptions.
+"""Render an on-demand per-test diagnostic catalog with descriptions.
 
 Reuses the same unittest discovery mechanism as
 operations/scripts/quality/run_unittests.py (the canonical test runner), so
@@ -331,7 +331,7 @@ RU_DESCRIPTIONS: dict[str, str] = {
         "Событийный gate покрывает push, PR и ручной запуск."
     ),
     "operations/tests/test_quality_integration.py|test_final_report_matches_current_repository_state": (
-        "work/m01_final_report.md полностью соответствует тому, что вычисляет render_final_report()."
+        "work/acceptance/m01_final_report.md соответствует render_final_report()."
     ),
     "operations/tests/test_quality_integration.py|test_only_one_hook_contains_validation_logic": (
         "Логика проверки находится только в одном каноническом хуке."
@@ -547,7 +547,7 @@ RU_DESCRIPTIONS: dict[str, str] = {
         "Артефакты в runtime/ не влияют на результат проверки документов."
     ),
     "operations/tests/tooling/test_markdown_index.py|test_generated_directory_is_excluded": (
-        "Каталог generated/ исключён из индекса."
+        "Runtime artifacts исключены из диагностического индекса."
     ),
     "operations/tests/tooling/test_markdown_index.py|test_lists_every_tracked_markdown_file_exactly_once": (
         "Каждый отслеживаемый .md файл перечислен в индексе ровно один раз."
@@ -979,7 +979,7 @@ def collect_tests(root: Path, start_dir: str = "operations/tests") -> list[dict[
     return rows
 
 
-def render_test_catalog(root: Path, generated_date: str | None = None) -> str:
+def render_test_catalog(root: Path, _generated_date: str | None = None) -> str:
     rows = collect_tests(root)
     total = len(rows)
     counts: dict[str, int] = {}

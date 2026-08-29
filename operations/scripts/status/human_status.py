@@ -6,6 +6,10 @@ from pathlib import Path
 from operations.scripts.common.project import atomic_write_generated, iter_files, relative_posix
 from operations.scripts.common.status_types import TaskItem
 from operations.scripts.documents.metadata import load_document
+from operations.scripts.documents.template_contracts import (
+    assert_registered_output,
+    render_contract,
+)
 from operations.scripts.status.generate_project_status import (
     build_owner_next_action,
     collect_milestones,
@@ -51,19 +55,15 @@ def _section(body: str, title: str) -> str:
 
 def _capability_summary(root: Path) -> str:
     """Read the hand-maintained owner summary without duplicating TASK prose."""
-    candidates = (
-        root / "capability_summary.md",
-        root / "operations" / "capability_summary.md",
-    )
-    for path in candidates:
-        if path.is_file():
-            document = load_document(path)
-            summary = _section(document.body, "Текущая сводка")
-            if summary:
-                return summary
-            capability_blocks = re.findall(r"(?ms)^###\s+.+?(?=^###\s|\Z)", document.body)
-            if capability_blocks:
-                return "\n\n".join(block.strip() for block in capability_blocks)
+    path = root / "capability_summary.md"
+    if path.is_file():
+        document = load_document(path)
+        summary = _section(document.body, "Текущая сводка")
+        if summary:
+            return summary
+        capability_blocks = re.findall(r"(?ms)^###\s+.+?(?=^###\s|\Z)", document.body)
+        if capability_blocks:
+            return "\n\n".join(block.strip() for block in capability_blocks)
     return "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
 
 
@@ -113,7 +113,11 @@ def _component_link(component: str) -> str:
 
 def _audit_status(root: Path) -> str:
     """Render owner-facing aggregate state from the canonical AUD register."""
-    baseline = root / "work" / "audit_baseline.md"
+    candidates = sorted((root / "work" / "audit").glob("audit_baseline_????_??_??.md"))
+    if not candidates:
+        raise ValueError("Отсутствует датированный audit baseline в work/audit/")
+    baseline = candidates[-1]
+    relative_baseline = baseline.relative_to(root).as_posix()
     records: list[tuple[str, str, str]] = []
     for line in baseline.read_text(encoding="utf-8-sig").splitlines():
         match = _AUDIT_ROW_PATTERN.match(line)
@@ -157,7 +161,7 @@ def _audit_status(root: Path) -> str:
 | Закрыты | **{state_counts["resolved"]}** |
 | Критичность | {severity_text} |
 | Ближайшая дата проверки | **{review_text}** |
-| Полное описание и доказательства | [`work/audit_baseline.md`](work/audit_baseline.md) |"""
+| Полное описание и доказательства | [`{relative_baseline}`]({relative_baseline}) |"""
 
 
 def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
@@ -340,73 +344,34 @@ def render_repository_project_status(root: Path) -> str:
 >
 > `{next_action["commands"][0]["value"]}`"""
 
-    return f"""<!-- generated file: do not edit manually -->
----
-id: project_status_current
-type: generated_owner_status
-generation_state: generated
-version: 1.0
----
-
-# Состояние проекта
-
-> Это основной экран владельца. Он автоматически собирается из этапов и карточек задач.
-
-## Ваше действие сейчас
-
-{owner_guidance}
-
-Вам не нужно запускать проверки, разбираться с ветками или менять состояния вручную.
-
-## Текущее состояние
-
-| Параметр | Значение |
-|---|---|
-| Текущий этап | `{current_id}` — {current["title"]} |
-| Этапы V1 | ✅ **{completed_milestones}** выполнено / ❌ **{remaining_milestones}** осталось |
-| Текущая проектная задача | {task_link} |
-| Место в очереди проекта | {queue_position} |
-| Шаги текущей задачи | **{steps_done}** из **{steps_done + steps_remaining}** |
-| Следующий исполнитель | **{actor}** |
-
-## Этапы V1
-
-{milestone_lines}
-
-## Проектные задачи текущего этапа
-
-| Задача | Компонент | Проверка | Состояние |
-|---|---|---|---|
-{technical_coverage}
-
-## Шаги текущей работы
-
-{step_lines}
-
-## Блокеры
-
-{blocker_text}
-
-{audit_status}
-
-## Что уже умеет решение
-
-{capability_summary}
-
-## Незакрытые действия владельца (необязательные)
-
-> Эти пункты не блокируют работу агента и не требуют немедленного ответа — они остаются здесь, пока вы их не закроете, независимо от того, что сама задача уже сдана.
-
-{followups_text}
-
-## Что будет дальше
-
-{next_text}
-
-"""
+    return render_contract(
+        root,
+        "project_status",
+        {
+            "owner_guidance": owner_guidance,
+            "current_id": current_id,
+            "current_title": current["title"],
+            "completed_milestones": completed_milestones,
+            "remaining_milestones": remaining_milestones,
+            "task_link": task_link,
+            "queue_position": queue_position,
+            "steps_done": steps_done,
+            "steps_total": steps_done + steps_remaining,
+            "actor": actor,
+            "milestone_lines": milestone_lines,
+            "technical_coverage": technical_coverage,
+            "step_lines": step_lines,
+            "blocker_text": blocker_text,
+            "audit_status": audit_status,
+            "capability_summary": capability_summary,
+            "followups_text": followups_text,
+            "next_text": next_text,
+        },
+    )
 
 
 def generate_repository_project_status(root: Path) -> bool:
+    assert_registered_output(root, "project_status", root / "project_status.md")
     return atomic_write_generated(
         root / "project_status.md", render_repository_project_status(root)
     )

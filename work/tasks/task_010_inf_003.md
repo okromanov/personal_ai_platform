@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
 work_state: completed
-version: 1.8
-updated: 2026-08-26
+version: 1.9
+updated: 2026-08-28
 next_actor: none
 owner_action: none
 depends_on:
@@ -18,13 +18,10 @@ allowed_paths:
   - src/secrets/env_provider.py
   - src/channels/telegram.py
   - operations/tests/product/test_secrets.py
-  - operations/capability_summary.md
+  - capability_summary.md
   - operations/scripts/documents/generate.py
   - operations/scripts/status/human_status.py
   - project_status.md
-  - generated/markdown_index.md
-  - operations/scripts/documents/platform_capability.py
-  - generated/platfrom_capability.md
 traces_to:
   - m02
 implements:
@@ -76,7 +73,7 @@ tests:
 
 - [x] Шесть тестов `operations/tests/product/test_secrets.py` прошли;
 - [~] Полный server gate GitHub Actions отложен до 1 сентября 2026 года из-за исчерпанного лимита; успешный результат не заявляется;
-- [x] generated-документы обновлены на этой ветке;
+- [x] [`project_status.md`](../../project_status.md) обновлён на этой ветке;
 - [x] Все пути поставки входят в `allowed_paths`;
 - [x] [`TEST_016`](../tests/test_016.md) имеет актуальную спецификацию и автоматическое evidence.
 

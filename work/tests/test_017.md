@@ -5,8 +5,8 @@ title: "INF_CMP_005 — SQLite-постоянное состояние зада�
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.0
-updated: 2026-08-26
+version: 1.1
+updated: 2026-08-28
 accepts:
   - m02
 traces_to:
@@ -39,3 +39,8 @@ depends_on:
 ## 4. Критерий успеха
 
 Тест создаёт SQLite-хранилище, записывает все виды состояния, затем открывает тот же файл новым экземпляром. Сообщение, checkpoint, retry/cancel и защита от повтора должны быть восстановлены.
+
+## 5. Состав доказательства
+
+`automated_evidence: quality_suite`. Evidence содержит результат канонического
+набора тестов, Git SHA и время выполнения.
