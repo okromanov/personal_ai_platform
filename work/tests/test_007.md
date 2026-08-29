@@ -5,7 +5,7 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.9
+version: 2.0
 updated: 2026-08-29
 accepts:
   - m02
@@ -56,7 +56,7 @@ python3 -m unittest operations.tests.product.test_channels -v
 
 ## 4. Критерий успеха
 
-Все 16 тестов проходят, включая сценарии:
+Все 17 тестов проходят, включая сценарии:
 
 - ✓ telegram_channel_init — инициализация с токеном
 - ✓ receive_without_token — отказ без токена
@@ -66,10 +66,11 @@ python3 -m unittest operations.tests.product.test_channels -v
 - ✓ send_status — отправка статуса задачи
 - ✓ multiple_messages — обработка нескольких сообщений
 - ✓ channel_reset — очистка состояния канала
+- ✓ receive_timeout — таймаут ожидания сообщения возвращает `ChannelError`
 
 ## 5. Состав доказательства
 
-`automated_evidence: quality_suite`. Каждый запуск верификационного скрипта создаёт доказательство выполнения всех 16 модульных тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
+`automated_evidence: quality_suite`. Каждый запуск верификационного скрипта создаёт доказательство выполнения всех 17 модульных тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
 
 ## 6. Реализованные компоненты
 
@@ -124,12 +125,12 @@ operations/tests/product/
 ## 9. Доказательства
 
 - **Исходный код**: [`src/channels/`](../../src/channels/) — стабильный контракт и Telegram реализация
-- **Тесты**: 16 юнит-тестов в [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`
+- **Тесты**: 17 юнит-тестов в [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`
 - **Отсутствие регрессий**: Запуск `check.py --all` прошел успешно
 
 ## 10. Готово когда
 
-- ✅ 16 тестов пройдено
+- ✅ 17 тестов пройдено
 - ✅ Архитектура Channel определена и используется
 - ✅ TelegramChannel реализован для базового сценария
 - ✅ TaskMessage нормализует ввод с метаданными

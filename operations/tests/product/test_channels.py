@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import unittest
+from unittest.mock import patch
 
 from src.channels import ChannelError, TaskMessage, TaskState, TelegramChannel
 
@@ -41,6 +42,23 @@ class TelegramChannelAsyncTests(unittest.IsolatedAsyncioTestCase):
         received = await asyncio.wait_for(channel.receive(), timeout=1.0)
         self.assertEqual(received.user_input, "Hello assistant")
         self.assertIs(received, injected)
+
+    async def test_receive_times_out_when_no_message_arrives(self) -> None:
+        # AUD-016: this is the channel's only externally-observable error
+        # path besides the missing-token case, but nothing called it live
+        # (Orchestrator only calls .send()) or tested it. Fake an immediate
+        # timeout rather than waiting the real 30s.
+        channel = TelegramChannel(bot_token="test_token")
+
+        async def immediate_timeout(coro, timeout):
+            coro.close()
+            raise TimeoutError
+
+        with patch("src.channels.telegram.asyncio.wait_for", side_effect=immediate_timeout):
+            with self.assertRaisesRegex(
+                ChannelError, "No message received from Telegram within timeout"
+            ):
+                await channel.receive()
 
     async def test_send_without_token_raises_channel_error(self) -> None:
         channel = TelegramChannel()
