@@ -4,7 +4,7 @@ type: milestone_completion_report
 completion_state: completed
 version: 1.0
 created: 2026-08-22
-updated: 2026-08-28
+updated: 2026-08-29
 milestone: m01
 ---
 
@@ -28,7 +28,7 @@ milestone: m01
 
 ### Новые файлы (1)
 
-- [`work/m01.json`](m01.json)
+- [`work/acceptance/m01.json`](m01.json)
 
 ### Изменённые файлы (4)
 

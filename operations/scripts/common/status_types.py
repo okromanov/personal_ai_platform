@@ -40,6 +40,7 @@ class TaskItem(TypedDict):
     traces_to: list[str]
     implements: list[str]
     component: str
+    delivery_role: str
     allowed_paths: list[str]
     blocker: str
     tests: list[TestRef]

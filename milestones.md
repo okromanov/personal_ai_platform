@@ -2,8 +2,8 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 1.6
-updated: 2026-08-26
+version: 1.7
+updated: 2026-08-29
 depends_on:
   - business_requirements
   - architecture_baseline
@@ -71,6 +71,8 @@ V1 — первый регулярно используемый персонал
 Эти пункты являются критериями, а не отметкой их фактического выполнения. До их подтверждения [`m01`](#m01) остаётся `in-progress`.
 
 Состояние `completed` появляется только после решения владельца `ПРИНИМАЮ m01` и контролируемого перехода принятия по [`operations/acceptance.md`](operations/acceptance.md).
+
+**Примечание (2026-08-29, [`AUD-009`](work/audit/audit_register.md#aud-009)):** запись принятия [`work/acceptance/m01.json`](work/acceptance/m01.json) была создана не через `operations/scripts/acceptance/apply.py`, а вручную, и ошибочно заявляла переход в `accepted` для всех 9 ADR, включая [`ADR_005`](adr/adr_005_first_model_provider_selection.md)–[`ADR_009`](adr/adr_009_secret_management_strategy.md) (трассируются на [`m02`](#m02)/[`m04`](#m04)/[`m06`](#m06), не на [`m01`](#m01)). Сам переход ни разу не выполнялся. Исправлено: [`ADR_001`](adr/adr_001_language_and_runtime.md)–[`ADR_004`](adr/adr_004_task_events_and_logging.md) (единственные с `traces_to: m01`) переведены в `accepted`; запись принятия и итоговый отчёт скорректированы. Существенные факты приёмки — CI-доказательство и смысловая проверка — независимо подтверждены и не затронуты этим исправлением.
 
 <a id="m02"></a>
 ## m02 — Выбор ключевых технологий и первый живой помощник

@@ -2,8 +2,8 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.6
-updated: 2026-08-28
+version: 1.8
+updated: 2026-08-29
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -24,6 +24,13 @@ depends_on:
 | [`change_process.md`](change_process.md) | Как вносить изменения в репозиторий | Владелец/агент готов к изменению | Коммит в ветку или PR |
 | [`semantic_review.md`](semantic_review.md) | Проверить документы на противоречия | Редакция опубликована на SHA | Отчёт о найденных проблемах |
 | [`acceptance.md`](acceptance.md) | Принять этап и перейти в следующее состояние | Все доказательства собраны | Этап переводится в `completed` |
+| [`adr_lifecycle.md`](adr_lifecycle.md) | Как создаются, обновляются и архивируются ADR | Нужно принять или изменить архитектурное решение | ADR в состоянии `proposed`/`accepted`/`superseded` |
+| [`state_machines.md`](state_machines.md) | Диаграммы допустимых переходов состояний (TASK, ADR, milestone) | Непонятен допустимый следующий `work_state`/`decision_state` | Подтверждённый допустимый переход |
+| [`threat_review_triggers.md`](threat_review_triggers.md) | Какое событие означает, что угроза из модели угроз реализовалась, и что делать | Аномалия, ошибка или инцидент, потенциально связанный с [`threat_model.md`](../specifications/threat_model.md) | Решение: инцидент подтверждён/отклонён, процедура реагирования |
+| [`license_policy.md`](license_policy.md) | Почему в репозитории нет корневого `LICENSE` и что это означает | Вопрос о лицензировании/распространении кода | Понимание текущего закрытого режима |
+| [`procedures/file_update_dependencies.md`](procedures/file_update_dependencies.md) | Какие производные файлы нужно обновить при правке конкретного первичного файла | Правка файла с известными зависимыми генераторами/документами | Полный список файлов для синхронной правки |
+| [`procedures/recover_stale_sensitive_action_lock.md`](procedures/recover_stale_sensitive_action_lock.md) | Как безопасно снять зависшую блокировку sensitive-action после краха процесса | `authorize_sensitive_action` стабильно возвращает `OwnerControlStateError` о блокировке | Блокировка снята после подтверждения, что держатель мёртв |
+| [`examples/sample_task_lifecycle.md`](examples/sample_task_lifecycle.md) | Полный пример карточки TASK от начала до завершения | Нужен образец при создании новой TASK | Понимание структуры и связей карточки TASK |
 
 ## 3. Сценарии и порядок выполнения
 
@@ -178,6 +185,5 @@ AGENTS.md раздел 2 (с чего начинать)
 - **Пути — только `lower_snake_case`** (кроме [`AGENTS.md`](../AGENTS.md) и dot-файлов).
 - **Ссылки на элементы трассируемости** — каждое упоминание `BR_XXX`/`SYS_XXX`/`ARC_CMP_XXX`/
   `TASK_XXX`/`TEST_XXX`/`mXX` и т. д. в тексте TASK/TEST оформляется код-спаном со ссылкой на исходный документ, а не голым
-  текстом. Правило и его исключения (разделы, цитируемые целиком в [`project_status.md`](../project_status.md))
-  — в [`operations/templates/task_template.md`](templates/task_template.md) и
+  текстом. Правило — в [`operations/templates/task_template.md`](templates/task_template.md) и
   [`operations/templates/test_template.md`](templates/test_template.md).

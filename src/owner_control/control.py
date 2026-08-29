@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from .base import (
     SENSITIVE_ACTION_CLASSES,
@@ -90,12 +92,24 @@ class OwnerControlGate(OwnerControl):
             os.mkdir(self._actions_lock_path)
         except FileExistsError as exc:
             raise OwnerControlStateError(
-                "owner-control state is locked or recovery is required"
+                "owner-control state is locked or recovery is required; see "
+                f"{self._actions_lock_path.name}/holder.json for who holds it and "
+                "operations/procedures/recover_stale_sensitive_action_lock.md for the runbook"
             ) from exc
+        # Record who holds the lock (AUD-013): a process that crashes between
+        # os.mkdir and os.rmdir leaves the lock held forever with nothing on
+        # disk saying why -- recover_stale_sensitive_action_lock() reads this
+        # to refuse removing a lock whose holder process is still alive.
+        holder_path = self._actions_lock_path / "holder.json"
+        atomic_write_json(
+            holder_path,
+            {"pid": os.getpid(), "acquired_at": datetime.now(UTC).isoformat()},
+        )
         try:
             yield
         finally:
             try:
+                holder_path.unlink(missing_ok=True)
                 os.rmdir(self._actions_lock_path)
             except OSError as exc:
                 raise OwnerControlStateError(
@@ -190,3 +204,52 @@ class OwnerControlGate(OwnerControl):
             return AuthorizationDecision(
                 authorized=True, action_id=action_id, reason="owner confirmed"
             )
+
+
+class StaleLockRecoveryError(RuntimeError):
+    """Raised when a stale sensitive-action lock cannot be safely removed."""
+
+
+RECOVERY_CONFIRMATION_PHRASE = "REMOVE STALE OWNER CONTROL LOCK"
+
+
+def _process_is_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        # Exists, owned by someone else. Fail closed: treat as alive rather
+        # than guess it's safe to remove the lock out from under it.
+        return True
+    return True
+
+
+def recover_stale_sensitive_action_lock(
+    state_dir: Path,
+    *,
+    confirmation: str,
+    is_process_alive: Callable[[int], bool] = _process_is_alive,
+) -> None:
+    """Remove a sensitive-action lock left behind by a crashed process
+    (AUD-013). Never automatic and never called by OwnerControlGate itself:
+    a human runs this deliberately, after confirming out of band that the
+    holder process is actually gone -- not merely slow. Refuses outright if
+    the recorded holder PID is still alive, or if no lock is held at all."""
+    if confirmation != RECOVERY_CONFIRMATION_PHRASE:
+        raise StaleLockRecoveryError(
+            f"recovery requires the exact confirmation phrase: {RECOVERY_CONFIRMATION_PHRASE!r}"
+        )
+    lock_path = state_dir / "owner_control_actions.lock"
+    if not lock_path.is_dir():
+        raise StaleLockRecoveryError("no lock is currently held; nothing to recover")
+    holder_path = lock_path / "holder.json"
+    if holder_path.is_file():
+        holder = read_json_object(holder_path)
+        pid = holder.get("pid")
+        if isinstance(pid, int) and is_process_alive(pid):
+            raise StaleLockRecoveryError(
+                f"lock holder process {pid} is still running; do not remove the lock"
+            )
+    holder_path.unlink(missing_ok=True)
+    lock_path.rmdir()

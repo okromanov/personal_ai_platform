@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
 work_state: completed
-version: 1.9
-updated: 2026-08-28
+version: 2.0
+updated: 2026-08-29
 next_actor: none
 owner_action: none
 depends_on:
@@ -18,7 +18,6 @@ allowed_paths:
   - src/secrets/env_provider.py
   - src/channels/telegram.py
   - operations/tests/product/test_secrets.py
-  - capability_summary.md
   - operations/scripts/documents/generate.py
   - operations/scripts/status/human_status.py
   - project_status.md

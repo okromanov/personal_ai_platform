@@ -2,8 +2,8 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.9
-updated: 2026-08-28
+version: 2.0
+updated: 2026-08-29
 depends_on:
   - project_rules
 ---
@@ -203,6 +203,7 @@ traces_to:
 
 Опциональные поля:
 - `blocker` — если `work_state: blocked`, причина блокировки
+- `delivery_role` — допустимые значения: `component` (по умолчанию, задача поставляет внутренний компонент, заменима эквивалентной задачей) или `terminal_outcome` (задача из раздела этапа «Очередь, закрывающая пользовательский результат» — заменить её задачей со значением `component` нельзя, см. [`task_template.md`](../operations/templates/task_template.md)). Каждая TASK, упомянутая в таком разделе [`milestones.md`](../milestones.md), обязана иметь `delivery_role: terminal_outcome` — проверяется автоматически.
 
 Пример:
 ```yaml
@@ -349,6 +350,8 @@ version: 1.0
 6. **Состояния**: используются только значения, перечисленные выше. Универсальное `status` запрещено.
 
 7. **Автоматическая валидация**: скрипт `operations/scripts/documents/check.py` проверяет корректность всех frontmatter полей при каждом коммите.
+
+8. **Порядок полей (рекомендация, не проверяется автоматически)**: `id`, `type`, `title` (если применимо), поле состояния (`document_state`/`decision_state`/`work_state`/`spec_state`), специальные поля типа, `version`, `updated`, `depends_on` последним. Существующие документы этому порядку не всегда следуют — не переоформляйте файл только ради порядка полей при несвязанной правке.
 
 ### 8.3 Когда создавать новые документы
 

@@ -45,6 +45,27 @@ class QualityRunnerTests(unittest.TestCase):
             )
             self.assertEqual(run_tests(root, start_dir="tests", verbosity=0), 0)
 
+    def test_canonical_unittest_runner_gives_unexpected_success_its_own_exit_code(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            tests = root / "tests"
+            tests.mkdir()
+            (tests / "test_xpass.py").write_text(
+                "import unittest\n"
+                "class Sample(unittest.TestCase):\n"
+                "    @unittest.expectedFailure\n"
+                "    def test_now_passes(self): self.assertTrue(True)\n",
+                encoding="utf-8",
+            )
+            with patch.object(
+                unittest.defaultTestLoader,
+                "_top_level_dir",
+                str(Path(__file__).resolve().parents[3]),
+            ):
+                self.assertEqual(run_tests(root, start_dir="tests", verbosity=0), 3)
+
     def test_configuration_and_permission_checks_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

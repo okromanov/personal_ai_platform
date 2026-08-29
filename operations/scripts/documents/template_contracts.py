@@ -205,7 +205,9 @@ def render_contract(
 def assert_registered_output(root: Path, contract_id: str, output: Path) -> None:
     contract = _contract(root, contract_id)
     relative = output.resolve().relative_to(root.resolve()).as_posix()
-    patterns = [str(value) for value in contract.get("outputs", [])]
+    raw_outputs = contract.get("outputs", [])
+    outputs = raw_outputs if isinstance(raw_outputs, list) else []
+    patterns = [str(value) for value in outputs]
     if not any(_output_matches(relative, pattern) for pattern in patterns):
         raise TemplateContractError(f"{contract_id}: путь {relative} не разрешён реестром шаблонов")
 

@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
 
 from src.channels import TaskMessage, TaskState
-from src.task_state import SQLiteTaskLifecycleStore
+from src.task_state import SQLiteTaskLifecycleStore, TaskLifecycleError
 
 
 class SQLiteTaskLifecycleStoreTests(unittest.TestCase):
@@ -68,6 +69,68 @@ class SQLiteTaskLifecycleStoreTests(unittest.TestCase):
             self.assertEqual(state.checkpoint.step, "second")
             self.assertEqual(state.retry_count, 1)
             self.assertTrue(state.cancelled)
+
+
+class SQLiteTaskLifecycleStoreCorruptionTests(unittest.TestCase):
+    """AUD-019: these decode/state-validation paths (mirroring
+    test_owner_control.py's coverage of the same JSON-in-storage-corruption
+    risk class) were never exercised -- write directly to the database,
+    bypassing the store's own encode(), to simulate real corruption."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.database_path = Path(self._tmp.name) / "task-state.sqlite3"
+        self.store = SQLiteTaskLifecycleStore(self.database_path)
+
+    def _insert_task_message(self, *, metadata_json: str, state: str) -> None:
+        with sqlite3.connect(self.database_path) as connection:
+            connection.execute(
+                """
+                INSERT INTO task_messages (
+                    task_id, channel_type, user_input, metadata_json, state,
+                    created_at, completed_at, error_message
+                ) VALUES ('task-1', 'telegram', 'hi', ?, ?, '2026-08-29T00:00:00', NULL, NULL)
+                """,
+                (metadata_json, state),
+            )
+
+    def test_load_task_with_invalid_metadata_json_fails_closed(self) -> None:
+        self._insert_task_message(metadata_json="not json", state=TaskState.PENDING.value)
+        with self.assertRaises(TaskLifecycleError):
+            self.store.load_task("task-1")
+
+    def test_load_task_with_non_dict_metadata_json_fails_closed(self) -> None:
+        self._insert_task_message(metadata_json="[1, 2, 3]", state=TaskState.PENDING.value)
+        with self.assertRaises(TaskLifecycleError):
+            self.store.load_task("task-1")
+
+    def test_load_task_with_unknown_state_fails_closed(self) -> None:
+        self._insert_task_message(metadata_json="{}", state="not_a_real_state")
+        with self.assertRaises(TaskLifecycleError):
+            self.store.load_task("task-1")
+
+    def test_get_state_with_invalid_checkpoint_data_json_fails_closed(self) -> None:
+        with sqlite3.connect(self.database_path) as connection:
+            connection.execute(
+                """
+                INSERT INTO task_states (task_id, checkpoint_step, checkpoint_data_json)
+                VALUES ('task-1', 'tool_called', 'not json')
+                """
+            )
+        with self.assertRaises(TaskLifecycleError):
+            self.store.get_state("task-1")
+
+    def test_get_state_with_non_dict_checkpoint_data_json_fails_closed(self) -> None:
+        with sqlite3.connect(self.database_path) as connection:
+            connection.execute(
+                """
+                INSERT INTO task_states (task_id, checkpoint_step, checkpoint_data_json)
+                VALUES ('task-1', 'tool_called', '"just a string"')
+                """
+            )
+        with self.assertRaises(TaskLifecycleError):
+            self.store.get_state("task-1")
 
 
 if __name__ == "__main__":

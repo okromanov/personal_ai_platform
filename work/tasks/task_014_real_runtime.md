@@ -3,10 +3,10 @@ id: TASK_014
 type: task
 title: Реальная среда агента для ARC_CMP_003
 component: ARC_CMP_003
-delivery_role: component
+delivery_role: terminal_outcome
 work_state: planned
-version: 1.0
-updated: 2026-08-26
+version: 1.1
+updated: 2026-08-29
 next_actor: agent
 owner_action: none
 depends_on:

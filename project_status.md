@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-29T16:01:00+00:00
+generated_at: 2026-08-29T20:05:00+00:00
 version: 1.0
 ---
 
@@ -57,10 +57,10 @@ version: 1.0
 | [`TASK_011`](work/tasks/task_011_inf_005.md) | [`INF_CMP_005`](specifications/infrastructure_baseline.md#inf_cmp_005) | [`TEST_017`](work/tests/test_017.md) | выполнена |
 | [`TASK_012`](work/tasks/task_012_inf_007.md) | [`INF_CMP_007`](specifications/infrastructure_baseline.md#inf_cmp_007) | [`TEST_018`](work/tests/test_018.md) | выполнена |
 | [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — | выполняется |
-| [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — | запланирована |
-| [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована |
-| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована |
-| [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована |
+| [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — | запланирована — закрывает результат этапа |
+| [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована — закрывает результат этапа |
+| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована — закрывает результат этапа |
+| [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована — закрывает результат этапа |
 
 ## Шаги текущей работы
 
@@ -80,57 +80,14 @@ version: 1.0
 | Параметр | Значение |
 |---|---|
 | Всего замечаний | **20** |
-| Исправлены, ожидают проверки | **6** |
-| Открыты | **14** |
+| Исправлены, ожидают проверки | **19** |
+| Открыты | **1** |
 | Риски приняты владельцем | **0** |
 | Закрыты | **0** |
 | Критичность | critical: **1**, high: **3**, medium: **10**, low: **6** |
+| Состояние gate/CI | **ЕСТЬ незакрытые критические замечания (1)** — не полагайтесь на статус CI/gate без проверки карточек ниже |
 | Ближайшая дата проверки | **2026-09-02** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |
-
-## Что уже умеет решение
-
-### Управляемая обработка сообщений
-
-- **Тип:** пользовательская
-- **Описание:** Платформа принимает поддерживаемое сообщение, проверяет личность и чувствительные действия, проводит задачу через предсказуемый цикл и выдаёт контролируемый ответ; модель и инструменты пока используют тестовые адаптеры.
-- **Сформирована задачами:** [TASK_001](work/tasks/task_001_arc_001.md), [TASK_002](work/tasks/task_002_arc_002.md), [TASK_003](work/tasks/task_003_arc_003.md), [TASK_004](work/tasks/task_004_arc_004.md), [TASK_005](work/tasks/task_005_arc_005.md).
-
-### Возобновляемое состояние задач
-
-- **Тип:** системная
-- **Описание:** Состояние шага, повтора, отмены и защиты от повторного действия хранится отдельно от цикла выполнения и может быть корректно восстановлено.
-- **Сформирована задачами:** [TASK_006](work/tasks/task_006_arc_007.md).
-
-### Наблюдаемость и контроль работоспособности
-
-- **Тип:** системная
-- **Описание:** Платформа сохраняет между перезапусками только технические сведения о работоспособности, ресурсах, внешнем потреблении и числовых событиях. Текст задач, ответов, секретов и деталей ошибок не имеет поля хранения.
-- **Сформирована задачами:** [TASK_007](work/tasks/task_007_arc_009.md), [TASK_012](work/tasks/task_012_inf_007.md).
-
-### Минимальная вычислительная среда
-
-- **Тип:** системная
-- **Описание:** Определена воспроизводимая непривилегированная среда выполнения с проверяемым health-check без объявления конкретного облачного поставщика.
-- **Сформирована задачами:** [TASK_008](work/tasks/task_008_inf_001.md).
-
-### Контролируемая сеть
-
-- **Тип:** системная
-- **Описание:** Fail-closed политика по умолчанию закрывает ingress, egress и DNS; будущее исключение требует точного сервиса, адреса и порта, а защищённый туннель не имеет прямого fallback.
-- **Сформирована задачами:** [TASK_009](work/tasks/task_009_inf_002.md).
-
-### Защищённая выдача секретов
-
-- **Тип:** системная
-- **Описание:** Секреты запрашиваются по логическому имени через заменяемый `SecretProvider`; env-реализация отклоняет пустые и отсутствующие значения без раскрытия секретов, а TelegramChannel получает `TELEGRAM_BOT_TOKEN` через контракт.
-- **Сформирована задачами:** [TASK_010](work/tasks/task_010_inf_003.md).
-
-### Постоянное состояние задач
-
-- **Тип:** системная
-- **Описание:** Состояние задачи, checkpoint, повторы, отмена и защита от повторного действия сохраняются в переносимой SQLite-базе и восстанавливаются после перезапуска без изменения прикладного контракта.
-- **Сформирована задачами:** [TASK_006](work/tasks/task_006_arc_007.md), [TASK_011](work/tasks/task_011_inf_005.md).
 
 ## Незакрытые действия владельца (необязательные)
 

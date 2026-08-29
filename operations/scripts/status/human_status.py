@@ -53,20 +53,6 @@ def _section(body: str, title: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _capability_summary(root: Path) -> str:
-    """Read the hand-maintained owner summary without duplicating TASK prose."""
-    path = root / "capability_summary.md"
-    if path.is_file():
-        document = load_document(path)
-        summary = _section(document.body, "Текущая сводка")
-        if summary:
-            return summary
-        capability_blocks = re.findall(r"(?ms)^###\s+.+?(?=^###\s|\Z)", document.body)
-        if capability_blocks:
-            return "\n\n".join(block.strip() for block in capability_blocks)
-    return "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
-
-
 def _open_followups(tasks: list[TaskItem]) -> list[tuple[TaskItem, str]]:
     """Every open, non-blocking `owner_followups` entry across all TASK cards.
 
@@ -121,7 +107,7 @@ def _audit_status(root: Path) -> str:
     for line in register.read_text(encoding="utf-8-sig").splitlines():
         match = _AUDIT_ROW_PATTERN.match(line)
         if match:
-            records.append(match.groups())
+            records.append((match.group(1), match.group(2), match.group(3)))
 
     state_counts = {
         state: sum(record_state == state for _, record_state, _ in records)
@@ -148,6 +134,16 @@ def _audit_status(root: Path) -> str:
         or "нет"
     )
     review_text = active_review_dates[0] if active_review_dates else "не требуется"
+    critical_open = sum(
+        record_severity == "critical" and record_state != "resolved"
+        for record_severity, record_state, _ in records
+    )
+    gate_text = (
+        f"**ЕСТЬ незакрытые критические замечания ({critical_open})** — "
+        "не полагайтесь на статус CI/gate без проверки карточек ниже"
+        if critical_open
+        else "критических незакрытых замечаний нет"
+    )
 
     return f"""## Контроль результатов аудита
 
@@ -159,6 +155,7 @@ def _audit_status(root: Path) -> str:
 | Риски приняты владельцем | **{state_counts["accepted_risk"]}** |
 | Закрыты | **{state_counts["resolved"]}** |
 | Критичность | {severity_text} |
+| Состояние gate/CI | {gate_text} |
 | Ближайшая дата проверки | **{review_text}** |
 | Полное описание и доказательства | [`{relative_baseline}`]({relative_baseline}) |"""
 
@@ -189,6 +186,8 @@ def _technical_coverage(tasks: list[TaskItem], root: Path) -> str:
         linked = tests_by_task.get(str(task["id"]), [])
         evidence = ", ".join(f"[`{test_id}`]({path})" for test_id, path in linked) or "—"
         state = labels.get(str(task.get("work_state", "")), str(task.get("work_state", "")))
+        if str(task.get("delivery_role", "component")) == "terminal_outcome":
+            state = f"{state} — закрывает результат этапа"
         rows.append(f"| {task_link} | {_component_link(component)} | {evidence} | {state} |")
     return "\n".join(rows) or "| — | — | — | — |"
 
@@ -231,7 +230,6 @@ def render_repository_project_status(root: Path) -> str:
     )
     technical_coverage = _technical_coverage(current_tasks, root)
     audit_status = _audit_status(root)
-    capability_summary = _capability_summary(root)
 
     if current_task:
         task_link = (
@@ -362,7 +360,6 @@ def render_repository_project_status(root: Path) -> str:
             "step_lines": step_lines,
             "blocker_text": blocker_text,
             "audit_status": audit_status,
-            "capability_summary": capability_summary,
             "followups_text": followups_text,
             "next_text": next_text,
         },

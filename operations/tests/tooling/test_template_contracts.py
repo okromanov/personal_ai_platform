@@ -102,9 +102,8 @@ class TemplateContractTests(unittest.TestCase):
         self.assertNotIn("Подтвердить завершение", fenced)
         self.assertNotIn("предыдущей TASK", fenced)
 
-    def test_owner_status_keeps_capability_and_dated_audit_sections(self) -> None:
+    def test_owner_status_keeps_dated_audit_section(self) -> None:
         rendered = render_repository_project_status(ROOT)
-        self.assertIn("Что уже умеет решение", rendered)
         self.assertIn("audit_register.md", rendered)
 
 

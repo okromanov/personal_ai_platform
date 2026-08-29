@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_007
 component: INF_CMP_007
 work_state: completed
-version: 1.8
-updated: 2026-08-28
+version: 1.9
+updated: 2026-08-29
 next_actor: none
 owner_action: none
 depends_on:
@@ -17,7 +17,6 @@ allowed_paths:
   - src/observability/collector.py
   - src/observability/sqlite_store.py
   - operations/tests/product/test_observability.py
-  - capability_summary.md
 traces_to:
   - m02
 implements:

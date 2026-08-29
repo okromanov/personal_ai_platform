@@ -267,15 +267,23 @@ def _document_ids(root: Path) -> dict[str, str]:
 
 
 def _known_reference_ids(root: Path, document_ids: dict[str, str]) -> set[str]:
+    """Falls back to `document_ids` alone on a genuinely malformed input
+    document (ValueError from the collectors' own validation, or OSError
+    reading it) -- that under-counts known IDs, which only produces more
+    false "unknown reference" errors, never fewer. Any other exception
+    (AttributeError, TypeError, ...) is a real bug in this function or its
+    collectors and must not be swallowed as if it were just missing data."""
     known = set(document_ids)
     try:
         known.update(identifier.lower() for identifier in collect_traceable_elements(root))
-    except Exception:
-        pass
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_traceable_elements failed, known IDs under-counted: {exc}",
+              file=sys.stderr)
     try:
         known.update(str(item["id"]).lower() for item in collect_milestones(root)["items"])
-    except Exception:
-        pass
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_milestones failed, known IDs under-counted: {exc}",
+              file=sys.stderr)
     return known
 
 
@@ -768,6 +776,51 @@ def check_milestones(root: Path) -> CheckResult:
     return _result("milestones", errors)
 
 
+_TERMINAL_QUEUE_PATTERN = re.compile(
+    r"(?ms)^###\s+Очередь, закрывающая пользовательский результат\s*$\n(.*?)(?=^##\s|\Z)"
+)
+# Only a TASK immediately followed by "-- description" is claimed as one of
+# the queue's own outcomes; other TASKs are commonly named nearby purely as
+# already-completed prerequisites (e.g. "TASK_012 и TASK_013 завершают
+# наблюдаемость...") and must not be swept in as terminal-outcome claims.
+_TASK_ID_MENTION = re.compile(r"`(TASK_\d{3})`\]\([^)]*\)\s*[—-]")
+
+
+def check_terminal_outcome_delivery_role(root: Path) -> CheckResult:
+    """Every TASK named in a milestone's "closes the user-facing outcome"
+    queue must be marked delivery_role: terminal_outcome (AUD-012): a
+    component-role TASK cannot substitute for one, per milestones.md's own
+    prose, but nothing previously verified the frontmatter field agreed
+    with that prose."""
+    errors: list[str] = []
+    milestones_path = root / "milestones.md"
+    if not milestones_path.is_file():
+        return _result("terminal_outcome_delivery_role", errors)
+    text = read_text(milestones_path)
+    queue_task_ids: set[str] = set()
+    for section in _TERMINAL_QUEUE_PATTERN.findall(text):
+        queue_task_ids.update(_TASK_ID_MENTION.findall(section))
+    if not queue_task_ids:
+        return _result("terminal_outcome_delivery_role", errors)
+
+    try:
+        tasks = {str(task["id"]): task for task in collect_tasks(root)["tasks"]}
+    except Exception as exc:
+        return _result("terminal_outcome_delivery_role", [str(exc)])
+
+    for task_id in sorted(queue_task_ids):
+        task = tasks.get(task_id)
+        if task is None:
+            errors.append(f"milestones.md: очередь ссылается на неизвестную {task_id}")
+            continue
+        if str(task.get("delivery_role", "component")) != "terminal_outcome":
+            errors.append(
+                f"{task_id}: указана в очереди, закрывающей пользовательский результат, "
+                "но delivery_role не terminal_outcome"
+            )
+    return _result("terminal_outcome_delivery_role", errors)
+
+
 def _markdown_section(body: str, heading: str) -> str:
     match = re.search(
         rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(heading)}\s*$\n(.*?)(?=^##\s|\Z)",
@@ -854,21 +907,30 @@ def check_tasks(root: Path) -> CheckResult:
 
 
 def check_test_specs(root: Path) -> CheckResult:
+    # Each fallback below only shrinks the known-ID/evidence sets on a
+    # genuinely malformed input (ValueError/OSError from the collector's own
+    # validation), which can only produce more false "unknown" errors, never
+    # mask a real one. Any other exception is a bug in this function or its
+    # collectors and must surface, not be swallowed as "just no data".
     errors: list[str] = []
     try:
         records = collect_traceable_elements(root)
-    except Exception:
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_traceable_elements failed in check_test_specs: {exc}",
+              file=sys.stderr)
         records = {}
     try:
         milestone_ids = {str(item["id"]).lower() for item in collect_milestones(root)["items"]}
-    except Exception:
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: collect_milestones failed in check_test_specs: {exc}", file=sys.stderr)
         milestone_ids = set()
     try:
         raw_catalog = load_quality_registry(root).get("evidence_catalog", {})
         evidence_ids = (
             {str(value) for value in raw_catalog} if isinstance(raw_catalog, dict) else set()
         )
-    except Exception:
+    except (ValueError, OSError) as exc:
+        print(f"WARNING: load_quality_registry failed in check_test_specs: {exc}", file=sys.stderr)
         evidence_ids = set()
     tests_dir = root / "work/tests"
     seen: set[str] = set()
@@ -1005,6 +1067,57 @@ def check_acceptance_model(root: Path) -> CheckResult:
     else:
         errors.extend(validate_task_semantics(root, current_id))
     return _result("acceptance_model", errors, warnings)
+
+
+def check_acceptance_adr_transitions(root: Path) -> CheckResult:
+    """A milestone acceptance record's claimed ADR transitions must match the
+    real decision_state on disk (see AUD-009: a hand-authored acceptance
+    record once claimed 9 ADR transitions to `accepted` while none of the
+    files were ever touched — apply.py's real transition writes the ADR
+    files themselves, so a record that claims a transition without a
+    matching file is evidence the record bypassed the script)."""
+    errors: list[str] = []
+    acceptance_dir = root / "work" / "acceptance"
+    if not acceptance_dir.is_dir():
+        return _result("acceptance_adr_transitions", errors)
+
+    adr_states: dict[str, str] = {}
+    for path in sorted((root / "adr").glob("adr_*.md")):
+        try:
+            doc = load_document(path)
+        except ValueError:
+            continue
+        doc_id = str(doc.metadata.get("id", "")).strip().upper()
+        if doc_id:
+            adr_states[doc_id] = str(doc.metadata.get("decision_state", "")).strip()
+
+    for path in sorted(acceptance_dir.glob("m*.json")):
+        relative = relative_posix(path, root)
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(record, dict):
+            continue
+        transitions = record.get("adr_transitions", [])
+        if not isinstance(transitions, list):
+            continue
+        for entry in transitions:
+            if not isinstance(entry, dict):
+                continue
+            adr_id = str(entry.get("adr_id", "")).strip().upper()
+            state_change = str(entry.get("state_change", ""))
+            if not adr_id or "accepted" not in state_change:
+                continue
+            actual = adr_states.get(adr_id)
+            if actual is None:
+                errors.append(f"{relative}: заявляет переход {adr_id}, но такого ADR нет в adr/")
+            elif actual != "accepted":
+                errors.append(
+                    f"{relative}: заявляет переход {adr_id} → accepted, "
+                    f"но decision_state в adr/ остаётся '{actual}'"
+                )
+    return _result("acceptance_adr_transitions", errors)
 
 
 def _block_scalar_errors(workflow_name: str, text: str) -> list[str]:
@@ -1369,11 +1482,13 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("authority_graph", check_authority_graph),
         ("document_policy", check_document_policy),
         ("milestones", check_milestones),
+        ("terminal_outcome_delivery_role", check_terminal_outcome_delivery_role),
         ("business_requirements_coverage", check_business_requirements_coverage),
         ("tasks", check_tasks),
         ("test_specs", check_test_specs),
         ("quality_registry", check_quality_registry),
         ("acceptance_model", check_acceptance_model),
+        ("acceptance_adr_transitions", check_acceptance_adr_transitions),
         ("automation_policy", check_automation_policy),
         ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
         ("generated", check_generated),
