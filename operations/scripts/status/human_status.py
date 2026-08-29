@@ -53,20 +53,6 @@ def _section(body: str, title: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-def _capability_summary(root: Path) -> str:
-    """Read the hand-maintained owner summary without duplicating TASK prose."""
-    path = root / "capability_summary.md"
-    if path.is_file():
-        document = load_document(path)
-        summary = _section(document.body, "Текущая сводка")
-        if summary:
-            return summary
-        capability_blocks = re.findall(r"(?ms)^###\s+.+?(?=^###\s|\Z)", document.body)
-        if capability_blocks:
-            return "\n\n".join(block.strip() for block in capability_blocks)
-    return "Пока ни одна завершённая TASK не добавила новую возможность для владельца."
-
-
 def _open_followups(tasks: list[TaskItem]) -> list[tuple[TaskItem, str]]:
     """Every open, non-blocking `owner_followups` entry across all TASK cards.
 
@@ -231,7 +217,6 @@ def render_repository_project_status(root: Path) -> str:
     )
     technical_coverage = _technical_coverage(current_tasks, root)
     audit_status = _audit_status(root)
-    capability_summary = _capability_summary(root)
 
     if current_task:
         task_link = (
@@ -362,7 +347,6 @@ def render_repository_project_status(root: Path) -> str:
             "step_lines": step_lines,
             "blocker_text": blocker_text,
             "audit_status": audit_status,
-            "capability_summary": capability_summary,
             "followups_text": followups_text,
             "next_text": next_text,
         },

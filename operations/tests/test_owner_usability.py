@@ -18,9 +18,7 @@ from operations.scripts.status.generate_project_status import (
     render_progress_sections,
 )
 from operations.scripts.status.human_status import (
-    _capability_summary,
     _rebase_relative_links,
-    _section,
     render_repository_project_status,
 )
 from operations.scripts.tasks.generate import _owner_followups, collect_tasks, select_current_task
@@ -99,7 +97,6 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Контроль результатов аудита",
             "Исправлены, ожидают проверки",
             "work/audit/audit_register.md",
-            "Что уже умеет решение",
             "выполнено",
             "осталось",
             "[x]",
@@ -110,6 +107,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Что произойдёт после вашей команды",
             "Когда потребуется ваше участие",
             "Общая картина V1",
+            "Что уже умеет решение",
         ]:
             self.assertNotIn(removed_text, rendered)
         self.assertLess(
@@ -133,23 +131,6 @@ class OwnerUsabilityTests(unittest.TestCase):
         # Per-file deliverables stay in TASK allowed_paths and composition;
         # project_status.md does not duplicate that inventory.
         self.assertNotIn("Файлы, созданные в рамках задач", rendered)
-
-    def test_capabilities_section_embeds_the_hand_maintained_synthesis(
-        self,
-    ) -> None:
-        rendered = render_repository_project_status(self.root)
-        section = rendered[
-            rendered.index("## Что уже умеет решение") : rendered.index(
-                "## Незакрытые действия владельца"
-            )
-        ]
-        summary_doc = load_document(self.root / "capability_summary.md")
-        expected = _section(summary_doc.body, "Текущая сводка") or _capability_summary(self.root)
-        self.assertTrue(expected)
-        self.assertIn(expected, section)
-        # This is a synthesis, not a per-TASK list: it must not name TASKs.
-        for task_id in [f"TASK_{n:03d}" for n in range(1, 14)]:
-            self.assertNotIn(f"`{task_id}`](work/tasks/", section)
 
     def test_first_unfinished_task_is_selected_by_queue_order(self) -> None:
         tasks = [
@@ -400,42 +381,6 @@ class RebaseRelativeLinksTests(unittest.TestCase):
             rendered = render_repository_project_status(root)
 
         self.assertIn("| Место в очереди проекта | **13 из 17** |", rendered)
-
-
-class CapabilitySummaryTests(unittest.TestCase):
-    def test_reads_the_current_summary_section_from_the_hand_maintained_file(self) -> None:
-        with TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / "capability_summary.md").write_text(
-                "---\n"
-                "id: capability_summary\n"
-                "type: guide\n"
-                "document_state: current\n"
-                "version: 1.0\n"
-                "updated: 2026-08-25\n"
-                "---\n\n"
-                "# Итог\n\n"
-                "## Текущая сводка\n\n"
-                "Синтезированный текст возможностей.\n\n"
-                "## Как обновлять\n\n"
-                "Не должно попасть в результат.\n",
-                encoding="utf-8",
-            )
-
-            summary = _capability_summary(root)
-
-            self.assertEqual(summary, "Синтезированный текст возможностей.")
-
-    def test_falls_back_when_the_summary_file_is_missing(self) -> None:
-        with TemporaryDirectory() as tmp:
-            root = Path(tmp)
-
-            summary = _capability_summary(root)
-
-            self.assertEqual(
-                summary,
-                "Пока ни одна завершённая TASK не добавила новую возможность для владельца.",
-            )
 
 
 class OwnerFollowupParsingTests(unittest.TestCase):

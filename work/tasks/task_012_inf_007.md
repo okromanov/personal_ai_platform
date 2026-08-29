@@ -17,7 +17,6 @@ allowed_paths:
   - src/observability/collector.py
   - src/observability/sqlite_store.py
   - operations/tests/product/test_observability.py
-  - capability_summary.md
 traces_to:
   - m02
 implements:
