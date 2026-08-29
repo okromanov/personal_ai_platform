@@ -121,7 +121,6 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "operations.scripts.documents.check.collect_tasks",
                 return_value={"tasks": [task, planned]},
             ),
-            patch("operations.scripts.documents.check.render_task_index", return_value="index"),
             patch("operations.scripts.documents.check.read_text", return_value="index"),
             patch.object(Path, "exists", return_value=True),
         ):
@@ -175,7 +174,6 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "operations.scripts.documents.check.collect_tasks",
                 return_value={"tasks": [_task(placeholder_body)]},
             ),
-            patch("operations.scripts.documents.check.render_task_index", return_value="index"),
             patch("operations.scripts.documents.check.read_text", return_value="index"),
             patch.object(Path, "exists", return_value=True),
         ):
@@ -187,7 +185,6 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "operations.scripts.documents.check.collect_tasks",
                 return_value={"tasks": [_task(filled_body)]},
             ),
-            patch("operations.scripts.documents.check.render_task_index", return_value="index"),
             patch("operations.scripts.documents.check.read_text", return_value="index"),
             patch.object(Path, "exists", return_value=True),
         ):
@@ -218,7 +215,6 @@ class CheckerNegativePathTests(unittest.TestCase):
                     "operations.scripts.documents.check.collect_tasks",
                     return_value={"tasks": [_task(body)]},
                 ),
-                patch("operations.scripts.documents.check.render_task_index", return_value="index"),
                 patch("operations.scripts.documents.check.read_text", return_value="index"),
                 patch.object(Path, "exists", return_value=True),
             ):

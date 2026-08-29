@@ -2,8 +2,8 @@
 id: operations_change_process
 type: operations
 document_state: current
-version: 1.8
-updated: 2026-08-26
+version: 1.9
+updated: 2026-08-28
 depends_on:
   - project_rules
 ---
@@ -314,13 +314,15 @@ depends_on:
 ---
 ```
 
-**Генерируемые файлы** (project_status.md, tasks.md, generated/*, не подлежат ручному редактированию):
+**Генерируемые файлы** ([`project_status.md`](../project_status.md) и runtime-отчёты, не подлежат ручному редактированию):
 
 - `id` — уникальный идентификатор генерируемого файла, например `project_status_current`
 - `type` — строка `generated_*`, например `generated_owner_status`
 - `generation_state` — статус генерации, обычно `generated`
 - `version` — версия схемы генератора, стартует с `1.0`
 - Поля `updated`, `depends_on`, `created` не используются — генерируемые файлы обновляются при каждом прогоне
+
+Постоянный производный документ создаётся только зарегистрированным renderer из шаблона и только по пути, разрешённому [`operations/template_registry.json`](template_registry.json). Диагностические индексы и матрицы строятся по запросу в памяти или во временном каталоге и не коммитятся.
 
 Пример:
 ```yaml

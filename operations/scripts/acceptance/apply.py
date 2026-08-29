@@ -363,7 +363,6 @@ def validate_semantic_review(root: Path, path: Path, milestone_id: str) -> dict[
         "adr/",
         "operations/",
         "work/",
-        "generated/",
         ".github/workflows/",
     }
     missing = sorted(required - artifacts)

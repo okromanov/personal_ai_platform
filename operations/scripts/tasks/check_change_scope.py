@@ -21,6 +21,8 @@ from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.tasks.generate import TERMINAL_STATES, collect_tasks
 
 UPDATED_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+AUDIT_HISTORY_PATH = re.compile(r"^work/audit/audit_baseline_\d{4}_\d{2}_\d{2}\.md$")
+AUDIT_HISTORY_PREFIX = "work/audit/audit_baseline_"
 MILESTONE_WORK_STATE = re.compile(r"(?m)^-\s+work_state:\s+`?([a-z-]+)`?\s*$", re.IGNORECASE)
 # Документы, которые задают полномочия агента, владельца и правила изменения.
 # Служебная правка не создаёт TASK, поэтому границы путей их не покрывают —
@@ -339,6 +341,50 @@ def changed_paths_between(root: Path, base: str, head: str) -> list[str]:
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
+def validate_audit_history(root: Path, base: str, head: str) -> list[str]:
+    """Audit snapshots are append-only: a run adds a dated file, never rewrites history."""
+    result = run_command(
+        [
+            "git",
+            "diff",
+            "--name-status",
+            "--find-renames",
+            base,
+            head,
+            "--",
+            "work/audit",
+        ],
+        cwd=root,
+        timeout=60,
+    )
+    if not result.ok:
+        detail = result.stderr.strip() or result.stdout.strip() or "неизвестная ошибка Git"
+        return [f"Не удалось проверить историю аудитов: {detail}"]
+
+    errors: list[str] = []
+    for line in result.stdout.splitlines():
+        fields = line.split("\t")
+        if len(fields) < 2:
+            continue
+        status = fields[0]
+        paths = [_normalize(value) for value in fields[1:]]
+        audit_paths = [path for path in paths if path.startswith(AUDIT_HISTORY_PREFIX)]
+        if not audit_paths:
+            continue
+        if status == "A" and len(paths) == 1:
+            if not AUDIT_HISTORY_PATH.fullmatch(paths[0]):
+                errors.append(
+                    f"{paths[0]}: новый результат аудита обязан иметь имя "
+                    "audit_baseline_YYYY_MM_DD.md"
+                )
+            continue
+        errors.append(
+            f"{', '.join(audit_paths)}: датированная история аудитов неизменяема; "
+            "создайте новый audit_baseline_YYYY_MM_DD.md"
+        )
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Проверка покрытия путей поставки проекта карточками TASK"
@@ -351,6 +397,7 @@ def main() -> int:
     changed = changed_paths_between(root, args.base, args.head)
     errors = validate_change_scope(root, changed, base=args.base, head=args.head)
     errors.extend(validate_document_metadata(root, args.base, args.head, changed))
+    errors.extend(validate_audit_history(root, args.base, args.head))
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

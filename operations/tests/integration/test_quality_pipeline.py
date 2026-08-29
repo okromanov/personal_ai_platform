@@ -6,6 +6,7 @@ Verifies that multiple quality checks work together correctly.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import subprocess
 import sys
@@ -114,6 +115,8 @@ class QualityPipelineIntegrationTest(unittest.TestCase):
         """Verify Vulture dead code detection runs clean against the same
         invocation (including the known-false-positive ignore list)
         run_suite.py uses."""
+        if importlib.util.find_spec("vulture") is None:
+            self.skipTest("vulture is not installed in the local snapshot runtime")
         result = subprocess.run(
             [
                 sys.executable,

@@ -98,7 +98,7 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Шаги текущей работы",
             "Контроль результатов аудита",
             "Исправлены, ожидают проверки",
-            "work/audit_baseline.md",
+            "work/audit/audit_baseline_2026_08_28.md",
             "Что уже умеет решение",
             "выполнено",
             "осталось",
@@ -130,9 +130,8 @@ class OwnerUsabilityTests(unittest.TestCase):
             "evidence bundle",
         ]:
             self.assertNotIn(internal, rendered)
-        # Per-file deliverables moved to generated/non_markdown_index.md
-        # (non-Markdown files only, with real per-file descriptions) —
-        # project_status.md no longer carries this table at all.
+        # Per-file deliverables stay in TASK allowed_paths and composition;
+        # project_status.md does not duplicate that inventory.
         self.assertNotIn("Файлы, созданные в рамках задач", rendered)
 
     def test_capabilities_section_embeds_the_hand_maintained_synthesis(
@@ -407,8 +406,7 @@ class CapabilitySummaryTests(unittest.TestCase):
     def test_reads_the_current_summary_section_from_the_hand_maintained_file(self) -> None:
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "operations").mkdir()
-            (root / "operations" / "capability_summary.md").write_text(
+            (root / "capability_summary.md").write_text(
                 "---\n"
                 "id: capability_summary\n"
                 "type: guide\n"

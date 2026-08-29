@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
 work_state: completed
-version: 1.9
-updated: 2026-08-26
+version: 2.0
+updated: 2026-08-28
 next_actor: none
 owner_action: none
 depends_on:
@@ -17,7 +17,7 @@ allowed_paths:
   - src/task_state/__init__.py
   - src/task_state/store.py
   - operations/tests/product/test_persistent_task_state.py
-  - operations/capability_summary.md
+  - capability_summary.md
   - project_status.md
 traces_to:
   - m02

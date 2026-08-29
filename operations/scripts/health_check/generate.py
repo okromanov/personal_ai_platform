@@ -9,6 +9,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import atomic_write, find_project_root
+from operations.scripts.documents.template_contracts import assert_registered_output
 from operations.scripts.health_check.metrics import (
     RepositoryHealth,
     assess_health,
@@ -119,9 +120,10 @@ def main() -> int:
             print(f"✅ Metrics saved to {args.json}", file=sys.stderr)
 
         output_path = args.output or root / "runtime" / "health_check_report.md"
-        report = generate_report(health)
+        report = generate_report(health, root)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
+        assert_registered_output(root, "health_check_report", output_path)
         atomic_write(output_path, report)
 
         print(f"✅ Report generated: {output_path.relative_to(root)}", file=sys.stderr)

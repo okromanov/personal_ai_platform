@@ -105,6 +105,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path runtime -Force | Out-Null
+          py operations\scripts\documents\template_contracts.py
           py operations\scripts\documents\check.py --all --json | Tee-Object -FilePath runtime\check_summary.json
           exit $LASTEXITCODE
 
@@ -122,7 +123,7 @@ jobs:
       - name: Check generated drift
         if: always()
         shell: pwsh
-        run: git diff --exit-code -- project_status.md tasks.md generated
+        run: git diff --exit-code -- project_status.md
 
       - name: Upload validation evidence
         if: always()
@@ -137,10 +138,7 @@ jobs:
             runtime/security_audit.json
             runtime/code_analysis.json
             runtime/dead_code.txt
-            tasks.md
-            generated/markdown_index.md
-            generated/repository_structure.md
-            generated/traceability_matrix.md
+            project_status.md
 
   quality-skills:
     name: Quality skills

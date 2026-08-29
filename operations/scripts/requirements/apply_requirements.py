@@ -11,6 +11,11 @@ if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import find_project_root, today_iso
+from operations.scripts.documents.template_contracts import (
+    assert_registered_output,
+    render_contract,
+)
+from operations.scripts.quality.registry import load_quality_registry
 
 
 def _find_next_requirement_number(spec_file: Path, prefix: str) -> int:
@@ -33,258 +38,290 @@ def _format_yaml_multiline(text: str, indent: int = 0) -> str:
     return "|\n" + "\n".join(f"{prefix}  {line}" for line in lines)
 
 
-def apply_requirements_to_specifications(root: Path, wizard_result: dict) -> list[str]:
-    """Apply wizard results to specification files."""
-    created = []
-    br_data = wizard_result["br"]
+def _next_card_number(directory: Path, prefix: str) -> int:
+    numbers = [
+        int(match.group(1))
+        for path in directory.glob(f"{prefix.lower()}_*.md")
+        if (match := re.match(rf"{prefix.lower()}_(\d{{3}})", path.name))
+    ]
+    return max(numbers, default=0) + 1
 
-    # 1. Добавить BR в business_requirements.md
+
+def apply_requirements_to_specifications(root: Path, wizard_result: dict) -> list[str]:
+    """Append specification fragments rendered from protected templates."""
+    created: list[str] = []
+    br_data = wizard_result["br"]
+    specification_paths = (
+        root / "specifications/business_requirements.md",
+        root / "specifications/system_specification.md",
+        root / "specifications/threat_model.md",
+        root / "specifications/architecture_baseline.md",
+    )
+    if not any(path.exists() for path in specification_paths):
+        return []
+
     br_file = root / "specifications" / "business_requirements.md"
     br_num = _find_next_requirement_number(br_file, "BR")
     br_id = f"BR_{br_num:03d}"
-
-    br_entry = f"""
-<a id="br_{br_num:03d}"></a>
-### {br_id} — {br_data["title"]}
-
-- priority: `core`
-
-{br_data["description"]}
-
-"""
-
     if br_file.exists():
-        content = br_file.read_text(encoding="utf-8")
-        # Find last BR entry and insert after it
-        content += br_entry
-        br_file.write_text(content, encoding="utf-8")
+        fragment = render_contract(
+            root,
+            "business_requirement",
+            {
+                "anchor": br_id.lower(),
+                "requirement_id": br_id,
+                "title": br_data["title"],
+                "priority": "core",
+                "description": br_data["description"],
+            },
+        )
+        assert_registered_output(root, "business_requirement", br_file)
+        br_file.write_text(
+            br_file.read_text(encoding="utf-8").rstrip() + "\n\n" + fragment,
+            encoding="utf-8",
+        )
         created.append("specifications/business_requirements.md (BR добавлено)")
 
-    # 2. Добавить SYS в system_specification.md
     sys_file = root / "specifications" / "system_specification.md"
     sys_base_num = _find_next_requirement_number(sys_file, "SYS")
-
-    sys_entries = ""
+    sys_ids: list[str] = []
+    sys_fragments: list[str] = []
     for i, sys_req in enumerate(wizard_result["sys_requirements"]):
         sys_num = sys_base_num + i
         sys_id = f"SYS_{sys_num:03d}"
-        sys_entries += f"""
-<a id="sys_{sys_num:03d}"></a>
-### {sys_id} — {sys_req["title"]}
-
-{sys_req["description"]}
-
-- traces_to: {br_id}
-
-"""
-
-    if sys_file.exists():
-        content = sys_file.read_text(encoding="utf-8")
-        content += sys_entries
-        sys_file.write_text(content, encoding="utf-8")
-        created.append(
-            f"specifications/system_specification.md ({len(wizard_result['sys_requirements'])} SYS добавлено)"
+        sys_ids.append(sys_id)
+        sys_req["id"] = sys_id
+        sys_fragments.append(
+            render_contract(
+                root,
+                "system_requirement",
+                {
+                    "anchor": sys_id.lower(),
+                    "requirement_id": sys_id,
+                    "title": sys_req["title"],
+                    "traces_to": f"[`{br_id}`](business_requirements.md#{br_id.lower()})",
+                    "requirement": sys_req["description"],
+                    "observed_result": sys_req["description"],
+                },
+            )
         )
 
-    # 3. Добавить THR и SEC_CTL в threat_model.md
     threat_file = root / "specifications" / "threat_model.md"
     threat_base_num = _find_next_requirement_number(threat_file, "THR")
-    control_base_num = _find_next_requirement_number(threat_file, "SEC_CTL")
+    control_base_num = _find_next_requirement_number(sys_file, "SEC_CTL")
+    old_to_new_threat: dict[str, str] = {}
+    for index, threat in enumerate(wizard_result["threats"]):
+        old_to_new_threat[str(threat["id"])] = f"THR_{threat_base_num + index:03d}"
 
-    threat_entries = ""
-    for i, threat in enumerate(wizard_result["threats"]):
-        threat_num = threat_base_num + i
-        threat_id = f"THR_{threat_num:03d}"
-        threat_entries += f"""
-<a id="thr_{threat_num:03d}"></a>
-## {threat_id} — {threat["title"]}
-
-{threat["description"]}
-
-- mitigated_by: SEC_CTL_TBD
-
-"""
-
-    control_entries = ""
+    control_fragments: list[str] = []
+    controls_by_threat: dict[str, list[str]] = {}
     for i, control in enumerate(wizard_result["security_controls"]):
         control_num = control_base_num + i
         control_id = f"SEC_CTL_{control_num:03d}"
-        control_entries += f"""
-<a id="sec_ctl_{control_num:03d}"></a>
-## {control_id} — {control["title"]}
-
-{control["description"]}
-
-- protects: {br_id}
-
-"""
-
-    if threat_file.exists():
-        content = threat_file.read_text(encoding="utf-8")
-        content += threat_entries + control_entries
-        threat_file.write_text(content, encoding="utf-8")
-        created.append(
-            f"specifications/threat_model.md ({len(wizard_result['threats'])} THR + {len(wizard_result['security_controls'])} SEC_CTL)"
+        old_threat_id = str(control.get("mitigates", ""))
+        controls_by_threat.setdefault(old_threat_id, []).append(control_id)
+        control["id"] = control_id
+        control_fragments.append(
+            render_contract(
+                root,
+                "security_control",
+                {
+                    "anchor": control_id.lower(),
+                    "control_id": control_id,
+                    "title": control["title"],
+                    "traces_to": (
+                        f"[`{sys_ids[0]}`](system_specification.md#{sys_ids[0].lower()})"
+                        if sys_ids
+                        else f"[`{br_id}`](business_requirements.md#{br_id.lower()})"
+                    ),
+                    "description": control["description"],
+                },
+            )
         )
 
-    # 4. Добавить ARC в architecture_baseline.md
-    arch_file = root / "specifications" / "architecture_baseline.md"
-    arch_base_num = _find_next_requirement_number(arch_file, "ARC")
+    threat_fragments: list[str] = []
+    for threat in wizard_result["threats"]:
+        old_id = str(threat["id"])
+        threat_id = old_to_new_threat[old_id]
+        controls = controls_by_threat.get(old_id, [])
+        if not controls:
+            raise ValueError(f"{threat_id}: угроза не имеет связанного SEC_CTL")
+        threat["id"] = threat_id
+        links = ", ".join(
+            f"[`{control_id}`](system_specification.md#{control_id.lower()})"
+            for control_id in controls
+        )
+        threat_fragments.append(
+            render_contract(
+                root,
+                "threat",
+                {
+                    "anchor": threat_id.lower(),
+                    "threat_id": threat_id,
+                    "title": threat["title"],
+                    "mitigated_by": links,
+                    "scenario": threat["description"],
+                    "assets": f"Активы требования {br_id}.",
+                    "consequence": "Нарушение требуемого поведения или конфиденциальности данных.",
+                    "residual_risk": "Требуется проверка эффективности связанных мер защиты.",
+                },
+            )
+        )
 
-    arch_entries = ""
+    if sys_file.exists():
+        assert_registered_output(root, "system_requirement", sys_file)
+        assert_registered_output(root, "security_control", sys_file)
+        fragments = [*sys_fragments, *control_fragments]
+        sys_file.write_text(
+            sys_file.read_text(encoding="utf-8").rstrip() + "\n\n" + "\n".join(fragments),
+            encoding="utf-8",
+        )
+        created.append(
+            "specifications/system_specification.md "
+            f"({len(sys_fragments)} SYS + {len(control_fragments)} SEC_CTL добавлено)"
+        )
+    if threat_file.exists():
+        assert_registered_output(root, "threat", threat_file)
+        threat_file.write_text(
+            threat_file.read_text(encoding="utf-8").rstrip() + "\n\n" + "\n".join(threat_fragments),
+            encoding="utf-8",
+        )
+        created.append(f"specifications/threat_model.md ({len(threat_fragments)} THR добавлено)")
+
+    arch_file = root / "specifications" / "architecture_baseline.md"
+    arch_base_num = _find_next_requirement_number(arch_file, "ARC_CMP")
+    arch_fragments: list[str] = []
     for i, component in enumerate(wizard_result["architecture"]):
         arch_num = arch_base_num + i
-        arch_id = f"ARC_{arch_num:03d}"
-        arch_entries += f"""
-<a id="arc_{arch_num:03d}"></a>
-### {arch_id} — {component["title"]}
-
-{component["description"]}
-
-- Responsibility: {component["responsibility"]}
-- traces_to: {br_id}
-
-"""
+        arch_id = f"ARC_CMP_{arch_num:03d}"
+        component["id"] = arch_id
+        if i < len(wizard_result["tasks"]):
+            wizard_result["tasks"][i]["implements"] = arch_id
+        arch_fragments.append(
+            render_contract(
+                root,
+                "architecture_component",
+                {
+                    "anchor": arch_id.lower(),
+                    "component_id": arch_id,
+                    "title": component["title"],
+                    "traces_to": f"[`{br_id}`](business_requirements.md#{br_id.lower()})",
+                    "description": component["description"],
+                    "responsibility": component["responsibility"],
+                },
+            )
+        )
 
     if arch_file.exists():
-        content = arch_file.read_text(encoding="utf-8")
-        content += arch_entries
-        arch_file.write_text(content, encoding="utf-8")
+        assert_registered_output(root, "architecture_component", arch_file)
+        arch_file.write_text(
+            arch_file.read_text(encoding="utf-8").rstrip() + "\n\n" + "\n".join(arch_fragments),
+            encoding="utf-8",
+        )
         created.append(
             f"specifications/architecture_baseline.md ({len(wizard_result['architecture'])} ARC добавлено)"
         )
+
+    if sys_ids:
+        for test in wizard_result["tests"]:
+            if str(test.get("verifies", "")).startswith("SYS_"):
+                test["verifies"] = sys_ids[0]
 
     return created
 
 
 def apply_tests_and_tasks(root: Path, wizard_result: dict) -> list[str]:
-    """Create TEST and TASK documents."""
-    created = []
+    """Create TEST and TASK documents from protected registered templates."""
+    task_created: list[str] = []
+    test_created: list[str] = []
     date = today_iso()
     milestone = wizard_result.get("milestone", "m02")
-
-    # Создать TEST документы
+    task_dir = root / "work" / "tasks"
     test_dir = root / "work" / "tests"
+    task_dir.mkdir(parents=True, exist_ok=True)
     test_dir.mkdir(parents=True, exist_ok=True)
 
-    for i, test in enumerate(wizard_result["tests"]):
-        test_num = 5000 + i  # Начиная с 5000, чтобы не пересекаться с основными
-        test_file = test_dir / f"test_{test_num:03d}.md"
+    tasks = wizard_result["tasks"]
+    tests = wizard_result["tests"]
+    if not tasks and tests:
+        raise ValueError("TEST нельзя создать без связанной TASK")
 
-        test_content = f"""---
-id: TEST_{test_num:03d}
-type: test
-title: {test["title"]}
-spec_state: current
-execution: manual
-version: 1.0
-updated: {date}
-verifies:
-  - {test["verifies"]}
-accepts:
-  - {milestone}
----
+    first_task_number = _next_card_number(task_dir, "task")
+    existing_previous = f"TASK_{first_task_number - 1:03d}" if first_task_number > 1 else None
+    task_ids = [f"TASK_{first_task_number + index:03d}" for index in range(len(tasks))]
 
-# TEST_{test_num:03d} — {test["title"]}
-
-## 1. Назначение
-
-{test["description"]}
-
-## 2. Что проверяется
-
-Требование `{test["verifies"]}`.
-
-## 3. Как выполнить
-
-Опишите пошаговую процедуру проверки требования.
-
-## 4. Критерий успеха
-
-Требование работает согласно спецификации.
-
-## 5. Результат
-
-Записать результат проверки.
-"""
-
-        test_file.write_text(test_content, encoding="utf-8")
-        created.append(f"work/tests/test_{test_num:03d}.md")
-
-    # Создать TASK документы
-    task_dir = root / "work" / "tasks"
-    task_dir.mkdir(parents=True, exist_ok=True)
-
-    for i, task in enumerate(wizard_result["tasks"]):
-        task_num = 5000 + i
-        task_file = task_dir / f"task_{task_num:03d}_{milestone}_component.md"
-
-        task_content = f"""---
-id: TASK_{task_num:03d}
-type: task
-title: {task["title"]}
-work_state: planned
-version: 1.0
-updated: {date}
-next_actor: agent
-owner_action: none
-allowed_paths:
-  - src/**
-  - tests/**
-traces_to:
-  - {milestone}
-implements:
-  - {task["implements"]}
----
-
-# TASK_{task_num:03d} — {task["title"]}
-
-## 1. Зачем это делаем
-
-{task["description"]}
-
-## 2. Результат
-
-Компонент полностью реализован, протестирован и интегрирован.
-
-## 3. Где мы сейчас
-
-Компонент определён в спецификации архитектуры.
-
-## 4. Что делать сейчас
-
-### Агенту
-
-1. Изучить требования компонента в architecture_baseline.md
-2. Спроектировать реализацию
-3. Реализовать функциональность
-4. Написать тесты
-5. Проверить интеграцию
-
-## 5. План выполнения
-
-- [ ] Изучить требования
-- [ ] Спроектировать
-- [ ] Реализовать
-- [ ] Написать тесты
-- [ ] Провести интеграцию
-
-## 6. Состав
-
-- `src/` — исходный код компонента
-- `tests/` — тесты компонента
-
-## 7. Готово когда
-
-- ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
-- ✅ CI успешен
-"""
-
+    for index, task in enumerate(tasks):
+        task_id = task_ids[index]
+        task_number = first_task_number + index
+        component = str(task["implements"])
+        task_file = task_dir / f"task_{task_number:03d}_{milestone}_component.md"
+        previous = task_ids[index - 1] if index else existing_previous
+        task_content = render_contract(
+            root,
+            "task",
+            {
+                "task_id": task_id,
+                "title": task["title"],
+                "component": component,
+                "delivery_role": "component",
+                "updated": date,
+                "depends_on_block": (
+                    f"depends_on:\n  - {previous}" if previous else "depends_on: []"
+                ),
+                "task_path": task_file.relative_to(root).as_posix(),
+                "milestone": milestone,
+                "why": task["description"],
+                "result": "Компонент полностью реализован, протестирован и интегрирован.",
+                "current_state": "Компонент определён в спецификации архитектуры.",
+                "agent_actions": "1. Уточнить фактические пути реализации\n2. Реализовать компонент и доказательство",
+                "plan": "- [ ] Уточнить требования и allowed_paths\n- [ ] Реализовать компонент\n- [ ] Создать связанный TEST\n- [ ] Проверить результат",
+                "scope": "Фактические пути поставки добавляются в `allowed_paths` перед реализацией.",
+                "evidence": "Связанный TEST должен проверить требования компонента реальным evidence.",
+                "done_when": "- ✅ План выполнен\n- ✅ Локальные и серверные проверки успешны",
+                "next_step": "Перейти к следующей карточке очереди.",
+                "owner_value": "Функционал появится после завершения этой TASK.",
+            },
+        )
+        assert_registered_output(root, "task", task_file)
         task_file.write_text(task_content, encoding="utf-8")
-        created.append(f"work/tasks/task_{task_num:03d}_{milestone}_component.md")
+        task_created.append(task_file.relative_to(root).as_posix())
 
-    return created
+    catalog = load_quality_registry(root).get("evidence_catalog", {})
+    evidence_ids = set(catalog) if isinstance(catalog, dict) else set()
+    first_test_number = _next_card_number(test_dir, "test")
+    for index, test in enumerate(tests):
+        test_number = first_test_number + index
+        test_id = f"TEST_{test_number:03d}"
+        test_file = test_dir / f"test_{test_number:03d}.md"
+        evidence_id = str(test.get("manual_evidence", f"{milestone}_e2e_tests"))
+        if evidence_id not in evidence_ids:
+            raise ValueError(f"TEST {test_id}: evidence {evidence_id} отсутствует в реестре")
+        task_id = task_ids[min(index, len(task_ids) - 1)]
+        test_content = render_contract(
+            root,
+            "test",
+            {
+                "test_id": test_id,
+                "execution": "manual",
+                "updated": date,
+                "task_id": task_id,
+                "verifies": test["verifies"],
+                "milestone": milestone,
+                "evidence_field": f"manual_evidence: {evidence_id}",
+                "title": test["title"],
+                "purpose": test["description"],
+                "checked": f"Требование `{test['verifies']}`.",
+                "execution_heading": "Действия владельца",
+                "execution_steps": "Выполнить пользовательский сценарий без внутренних инструментов разработки.",
+                "success": "Наблюдаемый результат соответствует спецификации.",
+                "evidence_composition": "Структурированная запись результата с SHA, средой и временем проверки.",
+            },
+        )
+        assert_registered_output(root, "test", test_file)
+        test_file.write_text(test_content, encoding="utf-8")
+        test_created.append(test_file.relative_to(root).as_posix())
+
+    return [*test_created, *task_created]
 
 
 def update_milestones(root: Path, wizard_result: dict, br_id: str) -> None:
@@ -311,6 +348,7 @@ def update_milestones(root: Path, wizard_result: dict, br_id: str) -> None:
         return prefix + composition + suffix
 
     content = re.sub(pattern, add_br_to_composition, content, flags=re.DOTALL)
+    assert_registered_output(root, "milestone", milestone_file)
     milestone_file.write_text(content, encoding="utf-8")
 
 

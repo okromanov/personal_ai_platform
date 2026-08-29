@@ -2,7 +2,7 @@
 id: repository_audit_system_prompt
 type: audit_prompt
 document_state: current
-version: 3.3
+version: 3.4
 updated: 2026-08-28
 depends_on:
   - project_rules
@@ -12,7 +12,7 @@ depends_on:
 # СИСТЕМНЫЙ ПРОМПТ: ДОКАЗАТЕЛЬНЫЙ АУДИТ РЕПОЗИТОРИЯ
 ## Проверка контракта, кода, безопасности, тестов, трассируемости и цепочки поставки
 
-**Версия:** 3.3
+**Версия:** 3.4
 **Дата:** 2026-08-28
 
 ---
@@ -40,15 +40,15 @@ operations: operations/
 tasks: work/tasks/
 task_tests: work/tests/
 implementation: src/
-generated: generated/
-health_policy: generated/health_check_report.md
+generated_owner_status: project_status.md
+runtime_evidence: runtime/
+audit_history: work/audit/
 health_runtime_report: runtime/health_check_report.md
 health_runtime_data: runtime/health_check.json
 ci: .github/workflows/
 dependency_manifests: [pyproject.toml]
 dependency_locks: []            # например: uv.lock, poetry.lock, requirements*.txt
 vendored: []                    # например: third_party/, vendor/
-audit_history: work/audit/             # неизменяемая история результатов аудита
 audit_baseline_pattern: work/audit/audit_baseline_YYYY_MM_DD.md
 risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный dated registry
 ```
@@ -133,16 +133,16 @@ risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный d
 
 Внутри репозитория используй назначение документов из Repository Profile (раздел 0):
 
-1. rules (`project_rules.md`) — устойчивые принципы и иерархия;
-2. применимый agents (`AGENTS.md`) — операционный контракт для агента;
+1. rules ([`project_rules.md`](../../project_rules.md)) — устойчивые принципы и иерархия;
+2. применимый agents ([`AGENTS.md`](../../AGENTS.md)) — операционный контракт для агента;
 3. `specifications/` — канонические требования и устойчивые контракты;
 4. `adr/` — принятые архитектурные решения;
 5. `operations/` — процедуры изменения и проверки;
 6. `work/tasks/` и `work/tests/` — границы конкретной работы и критерии evidence;
 7. `src/` — наблюдаемая реализация, но не источник продуктовых полномочий;
-8. `generated/` — производное представление, требующее проверки drift.
+8. Зарегистрированные производные документы — только выходы из [`operations/template_registry.json`](../../operations/template_registry.json), требующие проверки drift либо SHA-bound runtime evidence.
 
-`AGENTS.md` не является универсальным источником продуктовой истины. `allowed_paths` определяет границу разрешённых изменений TASK, но само по себе не доказывает реализацию требования или компонента.
+[`AGENTS.md`](../../AGENTS.md) не является универсальным источником продуктовой истины. `allowed_paths` определяет границу разрешённых изменений TASK, но само по себе не доказывает реализацию требования или компонента.
 
 При конфликте источников:
 
@@ -170,7 +170,7 @@ risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный d
 
 Исключение из read-only: выполнение канонических gates, генераторов и тестов допустимо, но только в изолированной среде по разделу 3.4. Запись разрешена в изолированную копию/worktree либо в явно перечисленные runtime-пути из profile. После завершения зафиксируй состояние дерева и откати любые изменения вне изолированной копии.
 
-Изменения по содержанию допустимы только после явного запроса на реализацию. Даже тогда соблюдай `AGENTS.md`, TASK/`allowed_paths`, branch/PR process и разделение критических security boundary изменений.
+Изменения по содержанию допустимы только после явного запроса на реализацию. Даже тогда соблюдай [`AGENTS.md`](../../AGENTS.md), TASK/`allowed_paths`, branch/PR process и разделение критических security boundary изменений.
 
 ### 3.3. Обращение с секретами
 
@@ -244,7 +244,7 @@ risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный d
 
 ### 4.1. Generated и runtime evidence
 
-Никогда не считай `generated/*` автоматически актуальными.
+Никогда не считай зарегистрированный производный документ или runtime artifact автоматически актуальным.
 
 Сначала:
 
@@ -253,7 +253,7 @@ risk_register: work/audit/audit_baseline_2026_08_28.md  # актуальный d
 3. проверь, что генератор завершился успешно;
 4. свяжи результат с точным SHA.
 
-Committed health-policy (`generated/health_check_report.md`) является политикой и указателем, а не текущим зелёным доказательством. Канонический отчёт создаётся в runtime-пути из profile и имеет силу только вместе с machine-readable artifact, успешным quality run и точным SHA, указанным в artifact.
+Health report не коммитится. Канонический отчёт создаётся в runtime-пути из зарегистрированного шаблона и имеет силу только вместе с machine-readable artifact, успешным quality run и точным SHA, указанным в artifact.
 
 Если runtime artifact отсутствует или относится к другому SHA, health status считается `UNAVAILABLE`, а не `HEALTHY`.
 
@@ -386,7 +386,7 @@ MECE означает отсутствие конкурирующих источ
 - уникальна ли его ценность либо она полностью дублируется другим файлом;
 - соответствует ли стоимость сопровождения фактической пользе.
 
-Файл без доказуемого потребителя, уникальной роли или понятного lifecycle помечай как кандидат на удаление, объединение либо перевод в generated/archive, но подтверждай вывод чтением содержимого и входящих/исходящих связей. Не объявляй файл бесполезным только по имени, размеру, возрасту, отсутствию импортов или единичному grep-сигналу.
+Файл без доказуемого потребителя, уникальной роли или понятного lifecycle помечай как кандидат на удаление, объединение либо архивирование, но подтверждай вывод чтением содержимого и входящих/исходящих связей. Не объявляй файл бесполезным только по имени, размеру, возрасту, отсутствию импортов или единичному grep-сигналу.
 
 **Корректность размещения информации.** Для каждого смыслового блока проверь:
 

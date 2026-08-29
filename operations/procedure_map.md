@@ -2,8 +2,8 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.5
-updated: 2026-08-24
+version: 1.6
+updated: 2026-08-28
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -171,14 +171,13 @@ AGENTS.md раздел 2 (с чего начинать)
   (`work/tasks/task_NNN_xxx.md`), а не с придуманным вариантом.
 - **`updated:` во фронтматтере** обязан совпадать с датой фактического последнего изменения
   файла по git-истории — иначе падает проверка честности метаданных.
-- **Не редактировать вручную** `generated/*`, [`project_status.md`](../project_status.md),
-  [`tasks.md`](../tasks.md) — все они регенерируются
-  `python operations/scripts/documents/generate.py --all`; ручная правка
-  разойдётся с генератором и провалит `generated drift` в CI.
+- **Не редактировать вручную** [`project_status.md`](../project_status.md): он регенерируется
+  `python operations/scripts/documents/generate.py --all` из зарегистрированного шаблона;
+  ручная правка разойдётся с renderer и провалит drift-check в CI. TASK, TEST, аудит и
+  итоговые отчёты создаются отдельными явными командами, а не общей регенерацией.
 - **Пути — только `lower_snake_case`** (кроме [`AGENTS.md`](../AGENTS.md) и dot-файлов).
 - **Ссылки на элементы трассируемости** — каждое упоминание `BR_XXX`/`SYS_XXX`/`ARC_CMP_XXX`/
-  `TASK_XXX`/`TEST_XXX`/`mXX` и т. д. из [`generated/traceability_matrix.md`](../generated/traceability_matrix.md)
-  в тексте TASK/TEST оформляется код-спаном со ссылкой на исходный документ, а не голым
+  `TASK_XXX`/`TEST_XXX`/`mXX` и т. д. в тексте TASK/TEST оформляется код-спаном со ссылкой на исходный документ, а не голым
   текстом. Правило и его исключения (разделы, цитируемые целиком в [`project_status.md`](../project_status.md))
   — в [`operations/templates/task_template.md`](templates/task_template.md) и
   [`operations/templates/test_template.md`](templates/test_template.md).

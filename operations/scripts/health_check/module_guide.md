@@ -1,9 +1,9 @@
 ---
 id: health_check_module
 type: documentation
-version: 1.3
+version: 1.4
 document_state: current
-updated: 2026-08-26
+updated: 2026-08-28
 depends_on: []
 ---
 
@@ -29,9 +29,9 @@ python operations/scripts/health_check/generate.py --summary
 python operations/scripts/health_check/generate.py
 ```
 
-Сгенерирует `runtime/health_check_report.md`. Файл
-[`generated/health_check_report.md`](../../../generated/health_check_report.md)
-содержит только объяснение политики и намеренно не хранит статус конкретного запуска.
+Сгенерирует `runtime/health_check_report.md`. Это SHA-bound runtime/CI artifact,
+который намеренно не коммитится; его структура закреплена
+[`health_check_report_template.md`](../../templates/health_check_report_template.md).
 
 ### Экспорт метрик в JSON
 ```bash
@@ -165,7 +165,7 @@ def assess_health(health: RepositoryHealth) -> str:
 ## 📚 Документация
 
 - Этот файл (module_guide.md)
-- [`health_check_report.md`](../../../generated/health_check_report.md) - политика хранения отчёта
+- [`health_check_report_template.md`](../../templates/health_check_report_template.md) - структура runtime-отчёта
 - Встроенная документация в коде (docstrings)
 
 ## ✅ Требования

@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "required_owner": "@okromanov",
+  "protected_paths": [
+    ".github/CODEOWNERS",
+    ".github/workflows/project_check.yml",
+    "operations/template_registry.json",
+    "operations/scripts/documents/template_contracts.py",
+    "operations/scripts/quality/run_suite.py",
+    "operations/scripts/tasks/check_change_scope.py"
+  ],
+  "enforcement_tests": [
+    "operations/tests/test_generation_safety.py",
+    "operations/tests/test_quality_integration.py",
+    "operations/tests/tooling/test_health_check.py",
+    "operations/tests/tooling/test_milestone_lifecycle.py",
+    "operations/tests/tooling/test_requirement_tooling.py",
+    "operations/tests/tooling/test_change_scope.py",
+    "operations/tests/tooling/test_template_contracts.py"
+  ],
+  "contracts": {
+    "architecture_component": {
+      "template": "operations/templates/architecture_component_template.md",
+      "outputs": ["specifications/architecture_baseline.md"],
+      "mode": "committed_fragment",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "adr": {
+      "template": "operations/templates/adr_template.md",
+      "outputs": ["adr/adr_*.md"],
+      "mode": "committed",
+      "generators": []
+    },
+    "business_requirement": {
+      "template": "operations/templates/business_requirement_template.md",
+      "outputs": ["specifications/business_requirements.md"],
+      "mode": "committed_fragment",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "generated_files_base": {
+      "template": "operations/templates/generated_files_template.md",
+      "outputs": [],
+      "mode": "base_contract",
+      "generators": []
+    },
+    "infrastructure_component": {
+      "template": "operations/templates/infrastructure_component_template.md",
+      "outputs": ["specifications/infrastructure_baseline.md"],
+      "mode": "committed_fragment",
+      "generators": []
+    },
+    "infrastructure_flow": {
+      "template": "operations/templates/infrastructure_flow_template.md",
+      "outputs": ["specifications/infrastructure_baseline.md"],
+      "mode": "committed_fragment",
+      "generators": []
+    },
+    "infrastructure_requirement": {
+      "template": "operations/templates/infrastructure_requirement_template.md",
+      "outputs": ["specifications/infrastructure_baseline.md"],
+      "mode": "committed_fragment",
+      "generators": []
+    },
+    "milestone": {
+      "template": "operations/templates/milestone_template.md",
+      "outputs": ["milestones.md"],
+      "mode": "committed_fragment",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "milestone_completion_report": {
+      "template": "operations/templates/milestone_completion_report_template.md",
+      "outputs": ["work/acceptance/m*_final_report.md"],
+      "mode": "committed",
+      "generators": [
+        "operations/scripts/milestones/init_milestone.py",
+        "operations/scripts/milestones/update_completion_report.py"
+      ]
+    },
+    "project_status": {
+      "template": "operations/templates/project_status_template.md",
+      "outputs": ["project_status.md"],
+      "mode": "committed_generated",
+      "generators": [
+        "operations/scripts/documents/generate.py",
+        "operations/scripts/status/human_status.py"
+      ]
+    },
+    "repository_audit_result": {
+      "template": "operations/templates/repository_audit_result_template.md",
+      "outputs": ["work/audit/audit_baseline_????_??_??.md"],
+      "mode": "committed_history",
+      "generators": []
+    },
+    "security_control": {
+      "template": "operations/templates/security_control_template.md",
+      "outputs": ["specifications/system_specification.md"],
+      "mode": "committed_fragment",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "system_requirement": {
+      "template": "operations/templates/system_requirement_template.md",
+      "outputs": ["specifications/system_specification.md"],
+      "mode": "committed_fragment",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "task": {
+      "template": "operations/templates/task_template.md",
+      "outputs": ["work/tasks/task_*.md"],
+      "mode": "committed",
+      "generators": [
+        "operations/scripts/documents/auto_generate_tasks.py",
+        "operations/scripts/requirements/apply_requirements.py"
+      ]
+    },
+    "test": {
+      "template": "operations/templates/test_template.md",
+      "outputs": ["work/tests/test_*.md"],
+      "mode": "committed",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "threat": {
+      "template": "operations/templates/threat_template.md",
+      "outputs": ["specifications/threat_model.md"],
+      "mode": "committed_fragment",
+      "generators": ["operations/scripts/requirements/apply_requirements.py"]
+    },
+    "health_check_report": {
+      "template": "operations/templates/health_check_report_template.md",
+      "outputs": ["runtime/*.md"],
+      "mode": "runtime",
+      "generators": [
+        "operations/scripts/health_check/generate.py",
+        "operations/scripts/health_check/reporter.py"
+      ]
+    }
+  }
+}

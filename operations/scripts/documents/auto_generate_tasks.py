@@ -11,6 +11,10 @@ if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from operations.scripts.common.project import find_project_root, today_iso
+from operations.scripts.documents.template_contracts import (
+    assert_registered_output,
+    render_contract,
+)
 from operations.scripts.quality.registry import load_quality_registry, profiles_for_milestone
 from operations.scripts.status.generate_project_status import collect_milestones
 
@@ -94,6 +98,7 @@ def _extract_pending_components(root: Path) -> set[str]:
 
 
 def _generate_task_document(
+    root: Path,
     task_number: int,
     component_id: str,
     milestone: str,
@@ -112,88 +117,71 @@ def _generate_task_document(
     До атомарного старта этапа агент обязан связать эту карточку с TEST,
     проверяющим требования из канонической цепочки компонента.
     """
-    date = today_iso()
-    depends_lines = f"  - {depends_on}\n" if depends_on else ""
-
-    return f"""---
-id: TASK_{task_number:03d}
-type: task
-title: Реализация {component_id}
-component: {component_id}
-work_state: planned
-version: 1.0
-updated: {date}
-next_actor: agent
-owner_action: none
-depends_on:
-{depends_lines}allowed_paths:
-  - {task_path}
-traces_to:
-  - {milestone}
-implements:
-  - {component_id}
----
-
-# TASK_{task_number:03d} — Реализация {component_id}
-
-## 1. Зачем это делаем
-
-Реализовать компонент `{component_id}` согласно спецификации архитектуры.
-
-## 2. Результат
-
-Компонент `{component_id}` полностью реализован, протестирован и интегрирован.
-
-## 3. Где мы сейчас
-
-Компонент определён в спецификации, но не реализован. `allowed_paths` намеренно
-сужен до собственного файла TASK: перед началом работы агент обязан явно
-дополнить `allowed_paths` реальными путями реализации, а не полагаться на
-угаданный заранее каталог.
-
-## 4. Что делать сейчас
-
-### Агенту
-
-1. Изучить спецификацию `{component_id}` в соответствующем документе
-2. Дополнить `allowed_paths` фактическими путями реализации
-3. Создать план реализации
-4. Реализовать функциональность и написать TEST с реальным evidence
-5. Связать TASK с TEST, который проверяет требования компонента
-6. Проверить интеграцию
-
-## 5. План выполнения
-
-- [ ] Изучить требования к {component_id}
-- [ ] Дополнить allowed_paths реальными путями
-- [ ] Спроектировать реализацию
-- [ ] Реализовать компонент
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
-- [ ] Проверить покрытие путей в allowed_paths
-
-## 6. Состав
-
-Затрагиваемые пути определяются в начале работы и фиксируются в `allowed_paths`.
-
-## 7. Проверки и доказательства
-
-Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`.
-
-## 8. Готово когда
-
-- ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны
-- ✅ CI успешен
-- ✅ Код review завершен
-
-## 9. Что будет дальше
-
-После завершения этой TASK перейти к следующему компоненту или интеграционным испытаниям.
-
-## 10. Что это даёт владельцу
-
-Функционал появится после завершения этой TASK.
-"""
+    task_id = f"TASK_{task_number:03d}"
+    return render_contract(
+        root,
+        "task",
+        {
+            "task_id": task_id,
+            "title": f"Реализация {component_id}",
+            "component": component_id,
+            "delivery_role": "component",
+            "updated": today_iso(),
+            "depends_on_block": (
+                f"depends_on:\n  - {depends_on}" if depends_on else "depends_on: []"
+            ),
+            "task_path": task_path,
+            "milestone": milestone,
+            "why": f"Реализовать компонент `{component_id}` согласно спецификации архитектуры.",
+            "result": (
+                f"Компонент `{component_id}` полностью реализован, протестирован и интегрирован."
+            ),
+            "current_state": (
+                "Компонент определён в спецификации, но не реализован. `allowed_paths` "
+                "намеренно сужен до собственного файла TASK: перед началом работы агент "
+                "обязан явно дополнить его реальными путями реализации."
+            ),
+            "agent_actions": "\n".join(
+                [
+                    f"1. Изучить спецификацию `{component_id}`",
+                    "2. Дополнить `allowed_paths` фактическими путями реализации",
+                    "3. Спроектировать и реализовать функциональность",
+                    "4. Написать TEST с реальным evidence",
+                    "5. Проверить интеграцию",
+                ]
+            ),
+            "plan": "\n".join(
+                [
+                    f"- [ ] Изучить требования к {component_id}",
+                    "- [ ] Дополнить allowed_paths реальными путями",
+                    "- [ ] Спроектировать реализацию",
+                    "- [ ] Реализовать компонент",
+                    "- [ ] Написать TEST, связанный с TASK и требованиями компонента",
+                    "- [ ] Проверить покрытие путей в allowed_paths",
+                ]
+            ),
+            "scope": (
+                "Затрагиваемые пути определяются в начале работы и фиксируются в `allowed_paths`."
+            ),
+            "evidence": (
+                "Автоматическая проверка подтверждает, что все изменённые пути "
+                "входят в `allowed_paths`."
+            ),
+            "done_when": "\n".join(
+                [
+                    "- ✅ Все шаги плана выполнены",
+                    "- ✅ Локальные проверки успешны",
+                    "- ✅ CI успешен",
+                    "- ✅ Код review завершён",
+                ]
+            ),
+            "next_step": (
+                "После завершения этой TASK перейти к следующему компоненту "
+                "или интеграционным испытаниям."
+            ),
+            "owner_value": "Функционал появится после завершения этой TASK.",
+        },
+    )
 
 
 def auto_generate_tasks(root: Path) -> list[str]:
@@ -245,9 +233,11 @@ def auto_generate_tasks(root: Path) -> list[str]:
         prefix = "arc" if component_id.startswith("ARC_") else "inf"
         suffix = component_id.rsplit("_", 1)[-1].lower()
         task_path = f"work/tasks/task_{task_num:03d}_{prefix}_{suffix}.md"
-        content = _generate_task_document(task_num, component_id, current_id, depends_on, task_path)
+        content = _generate_task_document(
+            root, task_num, component_id, current_id, depends_on, task_path
+        )
         task_file = root / task_path
-
+        assert_registered_output(root, "task", task_file)
         task_file.write_text(content, encoding="utf-8")
         created.append(task_file.relative_to(root).as_posix())
         depends_on = f"TASK_{task_num:03d}"

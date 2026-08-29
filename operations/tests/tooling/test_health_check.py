@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -24,6 +25,16 @@ from operations.scripts.health_check.metrics import (
     collect_test_metrics,
 )
 from operations.scripts.health_check.reporter import generate_report, print_summary
+
+
+def _install_health_contract(root: Path) -> None:
+    source_root = Path(__file__).resolve().parents[3]
+    (root / "operations/templates").mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_root / "operations/template_registry.json", root / "operations")
+    shutil.copy2(
+        source_root / "operations/templates/health_check_report_template.md",
+        root / "operations/templates",
+    )
 
 
 def _git(root: Path, *args: str) -> None:
@@ -307,6 +318,7 @@ class HealthCheckCliTests(unittest.TestCase):
         health = _make_health()
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            _install_health_contract(root)
             report_path = root / "runtime" / "health.md"
             json_path = root / "runtime" / "health.json"
             with (
@@ -350,6 +362,7 @@ class HealthCheckCliTests(unittest.TestCase):
         health = _make_health()
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            _install_health_contract(root)
             with (
                 patch.object(health_generate, "find_project_root", return_value=root),
                 patch.object(

@@ -3,7 +3,7 @@
 Initialize milestone files on transition.
 
 When milestone state changes (planned → in-progress), creates:
-- work/m0X_final_report.md, rendered by render_final_report() (the same
+- work/acceptance/m0X_final_report.md, rendered by render_final_report() (the same
   function operations/scripts/milestones/update_completion_report.py uses to
   regenerate it after acceptance) so the initial and final report are always
   the same format, never two hand-kept templates drifting apart.
@@ -25,6 +25,7 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from operations.scripts.documents.template_contracts import assert_registered_output
 from operations.scripts.milestones.update_completion_report import render_final_report
 
 
@@ -48,7 +49,8 @@ def init_milestone(milestone_id: str, root: Path | None = None) -> bool:
         # The initial (pending) final_report.md is rendered by the same
         # function that regenerates it after acceptance, so the two never
         # drift into two different report formats.
-        report_path = root / "work" / f"{milestone_id}_final_report.md"
+        report_path = root / "work" / "acceptance" / f"{milestone_id}_final_report.md"
+        assert_registered_output(root, "milestone_completion_report", report_path)
         _write_if_absent(report_path, render_final_report(root, milestone_id))
 
         return True

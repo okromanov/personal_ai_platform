@@ -2,8 +2,8 @@
 id: semantic_governance_review
 type: operations
 document_state: current
-version: 1.1
-updated: 2026-08-24
+version: 1.2
+updated: 2026-08-28
 depends_on:
   - project_rules
 ---
@@ -117,7 +117,6 @@ TEST без evidence, неявные зависимости SYS и несогл�
     "adr/",
     "operations/",
     "work/",
-    "generated/",
     ".github/workflows/"
   ],
   "scores": {

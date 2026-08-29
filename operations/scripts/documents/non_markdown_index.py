@@ -24,7 +24,7 @@ DESCRIPTIONS: dict[str, str] = {
     ),
     "operations/hooks/pre_commit_regenerate_dashboards.sh": (
         "Шаг pre-commit hook: при изменении любого .md-файла бампит его версию и "
-        "регенерирует project_status.md, tasks.md и generated/*."
+        "проверяет реестр шаблонов и регенерирует только project_status.md."
     ),
     "operations/hooks/pre_push_hook.sh": (
         "Канонический pre-push hook: полный набор проверок (mypy, форматирование, "
@@ -63,23 +63,23 @@ DESCRIPTIONS: dict[str, str] = {
         "Главный генератор: пересобирает все производные файлы из состояния репозитория."
     ),
     "operations/scripts/documents/index.py": (
-        "Строит generated/markdown_index.md — перечень всех Markdown-документов репозитория."
+        "Рендерит диагностический Markdown-индекс по явному запросу; результат не коммитится."
     ),
     "operations/scripts/documents/links.py": (
         "Проверяет, что ссылки и якоря в Markdown-документах ведут на существующие файлы и разделы."
     ),
     "operations/scripts/documents/metadata.py": ("Разбор YAML-фронтматтера Markdown-документов."),
     "operations/scripts/documents/non_markdown_index.py": (
-        "Строит generated/non_markdown_index.md — перечень не-Markdown файлов репозитория."
+        "Рендерит диагностический индекс не-Markdown файлов по явному запросу."
     ),
     "operations/scripts/documents/repository_tree.py": (
-        "Строит generated/repository_structure.md — полное дерево отслеживаемых файлов."
+        "Рендерит диагностическое дерево отслеживаемых файлов по явному запросу."
     ),
     "operations/scripts/documents/test_catalog.py": (
-        "Строит generated/test_catalog.md — каталог всех unit-тестов с описаниями."
+        "Рендерит диагностический каталог unit-тестов по явному запросу."
     ),
     "operations/scripts/documents/traceability.py": (
-        "Строит generated/traceability_matrix.md — таблицу связей требований, компонентов, TASK и TEST."
+        "Рендерит диагностическую матрицу трассировки по явному запросу."
     ),
     "operations/scripts/evidence/generate_bundle.py": (
         "Собирает evidence bundle из результатов проверок и тестов для приложения к PR."
@@ -160,7 +160,7 @@ DESCRIPTIONS: dict[str, str] = {
     "operations/scripts/tasks/check_change_scope.py": (
         "Проверка покрытия путей поставки проекта карточками TASK."
     ),
-    "operations/scripts/tasks/generate.py": "Собирает карточки TASK и рендерит tasks.md.",
+    "operations/scripts/tasks/generate.py": "Собирает карточки TASK и рендерит диагностическое представление в памяти.",
     "operations/scripts/tasks/semantics.py": (
         "Смысловая проверка связей TASK → компонент → требование."
     ),
@@ -238,7 +238,7 @@ DESCRIPTIONS: dict[str, str] = {
     "operations/tests/tooling/test_milestone_start_and_task_semantics.py": (
         "Тесты атомарного старта этапа и смысловой проверки TASK."
     ),
-    "operations/tests/tooling/test_non_markdown_index.py": "Тесты генератора generated/non_markdown_index.md.",
+    "operations/tests/tooling/test_non_markdown_index.py": "Тесты диагностического индекса не-Markdown файлов.",
     "operations/tests/tooling/test_project_common.py": (
         "Тесты общих утилит репозитория: git-информация, чтение текстовых файлов."
     ),
@@ -254,8 +254,8 @@ DESCRIPTIONS: dict[str, str] = {
     "operations/tests/tooling/test_task_registry.py": (
         "Тесты сбора карточек TASK и ширины их идентификаторов."
     ),
-    "operations/tests/tooling/test_test_catalog.py": "Тесты генератора generated/test_catalog.md.",
-    "operations/tests/tooling/test_traceability.py": "Тесты построения generated/traceability_matrix.md.",
+    "operations/tests/tooling/test_test_catalog.py": "Тесты диагностического каталога тестов.",
+    "operations/tests/tooling/test_traceability.py": "Тесты диагностической матрицы трассировки.",
     "operations/tests/tooling/test_versioning.py": "Тесты автоматического повышения версии файла.",
     "pyproject.toml": "Конфигурация ruff, mypy и порогов покрытия тестами.",
     "src/__init__.py": (
@@ -301,7 +301,7 @@ def _file_description(path: Path, relative: str) -> str:
     return NO_DESCRIPTION
 
 
-def render_non_markdown_index(root: Path, generated_date: str | None = None) -> str:
+def render_non_markdown_index(root: Path, _generated_date: str | None = None) -> str:
     tasks = collect_tasks(root)["tasks"]
     task_by_path = _deliverable_task_map(tasks)
 
@@ -335,7 +335,7 @@ def render_non_markdown_index(root: Path, generated_date: str | None = None) -> 
         "|---|---|",
         f"| Всего файлов | `{total}` |",
         "",
-        "> Все не-Markdown файлы репозитория, кроме `generated/`. Markdown-документы — в [`markdown_index.md`](markdown_index.md).",
+        "> Диагностический снимок не-Markdown файлов; результат не является постоянным артефактом репозитория.",
         "",
         "| Файл | Задача | Описание |",
         "|---|---|---|",

@@ -26,12 +26,16 @@ if __package__ in {None, ""}:
 
 from operations.scripts.common.project import run_command
 from operations.scripts.common.status_types import MilestoneItem, TaskItem
+from operations.scripts.documents.template_contracts import (
+    assert_registered_output,
+    render_contract,
+)
 from operations.scripts.documents.traceability import collect_traceable_elements
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.tasks.generate import collect_tasks
 
 RESULT_SECTION = re.compile(r"(?ms)^##\s+(?:\d+\.\s*)?Результат\s*$\n(.*?)(?=^##\s|\Z)")
-EXCLUDED_DIFF_PREFIXES = ("generated/",)
+EXCLUDED_DIFF_PREFIXES = ("runtime/",)
 
 
 def _link(target_path: str) -> str:
@@ -253,7 +257,7 @@ def render_final_report(root: Path, milestone_id: str) -> str:
 
     tasks_report = collect_tasks(root)
     milestone_tasks = _milestone_tasks(tasks_report["tasks"], milestone_id)
-    completed_tasks = [t for t in milestone_tasks if t["work_state"] == "completed"]
+    completed_tasks = [task for task in milestone_tasks if task["work_state"] == "completed"]
     if not milestone_tasks:
         all_tasks_done_text = "не применимо (TASK для этапа не создаются)"
     elif len(completed_tasks) == len(milestone_tasks):
@@ -278,105 +282,107 @@ def render_final_report(root: Path, milestone_id: str) -> str:
         time_line = f"{start_date} — продолжается"
         completion_date = "—"
 
-    lines = [
-        "---",
-        f"id: {milestone_id}_final_report",
-        "type: milestone_completion_report",
-        f"completion_state: {'completed' if completed else 'pending'}",
-        "version: 1.0",
-        f"created: {start_date}",
-        f"updated: {today}",
-        f"milestone: {milestone_id}",
-        "---",
-        "",
-        f"# {milestone_id.upper()} — Итоговый отчёт",
-        "",
-        "## 1. Состояние завершения",
-        "",
-        f"- Статус: {'завершено' if completed else 'в процессе'}",
-        f"- Дата начала: {start_date}",
-        f"- Дата завершения: {completion_date}",
-        f"- Время работы над этапом: {time_line}",
-        f"- Все задачи завершены: {all_tasks_done_text}",
-        "",
-        "## 2. Что реализовано функционально",
-        "",
-    ]
+    completion_section = "\n".join(
+        [
+            f"- Статус: {'завершено' if completed else 'в процессе'}",
+            f"- Дата начала: {start_date}",
+            f"- Дата завершения: {completion_date}",
+            f"- Время работы над этапом: {time_line}",
+            f"- Все задачи завершены: {all_tasks_done_text}",
+        ]
+    )
+
+    functional_lines: list[str] = []
     result_text = milestone["result"]
     if result_text:
         milestones_link = _link("milestones.md")
-        lines.append(f"**Цель этапа (из [`milestones.md`]({milestones_link})):** {result_text}")
-        lines.append("")
+        functional_lines.append(
+            f"**Цель этапа (из [`milestones.md`]({milestones_link})):** {result_text}"
+        )
+        functional_lines.append("")
     if not completed_tasks:
-        lines.append("Пока ни одна TASK этого этапа не завершена.")
-        lines.append("")
+        functional_lines.append("Пока ни одна TASK этого этапа не завершена.")
     else:
         for task in completed_tasks:
             component = str(task.get("component", "")) or "—"
-            result_text = _result_section(str(task["body"])) or "_Раздел «Результат» пуст._"
-            lines.append(f"### `{component}` — {task['title']} (`{task['id']}`)")
-            lines.append("")
-            lines.append(result_text)
-            lines.append("")
-    lines.append("## 3. Изменения в репозитории")
-    lines.append("")
+            task_result = _result_section(str(task["body"])) or "_Раздел «Результат» пуст._"
+            functional_lines.extend(
+                [
+                    f"### `{component}` — {task['title']} (`{task['id']}`)",
+                    "",
+                    task_result,
+                    "",
+                ]
+            )
+    functional_section = "\n".join(functional_lines).rstrip()
+
+    changes_lines: list[str] = []
     if not completed:
-        lines.append("Считается при завершении этапа (сравнение с коммитом начала этапа).")
-        lines.append("")
+        changes_lines.append("Считается при завершении этапа (сравнение с коммитом начала этапа).")
     elif not added and not modified:
-        lines.append("Изменений файлов не обнаружено.")
-        lines.append("")
+        changes_lines.append("Изменений файлов не обнаружено.")
     else:
-        # A path git recorded as "added" back when the milestone was open can
-        # since have been renamed or removed by later, unrelated history; only
-        # what's still actually there now is worth showing as a deliverable.
         current_added = [path for path in added if (root / path).exists()]
-        lines.append(f"### Новые файлы ({len(current_added)})")
-        lines.append("")
-        lines.extend(
+        current_modified = [path for path in modified if (root / path).exists()]
+        changes_lines.extend([f"### Новые файлы ({len(current_added)})", ""])
+        changes_lines.extend(
             (f"- {_path_reference(root, path)}" for path in current_added)
             if current_added
             else ["—"]
         )
-        lines.append("")
-        lines.append(f"### Изменённые файлы ({len(modified)})")
-        lines.append("")
-        lines.extend(
-            (f"- {_path_reference(root, path)}" for path in modified) if modified else ["—"]
+        changes_lines.extend(["", f"### Изменённые файлы ({len(current_modified)})", ""])
+        changes_lines.extend(
+            (f"- {_path_reference(root, path)}" for path in current_modified)
+            if current_modified
+            else ["—"]
         )
-        lines.append("")
-    lines.append("## 4. Задачи и тесты этапа")
-    lines.append("")
+    changes_section = "\n".join(changes_lines).rstrip()
+
+    task_lines: list[str] = []
     if not milestone_tasks:
-        lines.append("Проектных TASK для этого этапа нет.")
+        task_lines.append("Проектных TASK для этого этапа нет.")
     else:
-        lines.append("| TASK | Компонент | Статус | TEST |")
-        lines.append("|---|---|---|---|")
+        task_lines.extend(["| TASK | Компонент | Статус | TEST |", "|---|---|---|---|"])
         for task in milestone_tasks:
             tests = (
-                ", ".join(f"[`{t['id']}`]({_link(str(t['path']))})" for t in task.get("tests", []))
+                ", ".join(
+                    f"[`{test['id']}`]({_link(str(test['path']))})"
+                    for test in task.get("tests", [])
+                )
                 or "—"
             )
             task_link = _link(str(task["path"]))
-            lines.append(
-                f"| [`{task['id']}`]({task_link}) | `{task.get('component', '') or '—'}` "
-                f"| {task['work_state']} | {tests} |"
+            task_lines.append(
+                f"| [`{task['id']}`]({task_link}) | "
+                f"`{task.get('component', '') or '—'}` | {task['work_state']} | {tests} |"
             )
-    lines.append("")
-    lines.append("## 5. Связанные требования")
-    lines.append("")
+    tasks_section = "\n".join(task_lines)
+
     scope = milestone.get("scope", [])
-    lines.append(", ".join(_requirement_links(root, scope)) if scope else "—")
-    lines.append("")
-    lines.append(f"## {_LIMITATIONS_HEADING}")
-    lines.append("")
-    lines.append(_preserved_or_placeholder(root, milestone_id, _LIMITATIONS_HEADING))
-    lines.append("")
-    lines.append(f"## {_RECOMMENDATIONS_HEADING}")
-    lines.append("")
-    lines.append(_preserved_or_placeholder(root, milestone_id, _RECOMMENDATIONS_HEADING))
-    lines.append("")
-    return "\n".join(lines)
+    requirements_section = ", ".join(_requirement_links(root, scope)) if scope else "—"
+
+    return render_contract(
+        root,
+        "milestone_completion_report",
+        {
+            "milestone_id": milestone_id,
+            "completion_state": "completed" if completed else "pending",
+            "created": start_date,
+            "updated": today,
+            "milestone_label": milestone_id.upper(),
+            "completion_section": completion_section,
+            "functional_section": functional_section,
+            "changes_section": changes_section,
+            "tasks_section": tasks_section,
+            "requirements_section": requirements_section,
+            "limitations_section": _preserved_or_placeholder(
+                root, milestone_id, _LIMITATIONS_HEADING
+            ),
+            "recommendations_section": _preserved_or_placeholder(
+                root, milestone_id, _RECOMMENDATIONS_HEADING
+            ),
+        },
+    )
 
 
 def update_completion_report(milestone_id: str, root: Path | None = None) -> bool:
@@ -389,6 +395,7 @@ def update_completion_report(milestone_id: str, root: Path | None = None) -> boo
         return False
 
     try:
+        assert_registered_output(root, "milestone_completion_report", report_path)
         report_path.write_text(render_final_report(root, milestone_id), encoding="utf-8")
         return True
     except Exception as e:

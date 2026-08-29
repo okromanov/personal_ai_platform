@@ -1,7 +1,6 @@
 #!/bin/bash
-# Pre-commit hook: regenerate dashboards if any tracked Markdown doc changed
-# Triggered before commit to ensure project_status.md and
-# generated/* stay in sync
+# Pre-commit hook: validate template contracts and regenerate project_status.md
+# if any tracked Markdown document changed.
 #
 # This is an integrity step, not a best-effort convenience: a failed version
 # bump or regeneration must block the commit rather than leave plausible but
@@ -26,6 +25,8 @@ find_python() {
 }
 PYTHON="$(find_python)"
 
+"$PYTHON" operations/scripts/documents/template_contracts.py
+
 # Increment file versions for modified .md files first. Dashboards below embed
 # each document's version number, so they must be regenerated *after* this
 # step — otherwise they'd snapshot the pre-bump version and immediately drift
@@ -41,23 +42,16 @@ if [ "${#modified_md[@]}" -gt 0 ]; then
     git add "${modified_md[@]}"
 fi
 
-# Regenerate whenever any staged Markdown doc changed. generated/*
-# (document_index.md, repository_structure.md, traceability_matrix.md,
-# test_catalog.md) reflect every tracked .md's frontmatter (id/type/version/
-# state), not just work/tasks|tests|mXX — a version bump on e.g. AGENTS.md or
-# an ADR drifts them exactly the same way a TASK/TEST change does, so scoping
-# this to work/* alone left those cases unregenerated until CI caught them.
+# Regenerate the owner dashboard whenever a staged Markdown document changed.
 if [ "${#modified_md[@]}" -gt 0 ]; then
-    echo "📊 Detected changes in tracked Markdown docs, regenerating dashboards..."
+    echo "📊 Detected changes in tracked Markdown docs, regenerating project status..."
 
-    # documents/generate.py --all is the single entry point that rebuilds
-    # project_status.md and generated/*; there's nothing further to call.
+    # documents/generate.py --all intentionally rebuilds only the registered
+    # owner dashboard. It never creates TASK cards or diagnostic indexes.
     "$PYTHON" operations/scripts/documents/generate.py --all
 
-    # Auto-add regenerated files if they changed.
-    if ! git diff --quiet project_status.md 2>/dev/null || \
-       ! git diff --quiet generated/ 2>/dev/null; then
-        echo "⚡ Dashboard changes detected, adding to commit..."
-        git add project_status.md generated/
+    if ! git diff --quiet project_status.md 2>/dev/null; then
+        echo "⚡ Project status changed, adding it to commit..."
+        git add project_status.md
     fi
 fi
