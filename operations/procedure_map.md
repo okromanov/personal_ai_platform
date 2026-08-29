@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.7
+version: 1.8
 updated: 2026-08-29
 depends_on:
   - operations_change_process
@@ -29,6 +29,7 @@ depends_on:
 | [`threat_review_triggers.md`](threat_review_triggers.md) | Какое событие означает, что угроза из модели угроз реализовалась, и что делать | Аномалия, ошибка или инцидент, потенциально связанный с [`threat_model.md`](../specifications/threat_model.md) | Решение: инцидент подтверждён/отклонён, процедура реагирования |
 | [`license_policy.md`](license_policy.md) | Почему в репозитории нет корневого `LICENSE` и что это означает | Вопрос о лицензировании/распространении кода | Понимание текущего закрытого режима |
 | [`procedures/file_update_dependencies.md`](procedures/file_update_dependencies.md) | Какие производные файлы нужно обновить при правке конкретного первичного файла | Правка файла с известными зависимыми генераторами/документами | Полный список файлов для синхронной правки |
+| [`procedures/recover_stale_sensitive_action_lock.md`](procedures/recover_stale_sensitive_action_lock.md) | Как безопасно снять зависшую блокировку sensitive-action после краха процесса | `authorize_sensitive_action` стабильно возвращает `OwnerControlStateError` о блокировке | Блокировка снята после подтверждения, что держатель мёртв |
 | [`examples/sample_task_lifecycle.md`](examples/sample_task_lifecycle.md) | Полный пример карточки TASK от начала до завершения | Нужен образец при создании новой TASK | Понимание структуры и связей карточки TASK |
 
 ## 3. Сценарии и порядок выполнения

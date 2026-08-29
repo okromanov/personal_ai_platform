@@ -18,10 +18,16 @@ from .base import (
     OwnerControlError,
     OwnerControlStateError,
 )
-from .control import OwnerControlGate
+from .control import (
+    RECOVERY_CONFIRMATION_PHRASE,
+    OwnerControlGate,
+    StaleLockRecoveryError,
+    recover_stale_sensitive_action_lock,
+)
 from .emergency_switch import EmergencySwitch
 
 __all__ = [
+    "RECOVERY_CONFIRMATION_PHRASE",
     "ActionDescriptor",
     "ActionClass",
     "AuthorizationDecision",
@@ -33,4 +39,6 @@ __all__ = [
     "OwnerControlError",
     "OwnerControlGate",
     "OwnerControlStateError",
+    "StaleLockRecoveryError",
+    "recover_stale_sensitive_action_lock",
 ]

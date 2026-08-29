@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest import mock
 
 from src.owner_control import (
+    RECOVERY_CONFIRMATION_PHRASE,
     ActionClass,
     ActionDescriptor,
     EmergencyStopActive,
@@ -19,6 +20,8 @@ from src.owner_control import (
     IdentityRejected,
     OwnerControlGate,
     OwnerControlStateError,
+    StaleLockRecoveryError,
+    recover_stale_sensitive_action_lock,
 )
 from src.owner_control.state_io import atomic_write_json
 
@@ -260,6 +263,71 @@ class OwnerControlGateSensitiveActionTests(unittest.TestCase):
         self.gate._actions_lock_path.mkdir(parents=True)
         with self.assertRaises(OwnerControlStateError):
             self.gate.authorize_sensitive_action("action_11", _action())
+
+    def test_lock_holder_metadata_is_recorded_and_cleared(self) -> None:
+        holder_path = self.gate._actions_lock_path / "holder.json"
+        with self.gate._exclusive_state():
+            recorded = json.loads(holder_path.read_text(encoding="utf-8"))
+            self.assertEqual(recorded["pid"], os.getpid())
+            self.assertIn("acquired_at", recorded)
+        self.assertFalse(self.gate._actions_lock_path.exists())
+
+
+class StaleLockRecoveryTests(unittest.TestCase):
+    """AUD-013: a process that crashes between os.mkdir and os.rmdir leaves
+    the sensitive-action lock held forever. recover_stale_sensitive_action_lock()
+    is the explicit, owner-invoked recovery path -- never automatic, and it
+    must refuse whenever it cannot prove the holder is actually dead."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.state_dir = Path(self._tmp.name)
+        self.lock_path = self.state_dir / "owner_control_actions.lock"
+
+    def test_refuses_without_the_exact_confirmation_phrase(self) -> None:
+        self.lock_path.mkdir(parents=True)
+        with self.assertRaises(StaleLockRecoveryError):
+            recover_stale_sensitive_action_lock(self.state_dir, confirmation="yes please")
+        self.assertTrue(self.lock_path.is_dir())
+
+    def test_refuses_when_no_lock_is_held(self) -> None:
+        with self.assertRaises(StaleLockRecoveryError):
+            recover_stale_sensitive_action_lock(
+                self.state_dir, confirmation=RECOVERY_CONFIRMATION_PHRASE
+            )
+
+    def test_refuses_when_holder_process_is_still_alive(self) -> None:
+        self.lock_path.mkdir(parents=True)
+        atomic_write_json(
+            self.lock_path / "holder.json", {"pid": 4242, "acquired_at": "2026-08-29T00:00:00Z"}
+        )
+        with self.assertRaises(StaleLockRecoveryError):
+            recover_stale_sensitive_action_lock(
+                self.state_dir,
+                confirmation=RECOVERY_CONFIRMATION_PHRASE,
+                is_process_alive=lambda _pid: True,
+            )
+        self.assertTrue(self.lock_path.is_dir())
+
+    def test_removes_the_lock_when_holder_process_is_confirmed_dead(self) -> None:
+        self.lock_path.mkdir(parents=True)
+        atomic_write_json(
+            self.lock_path / "holder.json", {"pid": 4242, "acquired_at": "2026-08-29T00:00:00Z"}
+        )
+        recover_stale_sensitive_action_lock(
+            self.state_dir,
+            confirmation=RECOVERY_CONFIRMATION_PHRASE,
+            is_process_alive=lambda _pid: False,
+        )
+        self.assertFalse(self.lock_path.exists())
+
+    def test_removes_a_lock_with_no_holder_metadata(self) -> None:
+        self.lock_path.mkdir(parents=True)
+        recover_stale_sensitive_action_lock(
+            self.state_dir, confirmation=RECOVERY_CONFIRMATION_PHRASE
+        )
+        self.assertFalse(self.lock_path.exists())
 
 
 if __name__ == "__main__":
