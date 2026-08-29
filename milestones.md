@@ -38,6 +38,7 @@ V1 — первый регулярно используемый персонал
 - work_state: `completed`
 - результат: непротиворечивая базовая редакция документов, трассировки, шаблонов и автоматических проверок до начала основного продуктового кода. Номер версии отдельного документа отражает его собственную историю и не обязан равняться `1.0`.
 - состав основы: первичные документы, шаблоны, типизированная трассировка, средства проверки качества и принятия. Машинная область файлов задаётся профилем `foundation` в [`operations/quality_registry.json`](operations/quality_registry.json). Этап [`m01`](#m01) **не означает реализацию продуктовых BR/SYS/SEC/INF**.
+- ADR этого этапа: [`ADR_001`](adr/adr_001_language_and_runtime.md#adr_001), [`ADR_002`](adr/adr_002_core_runtime_boundary.md#adr_002), [`ADR_003`](adr/adr_003_model_provider_interface.md#adr_003), [`ADR_004`](adr/adr_004_task_events_and_logging.md#adr_004).
 - обязательные автоматические доказательства: [`TEST_001`](work/tests/test_001.md), [`TEST_002`](work/tests/test_002.md).
 - обязательное доказательство владельца перед `ПРИНИМАЮ m01`: смысловая проверка базовой редакции на точном Git SHA по процедуре [`operations/semantic_review.md`](operations/semantic_review.md#обязательная-смысловая-проверка-при-принятии-этапа).
 
@@ -80,6 +81,7 @@ V1 — первый регулярно используемый персонал
 - work_state: `in-progress`
 - результат: владелец отправляет сообщение через Telegram и получает реальный ответ модели из постоянно работающей выбранной среды. Границы платформы остаются под контролем владельца.
 - состав: [`BR_001`](specifications/business_requirements.md#br_001), [`BR_004`](specifications/business_requirements.md#br_004), [`BR_005`](specifications/business_requirements.md#br_005), [`BR_006`](specifications/business_requirements.md#br_006), [`BR_033`](specifications/business_requirements.md#br_033), [`BR_036`](specifications/business_requirements.md#br_036), [`SYS_001`](specifications/system_specification.md#sys_001), [`SYS_002`](specifications/system_specification.md#sys_002), [`SYS_003`](specifications/system_specification.md#sys_003), [`SYS_004`](specifications/system_specification.md#sys_004), [`SYS_006`](specifications/system_specification.md#sys_006), [`SYS_020`](specifications/system_specification.md#sys_020), [`SYS_024`](specifications/system_specification.md#sys_024), [`SYS_027`](specifications/system_specification.md#sys_027), [`SEC_CTL_001`](specifications/system_specification.md#sec_ctl_001), [`SEC_CTL_002`](specifications/system_specification.md#sec_ctl_002), [`SEC_CTL_003`](specifications/system_specification.md#sec_ctl_003), [`SEC_CTL_005`](specifications/system_specification.md#sec_ctl_005), [`SEC_CTL_008`](specifications/system_specification.md#sec_ctl_008), [`SEC_CTL_020`](specifications/system_specification.md#sec_ctl_020), [`INF_REQ_001`](specifications/infrastructure_baseline.md#inf_req_001), [`INF_REQ_002`](specifications/infrastructure_baseline.md#inf_req_002), [`INF_REQ_003`](specifications/infrastructure_baseline.md#inf_req_003), [`INF_REQ_006`](specifications/infrastructure_baseline.md#inf_req_006), [`INF_REQ_010`](specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_012`](specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](specifications/infrastructure_baseline.md#inf_req_013), [`INF_REQ_015`](specifications/infrastructure_baseline.md#inf_req_015), [`INF_REQ_016`](specifications/infrastructure_baseline.md#inf_req_016).
+- ADR этого этапа: [`ADR_005`](adr/adr_005_first_model_provider_selection.md#adr_005), [`ADR_006`](adr/adr_006_agent_environment_framework.md#adr_006), [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007), [`ADR_009`](adr/adr_009_secret_management_strategy.md#adr_009).
 
 ### Обязательный пользовательский результат
 
@@ -111,6 +113,7 @@ V1 — первый регулярно используемый персонал
 - work_state: `planned`
 - результат: помощник отвечает по материалам пользователя и интернет-источникам с указанием происхождения данных. Он формирует полезный исследовательский и новостной поток без повторов.
 - состав: [`BR_003`](specifications/business_requirements.md#br_003), [`BR_011`](specifications/business_requirements.md#br_011), [`BR_012`](specifications/business_requirements.md#br_012), [`BR_026`](specifications/business_requirements.md#br_026), [`BR_027`](specifications/business_requirements.md#br_027), [`BR_028`](specifications/business_requirements.md#br_028), [`SYS_008`](specifications/system_specification.md#sys_008), [`SYS_009`](specifications/system_specification.md#sys_009), [`SYS_010`](specifications/system_specification.md#sys_010), [`SYS_022`](specifications/system_specification.md#sys_022), [`SYS_023`](specifications/system_specification.md#sys_023), [`SEC_CTL_004`](specifications/system_specification.md#sec_ctl_004), [`SEC_CTL_007`](specifications/system_specification.md#sec_ctl_007), [`SEC_CTL_009`](specifications/system_specification.md#sec_ctl_009), [`SEC_CTL_010`](specifications/system_specification.md#sec_ctl_010), [`SEC_CTL_012`](specifications/system_specification.md#sec_ctl_012), [`INF_REQ_004`](specifications/infrastructure_baseline.md#inf_req_004), [`INF_REQ_005`](specifications/infrastructure_baseline.md#inf_req_005), [`INF_REQ_007`](specifications/infrastructure_baseline.md#inf_req_007).
+- ADR этого этапа: нет.
 
 ### Подэтапы
 
@@ -126,6 +129,7 @@ V1 — первый регулярно используемый персонал
 - work_state: `planned`
 - результат: система сохраняет полезный контекст между сессиями и формирует статус проектов, решений, обязательств, рисков и следующих действий.
 - состав: [`BR_002`](specifications/business_requirements.md#br_002), [`BR_010`](specifications/business_requirements.md#br_010), [`BR_022`](specifications/business_requirements.md#br_022), [`BR_023`](specifications/business_requirements.md#br_023), [`BR_024`](specifications/business_requirements.md#br_024), [`SYS_010`](specifications/system_specification.md#sys_010), [`SYS_011`](specifications/system_specification.md#sys_011), [`SYS_012`](specifications/system_specification.md#sys_012), [`SYS_029`](specifications/system_specification.md#sys_029), [`SEC_CTL_006`](specifications/system_specification.md#sec_ctl_006), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013), [`SEC_CTL_019`](specifications/system_specification.md#sec_ctl_019), [`INF_REQ_008`](specifications/infrastructure_baseline.md#inf_req_008), [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009), [`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014).
+- ADR этого этапа: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007), [`ADR_008`](adr/adr_008_data_storage_schema.md#adr_008).
 
 ### Подэтапы
 
@@ -141,6 +145,7 @@ V1 — первый регулярно используемый персонал
 - work_state: `planned`
 - результат: владелец может создавать и управлять разрешёнными однократными и регулярными задачами, которые надёжно выполняются по расписанию. Первый обязательный сценарий — единая приоритетная сводка без дублей и скрытого расширения полномочий.
 - состав: [`BR_013`](specifications/business_requirements.md#br_013), [`BR_028`](specifications/business_requirements.md#br_028), [`BR_036`](specifications/business_requirements.md#br_036), [`SYS_013`](specifications/system_specification.md#sys_013), [`SYS_024`](specifications/system_specification.md#sys_024), [`SYS_030`](specifications/system_specification.md#sys_030), [`SEC_CTL_012`](specifications/system_specification.md#sec_ctl_012), [`SEC_CTL_017`](specifications/system_specification.md#sec_ctl_017), [`INF_REQ_001`](specifications/infrastructure_baseline.md#inf_req_001), [`INF_REQ_008`](specifications/infrastructure_baseline.md#inf_req_008).
+- ADR этого этапа: нет.
 
 ### Подэтапы
 
@@ -158,6 +163,7 @@ V1 — первый регулярно используемый персонал
 - work_state: `planned`
 - результат: объединённый контур V1 пригоден для регулярного использования и восстанавливается после типовых отказов без ослабления контроля владельца.
 - состав: [`BR_001`](specifications/business_requirements.md#br_001), [`BR_002`](specifications/business_requirements.md#br_002), [`BR_003`](specifications/business_requirements.md#br_003), [`BR_004`](specifications/business_requirements.md#br_004), [`BR_005`](specifications/business_requirements.md#br_005), [`BR_006`](specifications/business_requirements.md#br_006), [`BR_010`](specifications/business_requirements.md#br_010), [`BR_011`](specifications/business_requirements.md#br_011), [`BR_012`](specifications/business_requirements.md#br_012), [`BR_013`](specifications/business_requirements.md#br_013), [`BR_022`](specifications/business_requirements.md#br_022), [`BR_023`](specifications/business_requirements.md#br_023), [`BR_024`](specifications/business_requirements.md#br_024), [`BR_026`](specifications/business_requirements.md#br_026), [`BR_027`](specifications/business_requirements.md#br_027), [`BR_028`](specifications/business_requirements.md#br_028), [`BR_033`](specifications/business_requirements.md#br_033), [`BR_036`](specifications/business_requirements.md#br_036), [`SYS_025`](specifications/system_specification.md#sys_025), [`SYS_026`](specifications/system_specification.md#sys_026), [`SYS_027`](specifications/system_specification.md#sys_027), [`SEC_CTL_011`](specifications/system_specification.md#sec_ctl_011), [`SEC_CTL_012`](specifications/system_specification.md#sec_ctl_012), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013), [`SEC_CTL_014`](specifications/system_specification.md#sec_ctl_014), [`SEC_CTL_015`](specifications/system_specification.md#sec_ctl_015), [`SEC_CTL_016`](specifications/system_specification.md#sec_ctl_016), [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009), [`INF_REQ_010`](specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](specifications/infrastructure_baseline.md#inf_req_011), [`INF_REQ_012`](specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](specifications/infrastructure_baseline.md#inf_req_013), [`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014).
+- ADR этого этапа: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007).
 
 ### Подэтапы
 
@@ -173,6 +179,7 @@ V1 — первый регулярно используемый персонал
 
 - work_state: `planned`
 - результат: после фактической эксплуатации V1 собраны данные о пользе, качестве, стоимости, проблемах и технологических ограничениях. На их основе сформирован новый приоритетный план.
+- ADR этого этапа: нет.
 
 ### Подэтапы
 
