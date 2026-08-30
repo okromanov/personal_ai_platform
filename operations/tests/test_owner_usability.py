@@ -37,6 +37,7 @@ def _task_item(
         "traces_to": traces_to,
         "implements": [],
         "component": "",
+        "delivery_role": "component",
         "allowed_paths": [],
         "blocker": "",
         "tests": [],

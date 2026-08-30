@@ -12,11 +12,19 @@ from operations.scripts.eval.run_eval_suite import (
     GoldenCase,
     GoldenCaseError,
     _default_gateway,
+    build_gateway,
     load_golden_cases,
+    main,
     run_case,
     run_eval_suite,
 )
-from src.models import ModelGatewayError, StubModelGateway
+from src.models import (
+    ModelGateway,
+    ModelGatewayError,
+    ModelRequest,
+    ModelResponse,
+    StubModelGateway,
+)
 
 
 class CheckTests(unittest.TestCase):
@@ -162,6 +170,32 @@ class RunEvalSuiteTests(unittest.IsolatedAsyncioTestCase):
         gateway = _default_gateway(cases)
         result = await run_eval_suite(gateway, cases)
         self.assertTrue(result.passed, [r.failures for r in result.results if not r.passed])
+
+
+class EvalProfileTests(unittest.TestCase):
+    class DegradedGateway(ModelGateway):
+        async def complete(self, request: ModelRequest) -> ModelResponse:
+            del request
+            return ModelResponse(text="degraded")
+
+    def test_unknown_profile_is_rejected(self) -> None:
+        cases = load_golden_cases(Path("operations/eval/golden_cases.json"))
+        with self.assertRaises(GoldenCaseError):
+            build_gateway("missing", cases)
+
+    def test_non_stub_profile_requires_full_sha(self) -> None:
+        exit_code = main(
+            ["--profile", "degraded"],
+            gateway_factories={"degraded": lambda _cases: self.DegradedGateway()},
+        )
+        self.assertEqual(exit_code, 2)
+
+    def test_canonical_entrypoint_fails_for_degraded_non_stub_profile(self) -> None:
+        exit_code = main(
+            ["--profile", "degraded", "--git-sha", "a" * 40],
+            gateway_factories={"degraded": lambda _cases: self.DegradedGateway()},
+        )
+        self.assertEqual(exit_code, 1)
 
 
 if __name__ == "__main__":

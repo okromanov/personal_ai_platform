@@ -34,9 +34,7 @@ _SHORTHAND_RANGE_SPAN_ERROR = re.compile(
     r"сокращает \S+ — должны быть отдельными кликабельными ссылками "
     r"(?P<id1>\S+) на (?P<target1>\S+) и (?P<id2>\S+) на (?P<target2>\S+)$"
 )
-_TRACEABLE_FAMILIES = (
-    "BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW|ADR|TASK|TEST"
-)
+_TRACEABLE_FAMILIES = "BR|SYS|THR|SEC_CTL|ARC_CMP|ARC_FLOW|INF_REQ|INF_CMP|INF_FLOW|ADR|TASK|TEST"
 # `[`ADR_005`](...)–009` drops the family prefix on the range's second
 # endpoint, so it never matches REFERENCE_PATTERN (which requires the full
 # `FAMILY_NNN` form) and the ordinary bare-identifier check below can't see
@@ -316,8 +314,8 @@ def _check_shorthand_range_tail_references(
                 or match.group("family_coded")
                 or match.group("family_bare")
             ).upper()
-            num1 = match.group("num1_linked") or match.group("num1_coded") or match.group(
-                "num1_bare"
+            num1 = (
+                match.group("num1_linked") or match.group("num1_coded") or match.group("num1_bare")
             )
             num2 = match.group("num2")
             identifier2 = f"{family}_{num2}"
@@ -504,9 +502,7 @@ def _fix_shorthand_range_tail_references(
             line = lines[idx]
             # Rightmost first so an earlier replacement's inserted text
             # cannot shift the span of a later match on the same line.
-            for match in sorted(
-                line_matches, key=lambda m: int(m.group("num2")), reverse=True
-            ):
+            for match in sorted(line_matches, key=lambda m: int(m.group("num2")), reverse=True):
                 identifier = match.group("id")
                 record = records.get(identifier)
                 if record is None:
@@ -554,9 +550,7 @@ def _fix_shorthand_range_span_references(
             if idx >= len(lines):
                 continue
             line = lines[idx]
-            for match in sorted(
-                line_matches, key=lambda m: int(m.group("num2")), reverse=True
-            ):
+            for match in sorted(line_matches, key=lambda m: int(m.group("num2")), reverse=True):
                 identifier1 = match.group("id1")
                 identifier2 = match.group("id2")
                 record1 = records.get(identifier1)
@@ -576,9 +570,7 @@ def _fix_shorthand_range_span_references(
                     continue
                 sep_match = re.search(r"[–—-]", span.group(0))
                 separator = sep_match.group(0) if sep_match else "–"
-                replacement = (
-                    f"[`{identifier1}`]({href1}){separator}[`{identifier2}`]({href2})"
-                )
+                replacement = f"[`{identifier1}`]({href1}){separator}[`{identifier2}`]({href2})"
                 line = line[: span.start()] + replacement + line[span.end() :]
             lines[idx] = line
         new_text = "\n".join(lines)

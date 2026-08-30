@@ -16,8 +16,8 @@ env/
 .env
 .env.*
 !.env.example
-secrets/
-credentials/
+/secrets/
+/credentials/
 *.pem
 *.key
 *.p12

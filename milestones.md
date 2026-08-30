@@ -2,8 +2,8 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 1.8
-updated: 2026-08-29
+version: 1.9
+updated: 2026-08-30
 depends_on:
   - business_requirements
   - architecture_baseline
@@ -129,7 +129,7 @@ V1 — первый регулярно используемый персонал
 - результат: система сохраняет полезный контекст между сессиями и формирует статус проектов, решений, обязательств, рисков и следующих действий.
 - состав: [`BR_002`](specifications/business_requirements.md#br_002), [`BR_010`](specifications/business_requirements.md#br_010), [`BR_022`](specifications/business_requirements.md#br_022), [`BR_023`](specifications/business_requirements.md#br_023), [`BR_024`](specifications/business_requirements.md#br_024), [`SYS_010`](specifications/system_specification.md#sys_010), [`SYS_011`](specifications/system_specification.md#sys_011), [`SYS_012`](specifications/system_specification.md#sys_012), [`SYS_029`](specifications/system_specification.md#sys_029), [`SEC_CTL_006`](specifications/system_specification.md#sec_ctl_006), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013), [`SEC_CTL_019`](specifications/system_specification.md#sec_ctl_019), [`INF_REQ_008`](specifications/infrastructure_baseline.md#inf_req_008), [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009), [`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014).
 - ADR этого этапа: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007), [`ADR_008`](adr/adr_008_data_storage_schema.md#adr_008).
-- карта решений: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007) уже назначен [`TASK_013`](work/tasks/task_013_inf_008.md); для [`ADR_008`](adr/adr_008_data_storage_schema.md#adr_008) TASK-владелец создаётся при декомпозиции `m04` и обязателен до перехода этапа в `in-progress`.
+- карта решений: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007) назначен [`TASK_013`](work/tasks/task_013_inf_008.md); [`ADR_008`](adr/adr_008_data_storage_schema.md#adr_008) назначен [`TASK_019`](work/tasks/task_019_m04_data_storage.md).
 
 ### Подэтапы
 
