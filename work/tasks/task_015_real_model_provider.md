@@ -5,7 +5,7 @@ title: Реальный поставщик модели для ARC_CMP_004
 component: ARC_CMP_004
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.3
+version: 1.4
 updated: 2026-08-30
 next_actor: agent
 owner_action: none
@@ -53,7 +53,7 @@ implements:
 - [ ] Подключить одного реального provider
 - [ ] Зарегистрировать явный non-stub eval-профиль и отдельные golden expectations
 - [ ] Проверить timeout, budget и ошибки
-- [ ] Создать TEST и evidence полного 40-символьного commit SHA
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 
 ## 6. Состав
 

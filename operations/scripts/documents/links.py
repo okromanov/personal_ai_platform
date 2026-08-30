@@ -64,6 +64,26 @@ CLICKABLE_EXTENSIONS = ("md", "txt", "yaml", "json")
 MARKDOWN_PATH_PATTERN = re.compile(
     rf"^[A-Za-z0-9_./\\-]+\.(?:{'|'.join(CLICKABLE_EXTENSIONS)})(?:#[^\s]+)?$"
 )
+# The project's own source-of-truth registry (project_rules.md §2) treats
+# these top-level directories as navigable document collections and links
+# every one of them -- codified here so a bare mention of any of them
+# (exact string, not a glob or a path further into the tree) is caught the
+# same way an unlinked .md file reference already is. Code directories
+# (src/, operations/scripts/, ...) are deliberately excluded: those are
+# named by convention, not meant to be clicked into.
+KNOWN_DOCUMENT_DIRECTORIES = (
+    "adr/",
+    "specifications/",
+    "work/tasks/",
+    "work/tests/",
+    "work/audit/",
+    "work/acceptance/",
+    "operations/",
+)
+# Dated audit snapshots are immutable once published (see change_process.md
+# / check_change_scope.py AUDIT_HISTORY_PATH) -- never rewritten to satisfy
+# a check introduced after they were written.
+_IMMUTABLE_AUDIT_BASELINE = re.compile(r"^work/audit/audit_baseline_\d{4}_\d{2}_\d{2}\.md$")
 HEADING_PATTERN = re.compile(r"(?m)^#{1,6}\s+(.+?)\s*$")
 EXPLICIT_ANCHOR_PATTERN = re.compile(r"""<a\s+(?:id|name)=["']([^"']+)["']""")
 MARKDOWN_LINK_TEXT_PATTERN = re.compile(r"\[([^\]]*)\]\([^)]*\)")
@@ -155,6 +175,45 @@ def _check_clickable_document_references(root: Path, path: Path, text: str) -> l
             if before.endswith("[") and after.startswith("]("):
                 continue
             if _reference_exists(root, path, reference):
+                errors.append(
+                    f"{relative_posix(path, root)}:{line_number}: "
+                    f"ссылка на существующий документ должна быть кликабельной: {reference}"
+                )
+    return errors
+
+
+def _check_clickable_directory_references(root: Path, path: Path, text: str) -> list[str]:
+    """A bare mention of a known document-collection directory (see
+    KNOWN_DOCUMENT_DIRECTORIES) must be a clickable link, exactly like a
+    bare .md/.txt/.yaml/.json reference already must be."""
+
+    if _IMMUTABLE_AUDIT_BASELINE.fullmatch(relative_posix(path, root)):
+        return []
+    errors: list[str] = []
+    in_fence = False
+    fence_marker = ""
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        stripped = line.lstrip()
+        marker = stripped[:3]
+        if marker in {"```", "~~~"}:
+            if not in_fence:
+                in_fence = True
+                fence_marker = marker
+            elif marker == fence_marker:
+                in_fence = False
+                fence_marker = ""
+            continue
+        if in_fence:
+            continue
+        for match in INLINE_CODE_PATTERN.finditer(line):
+            reference = match.group(1).strip()
+            if reference not in KNOWN_DOCUMENT_DIRECTORIES:
+                continue
+            before = line[: match.start()]
+            after = line[match.end() :]
+            if before.endswith("[") and after.startswith("]("):
+                continue
+            if (root / reference).is_dir():
                 errors.append(
                     f"{relative_posix(path, root)}:{line_number}: "
                     f"ссылка на существующий документ должна быть кликабельной: {reference}"
@@ -402,6 +461,7 @@ def check_markdown_links(root: Path) -> list[str]:
                     f"{relative_posix(resolved, root)}#{anchor}"
                 )
         errors.extend(_check_clickable_document_references(root, path, text))
+        errors.extend(_check_clickable_directory_references(root, path, text))
         errors.extend(_check_bare_identifier_references(root, path, text, records))
         errors.extend(_check_shorthand_range_tail_references(root, path, text, records))
     return errors

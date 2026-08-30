@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-30T09:46:00-04:00
+generated_at: 2026-08-30T20:52:00+00:00
 version: 1.0
 ---
 
@@ -65,11 +65,11 @@ version: 1.0
 
 ## Шаги текущей работы
 
-- [ ] Сравнить Hetzner и DigitalOcean и runtime-secret варианты; подготовить решения [`ADR_007`](adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](adr/adr_009_secret_management_strategy.md)
+- [ ] Сравнить Hetzner/DigitalOcean (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](adr/adr_009_secret_management_strategy.md)
 - [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
-- [ ] Написать TEST с реальным evidence
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 - [ ] Проверить развёрнутый контур и покрытие путей
 
 ## Блокеры
@@ -80,12 +80,12 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего замечаний | **27** |
-| Исправлены, ожидают проверки | **25** |
+| Всего замечаний | **30** |
+| Исправлены, ожидают проверки | **26** |
 | Открыты | **2** |
 | Риски приняты владельцем | **0** |
-| Закрыты | **0** |
-| Критичность | critical: **1**, high: **7**, medium: **13**, low: **6** |
+| Закрыты | **2** |
+| Критичность | critical: **1**, high: **7**, medium: **15**, low: **7** |
 | Состояние gate/CI | **ЕСТЬ незакрытые критические замечания (1)** — не полагайтесь на статус CI/gate без проверки карточек ниже |
 | Ближайшая дата проверки | **2026-09-02** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |

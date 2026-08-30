@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
-version: 2.0
-updated: 2026-08-24
+version: 2.1
+updated: 2026-08-30
 next_actor: none
 owner_action: none
 depends_on:
@@ -62,7 +62,7 @@ polling) нет. Живой бот не настроен и не запущен.
 - [x] Дополнить allowed_paths реальными путями
 - [x] Спроектировать реализацию
 - [x] Реализовать компонент
-- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Написать [`TEST_007`](../tests/test_007.md), связанный с TASK и требованиями компонента
 - [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав

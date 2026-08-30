@@ -3,7 +3,7 @@ id: m01_final_report
 type: milestone_completion_report
 completion_state: completed
 version: 1.0
-created: 2026-08-30
+created: 2026-08-22
 updated: 2026-08-30
 milestone: m01
 ---
@@ -13,9 +13,9 @@ milestone: m01
 ## 1. Состояние завершения
 
 - Статус: завершено
-- Дата начала: 2026-08-30
-- Дата завершения: 2026-08-30
-- Время работы над этапом: 2026-08-30 (в тот же день)
+- Дата начала: 2026-08-22
+- Дата завершения: 2026-08-22
+- Время работы над этапом: 2026-08-22 (в тот же день)
 - Все задачи завершены: не применимо (TASK для этапа не создаются)
 
 ## 2. Что реализовано функционально
@@ -26,7 +26,16 @@ milestone: m01
 
 ## 3. Изменения в репозитории
 
-Изменений файлов не обнаружено.
+### Новые файлы (1)
+
+- [`work/acceptance/m01.json`](m01.json)
+
+### Изменённые файлы (4)
+
+- [`.github/workflows/project_check.yml`](../../.github/workflows/project_check.yml)
+- [`milestones.md`](../../milestones.md)
+- [`operations/quality_registry.json`](../../operations/quality_registry.json)
+- [`project_status.md`](../../project_status.md)
 
 ## 4. Задачи и тесты этапа
 

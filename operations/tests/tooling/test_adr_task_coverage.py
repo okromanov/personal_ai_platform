@@ -111,20 +111,10 @@ class AdrDecisionTaskCoverageTests(unittest.TestCase):
         self._task(root, "TASK_018", "m02", decides=("ADR_008",))
         self.assertRegex(validate_adr_decision_tasks(root)[0], "должна traces_to")
 
-    def test_future_planned_milestone_requires_decision_task_immediately(self) -> None:
+    def test_future_planned_milestone_is_deferred_until_decomposition(self) -> None:
         root = self._root()
         self._milestones(root)
         self._adr(root, "ADR_008", "m04")
-        self.assertRegex(
-            validate_adr_decision_tasks(root)[0],
-            "ровно одну незавершённую TASK",
-        )
-
-    def test_future_planned_milestone_with_owner_passes(self) -> None:
-        root = self._root()
-        self._milestones(root)
-        self._adr(root, "ADR_008", "m04")
-        self._task(root, "TASK_018", "m04", decides=("ADR_008",))
         self.assertEqual(validate_adr_decision_tasks(root), [])
 
     def test_unknown_adr_reference_is_rejected(self) -> None:

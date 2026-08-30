@@ -2,7 +2,7 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 1.7
+version: 2.1
 updated: 2026-08-30
 depends_on: []
 ---
@@ -46,74 +46,120 @@ depends_on: []
 | AUD-018 | low | remediated_pending_verification | 2026-08-29 | 2026-09-19 | repository_owner | [`test_007.md`](../tests/test_007.md), [`quality_registry.json`](../../operations/quality_registry.json), `.gitignore` | [`TEST_007`](../tests/test_007.md) приведён к единому числу (17, с учётом нового теста AUD-016); в [`quality_registry.json`](../../operations/quality_registry.json) добавлено пояснение фазирования; устаревший блок `generated/` удалён из `.gitignore`. |
 | AUD-019 | low | remediated_pending_verification | 2026-08-29 | 2026-09-19 | repository_owner | [`sqlite_store.py`](../../src/task_state/sqlite_store.py), [`test_persistent_task_state.py`](../../operations/tests/product/test_persistent_task_state.py) | Добавлены тесты по образцу `test_owner_control.py`: невалидный/не-dict JSON и неизвестный `state`, записанные напрямую в SQLite, подтверждают `TaskLifecycleError`. |
 | AUD-020 | medium | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5, [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py) | §7.5 требует eval/regression-набор; текущий `stub` profile доказывает только plumbing. Реальный profile должен быть явно зарегистрирован в [`TASK_015`](../tasks/task_015_real_model_provider.md), привязан к полному SHA и иметь отдельные expectations. |
-| AUD-021 | high | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`TASK_013`](../tasks/task_013_inf_008.md)–[`TASK_019`](../tasks/task_019_m04_data_storage.md) | Введено `TASK.decides`; каждый proposed ADR любого milestone назначен одной незавершённой TASK, включая [`ADR_008`](../../adr/adr_008_data_storage_schema.md) → [`TASK_019`](../tasks/task_019_m04_data_storage.md); negative tests блокируют потерю и дублирование владельца. |
+| AUD-021 | high | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`TASK_013`](../tasks/task_013_inf_008.md)–[`TASK_015`](../tasks/task_015_real_model_provider.md) | Введено `TASK.decides`, active proposed ADR назначены незавершённым TASK, планирование и аудит требуют обратного прохода ADR → TASK; отрицательные tests блокируют потерю и дублирование владельца решения. Планируемый (`planned`) milestone деференциально откладывает назначение TASK до декомпозиции — владелец подтвердил 2026-08-30, см. AUD-025. |
 | AUD-022 | high | remediated_pending_verification | 2026-08-30 | 2026-09-06 | repository_owner | [`project_status.md`](../../project_status.md), [`audit_register.md`](#3-реестр), [`AGENTS.md`](../../AGENTS.md), [`project_check.yml`](../../.github/workflows/project_check.yml), [`test_checker_negative_paths.py`](../../operations/tests/test_checker_negative_paths.py) | Ссылки и owner-status исправлены, CI triggers согласованы, formatter drift и Mypy-регрессия нового section-contract test устранены; ожидается серверная проверка. |
 | AUD-023 | high | remediated_pending_verification | 2026-08-30 | 2026-09-06 | repository_owner | [`.gitignore`](../../.gitignore), [`.dockerignore`](../../.dockerignore), [`test_security_extended.py`](../../operations/tests/test_security_extended.py) | Root secret dirs закреплены, `src/secrets` видим Git, Docker context исключает `.env`/keys/credentials; добавлены negative policy tests. |
-| AUD-024 | high | open | 2026-08-30 | 2026-09-06 | repository_owner | [`ADR_003`](../../adr/adr_003_model_provider_interface.md), [`TASK_014`](../tasks/task_014_real_runtime.md), [`TASK_018`](../tasks/task_018_runtime_task_events.md), [`TASK_019`](../tasks/task_019_m04_data_storage.md) | Контракт `ModelGateway` и candidate sets согласованы, [`ADR_008`](../../adr/adr_008_data_storage_schema.md) получил owner TASK. Остаётся `open` до реализации событий [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) в [`TASK_018`](../tasks/task_018_runtime_task_events.md). |
-| AUD-025 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`change_process.md`](../../operations/change_process.md), [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`task_template.md`](../../operations/templates/task_template.md), [`milestone_template.md`](../../operations/templates/milestone_template.md) | Процедуры, checker и защищённые шаблоны согласованы: каждый proposed ADR любого milestone немедленно получает одну незавершённую TASK-владельца; ожидается полный gate и серверная проверка. |
+| AUD-024 | high | open | 2026-08-30 | 2026-09-06 | repository_owner | [`ADR_003`](../../adr/adr_003_model_provider_interface.md), [`TASK_014`](../tasks/task_014_real_runtime.md), [`TASK_018`](../tasks/task_018_runtime_task_events.md) | Контракт `ModelGateway` и candidate sets согласованы. [`ADR_008`](../../adr/adr_008_data_storage_schema.md) намеренно без TASK-владельца сейчас — владелец подтвердил деференциальное правило для `planned` [`m04`](../../milestones.md#m04) (см. [`AUD-025`](#aud-025)), назначение будет при декомпозиции. Остаётся `open` до реализации событий [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) в [`TASK_018`](../tasks/task_018_runtime_task_events.md). |
+| AUD-025 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`change_process.md`](../../operations/change_process.md), [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`task_template.md`](../../operations/templates/task_template.md), [`milestone_template.md`](../../operations/templates/milestone_template.md) | Процедуры и checker разделяют create/compare/accept и удаляют PR-approval shortcut. Владелец 2026-08-30 явно вернул planned-milestone исключение (TASK для далёкого `planned` milestone откладывается до декомпозиции) — единственная отменённая деталь этого fix, см. карточку. |
 | AUD-026 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`TASK_013`](../tasks/task_013_inf_008.md), [`paths_validation.py`](../../operations/scripts/quality/paths_validation.py) | Служебные пути удалены из активной TASK; новая проверка запрещает governance/audit paths в незавершённых product TASK. |
 | AUD-027 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py), [`test_eval_suite.py`](../../operations/tests/tooling/test_eval_suite.py) | CLI получил явные profiles и SHA-требование для non-stub; degraded non-stub profile проверенно завершает canonical entrypoint с кодом 1. |
+| AUD-028 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`adr_006_agent_environment_framework.md`](../../adr/adr_006_agent_environment_framework.md), [`adr_007_cloud_provider_selection.md`](../../adr/adr_007_cloud_provider_selection.md), [`adr_lifecycle.md`](../../operations/adr_lifecycle.md) | Найдено при сведении параллельной ветки с `main`: два конкурирующих агента независимо переписали [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) (CrewAI vs Hermes Agent) и [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) (двухсценарная структура была свёрнута в один сценарий). Владелец 2026-08-30 явно разрешил оба конфликта: [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) объединён в четыре кандидата (LangGraph, CrewAI, Hermes Agent, собственная реализация); [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) вернулся к двум сценариям (A: Hetzner/DigitalOcean вне России; B: Selectel в бэклоге до проверки A). |
+| AUD-029 | medium | resolved | 2026-08-30 | 2026-09-13 | repository_owner | [`ADR_004`](../../adr/adr_004_task_events_and_logging.md), [`TASK_018`](../tasks/task_018_runtime_task_events.md), [`AUD-024`](#aud-024) | Дубликат ID со случайно тем же номером из параллельной ветки — переномерован при слиянии. Сама находка (принятый [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) не реализован в коде) уже отслеживается [`AUD-024`](#aud-024) и получила план исправления через [`TASK_018`](../tasks/task_018_runtime_task_events.md); отдельного действия не требуется. |
+| AUD-030 | low | resolved | 2026-08-30 | 2026-09-20 | repository_owner | [`adr_003_model_provider_interface.md`](../../adr/adr_003_model_provider_interface.md), [`src/models/base.py`](../../src/models/base.py) | Дубликат ID со случайно тем же номером из параллельной ветки — переномерован при слиянии. Сама находка (расхождение имени `ModelProvider`/`ModelGateway` между ADR и кодом) уже устранена независимо: [`ADR_003`](../../adr/adr_003_model_provider_interface.md) переименован на `ModelGateway`, совпадает с кодом. |
 
 ## 4. Карточки findings
+
+Единый список названий полей, ровно в этом порядке (проверяется автоматически, см. `check_audit_register_cards` в [`check.py`](../../operations/scripts/documents/check.py)). Других названий не существует — если для поля нет содержания, оно просто отсутствует в карточке, а не заменяется другим названием:
+
+1. `Severity/Confidence/Evidence state` — severity (`critical`/`high`/`medium`/`low`/`info`) / confidence (`high`/`medium`/`low`) / evidence state (`CONFIRMED`/`SUSPECTED`). Обязательно.
+2. `Baseline` — `introduced-by-change` | `pre-existing` | `duplicate`. Обязательно.
+3. `Файл` — затронутые пути, со строкой, если применимо и не динамическая. Обязательно.
+4. `Ожидаемый контракт` — какое правило/поведение нарушено.
+5. `Наблюдаемое поведение` — что реально обнаружено. Обязательно.
+6. `Воздействие и достижимость` — риск и насколько легко он триггерится.
+7. `Как воспроизвести` — команда или шаги.
+8. `Почему предыдущий аудит пропустил` — только если находка не нова, а пропущена ранее.
+9. `Рекомендованное исправление` — что нужно сделать.
+10. `Как проверить исправление` — что конкретно подтверждает, что рекомендация выполнена.
+11. `Исправлено (YYYY-MM-DD)` / `Частично исправлено (YYYY-MM-DD)` / `Уточнение (YYYY-MM-DD)` — датированные записи о ходе исправления, в хронологическом порядке; других названий для этой роли нет.
+12. `Критерий закрытия` — только когда переход в `resolved` требует чего-то отдельного от «как проверить исправление» (обычно: зелёный `Project check` на точном SHA).
+
+Поля 4, 6, 7, 8, 9, 10, 12 необязательны и пропускаются, если для них нет содержания.
 
 <a id="aud-001"></a>
 ### AUD-001 — workflow мог напрямую изменять основную ветку
 
-- **Наблюдение:** отдельный workflow публикации health report имел право `contents: write`, создавал коммит и выполнял прямой push. Результат служебной проверки мог изменять репозиторий в обход обычного PR и проверки точного SHA.
-- **Риск:** компрометация workflow или ошибка генератора позволяла записать непроверенное содержимое в основную ветку; автоматическая запись также могла запускать каскад CI и смешивать доказательство проверки с состоянием проверяемого кода.
-- **Ожидаемое состояние:** CI работает с минимальными правами, не изменяет репозиторий и сохраняет отчёты как неизменяемые artifacts, привязанные к проверяемому SHA.
-- **Исправление:** write-capable workflow удалён. Канонический [`Project check`](../../.github/workflows/project_check.yml) формирует runtime health evidence и загружает его как artifact без записи в Git.
-- **Критерий закрытия:** зелёный `Project check` на точном SHA подтверждает создание и загрузку health artifact; в активных workflows отсутствуют прямой push и необоснованное `contents: write`.
+- **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`.github/workflows/project_check.yml`](../../.github/workflows/project_check.yml)
+- **Ожидаемый контракт:** CI работает с минимальными правами, не изменяет репозиторий и сохраняет отчёты как неизменяемые artifacts, привязанные к проверяемому SHA.
+- **Наблюдаемое поведение:** отдельный workflow публикации health report имел право `contents: write`, создавал коммит и выполнял прямой push. Результат служебной проверки мог изменять репозиторий в обход обычного PR и проверки точного SHA.
+- **Воздействие и достижимость:** компрометация workflow или ошибка генератора позволяла записать непроверенное содержимое в основную ветку; автоматическая запись также могла запускать каскад CI и смешивать доказательство проверки с состоянием проверяемого кода.
+- **Рекомендованное исправление:** удалить write-capable workflow; публиковать health evidence как SHA-bound artifact без записи в Git.
+- **Как проверить исправление:** зелёный `Project check` на точном SHA подтверждает создание и загрузку health artifact; в активных workflows отсутствуют прямой push и необоснованное `contents: write`.
+- **Исправлено (2026-08-27):** write-capable workflow удалён. Канонический [`Project check`](../../.github/workflows/project_check.yml) формирует runtime health evidence и загружает его как artifact без записи в Git.
 
 <a id="aud-002"></a>
 ### AUD-002 — pre-commit допускал fail-open при регенерации
 
-- **Наблюдение:** ошибки вспомогательной регенерации подавлялись, поэтому hook мог завершиться успешно после неуспешного обновления производных файлов. После мутации не выполнялась повторная быстрая проверка итогового состояния.
-- **Риск:** в коммит могли попадать устаревшие или частично обновлённые `generated/*` и статусные документы, хотя локальный контроль показывал успех.
-- **Ожидаемое состояние:** любой обязательный генератор является blocking; после изменений hook проверяет уже окончательное состояние репозитория.
-- **Исправление:** [`pre_commit_hook.sh`](../../operations/hooks/pre_commit_hook.sh) и связанный скрипт регенерации теперь распространяют ненулевой код возврата и повторяют fast suite после мутаций. [`test_quality_integration.py`](../../operations/tests/test_quality_integration.py) содержит negative test отказа генератора.
-- **Критерий закрытия:** negative test подтверждает ненулевое завершение hook при ошибке генератора, а повторный запуск на стабильном дереве не создаёт drift.
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`pre_commit_hook.sh`](../../operations/hooks/pre_commit_hook.sh), [`test_quality_integration.py`](../../operations/tests/test_quality_integration.py)
+- **Ожидаемый контракт:** любой обязательный генератор является blocking; после изменений hook проверяет уже окончательное состояние репозитория.
+- **Наблюдаемое поведение:** ошибки вспомогательной регенерации подавлялись, поэтому hook мог завершиться успешно после неуспешного обновления производных файлов. После мутации не выполнялась повторная быстрая проверка итогового состояния.
+- **Воздействие и достижимость:** в коммит могли попадать устаревшие или частично обновлённые `generated/*` и статусные документы, хотя локальный контроль показывал успех.
+- **Рекомендованное исправление:** сделать регенерацию blocking; повторять fast suite после мутаций.
+- **Как проверить исправление:** negative test подтверждает ненулевое завершение hook при ошибке генератора, а повторный запуск на стабильном дереве не создаёт drift.
+- **Исправлено (2026-08-27):** [`pre_commit_hook.sh`](../../operations/hooks/pre_commit_hook.sh) и связанный скрипт регенерации теперь распространяют ненулевой код возврата и повторяют fast suite после мутаций. [`test_quality_integration.py`](../../operations/tests/test_quality_integration.py) содержит negative test отказа генератора.
 
 <a id="aud-003"></a>
 ### AUD-003 — контейнерная поставка была недостаточно воспроизводимой и проверяемой
 
-- **Наблюдение:** базовый Docker image не был закреплён неизменяемым digest, а CI не подтверждал полный цикл build/run/health и не формировал перечень программных компонентов поставки.
-- **Риск:** один и тот же Git SHA мог собираться на различной базе; ошибки контейнерного запуска и изменения транзитивного состава обнаруживались бы только при развёртывании, а анализ уязвимостей и лицензий не имел полного входа.
-- **Ожидаемое состояние:** база закреплена полным OCI digest; точный исходный SHA проходит реальную контейнерную сборку и health-check; для образа сохраняются digest и SBOM.
-- **Исправление:** [`dockerfile`](../../dockerfile) использует digest-pinned Python base. [`Project check`](../../.github/workflows/project_check.yml) собирает и запускает image, сверяет health и `APP_VERSION`, фиксирует digests и создаёт SPDX JSON SBOM.
-- **Критерий закрытия:** зелёный `Project check` на точном SHA содержит успешные Docker build/run/health шаги и загруженный SBOM вместе с digest evidence.
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`dockerfile`](../../dockerfile), [`project_check.yml`](../../.github/workflows/project_check.yml)
+- **Ожидаемый контракт:** база закреплена полным OCI digest; точный исходный SHA проходит реальную контейнерную сборку и health-check; для образа сохраняются digest и SBOM.
+- **Наблюдаемое поведение:** базовый Docker image не был закреплён неизменяемым digest, а CI не подтверждал полный цикл build/run/health и не формировал перечень программных компонентов поставки.
+- **Воздействие и достижимость:** один и тот же Git SHA мог собираться на различной базе; ошибки контейнерного запуска и изменения транзитивного состава обнаруживались бы только при развёртывании, а анализ уязвимостей и лицензий не имел полного входа.
+- **Рекомендованное исправление:** закрепить базу digest'ом; собирать и проверять image в CI, публиковать SBOM.
+- **Как проверить исправление:** зелёный `Project check` на точном SHA содержит успешные Docker build/run/health шаги и загруженный SBOM вместе с digest evidence.
+- **Исправлено (2026-08-27):** [`dockerfile`](../../dockerfile) использует digest-pinned Python base. [`Project check`](../../.github/workflows/project_check.yml) собирает и запускает image, сверяет health и `APP_VERSION`, фиксирует digests и создаёт SPDX JSON SBOM.
 
 <a id="aud-004"></a>
 ### AUD-004 — атомарная запись состояния не гарантировала POSIX durability
 
-- **Наблюдение:** запись JSON синхронизировала временный файл и выполняла atomic replace, но не синхронизировала родительский каталог после замены имени.
-- **Риск:** после внезапного отключения питания или сбоя ОС вызов мог быть сообщён как успешный, хотя directory entry ещё не был устойчиво сохранён. Это особенно существенно для owner-control и emergency state.
-- **Ожидаемое состояние:** на POSIX успешный результат возвращается только после последовательности file fsync → replace → directory fsync; отказ последнего барьера не скрывается. На Windows явно документируется отсутствие переносимого аналога directory fsync.
-- **Исправление:** [`state_io.py`](../../src/owner_control/state_io.py) синхронизирует родительский каталог после `os.replace` на POSIX. [`test_owner_control.py`](../../operations/tests/product/test_owner_control.py) проверяет порядок операций и распространение ошибки.
-- **Критерий закрытия:** Linux- и Windows-проверки проходят на точном SHA; POSIX-тест подтверждает порядок durability barriers и controlled failure при ошибке directory fsync.
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`state_io.py`](../../src/owner_control/state_io.py), [`test_owner_control.py`](../../operations/tests/product/test_owner_control.py)
+- **Ожидаемый контракт:** на POSIX успешный результат возвращается только после последовательности file fsync → replace → directory fsync; отказ последнего барьера не скрывается. На Windows явно документируется отсутствие переносимого аналога directory fsync.
+- **Наблюдаемое поведение:** запись JSON синхронизировала временный файл и выполняла atomic replace, но не синхронизировала родительский каталог после замены имени.
+- **Воздействие и достижимость:** после внезапного отключения питания или сбоя ОС вызов мог быть сообщён как успешный, хотя directory entry ещё не был устойчиво сохранён. Это особенно существенно для owner-control и emergency state.
+- **Рекомендованное исправление:** синхронизировать родительский каталог после `os.replace` на POSIX; распространять отказ этого барьера вызывающему коду.
+- **Как проверить исправление:** Linux- и Windows-проверки проходят на точном SHA; POSIX-тест подтверждает порядок durability barriers и controlled failure при ошибке directory fsync.
+- **Исправлено (2026-08-27):** [`state_io.py`](../../src/owner_control/state_io.py) синхронизирует родительский каталог после `os.replace` на POSIX. [`test_owner_control.py`](../../operations/tests/product/test_owner_control.py) проверяет порядок операций и распространение ошибки.
 
 <a id="aud-005"></a>
 ### AUD-005 — шаги quality gate могли зависать без контролируемого завершения
 
-- **Наблюдение:** runner запускал внешние проверки без общего ограничения времени на отдельный шаг.
-- **Риск:** зависший тест или инструмент мог удерживать локальный hook либо CI до внешнего принудительного завершения, не указывая владельцу конкретный зависший этап и не сохраняя полезную диагностику.
-- **Ожидаемое состояние:** каждый шаг имеет явный конечный timeout, локализованное сообщение об ошибке и сохраняемое доступное output evidence.
-- **Исправление:** [`run_suite.py`](../../operations/scripts/quality/run_suite.py) ограничивает шаг 300 секундами по умолчанию, обрабатывает `TimeoutExpired`, записывает доступный вывод и завершает gate контролируемой ошибкой с именем шага. Поведение проверяет [`test_quality_runner.py`](../../operations/tests/tooling/test_quality_runner.py).
-- **Критерий закрытия:** автоматический тест с коротким timeout завершается предсказуемо, называет зависший шаг и не оставляет runner в состоянии бесконечного ожидания.
+- **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`run_suite.py`](../../operations/scripts/quality/run_suite.py), [`test_quality_runner.py`](../../operations/tests/tooling/test_quality_runner.py)
+- **Ожидаемый контракт:** каждый шаг имеет явный конечный timeout, локализованное сообщение об ошибке и сохраняемое доступное output evidence.
+- **Наблюдаемое поведение:** runner запускал внешние проверки без общего ограничения времени на отдельный шаг.
+- **Воздействие и достижимость:** зависший тест или инструмент мог удерживать локальный hook либо CI до внешнего принудительного завершения, не указывая владельцу конкретный зависший этап и не сохраняя полезную диагностику.
+- **Рекомендованное исправление:** ограничить каждый шаг timeout'ом, сохранять доступный вывод и завершать gate контролируемой ошибкой с именем шага.
+- **Как проверить исправление:** автоматический тест с коротким timeout завершается предсказуемо, называет зависший шаг и не оставляет runner в состоянии бесконечного ожидания.
+- **Исправлено (2026-08-27):** [`run_suite.py`](../../operations/scripts/quality/run_suite.py) ограничивает шаг 300 секундами по умолчанию, обрабатывает `TimeoutExpired`, записывает доступный вывод и завершает gate контролируемой ошибкой с именем шага. Поведение проверяет [`test_quality_runner.py`](../../operations/tests/tooling/test_quality_runner.py).
 
 <a id="aud-006"></a>
 ### AUD-006 — отсутствовал долговечный реестр результатов аудита
 
-- **Наблюдение:** findings и состояние их устранения жили в тексте конкретного аудита или PR без единого стабильного реестра идентификаторов, владельцев и сроков пересмотра.
-- **Риск:** повторные аудиты могли дублировать одну причину под разными формулировками; незакрытые риски терялись после слияния PR, а статус исправления нельзя было однозначно проверить автоматически.
-- **Ожидаемое состояние:** каждый finding имеет стабильный ID, severity, lifecycle state, дату обнаружения, владельца, дату пересмотра, evidence, решение и подробную карточку причины и закрытия.
-- **Исправление:** создан этот реестр; [`run_suite.py`](../../operations/scripts/quality/run_suite.py) блокирует отсутствие записей, некорректные или повторные ID и открытые состояния без owner/review date.
-- **Критерий закрытия:** gate успешно валидирует реестр; все реализованные исправления подтверждены зелёным `Project check` на точном SHA и затем переведены в `resolved` отдельным служебным PR.
+- **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [Раздел 3](#3-реестр), [`run_suite.py`](../../operations/scripts/quality/run_suite.py)
+- **Ожидаемый контракт:** каждый finding имеет стабильный ID, severity, lifecycle state, дату обнаружения, владельца, дату пересмотра, evidence, решение и подробную карточку причины и закрытия.
+- **Наблюдаемое поведение:** findings и состояние их устранения жили в тексте конкретного аудита или PR без единого стабильного реестра идентификаторов, владельцев и сроков пересмотра.
+- **Воздействие и достижимость:** повторные аудиты могли дублировать одну причину под разными формулировками; незакрытые риски терялись после слияния PR, а статус исправления нельзя было однозначно проверить автоматически.
+- **Рекомендованное исправление:** создать реестр стабильных ID с owner/review date; проверять его в gate.
+- **Как проверить исправление:** gate успешно валидирует реестр; отсутствие записей, некорректные/повторные ID и открытые состояния без owner/review date отклоняются.
+- **Исправлено (2026-08-27):** создан этот реестр; [`run_suite.py`](../../operations/scripts/quality/run_suite.py) блокирует отсутствие записей, некорректные или повторные ID и открытые состояния без owner/review date.
+- **Критерий закрытия:** все реализованные исправления подтверждены зелёным `Project check` на точном SHA и затем переведены в `resolved` отдельным служебным PR.
 
 <a id="aud-007"></a>
 ### AUD-007 — CI не диспетчеризует джобы 4 дня подряд; ~30 мёрджей ушли без проверки gate
 
 - **Severity/Confidence/Evidence state:** critical / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`.github/workflows/project_check.yml`](../../.github/workflows/project_check.yml); история запусков GitHub Actions (API); [`task_012_inf_007.md`](../tasks/task_012_inf_007.md) §8
 - **Ожидаемый контракт:** AGENTS.md §3 — «Слияние или принятие этапа запрещено, пока общий gate не подтверждён для точного SHA»; `Project check` обязан выполняться на каждый push/PR.
 - **Наблюдаемое поведение:** запросил историю запусков `project_check.yml` на `main` через GitHub API. Последний реально отработавший (~2 минуты, зелёный) запуск — 2026-08-25 06:38 UTC (run #253, коммит `c6422e6`). Каждый запуск начиная с 2026-08-25 07:36 UTC и до текущего HEAD (2026-08-29 12:26, run #614) завершается неудачей за 2–13 секунд, без логов (404 при попытке скачать), оба джоба (`ubuntu-latest` и `windows-latest`) — то есть раннер вообще не назначался, а не упал на реальном шаге. Причина самораскрыта в [`task_012_inf_007.md`](../tasks/task_012_inf_007.md) §8: «серверный GitHub Actions gate ожидает восстановления квоты после 1 сентября 2026 года; успешный CI не заявляется».
@@ -122,12 +168,13 @@ depends_on: []
 - **Рекомендованное исправление:** дождаться восстановления квоты (после 2026-09-01) и получить хотя бы один реальный прогон на актуальном SHA; рассмотреть сокращение триггера CI (сейчас — каждый push в каждую ветку), чтобы не исчерпывать квоту повторно.
 - **Как проверить исправление:** `actions_list`/`actions_get` показывают `conclusion: success` с реалистичной длительностью (~1-2 минуты) и непустыми логами на точном SHA.
 - **Частично исправлено (2026-08-29):** вторая часть рекомендации выполнена — [`project_check.yml`](../../.github/workflows/project_check.yml) больше не триггерится на `push` в произвольную ветку (только `main`); `pull_request` по-прежнему покрывает каждый push в открытый PR. Первая часть (дождаться восстановления квоты) вне нашей власти — остаётся `open`.
-- **Решение владельца (2026-08-30):** Actions пока не восстанавливать. Это не перевод в `accepted_risk`: finding остаётся `critical/open`, серверное evidence отсутствует, readiness остаётся `NOT READY`.
+- **Уточнение (2026-08-30):** решение владельца — Actions пока не восстанавливать. Это не перевод в `accepted_risk`: finding остаётся `critical/open`, серверное evidence отсутствует, readiness остаётся `NOT READY`.
 
 <a id="aud-008"></a>
 ### AUD-008 — Канонический gate реально красный на HEAD по двум независимым причинам
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** introduced-by-change
 - **Файл:** [`template_contracts.py:208`](../../operations/scripts/documents/template_contracts.py), [`human_status.py:125`](../../operations/scripts/status/human_status.py), [`test_quality_integration.py:150`](../../operations/tests/test_quality_integration.py), [`m01_final_report.md:31,51`](../acceptance/m01_final_report.md)
 - **Ожидаемый контракт:** `run_suite.py full` обязан завершаться с exit 0 на коммитах, допущенных к слиянию ([`quality_baseline.json`](../../operations/quality_baseline.json): `mypy_error_budget: 0`, без per-file исключений).
 - **Наблюдаемое поведение:** запуск `run_suite.py full` в изолированной среде (worktree на точном HEAD SHA + venv с hash-verified pinned зависимостями) даёт два независимых провала: (а) `Mypy regression: 2 errors exceeds baseline budget 0` — `template_contracts.py:208` ("object" has no attribute "__iter__") и `human_status.py:125` (несовместимый тип tuple при `list.append`), оба трассируются через `git blame` к коммитам `dc4ee8b`/`f44cb1a` (последний мёрдж, PR #65/#63); (б) независимо подтверждено вторым прогоном: `test_final_report_matches_current_repository_state` падает, потому что `update_completion_report.py` был переписан в том же коммите `dc4ee8b`, но [`m01_final_report.md`](../acceptance/m01_final_report.md) не был полностью перегенерирован — файл всё ещё ссылается на `work/m01.json`, тогда как фактический путь (и то, что теперь вычисляет генератор) — [`work/acceptance/m01.json`](../acceptance/m01.json).
@@ -136,25 +183,27 @@ depends_on: []
 - **Рекомендованное исправление:** добавить типовые аннотации/приведения в `template_contracts.py`/`human_status.py`; перегенерировать [`m01_final_report.md`](../acceptance/m01_final_report.md) через `render_final_report()` и закоммитить результат байт-в-байт (кроме поля `updated:`).
 - **Как проверить исправление:** `run_suite.py full` доходит до конца без ошибок на mypy/Unit tests шагах на новом SHA.
 - **Исправлено (2026-08-29):** `assert_registered_output()` сузило тип `outputs` через `isinstance`; `_audit_status()` строит tuple явно через `match.group(1..3)` вместо `match.groups()`. `mypy` чист на обоих файлах. [`m01_final_report.md`](../acceptance/m01_final_report.md) перегенерирован — путь [`work/acceptance/m01.json`](../acceptance/m01.json) совпадает с генератором.
-- **Повторная верификация (2026-08-30):** pinned Mypy выявил четыре нулевых-baseline ошибки в ADR-checker и тестовых `TaskItem` fixtures; типизация и обязательное `delivery_role` исправлены, Mypy снова проходит с нулём ошибок. Канонический тест также подтвердил drift [`m01_final_report.md`](../acceptance/m01_final_report.md); отчёт повторно пересобран зарегистрированным `update_completion_report.py m01`.
+- **Частично исправлено (2026-08-30):** повторная проверка pinned Mypy выявила четыре нулевых-baseline ошибки в ADR-checker и тестовых `TaskItem` fixtures; типизация и обязательное `delivery_role` исправлены, Mypy снова проходит с нулём ошибок. Канонический тест также подтвердил drift [`m01_final_report.md`](../acceptance/m01_final_report.md); отчёт повторно пересобран зарегистрированным `update_completion_report.py m01`.
 
 <a id="aud-009"></a>
 ### AUD-009 — Акт приёмки m01 заявляет недостоверный переход всех 9 ADR в accepted
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** introduced-by-change
 - **Файл:** [`m01.json:27-63`](../acceptance/m01.json); коммит `a7831afbe2d3417ba71b1e68c0ee1254116151ca`; [`adr_001_language_and_runtime.md`](../../adr/adr_001_language_and_runtime.md) и остальные 8 ADR
 - **Ожидаемый контракт:** акт приёмки милестона — канонический источник истины о завершении этапа ([`project_rules.md`](../../project_rules.md) §2); он не должен утверждать эффект, которого не было.
-- **Наблюдаемое поведение:** [`m01.json`](../acceptance/m01.json) содержит массив `adr_transitions` из 9 записей, каждая `"state_change": "proposed → accepted"`. `git log -p --all -- adr/` не содержит ни одного вхождения строки `decision_state: accepted` за всю историю репозитория. `git show --stat a7831af` (коммит, чьё сообщение заявляет этот переход) не затрагивает ни одного файла под `adr/`. На SHA `218eb61` все 9 ADR остаются `decision_state: proposed`. Отдельно: [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)–[`ADR_009`](../../adr/adr_009_secret_management_strategy.md) указывают `traces_to` не на [`m01`](../../milestones.md#m01), а на [`m02`](../../milestones.md#m02)/[`m04`](../../milestones.md#m04)/[`m06`](../../milestones.md#m06) — переход для них не мог произойти в принципе по логике `apply.py`, независимо от того, что реально выполнялось.
+- **Наблюдаемое поведение:** [`m01.json`](../acceptance/m01.json) содержит массив `adr_transitions` из 9 записей, каждая `"state_change": "proposed → accepted"`. `git log -p --all -- adr/` не содержит ни одного вхождения строки `decision_state: accepted` за всю историю репозитория. `git show --stat a7831af` (коммит, чьё сообщение заявляет этот переход) не затрагивает ни одного файла под [`adr/`](../../adr/). На SHA `218eb61` все 9 ADR остаются `decision_state: proposed`. Отдельно: [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)–[`ADR_009`](../../adr/adr_009_secret_management_strategy.md) указывают `traces_to` не на [`m01`](../../milestones.md#m01), а на [`m02`](../../milestones.md#m02)/[`m04`](../../milestones.md#m04)/[`m06`](../../milestones.md#m06) — переход для них не мог произойти в принципе по логике `apply.py`, независимо от того, что реально выполнялось.
 - **Воздействие и достижимость:** не блокирует механически приёмку [`m01`](../../milestones.md#m01) (критерии [`milestones.md#m01`](../../milestones.md#m01) не требуют ADR-acceptance как gate), но высокоавторитетный evidence-документ содержит конкретное, опровержимое ложное утверждение — тот самый класс самообмана инструмента, который [`AGENTS.md`](../../AGENTS.md) §5.1 прямо запрещает для gate/evidence.
-- **Как воспроизвести:** `git log -p --all -- adr/ | grep "decision_state: accepted"` (пусто); `git show --stat a7831afbe2d3417ba71b1e68c0ee1254116151ca` (нет пути `adr/`); `grep decision_state adr/adr_*.md` (все `proposed`).
+- **Как воспроизвести:** `git log -p --all -- adr/ | grep "decision_state: accepted"` (пусто); `git show --stat a7831afbe2d3417ba71b1e68c0ee1254116151ca` (нет пути [`adr/`](../../adr/)); `grep decision_state adr/adr_*.md` (все `proposed`).
 - **Рекомендованное исправление:** решение владельца — либо реально выполнить переход [`ADR_001`](../../adr/adr_001_language_and_runtime.md)–[`ADR_004`](../../adr/adr_004_task_events_and_logging.md) (единственные, кто `traces_to: m01`) отдельным PR с честной evidence-записью, либо скорректировать нарратив [`m01.json`](../acceptance/m01.json)/[`adr_lifecycle.md`](../../operations/adr_lifecycle.md) корректирующей записью (без переписывания истории).
 - **Как проверить исправление:** `grep decision_state adr/adr_00{1,2,3,4}_*.md` показывает `accepted`, либо [`m01.json`](../acceptance/m01.json) больше не содержит недостоверного `adr_transitions`.
-- **Исправлено (2026-08-29), комплексно по решению владельца:** расследование показало, что запись НИКОГДА не создавалась через `apply.py` — её JSON-форма не совпадает со схемой скрипта (нет `schema_version`/`type`), подтверждая, что она создана вручную в обход контролируемого процесса. Выполнено: (1) [`ADR_001`](../../adr/adr_001_language_and_runtime.md)–[`ADR_004`](../../adr/adr_004_task_events_and_logging.md) реально переведены в `accepted` (`decision_state`, `updated: 2026-08-29`) — той же трансформацией, что выполнил бы `apply.py`; (2) [`m01.json`](../acceptance/m01.json) исправлен на `adr_transitions` из 4 (не 9) записей плюс явное поле `adr_transitions_correction`, документирующее расхождение и дату исправления; (3) [`milestones.md`](../../milestones.md) получил примечание в разделе [`m01`](../../milestones.md#m01); (4) добавлена новая проверка `check_acceptance_adr_transitions` в [`check.py`](../../operations/scripts/documents/check.py), сверяющая любую заявленную ADR-транзицию в `work/acceptance/*.json` с реальным `decision_state` на диске — это и есть «исправление скрипта»: не патч самой логики перехода (она была верна), а гарантия, что расхождение записи со скриптом больше не пройдёт незамеченным.
+- **Исправлено (2026-08-29):** комплексно по решению владельца. Расследование показало, что запись НИКОГДА не создавалась через `apply.py` — её JSON-форма не совпадает со схемой скрипта (нет `schema_version`/`type`), подтверждая, что она создана вручную в обход контролируемого процесса. Выполнено: (1) [`ADR_001`](../../adr/adr_001_language_and_runtime.md)–[`ADR_004`](../../adr/adr_004_task_events_and_logging.md) реально переведены в `accepted` (`decision_state`, `updated: 2026-08-29`) — той же трансформацией, что выполнил бы `apply.py`; (2) [`m01.json`](../acceptance/m01.json) исправлен на `adr_transitions` из 4 (не 9) записей плюс явное поле `adr_transitions_correction`, документирующее расхождение и дату исправления; (3) [`milestones.md`](../../milestones.md) получил примечание в разделе [`m01`](../../milestones.md#m01); (4) добавлена новая проверка `check_acceptance_adr_transitions` в [`check.py`](../../operations/scripts/documents/check.py), сверяющая любую заявленную ADR-транзицию в `work/acceptance/*.json` с реальным `decision_state` на диске — это и есть «исправление скрипта»: не патч самой логики перехода (она была верна), а гарантия, что расхождение записи со скриптом больше не пройдёт незамеченным.
 
 <a id="aud-010"></a>
 ### AUD-010 — Owner-facing статус не показывает состояние gate/CI и переоценивает близость к цели milestone
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`project_status.md`](../../project_status.md)
 - **Наблюдаемое поведение:** владелец, читающий только [`project_status.md`](../../project_status.md), не может увидеть ни AUD-007 (CI не работает), ни AUD-008 (gate реально красный локально), ни то, что ADR, на которые опираются заявленные возможности, всё ещё `proposed` (AUD-009). Рамка «13/17 задач [`m02`](../../milestones.md#m02) выполнено» не даёт сигнала, что все 4 оставшиеся задачи ([`TASK_014`](../tasks/task_014_real_runtime.md)–[`TASK_017`](../tasks/task_017_m02_live_e2e.md)) несут ~100% внешнего, пользовательского риска milestone (все три внешних адаптера — Telegram Bot API, agent runtime, model provider — остаются эхо-заглушками).
 - **Рекомендованное исправление:** добавить в генератор статуса поле состояния gate/CI (или явную пометку «последняя проверка недоступна»); добавить визуальное отличие component vs terminal-outcome задач в таблице (используя уже существующее поле `delivery_role`, см. AUD-012).
@@ -165,6 +214,7 @@ depends_on: []
 ### AUD-011 — Конкурирующий, осиротевший документ о стандарте frontmatter
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`operations/document_frontmatter_standard.md`](../../operations/document_frontmatter_standard.md)
 - **Наблюдаемое поведение:** документ объявляет себя «единственным источником истины» для YAML frontmatter, конфликтуя с реально применяемым и enforced [`change_process.md`](../../operations/change_process.md) §8. Ноль входящих ссылок из любого authority-файла или [`procedure_map.md`](../../operations/procedure_map.md). Правило порядка полей (§5) не соблюдается реальными ADR-файлами и не проверяется `metadata.py`/`check.py`. Пропускает живые поля (`delivery_role`, `blocker`, `owner_followups`).
 - **Рекомендованное исправление:** слить уникальный контент (правило порядка полей, если оно того стоит) в [`change_process.md`](../../operations/change_process.md) §8, либо пометить `document_state: superseded`; убрать самозаявление «единственный источник истины». Требует явного согласования владельца (AGENTS.md §5 — не менять соглашения об именовании самостоятельно).
@@ -175,6 +225,7 @@ depends_on: []
 ### AUD-012 — `delivery_role` не документирован ни в одном frontmatter-контракте
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`operations/templates/task_template.md`](../../operations/templates/task_template.md), [`work/tasks/task_014_real_runtime.md`](../tasks/task_014_real_runtime.md)…[`task_017_m02_live_e2e.md`](../tasks/task_017_m02_live_e2e.md), [`change_process.md`](../../operations/change_process.md) §8.1
 - **Наблюдаемое поведение:** поле `delivery_role` (`component`/`terminal_outcome`) — структурно важно (различает stub-TASK от закрывающих milestone, [`change_process.md`](../../operations/change_process.md) §7.1), присутствует в 4 из 17 карточек TASK и в 2 генераторах, но отсутствует в обоих документах, претендующих на перечисление TASK-контракта, и не валидируется `check.py` — ни один запуск не проверяет, что terminal-outcome задача из очереди milestone действительно так помечена.
 - **Рекомендованное исправление:** добавить `delivery_role` в таблицу полей TASK в [`change_process.md`](../../operations/change_process.md) §8.1; добавить проверку в `check.py`, что каждая задача из терминальной очереди milestone имеет `delivery_role: terminal_outcome`.
@@ -185,6 +236,7 @@ depends_on: []
 ### AUD-013 — Блокировка sensitive-action не имеет timeout и recovery-процедуры
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`src/owner_control/control.py:86-103`](../../src/owner_control/control.py) (`_exclusive_state`)
 - **Наблюдаемое поведение:** `os.mkdir`-блокировка вокруг `authorize_sensitive_action` не имеет timeout, retry или проверки «протухания» (PID/возраст держателя). Нигде в репозитории ([`change_process.md`](../../operations/change_process.md), [`state_machines.md`](../../operations/state_machines.md), `operations/procedures/`) не описано, что именно означает «recovery is required» операционно. Крах процесса между `os.mkdir` и `os.rmdir` (реалистичный сценарий — OOM-kill, принудительная остановка контейнера) навсегда блокирует все последующие чувствительные действия владельца, пока кто-то вручную не удалит `owner_control_actions.lock` — без единой инструкции в репозитории, что это правильное исправление.
 - **Воздействие и достижимость:** напрямую достижимо любым крахом процесса во время удержания блокировки; поскольку [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) — единая точка авторизации для всех чувствительных действий платформы, это правдоподобный полный self-lockout владельца. Fail-closed здесь — правильный default, но полное отсутствие runbook превращает спроектированное свойство безопасности в незадокументированную ловушку.
@@ -196,6 +248,7 @@ depends_on: []
 ### AUD-014 — Шесть операционных документов недостижимы из карты процедур
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`operations/adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`state_machines.md`](../../operations/state_machines.md), [`threat_review_triggers.md`](../../operations/threat_review_triggers.md), [`license_policy.md`](../../operations/license_policy.md), [`procedures/file_update_dependencies.md`](../../operations/procedures/file_update_dependencies.md), [`examples/sample_task_lifecycle.md`](../../operations/examples/sample_task_lifecycle.md)
 - **Наблюдаемое поведение:** [`AGENTS.md`](../../AGENTS.md) называет [`procedure_map.md`](../../operations/procedure_map.md) «детальным деревом решений для каждой ситуации», но этот файл ведёт лишь к 3 из ~9+ реальных процедурных документов. Ни один из перечисленных 6 файлов не имеет входящей ссылки ни из одного authority-файла, [`procedure_map.md`](../../operations/procedure_map.md) или друг из друга. Содержимое всех шести прочитано полностью и признано реальным, не дублирующим — дефект чисто навигационный, не дублирование и не мёртвый код.
 - **Рекомендованное исправление:** добавить по одной строке в таблицу [`procedure_map.md`](../../operations/procedure_map.md) (или в список утилит [`AGENTS.md`](../../AGENTS.md) §6) на каждый из 6 файлов, называя ситуацию, которую он описывает.
@@ -206,9 +259,10 @@ depends_on: []
 ### AUD-015 — Канонический traceability-checker глотает исключения из собственных коллекторов
 
 - **Severity/Confidence/Evidence state:** medium / medium / SUSPECTED
+- **Baseline:** pre-existing
 - **Файл:** [`operations/scripts/documents/check.py:269-279, 856-872`](../../operations/scripts/documents/check.py) (`_known_reference_ids`, `check_test_specs`)
 - **Наблюдаемое поведение:** оба места откатываются к пустому множеству/словарю при ЛЮБОМ исключении из `collect_traceable_elements`/`collect_milestones`/`load_quality_registry`, вместо того чтобы явно провалить проверку. На текущем SHA `check.py --all --json` проходит чисто (22/22) — ветка не была замечена сработавшей вживую, поэтому статус понижен до `SUSPECTED`, а не `CONFIRMED`.
-- **Воздействие:** если будущее изменение документа/реестра внесёт реальный баг парсера в эти коллекторы, checker молча недосчитает известные ID (более безопасное направление ошибки — больше ложных «unknown reference», а не меньше), но это увеличит стоимость отладки и риск «исправления не того».
+- **Воздействие и достижимость:** если будущее изменение документа/реестра внесёт реальный баг парсера в эти коллекторы, checker молча недосчитает известные ID (более безопасное направление ошибки — больше ложных «unknown reference», а не меньше), но это увеличит стоимость отладки и риск «исправления не того».
 - **Рекомендованное исправление:** сузить типы перехватываемых исключений до реально ожидаемых, и/или логировать проглоченное исключение в `runtime/check_summary.json`, даже если общая проверка всё равно проходит.
 - **Как проверить исправление:** новый тест подаёт заведомо некорректный вход в `collect_traceable_elements`/`collect_milestones`, достижимый из `check_test_specs`/`_known_reference_ids`, и подтверждает, что сбой становится видимым, а не тихо поглощается.
 - **Исправлено (2026-08-29):** оба места сужены до `except (ValueError, OSError)` с логированием проглоченного исключения в stderr; любое другое исключение (`AttributeError`, `TypeError` и т.п.) теперь распространяется. Новые тесты подтверждают оба поведения (fallback на ожидаемых ошибках, propagation на неожиданных).
@@ -217,6 +271,7 @@ depends_on: []
 ### AUD-016 — Timeout-путь TelegramChannel.receive() недостижим и не тестирован
 
 - **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`src/channels/telegram.py:65-68`](../../src/channels/telegram.py)
 - **Наблюдаемое поведение:** единственный документированный error-path канала (`Channel.receive()` → `ChannelError` при 30-секундном timeout) не вызывается ни одним текущим кодом (`Orchestrator` вызывает только `.send()`) и не покрыт ни одним из 16 тестов `test_channels.py`. Измеренное покрытие подтверждает: строки 67-68 явно отмечены как missing. Это ровно тот контракт, который понадобится [`TASK_016`](../tasks/task_016_real_telegram.md) (реальный Telegram Bot API).
 - **Рекомендованное исправление:** добавить тест, сокращающий timeout (параметр или monkey-patch `asyncio.wait_for`), подтверждающий `ChannelError` при пустой очереди без ожидания реальных 30 секунд.
@@ -227,6 +282,7 @@ depends_on: []
 ### AUD-017 — Хрупкость теста регенерации к версии Python + xpass не выделяется отдельно
 
 - **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`operations/tests/test_quality_integration.py:119-148`](../../operations/tests/test_quality_integration.py); [`pre_commit_regenerate_dashboards.sh:16-26`](../../operations/hooks/pre_commit_regenerate_dashboards.sh); [`run_unittests.py:24-30`](../../operations/scripts/quality/run_unittests.py)
 - **Наблюдаемое поведение:** (а) `find_python()` в хуке предпочитает новейший доступный интерпретатор (`python3.14`→…→`python3.12`) через `command -v`, который резолвится по реальному PATH, а не только по тестовому шиму — на любой машине с уже установленным `python3.13`/`3.14` тест ложно падает на несвязанном assertion; (б) "no skips" gate в `run_unittests.py` проверяет только `result.skipped`, не выделяя `result.unexpectedSuccesses` отдельным сообщением — пока безопасно (`wasSuccessful()` всё равно поймает xpass), но нет ни одного `expectedFailure`-теста, чтобы это проверить, и сообщение об ошибке было бы неотличимо от обычного провала.
 - **Рекомендованное исправление:** (а) шимить все имена интерпретаторов, которые пробует цикл, либо передавать явный override; (б) отдельно проверять и называть `result.unexpectedSuccesses`.
@@ -237,6 +293,7 @@ depends_on: []
 ### AUD-018 — Мелкая гигиена evidence-документов
 
 - **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`work/tests/test_007.md:59,72,132`](../tests/test_007.md); [`operations/quality_registry.json`](../../operations/quality_registry.json); `.gitignore`
 - **Наблюдаемое поведение:** [`TEST_007`](../tests/test_007.md) в разных разделах называет разное число тестов для одного файла (§4: 16, §5/§10: 8) — реальное число (посчитано напрямую) — 16; [`quality_registry.json`](../../operations/quality_registry.json) перечисляет `m02_security_tests`/`m02_e2e_tests`/`m02_infrastructure_tests` в `evidence_catalog`, но не в `m02_development.required_evidence`, без пояснения, преднамеренно ли это фазирование; `.gitignore` всё ещё описывает конвенцию «versioned generated markdown stays in git» для директории `generated/`, полностью удалённой коммитом `dc4ee8b`.
 - **Рекомендованное исправление:** привести [`TEST_007`](../tests/test_007.md) к единому числу (16); владелец/мейнтейнер поясняет намерение по `required_evidence`; убрать устаревший комментарий и связанные с ним ignore-паттерны из `.gitignore` при следующем изменении файла.
@@ -247,6 +304,7 @@ depends_on: []
 ### AUD-019 — Пути обработки повреждённых данных в SQLite-хранилище задач не тестируются
 
 - **Severity/Confidence/Evidence state:** low / medium / SUSPECTED
+- **Baseline:** pre-existing
 - **Файл:** [`src/task_state/sqlite_store.py:81-82,84,137-138`](../../src/task_state/sqlite_store.py) (`_decode`, `load_task`)
 - **Наблюдаемое поведение:** измеренное покрытие подтверждает, что эти строки (обработка `JSONDecodeError`, не-dict значений, неизвестного `state`) никогда не исполняются; `test_persistent_task_state.py` содержит только 3 теста, ни один не пишет напрямую повреждённый `metadata_json`/`checkpoint_data_json` в SQLite-файл. Контрастирует с гораздо более строгой проверкой того же класса риска (JSON-в-хранилище, повреждение) в `owner_control`.
 - **Рекомендованное исправление:** добавить тесты по образцу `test_owner_control.py` — напрямую записать невалидный JSON/не-dict/неизвестный `state` в строку SQLite и подтвердить, что `TaskLifecycleError` поднимается.
@@ -257,6 +315,7 @@ depends_on: []
 ### AUD-020 — Фреймворк аудита не проверяет наличие eval/regression-набора для качества выхода модели
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) (весь документ, включая §7.5 «Тестирование»); репозиторий целиком
 - **Ожидаемый контракт:** для продукта, чья основная ценность — поведение LLM-агента, полный аудит качества (пилар 7.5) должен включать проверку наличия и актуальности eval-набора (golden-задачи, регрессия ответов, LLM-judge или эквивалент), отдельно от обычных unit/coverage-тестов.
 - **Наблюдаемое поведение:** исчерпывающий поиск (`grep -in "eval"`) по [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) целиком не дал ни одного совпадения — ни в §6 (канонические проверки), ни в §7.5 (тестирование), ни где-либо ещё. Поиск по всему репозиторию терминов eval/evals/evaluation-suite/prompt-regression/llm-judge также не дал ни одного реального совпадения (только ложные срабатывания по подстроке, например `evaluate_coverage`). На проверенном SHA это не является дефектом реализации: `ModelGateway`/`RuntimePort` остаются эхо-заглушками ([`TASK_015`](../tasks/task_015_real_model_provider.md) не выполнена), поэтому оценивать пока нечего — но сам факт, что фреймворк аудита прошёл 7 столпов и не поднял этот вопрос, означает, что пробел останется незамеченным и после появления реального провайдера, если фреймворк не обновить заранее.
@@ -264,7 +323,7 @@ depends_on: []
 - **Как воспроизвести:** `grep -in "eval" work/audit/repository_audit_system_prompt.md` (пусто); `grep -rin "evaluation-suite\|llm-judge\|prompt-regression" --include=*.py --include=*.md .` (пусто, кроме подстрочных ложных срабатываний).
 - **Рекомендованное исправление:** владелец решает — либо (а) добавить в §7.5 фреймворка явный пункт «наличие и актуальность eval/regression-набора для LLM-выхода, если репозиторий содержит реальный model provider», либо (б) явно задокументировать это как осознанно отложенное до [`TASK_015`](../tasks/task_015_real_model_provider.md) решение (не пробел, а фаза). Само внедрение eval-набора — отдельная задача, вне рамок текущего аудита.
 - **Как проверить исправление:** обновлённый [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 явно упоминает eval/regression-проверку (или явное фазирование до [`TASK_015`](../tasks/task_015_real_model_provider.md) задокументировано в этом же разделе).
-- **Исправление (2026-08-29):** [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 требует проверки eval/regression-набора; добавлены пять golden-задач и исполняемый harness. Текущий `stub` profile доказывает только request/response plumbing и не является model-quality evidence.
+- **Исправлено (2026-08-29):** [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5 требует проверки eval/regression-набора; добавлены пять golden-задач и исполняемый harness. Текущий `stub` profile доказывает только request/response plumbing и не является model-quality evidence.
 - **Уточнение (2026-08-30):** [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py) получил явный выбор profile. Любой non-stub profile должен быть зарегистрирован [`TASK_015`](../tasks/task_015_real_model_provider.md) и запускаться с полным Git SHA; stub-specific expectations заменяются отдельным реальным набором. Канонический entrypoint проверенно падает на деградировавшем non-stub provider.
 - **Критерий закрытия:** зелёный `Project check` на точном SHA подтверждает `python3 -m operations.scripts.eval.run_eval_suite` и связанные unit-тесты; переход в `resolved` — как и для остальных findings этого запуска, недостижим, пока не разрешён [`AUD-007`](#aud-007).
 
@@ -272,81 +331,119 @@ depends_on: []
 ### AUD-021 — Proposed ADR активного этапа не имели машинного владельца решения
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`milestones.md`](../../milestones.md), [`TASK_013`](../tasks/task_013_inf_008.md)–[`TASK_015`](../tasks/task_015_real_model_provider.md), [`check.py`](../../operations/scripts/documents/check.py), [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md)
 - **Ожидаемый контракт:** каждый `proposed` ADR активного/заблокированного milestone имеет ровно одну незавершённую TASK, которая собирает сравнение/evidence и получает решение владельца. TASK и ADR относятся к одному milestone; завершить TASK при ADR в `proposed` нельзя.
 - **Наблюдаемое поведение:** [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)–[`ADR_009`](../../adr/adr_009_secret_management_strategy.md) имели только `traces_to` и текстовые упоминания. [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) был описан в [`TASK_014`](../tasks/task_014_real_runtime.md), но parser/checker не знал отношения принятия решения, поэтому не существовало машинного ребра и отрицательной проверки. [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) также не имели структурированного owner TASK. [`ADR_008`](../../adr/adr_008_data_storage_schema.md) относится только к planned [`m04`](../../milestones.md#m04).
-- **Почему аудит пропустил:** checker обходил граф в одну сторону и проверял лишь непустой `ADR.traces_to`; relation model не содержала `decides`; строка «ADR этого этапа» создавала ложное ощущение покрытия; защита от преждевременных TASK для будущих требований не имела исключения для ADR активного milestone; отрицательного fixture не было.
-- **Риск:** TASK или milestone можно было завершить, оставив решение `proposed`, без владельца, evidence и явного решения владельца; структура при этом оставалась «зелёной».
-- **Исправление:** `TASK_013.decides = [ADR_007, ADR_009]`, `TASK_014.decides = [ADR_006]`, `TASK_015.decides = [ADR_005]`; [`ADR_008`](../../adr/adr_008_data_storage_schema.md) обязан получить TASK при декомпозиции [`m04`](../../milestones.md#m04) до старта. Обновлены lifecycle, change process, шаблоны и audit prompt. Добавлен исполняемый checker и negative tests.
+- **Почему предыдущий аудит пропустил:** checker обходил граф в одну сторону и проверял лишь непустой `ADR.traces_to`; relation model не содержала `decides`; строка «ADR этого этапа» создавала ложное ощущение покрытия; защита от преждевременных TASK для будущих требований не имела исключения для ADR активного milestone; отрицательного fixture не было.
+- **Воздействие и достижимость:** TASK или milestone можно было завершить, оставив решение `proposed`, без владельца, evidence и явного решения владельца; структура при этом оставалась «зелёной».
+- **Исправлено (2026-08-29):** `TASK_013.decides = [ADR_007, ADR_009]`, `TASK_014.decides = [ADR_006]`, `TASK_015.decides = [ADR_005]`; [`ADR_008`](../../adr/adr_008_data_storage_schema.md) обязан получить TASK при декомпозиции [`m04`](../../milestones.md#m04) до старта. Обновлены lifecycle, change process, шаблоны и audit prompt. Добавлен исполняемый checker и negative tests.
 - **Критерий закрытия:** новый check `adr_decision_tasks`, unit tests, полный project gate и CI успешны на одном SHA; traceability matrix показывает все четыре связи активного [`m02`](../../milestones.md#m02).
-- **Дополнено (2026-08-30):** правило распространено на planned milestones; [`ADR_008`](../../adr/adr_008_data_storage_schema.md) назначен [`TASK_019`](../tasks/task_019_m04_data_storage.md), а negative fixture запрещает proposed ADR будущего этапа без TASK.
+- **Уточнение (2026-08-30):** правило кратко распространялось на planned milestones (TASK_019 для [`ADR_008`](../../adr/adr_008_data_storage_schema.md)), затем владелец явно вернул исходное деференциальное поведение и попросил не заводить TASK вне текущего этапа — см. [`AUD-025`](#aud-025) (обновление 2026-08-30). TASK_019 удалена; [`ADR_008`](../../adr/adr_008_data_storage_schema.md) получит владельца при декомпозиции [`m04`](../../milestones.md#m04).
 
 <a id="aud-022"></a>
 ### AUD-022 — Канонический gate красный, а owner-facing статус и описание CI устарели
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`project_status.md`](../../project_status.md), [`audit_register.md`](#3-реестр), [`AGENTS.md`](../../AGENTS.md), [`project_check.yml`](../../.github/workflows/project_check.yml)
-- **Наблюдение:** documentation audit нашёл 10 некликабельных ADR/TASK/milestone references в этом реестре. Генератор добавляет [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) в текущие шаги и меняет число findings с 20 на 21. [`AGENTS.md`](../../AGENTS.md) обещает push-проверку каждой ветки, а workflow запускает `push` только на `main`. После установки pinned development tools полный gate дополнительно обнаружил formatter drift в семи Python-файлах и несовместимость относительного `--output`, который сам `run_suite.py` передаёт health generator. После синхронизации с PR #76 Mypy также обнаружил инвариантный `list` в новом section-contract test.
-- **Риск:** основной экран владельца скрывает решение и одну high-находку; основной branch не удовлетворяет собственному gate.
-- **Исправление:** исправить ссылки, перегенерировать статус и согласовать описание triggers.
-- **Критерий закрытия:** полный suite и pre-commit зелёные; повторная генерация не создаёт diff.
+- **Наблюдаемое поведение:** documentation audit нашёл 10 некликабельных ADR/TASK/milestone references в этом реестре. Генератор добавляет [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) в текущие шаги и меняет число findings с 20 на 21. [`AGENTS.md`](../../AGENTS.md) обещает push-проверку каждой ветки, а workflow запускает `push` только на `main`. После установки pinned development tools полный gate дополнительно обнаружил formatter drift в семи Python-файлах и несовместимость относительного `--output`, который сам `run_suite.py` передаёт health generator. После синхронизации с PR #76 Mypy также обнаружил инвариантный `list` в новом section-contract test.
+- **Воздействие и достижимость:** основной экран владельца скрывает решение и одну high-находку; основной branch не удовлетворяет собственному gate.
+- **Рекомендованное исправление:** исправить ссылки, перегенерировать статус и согласовать описание triggers.
+- **Как проверить исправление:** полный suite и pre-commit зелёные; повторная генерация не создаёт diff.
 - **Исправлено (2026-08-30):** ссылки приведены к политике, [`project_status.md`](../../project_status.md) перегенерирован, описание triggers в [`AGENTS.md`](../../AGENTS.md) согласовано с workflow, formatter drift устранён каноническим Ruff formatter. Health generator нормализует относительные runtime paths относительно корня репозитория; regression test воспроизводит точную CLI-команду canonical suite. Section-contract test принимает ковариантный `Sequence`, поэтому Mypy сохраняет нулевой baseline. Ожидается серверная верификация.
 
 <a id="aud-023"></a>
 ### AUD-023 — Ignore-правила скрывают source-файлы и допускают секреты в Docker image
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`.gitignore`](../../.gitignore), [`.dockerignore`](../../.dockerignore), [`dockerfile`](../../dockerfile)
-- **Наблюдение:** unanchored `secrets/` игнорирует `src/secrets/`; текущие модули видны только потому, что tracked. Docker context не исключает `.env*`, ключи и secret-пути, а image копирует `src/`.
-- **Риск:** новый source-модуль может исчезнуть из Git, а локальный credential — попасть в image.
-- **Исправление:** привязать data-secret patterns к корню, разрешить source package, зеркально исключить секретные patterns в `.dockerignore` и добавить sentinel test.
-- **Критерий закрытия:** новый source-файл виден Git; sentinel отсутствует в build context, слоях и image.
+- **Наблюдаемое поведение:** unanchored `secrets/` игнорирует `src/secrets/`; текущие модули видны только потому, что tracked. Docker context не исключает `.env*`, ключи и secret-пути, а image копирует `src/`.
+- **Воздействие и достижимость:** новый source-модуль может исчезнуть из Git, а локальный credential — попасть в image.
+- **Рекомендованное исправление:** привязать data-secret patterns к корню, разрешить source package, зеркально исключить секретные patterns в `.dockerignore` и добавить sentinel test.
+- **Как проверить исправление:** новый source-файл виден Git; sentinel отсутствует в build context, слоях и image.
 - **Исправлено (2026-08-30):** root secret directories закреплены в [`.gitignore`](../../.gitignore), `src/secrets` остаётся видимым Git, чувствительные patterns добавлены в [`.dockerignore`](../../.dockerignore), negative policy tests проходят. Фактическая проверка слоёв image остаётся недоступна без Docker.
 
 <a id="aud-024"></a>
 ### AUD-024 — ADR-трассировка структурно зелёная, но семантически неполная
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`ADR_003`](../../adr/adr_003_model_provider_interface.md), [`ADR_004`](../../adr/adr_004_task_events_and_logging.md), [`ADR_006`](../../adr/adr_006_agent_environment_framework.md), [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), [`ADR_008`](../../adr/adr_008_data_storage_schema.md)
-- **Наблюдение:** для событий [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) нет `runtime_task_id` и тестов; [`TASK_014`](../tasks/task_014_real_runtime.md) не сравнивает требуемый [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) LangGraph; [`TASK_013`](../tasks/task_013_inf_008.md) не фиксирует оба прототипа [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md); [`ADR_008`](../../adr/adr_008_data_storage_schema.md) не имеет TASK-владельца; accepted contract [`ADR_003`](../../adr/adr_003_model_provider_interface.md) называется иначе, чем код.
-- **Причина пропуска предыдущим аудитом:** автоматическая проверка подтверждала только структурное ребро `TASK.decides`, общий milestone и состояния, но не сопоставляла содержание ADR с TASK, кодом и тестами. Planned-milestone exception исключал [`ADR_008`](../../adr/adr_008_data_storage_schema.md) из обязательной проверки, а ручной обратный проход не был завершён как отдельная матрица candidate sets, verification checklist и контрактных имён.
-- **Риск:** TASK можно завершить без verification checklist assigned ADR, а accepted ADR может заявлять отсутствующее поведение.
-- **Исправление:** получить решения владельца и синхронизировать ADR, TASK, код и поведенческое evidence; назначить владельцев всей незавершённой ADR-работы.
-- **Критерий закрытия:** candidate sets, contract names и evidence mapping совпадают; у каждого proposed ADR ровно одна незавершённая TASK.
-- **Частично исправлено (2026-08-30):** каноническое имя `ModelGateway` согласовано; [`TASK_014`](../tasks/task_014_real_runtime.md) сравнивает LangGraph, Hermes Agent и native loop; [`TASK_013`](../tasks/task_013_inf_008.md) сравнивает Hetzner и DigitalOcean; [`ADR_008`](../../adr/adr_008_data_storage_schema.md) назначен [`TASK_019`](../tasks/task_019_m04_data_storage.md). Finding остаётся `open`, пока [`TASK_018`](../tasks/task_018_runtime_task_events.md) не реализует и не проверит события [`ADR_004`](../../adr/adr_004_task_events_and_logging.md).
+- **Наблюдаемое поведение:** для событий [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) нет `runtime_task_id` и тестов; [`TASK_014`](../tasks/task_014_real_runtime.md) не сравнивает требуемый [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) LangGraph; [`TASK_013`](../tasks/task_013_inf_008.md) не фиксирует оба прототипа [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md); [`ADR_008`](../../adr/adr_008_data_storage_schema.md) не имеет TASK-владельца; accepted contract [`ADR_003`](../../adr/adr_003_model_provider_interface.md) называется иначе, чем код.
+- **Почему предыдущий аудит пропустил:** автоматическая проверка подтверждала только структурное ребро `TASK.decides`, общий milestone и состояния, но не сопоставляла содержание ADR с TASK, кодом и тестами. Planned-milestone exception исключал [`ADR_008`](../../adr/adr_008_data_storage_schema.md) из обязательной проверки, а ручной обратный проход не был завершён как отдельная матрица candidate sets, verification checklist и контрактных имён.
+- **Воздействие и достижимость:** TASK можно завершить без verification checklist assigned ADR, а accepted ADR может заявлять отсутствующее поведение.
+- **Рекомендованное исправление:** получить решения владельца и синхронизировать ADR, TASK, код и поведенческое evidence; назначить владельцев всей незавершённой ADR-работы.
+- **Как проверить исправление:** candidate sets, contract names и evidence mapping совпадают; у каждого proposed ADR ровно одна незавершённая TASK.
+- **Частично исправлено (2026-08-30):** каноническое имя `ModelGateway` согласовано; [`TASK_014`](../tasks/task_014_real_runtime.md) сравнивает LangGraph, CrewAI, Hermes Agent и собственную реализацию (согласовано с владельцем через диалог, см. [`AUD-028`](#aud-028)); [`TASK_013`](../tasks/task_013_inf_008.md) сравнивает Hetzner и DigitalOcean (сценарий A) и отдельно оценивает Selectel (сценарий B). [`ADR_008`](../../adr/adr_008_data_storage_schema.md) намеренно без TASK сейчас — владелец подтвердил, что вне текущего этапа TASK не заводятся; назначение произойдёт при декомпозиции [`m04`](../../milestones.md#m04). Finding остаётся `open`, пока [`TASK_018`](../tasks/task_018_runtime_task_events.md) не реализует и не проверит события [`ADR_004`](../../adr/adr_004_task_events_and_logging.md).
 
 <a id="aud-025"></a>
 ### AUD-025 — ADR lifecycle противоречит сам себе и каноническому change process
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`change_process.md`](../../operations/change_process.md)
-- **Наблюдение:** lifecycle одновременно требует сравнить альтернативы до создания ADR и поручает сравнение TASK-владельцу после создания. Подробная процедура требует решения владельца, таблица переходов считает достаточным PR approval. Planned-milestone exception оставляет proposed ADR без TASK.
-- **Риск:** ADR можно создать слишком поздно либо принять без решения владельца.
-- **Исправление:** оставить одно правило создания/сравнения/acceptance, удалить PR shortcut и исключение для ADR без TASK.
-- **Критерий закрытия:** negative fixtures блокируют acceptance без owner decision и proposed ADR без единственного незавершённого owner TASK.
+- **Наблюдаемое поведение:** lifecycle одновременно требует сравнить альтернативы до создания ADR и поручает сравнение TASK-владельцу после создания. Подробная процедура требует решения владельца, таблица переходов считает достаточным PR approval. Planned-milestone exception оставляет proposed ADR без TASK.
+- **Воздействие и достижимость:** ADR можно создать слишком поздно либо принять без решения владельца.
+- **Рекомендованное исправление:** оставить одно правило создания/сравнения/acceptance, удалить PR shortcut и исключение для ADR без TASK.
+- **Как проверить исправление:** negative fixtures блокируют acceptance без owner decision и proposed ADR без единственного незавершённого owner TASK.
 - **Исправлено (2026-08-30):** lifecycle и change process разделяют создание proposed ADR, сравнение TASK, явное решение владельца и доставку через PR; переход по одному PR approval удалён. Checker, negative tests и защищённые [`task_template.md`](../../operations/templates/task_template.md) и [`milestone_template.md`](../../operations/templates/milestone_template.md) требуют единственного незавершённого owner TASK для каждого proposed ADR любого milestone. Изменение шаблонов выполнено по явному разрешению владельца в отдельной ветке; finding ожидает полный gate и серверную проверку.
+- **Уточнение (2026-08-30):** владелец явно решил вернуть planned-milestone исключение — proposed ADR далёкого `planned` milestone не обязан иметь TASK немедленно, назначение откладывается до фактической декомпозиции этапа (как было до этого исправления). Остальная часть finding (разделение create/compare/accept, удаление PR-approval shortcut) остаётся исправленной без изменений; отменена только эта одна деталь. [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`change_process.md`](../../operations/change_process.md), [`adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`task_template.md`](../../operations/templates/task_template.md) и [`milestone_template.md`](../../operations/templates/milestone_template.md) приведены обратно к деференциальному поведению для `planned` milestone.
 
 <a id="aud-026"></a>
 ### AUD-026 — Служебные изменения ретроактивно включены в продуктовую TASK
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** introduced-by-change
 - **Файл:** [`TASK_013`](../tasks/task_013_inf_008.md), [`AGENTS.md`](../../AGENTS.md)
-- **Наблюдение:** карточка прямо говорит, что [`milestones.md`](../../milestones.md) и этот audit register добавлены в `allowed_paths`, потому что это была единственная активная TASK, хотя изменения не относятся к её компоненту.
-- **Риск:** `allowed_paths` перестаёт быть честной границей поставки и превращается в ретроактивное разрешение.
-- **Исправление:** убрать несвязанные paths/пояснение и применять service-change route; добавить проверку несвязанных расширений scope.
-- **Критерий закрытия:** scope fixture отделяет service change от product TASK и отклоняет несвязанное расширение карточки.
+- **Наблюдаемое поведение:** карточка прямо говорит, что [`milestones.md`](../../milestones.md) и этот audit register добавлены в `allowed_paths`, потому что это была единственная активная TASK, хотя изменения не относятся к её компоненту.
+- **Воздействие и достижимость:** `allowed_paths` перестаёт быть честной границей поставки и превращается в ретроактивное разрешение.
+- **Рекомендованное исправление:** убрать несвязанные paths/пояснение и применять service-change route; добавить проверку несвязанных расширений scope.
+- **Как проверить исправление:** scope fixture отделяет service change от product TASK и отклоняет несвязанное расширение карточки.
 - **Исправлено (2026-08-30):** служебные пути и объяснение удалены из [`TASK_013`](../tasks/task_013_inf_008.md); `paths_validation.py` отклоняет governance/audit paths в `allowed_paths` любой незавершённой product TASK и сохраняет исторические completed-карточки.
 
 <a id="aud-027"></a>
 ### AUD-027 — Eval CLI всегда выбирает stub, несмотря на обещание real-provider evidence
 
 - **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
 - **Файл:** [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py), [`AUD-020`](#aud-020)
-- **Наблюдение:** канонический `main()` всегда вызывает `_default_gateway()` и создаёт `StubModelGateway`. Карточка [`AUD-020`](#aud-020) обещает работу с реальным provider после [`TASK_015`](../tasks/task_015_real_model_provider.md) без изменения runner, но factory/configuration path отсутствует.
-- **Риск:** eval останется зелёным на echo-ответах после подключения реальной модели.
-- **Исправление:** исправить обещание; в [`TASK_015`](../tasks/task_015_real_model_provider.md) добавить явный provider selection/injection и разделить stub/real profiles.
-- **Критерий закрытия:** canonical entrypoint с деградировавшим non-stub provider возвращает 1 и фиксирует provider/profile и точный SHA.
+- **Наблюдаемое поведение:** канонический `main()` всегда вызывает `_default_gateway()` и создаёт `StubModelGateway`. Карточка [`AUD-020`](#aud-020) обещает работу с реальным provider после [`TASK_015`](../tasks/task_015_real_model_provider.md) без изменения runner, но factory/configuration path отсутствует.
+- **Воздействие и достижимость:** eval останется зелёным на echo-ответах после подключения реальной модели.
+- **Рекомендованное исправление:** исправить обещание; в [`TASK_015`](../tasks/task_015_real_model_provider.md) добавить явный provider selection/injection и разделить stub/real profiles.
+- **Как проверить исправление:** canonical entrypoint с деградировавшим non-stub provider возвращает 1 и фиксирует provider/profile и точный SHA.
 - **Исправлено (2026-08-30):** CLI поддерживает явные profiles, non-stub требует полный SHA, неизвестный profile отклоняется, а injected degraded profile возвращает exit code 1. Текущий default остаётся честно обозначенным `stub`.
+
+<a id="aud-028"></a>
+### AUD-028 — Слияние с `main` вскрыло два содержательных конфликта в ADR_006/ADR_007
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** introduced-by-change
+- **Файл:** [`adr_006_agent_environment_framework.md`](../../adr/adr_006_agent_environment_framework.md), [`adr_007_cloud_provider_selection.md`](../../adr/adr_007_cloud_provider_selection.md)
+- **Наблюдаемое поведение:** пока эта ветка не была смёржена, параллельная сессия в `main` независимо переписала оба файла, опираясь на другой диалог с владельцем. [`ADR_006`](../../adr/adr_006_agent_environment_framework.md): эта ветка согласовала с владельцем LangGraph+CrewAI+собственную реализацию; `main` — LangGraph+Hermes Agent+native loop, со ссылкой на «запрошенный владельцем Hermes-вариант». [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md): эта ветка (и явное подтверждение владельца в этом диалоге) держит двухсценарную структуру — A (Hetzner/DigitalOcean, вне России) и B (Selectel, в бэклоге до проверки A); `main` свернул это в один сценарий (Hetzner vs DigitalOcean), понизив Selectel до обычной отклонённой альтернативы.
+- **Воздействие и достижимость:** git показал бы это как обычный текстовый конфликт, но содержательно это два независимых, недоступных друг другу диалога с одним и тем же владельцем, давших разные ответы на один вопрос — без координации между сессиями сведение вслепую (взять любую сторону автоматически) закрепило бы неполный или устаревший список кандидатов.
+- **Рекомендованное исправление:** остановиться и получить решение владельца по каждому конфликту, а не выбирать сторону самостоятельно.
+- **Как проверить исправление:** `grep -c "кандидат" adr/adr_006_agent_environment_framework.md` показывает 4 строки с явно поименованными кандидатами; [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) §3 содержит оба заголовка «Сценарий A» и «Сценарий B».
+- **Исправлено (2026-08-30):** владелец разрешил оба конфликта явно. [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) объединён в четыре кандидата (LangGraph, CrewAI, Hermes Agent, собственная реализация без фреймворка), все проходят отсекающий критерий модель-инвариантности из §2. [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) вернулся к двум сценариям с уточнениями из версии `main` (сеть, развёртывание/rollback, переносимость, бюджет и доступ как явные пункты внутри сценария A).
+
+<a id="aud-029"></a>
+### AUD-029 — `accepted` ADR_004 не реализован в коде (дубликат номера, см. AUD-024)
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** duplicate
+- **Файл:** [`adr_004_task_events_and_logging.md`](../../adr/adr_004_task_events_and_logging.md), [`src/observability/collector.py`](../../src/observability/collector.py), [`TASK_012`](../tasks/task_012_inf_007.md)
+- **Наблюдаемое поведение:** эта карточка была изначально создана под номером AUD-022 независимо от параллельной сессии, которая в `main` заняла тот же номер под другой находкой. При слиянии переномерована в AUD-029, чтобы не потерять историю (реестр запрещает удаление строк, см. §5). Содержание находки: `accepted` [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) §3 требует `runtime_task_id` и структурированные события с временем/типом/компонентом/операцией/результатом; в `src/` нет ни одного упоминания `runtime_task_id`, `trace_id` или `span_id`. Единственный похожий механизм — `ObservationEvent`/`ObservabilityCollector`, другой и более узкий дизайн, не ссылающийся на [`ADR_004`](../../adr/adr_004_task_events_and_logging.md).
+- **Уточнение (2026-08-30):** уже отслеживается под [`AUD-024`](#aud-024) (найдено независимо параллельной сессией) и получила план исправления — [`TASK_018`](../tasks/task_018_runtime_task_events.md). Отдельного действия по этой карточке не требуется; закрывается вместе с [`AUD-024`](#aud-024)/[`TASK_018`](../tasks/task_018_runtime_task_events.md).
+
+<a id="aud-030"></a>
+### AUD-030 — Контракт модели назван по-разному в ADR и в коде (дубликат номера, уже устранено)
+
+- **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** duplicate
+- **Файл:** [`adr_003_model_provider_interface.md`](../../adr/adr_003_model_provider_interface.md), [`src/models/base.py`](../../src/models/base.py)
+- **Наблюдаемое поведение:** эта карточка была изначально создана под номером AUD-023 независимо от параллельной сессии, которая в `main` заняла тот же номер под другой находкой. При слиянии переномерована в AUD-030. Содержание находки: [`ADR_003`](../../adr/adr_003_model_provider_interface.md) называл контракт `ModelProvider` в тексте, а реализованный класс — `ModelGateway`.
+- **Исправлено (2026-08-30):** уже устранено независимо параллельной сессией — [`ADR_003`](../../adr/adr_003_model_provider_interface.md) §3 переименован на `ModelGateway`, совпадает с кодом. Проверено: `grep -rn "ModelProvider" adr/adr_003_model_provider_interface.md` не находит совпадений.
 
 ## 5. Правило обновления
 

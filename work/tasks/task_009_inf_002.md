@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_002
 component: INF_CMP_002
 work_state: completed
-version: 1.7
-updated: 2026-08-26
+version: 1.8
+updated: 2026-08-30
 next_actor: none
 owner_action: none
 depends_on:
@@ -49,7 +49,7 @@ tests:
 - [x] Дополнить allowed_paths фактическими путями реализации
 - [x] Спроектировать fail-closed allowlist-политику
 - [x] Реализовать компонент и negative tests
-- [x] Создать [`TEST_015`](../tests/test_015.md), связанный с TASK и требованиями компонента
+- [x] Написать [`TEST_015`](../tests/test_015.md), связанный с TASK и требованиями компонента
 - [x] Проверить покрытие путей в `allowed_paths`
 
 ## 6. Состав

@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_001
 component: INF_CMP_001
 work_state: completed
-version: 2.5
+version: 2.6
 updated: 2026-08-30
 next_actor: none
 owner_action: none
@@ -56,7 +56,7 @@ tests:
 - [x] Дополнить allowed_paths реальными путями
 - [x] Спроектировать реализацию
 - [x] Реализовать компонент
-- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Написать [`TEST_014`](../tests/test_014.md), связанный с TASK и требованиями компонента
 - [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав

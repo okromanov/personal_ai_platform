@@ -6,7 +6,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import Any, TypedDict, cast
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -923,6 +923,35 @@ def _task_section_contract_errors(
     ]
 
 
+_TASK_TEST_PLAN_ITEM_CANDIDATE = re.compile(r"(Написать|Создать)\s+(?:TEST\b|\[`TEST_\d{3}`\])")
+_TASK_TEST_PLAN_ITEM_CANONICAL = re.compile(
+    r"Написать (?:TEST|\[`TEST_\d{3}`\]\([^)]+\)), связанный с TASK и требованиями компонента"
+)
+
+
+def _task_test_plan_item_errors(identifier: str, checklist: list[Any]) -> list[str]:
+    """The TEST-writing plan item must use one exact wording, everywhere.
+
+    Before the TEST card exists: "Написать TEST, связанный с TASK и
+    требованиями компонента". Once it exists, only the bare `TEST` is
+    replaced by a code-span link to the real card -- nothing else changes.
+    Free-form variants ("Создать TEST и evidence...", "...и проверить SHA")
+    are exactly the drift this locks down.
+    """
+    errors: list[str] = []
+    for item in checklist:
+        text = str(item.get("text", "")).strip()
+        if not _TASK_TEST_PLAN_ITEM_CANDIDATE.match(text):
+            continue
+        if not _TASK_TEST_PLAN_ITEM_CANONICAL.fullmatch(text):
+            errors.append(
+                f"{identifier}: пункт плана про TEST должен быть дословно "
+                "'Написать TEST, связанный с TASK и требованиями компонента' "
+                f"(или с подставленным [`TEST_XXX`](...) вместо TEST), а не '{text}'"
+            )
+    return errors
+
+
 def _markdown_section(body: str, heading: str) -> str:
     match = re.search(
         rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(heading)}\s*$\n(.*?)(?=^##\s|\Z)",
@@ -944,6 +973,7 @@ def check_tasks(root: Path) -> CheckResult:
         owner_action = str(task.get("owner_action", "none"))
         if work_state in {"completed", "cancelled"} and next_actor != "none":
             invalid_terminal_actor = True
+        errors.extend(_task_test_plan_item_errors(identifier, task.get("checklist", [])))
         if owner_action != "none":
             if next_actor != "owner":
                 errors.append(f"{identifier}: owner_action задано, но next_actor не owner")
@@ -972,6 +1002,13 @@ def check_tasks(root: Path) -> CheckResult:
                 errors.append(
                     f"{identifier}: раздел 'Что это даёт владельцу' не может оставаться шаблонной заглушкой"
                 )
+            for test_ref in task.get("tests", []):
+                test_id = str(test_ref["id"]) if isinstance(test_ref, dict) else str(test_ref)
+                if not re.search(rf"\[`{re.escape(test_id)}`\]\(", body):
+                    errors.append(
+                        f"{identifier}: завершённая TASK не ссылается на связанную "
+                        f"{test_id} кликабельной ссылкой в тексте карточки"
+                    )
         owner_section = re.search(r"(?ms)^###\s+Владельцу\s*$\n(.*?)(?=^###\s|^##\s|\Z)", body)
         if owner_section:
             substantive_owner_text = re.sub(r"\d{1,3}%", "", owner_section.group(1)).strip()
@@ -1342,6 +1379,73 @@ def check_automation_policy(root: Path) -> CheckResult:
     return _result("automation_policy", errors)
 
 
+AUDIT_CARD_REQUIRED_FIELDS = (
+    "Severity/Confidence/Evidence state",
+    "Baseline",
+    "Файл",
+)
+AUDIT_CARD_OPTIONAL_FIELDS = frozenset(
+    {
+        "Ожидаемый контракт",
+        "Наблюдаемое поведение",
+        "Воздействие и достижимость",
+        "Как воспроизвести",
+        "Почему предыдущий аудит пропустил",
+        "Рекомендованное исправление",
+        "Как проверить исправление",
+        "Критерий закрытия",
+    }
+)
+AUDIT_CARD_RESOLUTION_LABELS = frozenset({"Исправлено", "Частично исправлено", "Уточнение"})
+AUDIT_CARD_ALLOWED_FIELDS = frozenset(AUDIT_CARD_REQUIRED_FIELDS) | AUDIT_CARD_OPTIONAL_FIELDS
+_AUDIT_CARD_SPLIT = re.compile(r'(?=<a id="aud-\d{3}"></a>)')
+_AUDIT_CARD_ID = re.compile(r'<a id="(aud-\d{3})"></a>')
+_AUDIT_CARD_FIELD = re.compile(r"^-\s+\*\*([^*:]+?):\*\*", re.MULTILINE)
+_AUDIT_CARD_DATE_SUFFIX = re.compile(r"\s*\([^)]*\)\s*$")
+
+
+def check_audit_register_cards(root: Path) -> CheckResult:
+    """Каждая карточка AUD-NNN использует один и тот же набор названий полей.
+
+    Свободные названия (например, придуманный на месте `Статус`) означают,
+    что реестр расходится сам с собой карточка от карточки — эта проверка
+    ловит любое имя поля, не входящее в согласованный список (см.
+    `work/audit/audit_register.md` §4), до того как оно попадёт в главную
+    ветку.
+    """
+
+    path = root / "work/audit/audit_register.md"
+    if not path.is_file():
+        return _result("audit_register_cards", [])
+    text = read_text(path)
+    errors: list[str] = []
+    for block in _AUDIT_CARD_SPLIT.split(text)[1:]:
+        card_id_match = _AUDIT_CARD_ID.match(block)
+        if not card_id_match:
+            continue
+        card_id = card_id_match.group(1).upper()
+        fields = _AUDIT_CARD_FIELD.findall(block)
+        # Дата в скобках — часть значения ресолюшн-полей (Исправлено (2026-08-30)),
+        # а не отдельное название поля; отделяем её перед сверкой со списком.
+        normalized = [_AUDIT_CARD_DATE_SUFFIX.sub("", f).strip() for f in fields]
+        for label in normalized:
+            if label in AUDIT_CARD_ALLOWED_FIELDS or label in AUDIT_CARD_RESOLUTION_LABELS:
+                continue
+            errors.append(
+                f"{card_id}: неизвестное название поля «{label}» — используйте только поля "
+                "из списка в audit_register.md §4, не изобретайте новое"
+            )
+        leading = normalized[: len(AUDIT_CARD_REQUIRED_FIELDS)]
+        if tuple(leading) != AUDIT_CARD_REQUIRED_FIELDS:
+            errors.append(
+                f"{card_id}: первые три поля карточки должны быть ровно "
+                f"{', '.join(AUDIT_CARD_REQUIRED_FIELDS)} в этом порядке; найдено {leading}"
+            )
+        if "Наблюдаемое поведение" not in normalized:
+            errors.append(f"{card_id}: отсутствует обязательное поле «Наблюдаемое поведение»")
+    return _result("audit_register_cards", errors)
+
+
 def check_generated(root: Path) -> CheckResult:
     errors: list[str] = []
     status_path = root / "project_status.md"
@@ -1604,6 +1708,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("acceptance_model", check_acceptance_model),
         ("acceptance_adr_transitions", check_acceptance_adr_transitions),
         ("automation_policy", check_automation_policy),
+        ("audit_register_cards", check_audit_register_cards),
         ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
         ("generated", check_generated),
         ("owner_interface", check_owner_interface),

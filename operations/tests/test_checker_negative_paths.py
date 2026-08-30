@@ -9,8 +9,10 @@ from unittest.mock import patch
 
 from operations.scripts.documents.check import (
     _known_reference_ids,
+    _task_test_plan_item_errors,
     check_acceptance_adr_transitions,
     check_acceptance_model,
+    check_audit_register_cards,
     check_authority_graph,
     check_automation_policy,
     check_business_requirements_coverage,
@@ -665,6 +667,121 @@ jobs:
             "immutable 40-char commit SHA",
         ):
             self.assertIn(fragment, joined)
+
+
+class TaskTestPlanItemWordingTests(unittest.TestCase):
+    def test_pre_creation_wording_passes(self) -> None:
+        checklist = [{"text": "Написать TEST, связанный с TASK и требованиями компонента"}]
+        self.assertEqual(_task_test_plan_item_errors("TASK_099", checklist), [])
+
+    def test_linked_wording_passes(self) -> None:
+        checklist = [
+            {
+                "text": (
+                    "Написать [`TEST_015`](../tests/test_015.md), связанный с TASK "
+                    "и требованиями компонента"
+                )
+            }
+        ]
+        self.assertEqual(_task_test_plan_item_errors("TASK_099", checklist), [])
+
+    def test_free_form_variants_are_rejected(self) -> None:
+        for bad_text in (
+            "Создать TEST и evidence",
+            "Создать TEST/evidence и проверить точный SHA",
+            "Создать [`TEST_015`](../tests/test_015.md), связанный с TASK и требованиями компонента",
+            "Написать TEST с реальным evidence",
+        ):
+            with self.subTest(bad_text=bad_text):
+                errors = _task_test_plan_item_errors("TASK_099", [{"text": bad_text}])
+                self.assertTrue(errors, f"expected an error for {bad_text!r}")
+                self.assertIn(bad_text, errors[0])
+
+    def test_unrelated_plan_items_mentioning_test_are_ignored(self) -> None:
+        checklist = [{"text": "Дополнить allowed_paths реальными путями реализации и TEST"}]
+        self.assertEqual(_task_test_plan_item_errors("TASK_099", checklist), [])
+
+
+class AuditRegisterCardFormatTests(unittest.TestCase):
+    HEADER = (
+        "---\nid: audit_register\ntype: audit_register\ndocument_state: current\n"
+        "version: 1.0\nupdated: 2026-08-30\ndepends_on: []\n---\n\n"
+        "# Реестр\n\n## 4. Карточки findings\n\n"
+    )
+
+    def _write(self, root: Path, card_body: str) -> None:
+        audit_dir = root / "work/audit"
+        audit_dir.mkdir(parents=True)
+        (audit_dir / "audit_register.md").write_text(self.HEADER + card_body, encoding="utf-8")
+
+    def test_unknown_field_name_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n"
+                "- **Статус:** придуманное на месте поле.\n",
+            )
+            result = check_audit_register_cards(root)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("неизвестное название поля «Статус»" in e for e in result.errors))
+
+    def test_reordered_required_fields_are_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Baseline:** pre-existing\n"
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n",
+            )
+            result = check_audit_register_cards(root)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("первые три поля карточки должны быть" in e for e in result.errors))
+
+    def test_missing_observed_behavior_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n",
+            )
+            result = check_audit_register_cards(root)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("Наблюдаемое поведение" in e for e in result.errors))
+
+    def test_dated_resolution_labels_and_optional_fields_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n"
+                "- **Рекомендованное исправление:** сделать X.\n"
+                "- **Как проверить исправление:** запустить Y.\n"
+                "- **Исправлено (2026-08-30):** сделано.\n"
+                "- **Уточнение (2026-08-31):** дополнено.\n"
+                "- **Критерий закрытия:** зелёный CI.\n",
+            )
+            result = check_audit_register_cards(root)
+        self.assertEqual(result.errors, [])
+
+    def test_missing_register_file_is_not_an_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = check_audit_register_cards(Path(tmp))
+        self.assertEqual(result.errors, [])
 
 
 if __name__ == "__main__":

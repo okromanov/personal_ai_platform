@@ -5,8 +5,8 @@ title: Живое E2E-доказательство ARC_FLOW_001
 component: ARC_FLOW_001
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.0
-updated: 2026-08-26
+version: 1.1
+updated: 2026-08-30
 next_actor: agent
 owner_action: none
 depends_on:
@@ -49,7 +49,7 @@ implements:
 - [ ] Подтвердить Telegram → модель → ответ
 - [ ] Подтвердить deny для чужого user_id, Kill Switch и потери VPN
 - [ ] Подтвердить timeout/provider failure и перезапуск без скрытого дубля
-- [ ] Создать TEST/evidence и проверить точный SHA
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 
 ## 6. Состав
 

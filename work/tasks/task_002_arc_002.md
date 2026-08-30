@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_002
 component: ARC_CMP_002
 work_state: completed
-version: 1.7
-updated: 2026-08-28
+version: 1.8
+updated: 2026-08-30
 next_actor: none
 owner_action: none
 depends_on:
@@ -62,7 +62,7 @@ tests:
 - [x] Дополнить allowed_paths реальными путями
 - [x] Спроектировать реализацию
 - [x] Реализовать компонент
-- [x] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Написать [`TEST_008`](../tests/test_008.md), связанный с TASK и требованиями компонента
 - [x] Проверить покрытие путей в allowed_paths
 
 ## 6. Состав

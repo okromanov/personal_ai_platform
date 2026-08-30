@@ -9,8 +9,27 @@ from typing import TypedDict
 from operations.scripts.documents.metadata import load_document, metadata_list
 
 ADR_ID_PATTERN = re.compile(r"^ADR_\d{3}$")
+MILESTONE_HEADING_PATTERN = re.compile(r"^##\s+(m\d{2})\s+—\s+.+?$", re.MULTILINE | re.IGNORECASE)
+MILESTONE_STATE_PATTERN = re.compile(r"(?m)^-\s+work_state:\s+`?([a-z-]+)`?\s*$", re.IGNORECASE)
+ACTIVE_OR_FINISHED_MILESTONE_STATES = {"in-progress", "blocked", "completed"}
 UNFINISHED_TASK_STATES = {"planned", "in-progress", "blocked"}
 TERMINAL_TASK_STATES = {"completed", "cancelled"}
+
+
+def _milestone_states(root: Path) -> dict[str, str]:
+    path = root / "milestones.md"
+    if not path.is_file():
+        return {}
+    text = path.read_text(encoding="utf-8-sig")
+    matches = list(MILESTONE_HEADING_PATTERN.finditer(text))
+    result: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        section = text[match.end() : end]
+        state = MILESTONE_STATE_PATTERN.search(section)
+        if state:
+            result[match.group(1).lower()] = state.group(1).lower()
+    return result
 
 
 class AdrRecord(TypedDict):
@@ -30,10 +49,13 @@ class TaskRecord(TypedDict):
 def validate_adr_decision_tasks(root: Path) -> list[str]:
     """Validate the canonical relation TASK.decides -> proposed ADR.
 
-    Every proposed ADR assigned to a milestone has exactly one unfinished
-    decision TASK immediately, including ADRs of planned future milestones.
+    A proposed ADR becomes mandatory to assign when at least one milestone in
+    its traces_to is active, blocked, or already completed. ADRs that belong
+    only to planned future milestones are checked when that milestone is
+    decomposed and started; this preserves the project's delivery horizon.
     """
 
+    milestone_states = _milestone_states(root)
     adrs: dict[str, AdrRecord] = {}
     for path in sorted((root / "adr").glob("adr_*.md")):
         doc = load_document(path)
@@ -76,7 +98,11 @@ def validate_adr_decision_tasks(root: Path) -> list[str]:
     for adr_id, adr in sorted(adrs.items()):
         if adr["state"] != "proposed":
             continue
-        relevant = adr["milestones"]
+        relevant = {
+            milestone
+            for milestone in adr["milestones"]
+            if milestone_states.get(milestone) in ACTIVE_OR_FINISHED_MILESTONE_STATES
+        }
         if not relevant:
             continue
 
