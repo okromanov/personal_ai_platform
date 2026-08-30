@@ -4,10 +4,12 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 1.9
+version: 2.0
 updated: 2026-08-29
 next_actor: agent
 owner_action: none
+owner_followups:
+  - "[open] Выполнить три инструкции развёртывания (Hetzner, DigitalOcean, Selectel) и прислать заполненные evidence-блоки (раздел 11 каждой) — агент не может сам зарегистрировать аккаунты, подключиться по SSH или создать Telegram-бота."
 depends_on:
   - TASK_012
 allowed_paths:
@@ -64,6 +66,8 @@ implements:
 
 По прямому запросу владельца, не относящемуся к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008): в [`milestones.md`](../../milestones.md) добавлена строка «ADR этого этапа» для каждого `mXX` и убран необязательный текст из раздела «Готовность этапа [`m01`](../../milestones.md#m01)»; в [`work/audit/audit_register.md`](../audit/audit_register.md) убрана вспомогательная запись, ссылавшаяся на этот текст. Оба файла добавлены в `allowed_paths` этой TASK, поскольку она сейчас единственная активная — правки не относятся к её собственному результату.
 
+Полный прогон проверки также обнаружил в [`work/audit/audit_register.md`](../audit/audit_register.md) две некликабельные ссылки на [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) (одна — испорченная вложенными скобками от автоматического линкера, добавлена отдельным изменением) — исправлены; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
+
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
 - `work/tests/test_00X.md` — описание проверок
@@ -94,3 +98,9 @@ implements:
 ## 10. Что это даёт владельцу
 
 Функционал появится после завершения этой TASK.
+
+## 11. Незакрытые действия владельца
+
+Выполнить три инструкции развёртывания (Hetzner, DigitalOcean, Selectel) и прислать заполненные evidence-блоки (раздел 11 каждой) — агент не может сам зарегистрировать аккаунты, подключиться по SSH или создать Telegram-бота.
+
+Инструкции отправлены владельцу как PDF (не в репозитории). Пока не пришли все три evidence-блока, [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) не может перейти из `proposed`: §6 ADR требует Hetzner и минимум одну альтернативу сценария A (DigitalOcean), а также отдельно оценённый сценарий B (Selectel). Можно проходить инструкции по одной, в любом порядке, и присылать evidence по мере готовности — это не блокирует ничего кроме самого решения по [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md).
