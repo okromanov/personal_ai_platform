@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.0
-updated: 2026-08-29
+version: 2.1
+updated: 2026-08-30
 next_actor: agent
 owner_action: none
 owner_followups:
@@ -67,6 +67,8 @@ implements:
 По прямому запросу владельца, не относящемуся к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008): в [`milestones.md`](../../milestones.md) добавлена строка «ADR этого этапа» для каждого `mXX` и убран необязательный текст из раздела «Готовность этапа [`m01`](../../milestones.md#m01)»; в [`work/audit/audit_register.md`](../audit/audit_register.md) убрана вспомогательная запись, ссылавшаяся на этот текст. Оба файла добавлены в `allowed_paths` этой TASK, поскольку она сейчас единственная активная — правки не относятся к её собственному результату.
 
 Полный прогон проверки также обнаружил в [`work/audit/audit_register.md`](../audit/audit_register.md) две некликабельные ссылки на [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) (одна — испорченная вложенными скобками от автоматического линкера, добавлена отдельным изменением) — исправлены; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
+
+По прямому запросу владельца проведена сверка синхронизации всех ADR (принятых и `proposed`) с реализованным кодом; найденные расхождения зафиксированы отдельными карточками AUD-022 и AUD-023 в [`work/audit/audit_register.md`](../audit/audit_register.md) — не реализовано решение [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) и разошлось имя контракта модели (`ModelProvider` в тексте [`ADR_003`](../../adr/adr_003_model_provider_interface.md)/[`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)/[`ADR_006`](../../adr/adr_006_agent_environment_framework.md) против `ModelGateway` в коде). Обе оставлены `open`, так как исправление требует решения владельца, а не механической правки; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
 
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
