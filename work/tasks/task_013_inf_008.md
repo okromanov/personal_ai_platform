@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.1
+version: 2.2
 updated: 2026-08-30
 next_actor: agent
 owner_action: none
@@ -16,8 +16,6 @@ allowed_paths:
   - work/tasks/task_013_inf_008.md
   - adr/adr_007_cloud_provider_selection.md
   - adr/adr_009_secret_management_strategy.md
-  - milestones.md
-  - work/audit/audit_register.md
 traces_to:
   - m02
 decides:
@@ -39,13 +37,13 @@ implements:
 
 ## 3. Где мы сейчас
 
-[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются и выбираются площадка размещения для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и совместимая с ней стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: AWS и AWS Secrets Manager в них являются ранними кандидатами, а текущая практическая проверка Hetzner ещё не превращена в решение владельца. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
+[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются Hetzner и DigitalOcean для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и совместимая с победителем стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: окончательное решение будет принято после единой scorecard, проверки доступной владельцу оплаты и практического deployment победителя. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. На одной scorecard завершить сравнение площадок и совместимых способов хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+1. На одной scorecard сравнить Hetzner и DigitalOcean вместе с совместимыми способами хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
 2. После решения владельца зафиксировать выбранные варианты и обоснование в обоих ADR
 3. Дополнить `allowed_paths` фактическими путями реализации
 4. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
@@ -53,7 +51,7 @@ implements:
 
 ## 5. План выполнения
 
-- [ ] Завершить сравнение площадок и runtime-secret вариантов; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+- [ ] Сравнить Hetzner и DigitalOcean и runtime-secret варианты; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
 - [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
@@ -63,10 +61,6 @@ implements:
 ## 6. Состав
 
 **В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `infrastructure/deploy/` или конфигурации существующего CI), добавит их в `allowed_paths` и создаст связанную карточку TEST.
-
-По прямому запросу владельца, не относящемуся к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008): в [`milestones.md`](../../milestones.md) добавлена строка «ADR этого этапа» для каждого `mXX` и убран необязательный текст из раздела «Готовность этапа [`m01`](../../milestones.md#m01)»; в [`work/audit/audit_register.md`](../audit/audit_register.md) убрана вспомогательная запись, ссылавшаяся на этот текст. Оба файла добавлены в `allowed_paths` этой TASK, поскольку она сейчас единственная активная — правки не относятся к её собственному результату.
-
-Полный прогон проверки также обнаружил в [`work/audit/audit_register.md`](../audit/audit_register.md) две некликабельные ссылки на [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) (одна — испорченная вложенными скобками от автоматического линкера, добавлена отдельным изменением) — исправлены; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
 
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания

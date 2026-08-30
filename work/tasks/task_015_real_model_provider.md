@@ -5,8 +5,8 @@ title: Реальный поставщик модели для ARC_CMP_004
 component: ARC_CMP_004
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.2
-updated: 2026-08-29
+version: 1.3
+updated: 2026-08-30
 next_actor: agent
 owner_action: none
 depends_on:
@@ -41,16 +41,19 @@ implements:
 
 1. Сравнить актуальных поставщиков на одной scorecard: качество, задержка, стоимость, доступность из выбранной сети, правила данных и обработка отказов; получить решение по [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)
 2. Дополнить allowed_paths и реализовать адаптер выбранного provider
-3. Проверить timeout, budget и отказ provider
-4. Создать TEST с evidence реального вызова без раскрытия секрета
+3. Зарегистрировать адаптер как явный non-stub профиль eval harness
+4. Создать отдельные golden expectations для реального provider; stub-ожидания не переиспользовать как доказательство качества
+5. Проверить timeout, budget и отказ provider
+6. Создать TEST и evidence реального вызова на полном commit SHA без раскрытия секрета
 
 ## 5. План выполнения
 
 - [ ] Сравнить варианты и принять [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Подключить одного реального provider
+- [ ] Зарегистрировать явный non-stub eval-профиль и отдельные golden expectations
 - [ ] Проверить timeout, budget и ошибки
-- [ ] Создать TEST и evidence точного SHA
+- [ ] Создать TEST и evidence полного 40-символьного commit SHA
 
 ## 6. Состав
 
@@ -58,13 +61,15 @@ implements:
 
 ## 7. Проверки и доказательства
 
-Проверяется реальный ответ, нормализация ошибки и отсутствие секретов в выводе. Успешный stub-тест не является доказательством.
+Проверяется реальный ответ, нормализация ошибки и отсутствие секретов в выводе. Eval запускается с явно выбранным non-stub профилем и полным 40-символьным commit SHA. Успешный stub-тест не является доказательством качества реального provider.
 
 ## 8. Готово когда
 
 - ✅ [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) принят владельцем
 - ✅ Реальный provider отвечает через ModelGateway
+- ✅ Реальный provider зарегистрирован как явный non-stub eval-профиль с отдельными golden expectations
 - ✅ Timeout, budget и отказ проверены
+- ✅ Eval evidence привязано к полному commit SHA
 - ✅ Секреты не попадают в репозиторий и логи
 
 ## 9. Что будет дальше

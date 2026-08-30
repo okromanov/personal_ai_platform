@@ -157,5 +157,52 @@ class PathTraversalContainmentTest(unittest.TestCase):
                 relative_posix(target, root)
 
 
+class BuildContextSecretPolicyTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = Path(__file__).resolve().parents[2]
+
+    def test_source_secrets_package_is_not_ignored_by_git(self) -> None:
+        source_candidate = "src/secrets/new_provider.py"
+        result = run_command(
+            ["git", "check-ignore", "--no-index", "-q", source_candidate],
+            cwd=self.root,
+        )
+        self.assertNotEqual(
+            result.returncode,
+            0,
+            "The source package src/secrets must remain visible to Git",
+        )
+
+    def test_root_secret_directory_is_ignored_by_git(self) -> None:
+        result = run_command(
+            ["git", "check-ignore", "--no-index", "-q", "secrets/local_token"],
+            cwd=self.root,
+        )
+        self.assertEqual(result.returncode, 0)
+
+    def test_docker_context_excludes_common_secret_files(self) -> None:
+        patterns = {
+            line.strip()
+            for line in (self.root / ".dockerignore").read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        }
+        required = {
+            ".env",
+            ".env.*",
+            "**/.env",
+            "**/.env.*",
+            "secrets",
+            "credentials",
+            "**/*.pem",
+            "**/*.key",
+            "**/*.p12",
+            "**/*.pfx",
+            "**/id_rsa*",
+            "**/id_ed25519*",
+        }
+        self.assertEqual(required - patterns, set())
+        self.assertNotIn("**/secrets", patterns, "Do not exclude the src/secrets code package")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -79,7 +79,10 @@ def main() -> int:
         return 0
 
     try:
-        if args.json:
+        json_path = args.json
+        if json_path is not None and not json_path.is_absolute():
+            json_path = root / json_path
+        if json_path:
             import json
 
             metrics_dict = {
@@ -115,11 +118,13 @@ def main() -> int:
                 },
                 "overall_status": health.overall_status,
             }
-            args.json.parent.mkdir(parents=True, exist_ok=True)
-            args.json.write_text(json.dumps(metrics_dict, indent=2))
-            print(f"✅ Metrics saved to {args.json}", file=sys.stderr)
+            json_path.parent.mkdir(parents=True, exist_ok=True)
+            json_path.write_text(json.dumps(metrics_dict, indent=2))
+            print(f"✅ Metrics saved to {json_path.relative_to(root)}", file=sys.stderr)
 
         output_path = args.output or root / "runtime" / "health_check_report.md"
+        if not output_path.is_absolute():
+            output_path = root / output_path
         report = generate_report(health, root)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)

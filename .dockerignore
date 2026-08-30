@@ -13,3 +13,15 @@ specifications
 operations
 generated
 *.md
+.env
+.env.*
+**/.env
+**/.env.*
+secrets
+credentials
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/id_rsa*
+**/id_ed25519*

@@ -14,6 +14,21 @@ import sys
 from fnmatch import fnmatch
 from pathlib import Path
 
+SERVICE_ONLY_PATHS = {
+    "AGENTS.md",
+    "milestones.md",
+    "operations/change_process.md",
+    "operations/template_registry.json",
+    "project_rules.md",
+}
+SERVICE_ONLY_PREFIXES = ("operations/templates/", "work/audit/")
+UNFINISHED_TASK_STATES = {"planned", "in-progress", "blocked"}
+
+
+def _is_service_only(path: str) -> bool:
+    normalized = path.removeprefix("./")
+    return normalized in SERVICE_ONLY_PATHS or normalized.startswith(SERVICE_ONLY_PREFIXES)
+
 
 def get_all_tracked_paths(root: Path) -> set[str]:
     """Получить все пути в репозитории (кроме .git и generated)."""
@@ -50,9 +65,18 @@ def validate_task_paths(root: Path) -> list[str]:
 
         allowed_text = allowed_match.group(1)
         allowed_paths = re.findall(r"-\s+(.+)", allowed_text)
+        state_match = re.search(r"^work_state:\s*([^\s#]+)", content, re.MULTILINE)
+        work_state = state_match.group(1).strip().strip('"').strip("'") if state_match else ""
 
         for allowed_path in allowed_paths:
             allowed_path = allowed_path.strip().strip('"').strip("'")
+
+            if work_state in UNFINISHED_TASK_STATES and _is_service_only(allowed_path):
+                errors.append(
+                    f"{task_file.name}: служебный путь '{allowed_path}' нельзя включать "
+                    "в allowed_paths незавершённой продуктовой TASK"
+                )
+                continue
 
             # Проверить, содержит ли маски
             if "*" in allowed_path or "?" in allowed_path:

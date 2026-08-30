@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-08-30T09:42:00-03:00
+generated_at: 2026-08-30T09:46:00-04:00
 version: 1.0
 ---
 
@@ -26,7 +26,7 @@ version: 1.0
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
 | Текущая проектная задача | [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md) |
-| Место в очереди проекта | **13 из 17** |
+| Место в очереди проекта | **13 из 18** |
 | Шаги текущей задачи | **0** из **6** |
 | Следующий исполнитель | **агент** |
 
@@ -61,10 +61,11 @@ version: 1.0
 | [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована — закрывает результат этапа |
 | [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована — закрывает результат этапа |
 | [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована — закрывает результат этапа |
+| [`TASK_018`](work/tasks/task_018_runtime_task_events.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | — | запланирована |
 
 ## Шаги текущей работы
 
-- [ ] Завершить сравнение площадок и runtime-secret вариантов; подготовить решения [`ADR_007`](adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](adr/adr_009_secret_management_strategy.md)
+- [ ] Сравнить Hetzner и DigitalOcean и runtime-secret варианты; подготовить решения [`ADR_007`](adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](adr/adr_009_secret_management_strategy.md)
 - [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
@@ -79,12 +80,12 @@ version: 1.0
 
 | Параметр | Значение |
 |---|---|
-| Всего замечаний | **21** |
-| Исправлены, ожидают проверки | **20** |
-| Открыты | **1** |
+| Всего замечаний | **27** |
+| Исправлены, ожидают проверки | **25** |
+| Открыты | **2** |
 | Риски приняты владельцем | **0** |
 | Закрыты | **0** |
-| Критичность | critical: **1**, high: **4**, medium: **10**, low: **6** |
+| Критичность | critical: **1**, high: **7**, medium: **13**, low: **6** |
 | Состояние gate/CI | **ЕСТЬ незакрытые критические замечания (1)** — не полагайтесь на статус CI/gate без проверки карточек ниже |
 | Ближайшая дата проверки | **2026-09-02** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |
