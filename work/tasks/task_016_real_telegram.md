@@ -5,8 +5,8 @@ title: Реальный Telegram Bot API для ARC_CMP_001
 component: ARC_CMP_001
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.1
-updated: 2026-08-29
+version: 1.2
+updated: 2026-08-30
 next_actor: agent
 owner_action: none
 depends_on:
@@ -48,7 +48,7 @@ implements:
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать Bot API без эмуляции
 - [ ] Проверить allowlist, Kill Switch и VPN fail-closed
-- [ ] Создать TEST и evidence
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 
 ## 6. Состав
 

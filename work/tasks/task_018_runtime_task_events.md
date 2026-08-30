@@ -5,7 +5,7 @@ title: Корреляция структурированных событий з
 component: ARC_CMP_007
 delivery_role: component
 work_state: planned
-version: 1.0
+version: 1.1
 updated: 2026-08-30
 depends_on:
   - TASK_017
@@ -51,7 +51,7 @@ implements:
 - [ ] Реализовать создание и распространение `runtime_task_id`
 - [ ] Связать ключевые события одного исполнения
 - [ ] Проверить ошибки, retries, checkpoints и redaction
-- [ ] Создать TEST и evidence точного SHA
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 
 ## 6. Состав
 

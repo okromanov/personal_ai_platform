@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.4
+version: 2.5
 updated: 2026-08-30
 next_actor: agent
 owner_action: none
@@ -57,7 +57,7 @@ implements:
 - [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
-- [ ] Написать TEST с реальным evidence
+- [ ] Написать TEST, связанный с TASK и требованиями компонента
 - [ ] Проверить развёрнутый контур и покрытие путей
 
 ## 6. Состав
