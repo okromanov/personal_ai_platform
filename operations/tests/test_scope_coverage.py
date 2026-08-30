@@ -50,6 +50,7 @@ def _task(task_id: str, implements: list[str]) -> TaskItem:
         "traces_to": [],
         "implements": implements,
         "component": "",
+        "delivery_role": "component",
         "allowed_paths": [],
         "blocker": "",
         "tests": [],

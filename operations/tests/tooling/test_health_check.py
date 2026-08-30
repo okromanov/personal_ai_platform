@@ -388,6 +388,45 @@ class HealthCheckCliTests(unittest.TestCase):
             self.assertTrue(report_path.is_file())
             self.assertIn("✅ HEALTHY", report_path.read_text(encoding="utf-8"))
 
+    def test_main_resolves_relative_runtime_paths_against_repository_root(self) -> None:
+        health = _make_health()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _install_health_contract(root)
+            with (
+                patch.object(health_generate, "find_project_root", return_value=root),
+                patch.object(
+                    health_generate, "collect_git_metrics", return_value=health.repository
+                ),
+                patch.object(health_generate, "collect_test_metrics", return_value=health.tests),
+                patch.object(
+                    health_generate,
+                    "collect_code_quality_metrics",
+                    return_value=health.code_quality,
+                ),
+                patch.object(
+                    health_generate,
+                    "collect_coverage_policy",
+                    return_value=health.coverage_policy,
+                ),
+                patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "generate.py",
+                        "--output",
+                        "runtime/health_check_report.md",
+                        "--json",
+                        "runtime/health_check.json",
+                    ],
+                ),
+            ):
+                result = health_generate.main()
+
+            self.assertEqual(result, 0)
+            self.assertTrue((root / "runtime/health_check_report.md").is_file())
+            self.assertTrue((root / "runtime/health_check.json").is_file())
+
     def test_main_fails_closed_when_repository_metrics_are_unavailable(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             with (

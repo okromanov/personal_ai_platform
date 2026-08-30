@@ -2,8 +2,8 @@
 id: template_milestone
 type: document_template
 document_state: current
-version: 1.2
-updated: 2026-08-29
+version: 1.4
+updated: 2026-08-30
 depends_on: []
 ---
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -182,7 +183,7 @@ class CheckerNegativePathTests(unittest.TestCase):
 
         def body(
             task_id: str,
-            sections: list[tuple[int | None, str]],
+            sections: Sequence[tuple[int | None, str]],
             *,
             followup_action: str = "",
         ) -> str:

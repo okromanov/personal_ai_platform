@@ -5,8 +5,8 @@ title: Реальная среда агента для ARC_CMP_003
 component: ARC_CMP_003
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.2
-updated: 2026-08-29
+version: 1.3
+updated: 2026-08-30
 next_actor: agent
 owner_action: none
 depends_on:
@@ -39,14 +39,14 @@ implements:
 
 ### Агенту
 
-1. Сравнить на одном минимальном сценарии Hermes Agent, Claude Agent SDK и минимальный native loop как контроль сложности
+1. Сравнить на одном минимальном сценарии LangGraph, Hermes Agent и минимальный native loop как контроль сложности
 2. Представить владельцу решение для [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
 3. После решения добавить фактические пути и реализовать адаптер
 4. Доказать работу через RuntimePort без обхода OwnerControl
 
 ## 5. План выполнения
 
-- [ ] Сравнить Hermes Agent, Claude Agent SDK и минимальный native loop по RuntimePort, отмене, состоянию, секретам, tool boundary и Kill Switch; принять [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
+- [ ] Сравнить LangGraph, Hermes Agent и минимальный native loop по RuntimePort, отмене, состоянию, секретам, tool boundary, модель-инвариантности и Kill Switch; принять [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Подключить выбранную среду через RuntimePort
 - [ ] Написать TEST с реальным evidence

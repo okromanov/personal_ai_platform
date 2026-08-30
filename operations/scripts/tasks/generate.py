@@ -167,7 +167,9 @@ def collect_tasks(root: Path) -> TasksReport:
             )
         delivery_role = str(doc.metadata.get("delivery_role", "")).strip() or "component"
         if delivery_role not in {"component", "terminal_outcome"}:
-            raise ValueError(f"{relative}: delivery_role должен быть component или terminal_outcome")
+            raise ValueError(
+                f"{relative}: delivery_role должен быть component или terminal_outcome"
+            )
         blocker = str(doc.metadata.get("blocker", "")).strip()
         if work_state == "blocked" and not blocker:
             raise ValueError(f"{relative}: заблокированная TASK требует поле blocker")

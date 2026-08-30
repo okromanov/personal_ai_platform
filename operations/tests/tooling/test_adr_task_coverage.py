@@ -93,12 +93,8 @@ class AdrDecisionTaskCoverageTests(unittest.TestCase):
         self._adr(root, "ADR_006", "m02")
         self._task(root, "TASK_014", "m02", state="completed", decides=("ADR_006",))
         errors = validate_adr_decision_tasks(root)
-        self.assertTrue(
-            any("ровно одну незавершённую TASK" in error for error in errors)
-        )
-        self.assertTrue(
-            any("не может оставлять ADR_006" in error for error in errors)
-        )
+        self.assertTrue(any("ровно одну незавершённую TASK" in error for error in errors))
+        self.assertTrue(any("не может оставлять ADR_006" in error for error in errors))
 
     def test_duplicate_decision_owners_are_rejected(self) -> None:
         root = self._root()

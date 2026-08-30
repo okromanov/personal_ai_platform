@@ -229,7 +229,6 @@ class FixLinksTests(unittest.TestCase):
             )
             self.assertEqual(check_markdown_links(root), [])
 
-
     def test_fixes_range_shorthand_dropped_prefix(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

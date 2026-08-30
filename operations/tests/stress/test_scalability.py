@@ -52,6 +52,7 @@ def _synthetic_task_item(number: int, *, work_state: str, depends_on: list[str])
         "traces_to": [],
         "implements": [],
         "component": "test",
+        "delivery_role": "component",
         "allowed_paths": [],
         "blocker": "",
         "tests": [],

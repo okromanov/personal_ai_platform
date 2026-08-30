@@ -306,6 +306,41 @@ class QualityUtilityTests(unittest.TestCase):
             self.assertTrue(any("missing.txt" in error for error in errors))
             self.assertTrue(any("src/**" in error for error in errors))
 
+    def test_unfinished_task_rejects_repository_maintenance_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            tasks = root / "work" / "tasks"
+            audit = root / "work" / "audit"
+            tasks.mkdir(parents=True)
+            audit.mkdir(parents=True)
+            (root / "milestones.md").write_text("milestones\n", encoding="utf-8")
+            (audit / "audit_register.md").write_text("register\n", encoding="utf-8")
+            (tasks / "task_001.md").write_text(
+                "work_state: in-progress\n"
+                "allowed_paths:\n"
+                "  - milestones.md\n"
+                "  - work/audit/audit_register.md\n",
+                encoding="utf-8",
+            )
+
+            errors = validate_task_paths(root)
+
+            self.assertEqual(len(errors), 2)
+            self.assertTrue(all("служебный путь" in error for error in errors))
+
+    def test_completed_task_may_preserve_historical_service_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            tasks = root / "work" / "tasks"
+            tasks.mkdir(parents=True)
+            (root / "milestones.md").write_text("milestones\n", encoding="utf-8")
+            (tasks / "task_001.md").write_text(
+                "work_state: completed\nallowed_paths:\n  - milestones.md\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(validate_task_paths(root), [])
+
     def test_owner_action_practicality_reports_each_policy_violation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

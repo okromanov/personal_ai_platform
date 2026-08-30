@@ -2,7 +2,7 @@
 id: template_task
 type: document_template
 document_state: current
-version: 1.9
+version: 2.1
 updated: 2026-08-30
 depends_on: []
 ---
