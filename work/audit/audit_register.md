@@ -2,8 +2,8 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 1.4
-updated: 2026-08-29
+version: 1.5
+updated: 2026-08-30
 depends_on: []
 ---
 
@@ -47,6 +47,8 @@ depends_on: []
 | AUD-019 | low | remediated_pending_verification | 2026-08-29 | 2026-09-19 | repository_owner | [`sqlite_store.py`](../../src/task_state/sqlite_store.py), [`test_persistent_task_state.py`](../../operations/tests/product/test_persistent_task_state.py) | Добавлены тесты по образцу `test_owner_control.py`: невалидный/не-dict JSON и неизвестный `state`, записанные напрямую в SQLite, подтверждают `TaskLifecycleError`. |
 | AUD-020 | medium | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) §7.5, [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py) | §7.5 теперь требует проверки eval/regression-набора; добавлен golden-case harness для model gateway, провайдер-независимый (работает со StubModelGateway сегодня, с реальным providers после TASK_015 без изменений раннера). |
 | AUD-021 | high | remediated_pending_verification | 2026-08-29 | 2026-09-05 | repository_owner | [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`TASK_013`](../tasks/task_013_inf_008.md)–[`TASK_015`](../tasks/task_015_real_model_provider.md) | Введено `TASK.decides`, active proposed ADR назначены незавершённым TASK, планирование и аудит требуют обратного прохода ADR → TASK; отрицательные tests блокируют потерю и дублирование владельца решения. |
+| AUD-022 | medium | open | 2026-08-30 | 2026-09-13 | repository_owner | [`adr_004_task_events_and_logging.md`](../../adr/adr_004_task_events_and_logging.md), [`src/observability/collector.py`](../../src/observability/collector.py) | Требует решения владельца — реализовать модель событий ADR_004 либо пересмотреть текст `accepted` решения под то, что реально построено. |
+| AUD-023 | low | open | 2026-08-30 | 2026-09-20 | repository_owner | [`adr_003_model_provider_interface.md`](../../adr/adr_003_model_provider_interface.md), [`src/models/base.py`](../../src/models/base.py) | Требует решения владельца — какое имя контракта верное (`ModelProvider` в тексте ADR или `ModelGateway` в коде); чисто терминологический выбор, не блокирует функциональность. |
 
 ## 4. Карточки findings
 
@@ -270,6 +272,28 @@ depends_on: []
 - **Риск:** TASK или milestone можно было завершить, оставив решение `proposed`, без владельца, evidence и явного решения владельца; структура при этом оставалась «зелёной».
 - **Исправление:** `TASK_013.decides = [ADR_007, ADR_009]`, `TASK_014.decides = [ADR_006]`, `TASK_015.decides = [ADR_005]`; [`ADR_008`](../../adr/adr_008_data_storage_schema.md) обязан получить TASK при декомпозиции [`m04`](../../milestones.md#m04) до старта. Обновлены lifecycle, change process, шаблоны и audit prompt. Добавлен исполняемый checker и negative tests.
 - **Критерий закрытия:** новый check `adr_decision_tasks`, unit tests, полный project gate и CI успешны на одном SHA; traceability matrix показывает все четыре связи активного [`m02`](../../milestones.md#m02).
+
+<a id="aud-022"></a>
+### AUD-022 — `accepted` ADR_004 не реализован в коде
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Файл:** [`adr_004_task_events_and_logging.md`](../../adr/adr_004_task_events_and_logging.md), [`src/observability/collector.py`](../../src/observability/collector.py), [`TASK_012`](../tasks/task_012_inf_007.md)
+- **Ожидаемый контракт:** `accepted` ADR фиксирует решение, которое реализация обязана отражать. [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) §3 требует, чтобы каждая исполняемая задача имела `runtime_task_id`, а существенные переходы состояния, вызовы моделей/инструментов, решения правил, повторы, контрольные точки и ошибки создавали структурированные события с временем, типом, компонентом, операцией и результатом; схема допускает `trace_id`/`span_id`/`parent_span_id`, когда сущность появляется.
+- **Наблюдаемое поведение:** в `src/` нет ни одного упоминания `runtime_task_id`, `trace_id` или `span_id` (проверено `grep` по всему дереву). Единственный похожий механизм — `ObservationEvent`/`ObservabilityCollector` ([`src/observability/collector.py`](../../src/observability/collector.py)), но это другой, более узкий дизайн: поля `kind`/`component`/`measurements` без привязки к задаче, без `operation`/`result`, без trace/span. Он реализован [`TASK_012`](../tasks/task_012_inf_007.md) под [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007) и нигде не ссылается на [`ADR_004`](../../adr/adr_004_task_events_and_logging.md). Ни одна TASK-карточка в репозитории не упоминает [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) вообще.
+- **Почему аудит пропустил:** `check.py` проверяет ссылочную целостность и наличие TASK-владельца решения для `proposed` ADR ([`AUD-021`](#aud-021)), но не сверяет содержимое `accepted` ADR с фактическим кодом — для `accepted` решений такой проверки в принципе не существует.
+- **Воздействие и достижимость:** не блокирует функционально ничего в [`m02`](../../milestones.md#m02) — диагностика задач сейчас работает через логи и `TaskLifecycleStore`. Риск в другом: `accepted` статус создаёт ложное ощущение, что решение уже определяет реализацию, хотя оно не определяет ничего — тот же класс расхождения между evidence-документом и реальностью, что и [`AUD-009`](#aud-009), только для содержимого ADR, а не для [`m01.json`](../acceptance/m01.json).
+- **Рекомендованное исправление:** решение владельца — либо (а) реализовать модель событий [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) отдельной TASK, привязанной к конкретному `ARC_CMP`/`INF_CMP`, либо (б) скорректировать текст [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) под то, что реально построено ([`ObservabilityCollector`](../../src/observability/collector.py)), зафиксировав это как осознанное сужение принятого решения, а не молчаливое расхождение. Само внедрение модели событий (если выбран вариант а) — отдельная задача вне рамок текущего аудита.
+- **Как проверить исправление:** либо `grep -rn "runtime_task_id" src/` находит реализацию, покрытую тестом, либо §3 [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) приведён в соответствие с [`ObservationEvent`](../../src/observability/collector.py) с явной пометкой решения владельца.
+
+<a id="aud-023"></a>
+### AUD-023 — Контракт модели назван по-разному в ADR и в коде
+
+- **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Файл:** [`adr_003_model_provider_interface.md`](../../adr/adr_003_model_provider_interface.md), [`adr_005_first_model_provider_selection.md`](../../adr/adr_005_first_model_provider_selection.md), [`adr_006_agent_environment_framework.md`](../../adr/adr_006_agent_environment_framework.md), [`src/models/base.py`](../../src/models/base.py)
+- **Наблюдаемое поведение:** [`ADR_003`](../../adr/adr_003_model_provider_interface.md) §3, а вслед за ним [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) и [`ADR_006`](../../adr/adr_006_agent_environment_framework.md), везде называют контракт `ModelProvider` как код-спан-идентификатор. Реализованный класс называется `ModelGateway` (`ModelGatewayError`, `ModelRequest`, `ModelResponse` — [`src/models/base.py`](../../src/models/base.py)); это же имя используется во всех потребителях ([`src/models/runtime_adapter.py`](../../src/models/runtime_adapter.py), [`src/models/stub_gateway.py`](../../src/models/stub_gateway.py)) и в самом реестре аудита ([`AUD-020`](#aud-020)). Функционально контракт полностью соответствует решению [`ADR_003`](../../adr/adr_003_model_provider_interface.md) — расхождение только в имени идентификатора.
+- **Воздействие и достижимость:** низкий практический риск — контракт существует и работает. Но [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) (пока `proposed`) использует имя `ModelProvider` как буквальный критерий проверки модель-инвариантности («узел, вызывающий модель, обращается к ней через `ModelProvider`») — критерий приёмки ссылается на идентификатор, которого в кодовой базе не существует под этим именем.
+- **Рекомендованное исправление:** решение владельца — какая сторона верна: (а) переименовать `ModelGateway` → `ModelProvider` в коде (более широкий diff, тестами уже закреплено имя `ModelGateway`), либо (б) заменить `ModelProvider` на `ModelGateway` в тексте [`ADR_003`](../../adr/adr_003_model_provider_interface.md), [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md), [`ADR_006`](../../adr/adr_006_agent_environment_framework.md). Само переименование — механическая правка после решения, не требующая отдельной TASK.
+- **Как проверить исправление:** `grep -rn "ModelProvider\|ModelGateway" adr/ src/` показывает одно и то же имя в обоих местах.
 
 ## 5. Правило обновления
 
