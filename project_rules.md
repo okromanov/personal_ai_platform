@@ -2,7 +2,7 @@
 id: project_rules
 type: project_rules
 document_state: current
-version: 1.2
+version: 1.3
 updated: 2026-08-30
 depends_on: []
 ---
@@ -48,7 +48,7 @@ depends_on: []
 | [`specifications/infrastructure_baseline.md`](specifications/infrastructure_baseline.md) | Какие устойчивые физические и эксплуатационные свойства должна обеспечить среда? |
 | [`adr/`](adr/) | Какой конкретный технический вариант фактически выбран и почему? |
 | [`milestones.md`](milestones.md) | Что делаем когда и каким набором доказательств принимаем этап? |
-| [`project_status.md`](project_status.md) и карточки `work/tasks/` | Какую конкретную работу по поставке продукта выполняем сейчас? |
+| [`project_status.md`](project_status.md) и карточки [`work/tasks/`](work/tasks/) | Какую конкретную работу по поставке продукта выполняем сейчас? |
 | [`work/tests/`](work/tests/) | Как специфицируется доказательство конкретных требований или инвариантов? |
 | [`operations/`](operations/) | Как выполняется повторяемая техническая процедура? |
 | [`work/audit/`](work/audit/) | Какие результаты независимых аудитов получены и как менялось состояние findings? |

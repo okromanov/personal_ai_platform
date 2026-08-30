@@ -136,10 +136,10 @@ risk_register: work/audit/audit_register.md  # единственный исто
 
 1. rules ([`project_rules.md`](../../project_rules.md)) — устойчивые принципы и иерархия;
 2. применимый agents ([`AGENTS.md`](../../AGENTS.md)) — операционный контракт для агента;
-3. `specifications/` — канонические требования и устойчивые контракты;
-4. `adr/` — принятые архитектурные решения;
-5. `operations/` — процедуры изменения и проверки;
-6. `work/tasks/` и `work/tests/` — границы конкретной работы и критерии evidence;
+3. [`specifications/`](../../specifications/) — канонические требования и устойчивые контракты;
+4. [`adr/`](../../adr/) — принятые архитектурные решения;
+5. [`operations/`](../../operations/) — процедуры изменения и проверки;
+6. [`work/tasks/`](../../work/tasks/) и [`work/tests/`](../../work/tests/) — границы конкретной работы и критерии evidence;
 7. `src/` — наблюдаемая реализация, но не источник продуктовых полномочий;
 8. Зарегистрированные производные документы — только выходы из [`operations/template_registry.json`](../../operations/template_registry.json), требующие проверки drift либо SHA-bound runtime evidence.
 

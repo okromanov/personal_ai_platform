@@ -373,5 +373,51 @@ class LinksInternalHelpersTests(unittest.TestCase):
             self.assertEqual(changed, set())
 
 
+class DirectoryReferenceTests(unittest.TestCase):
+    """KNOWN_DOCUMENT_DIRECTORIES (project_rules.md §2's own registry) must
+    be linked exactly like a bare .md reference already must be -- this is
+    what "work/tasks/" slipping through as a bare code-span in that table
+    should have been caught by all along."""
+
+    def test_rejects_unlinked_known_directory_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "adr" / "adr_001.md").write_text("# ADR_001\n", encoding="utf-8")
+            (root / "source.md").write_text("Решения хранятся в `adr/`.\n", encoding="utf-8")
+            errors = check_markdown_links(root)
+            self.assertTrue(any("должна быть кликабельной: adr/" in error for error in errors))
+
+    def test_accepts_clickable_known_directory_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "adr" / "adr_001.md").write_text("# ADR_001\n", encoding="utf-8")
+            (root / "source.md").write_text(
+                "Решения хранятся в [`adr/`](adr/).\n", encoding="utf-8"
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
+    def test_ignores_directories_outside_the_registry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "src" / "channels").mkdir(parents=True)
+            (root / "src" / "channels" / "base.py").write_text("", encoding="utf-8")
+            (root / "source.md").write_text("Реализация в `src/channels/`.\n", encoding="utf-8")
+            self.assertEqual(check_markdown_links(root), [])
+
+    def test_ignores_immutable_audit_baseline_snapshots(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "adr").mkdir()
+            (root / "adr" / "adr_001.md").write_text("# ADR_001\n", encoding="utf-8")
+            audit_dir = root / "work" / "audit"
+            audit_dir.mkdir(parents=True)
+            (audit_dir / "audit_baseline_2026_08_29.md").write_text(
+                "Решения хранятся в `adr/`.\n", encoding="utf-8"
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
+
 if __name__ == "__main__":
     unittest.main()
