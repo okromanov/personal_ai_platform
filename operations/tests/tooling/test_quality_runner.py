@@ -160,6 +160,30 @@ class QualityRunnerTests(unittest.TestCase):
                 with self.assertRaisesRegex(run_suite.QualityFailure, "must not be executable"):
                     run_suite.validate_python_permissions(root)
 
+    def test_audit_baseline_rejects_resolved_while_critical_finding_open(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / run_suite.AUDIT_REGISTER_PATH
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "| AUD-001 | critical | open | 2026-08-27 | 2026-09-02 | "
+                "repository_owner | evidence | fix |\n"
+                "| AUD-002 | low | resolved | 2026-08-27 | 2026-09-02 | "
+                "repository_owner | evidence | fix |\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(run_suite.QualityFailure, "AUD-002.*resolved"):
+                run_suite.validate_audit_baseline(root)
+
+            path.write_text(
+                "| AUD-001 | critical | open | 2026-08-27 | 2026-09-02 | "
+                "repository_owner | evidence | fix |\n"
+                "| AUD-002 | low | remediated_pending_verification | 2026-08-27 | "
+                "2026-09-02 | repository_owner | evidence | fix |\n",
+                encoding="utf-8",
+            )
+            run_suite.validate_audit_baseline(root)
+
     def test_run_step_records_combined_output_and_propagates_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

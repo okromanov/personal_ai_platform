@@ -153,14 +153,14 @@ def validate_audit_baseline(root: Path) -> None:
     if not path.is_file():
         raise QualityFailure(f"Missing audit register at {AUDIT_REGISTER_PATH.as_posix()}")
     relative_path = path.relative_to(root).as_posix()
-    records: dict[str, tuple[str, str, str]] = {}
+    records: dict[str, tuple[str, str, str, str]] = {}
     for line_number, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
         if not line.lstrip().startswith("| AUD-"):
             continue
         match = AUDIT_ROW.match(line)
         if match is None:
             raise QualityFailure(f"{relative_path}:{line_number}: invalid audit record")
-        finding_id, _severity, state, _first_seen, review_date, owner = match.groups()
+        finding_id, severity, state, _first_seen, review_date, owner = match.groups()
         if finding_id in records:
             raise QualityFailure(f"{relative_path}:{line_number}: duplicate {finding_id}")
         owner = owner.strip().strip("`")
@@ -168,9 +168,33 @@ def validate_audit_baseline(root: Path) -> None:
             raise QualityFailure(
                 f"{relative_path}:{line_number}: {finding_id} requires owner and review date"
             )
-        records[finding_id] = (state, owner, review_date)
+        records[finding_id] = (severity, state, owner, review_date)
     if not records:
         raise QualityFailure(f"{relative_path} contains no AUD records")
+
+    # `resolved` (§2/§5 of the register) requires a green canonical gate on
+    # the exact SHA. A critical finding still `open` is itself proof that
+    # gate has not run end to end (that is the entire point of severity
+    # `critical`) -- so no other row can honestly be `resolved` at the same
+    # time. This is the systemic guard for the AUD-029/030 drift: two
+    # duplicate-baseline rows were hand-marked `resolved` while a critical
+    # open finding (CI not dispatching) made that impossible to verify.
+    critical_open = sorted(
+        finding_id
+        for finding_id, (severity, state, _, _) in records.items()
+        if severity == "critical" and state == "open"
+    )
+    if critical_open:
+        resolved = sorted(
+            finding_id for finding_id, (_, state, _, _) in records.items() if state == "resolved"
+        )
+        if resolved:
+            raise QualityFailure(
+                f"{relative_path}: {', '.join(resolved)} marked resolved while critical "
+                f"open finding(s) {', '.join(critical_open)} remain -- resolved requires a "
+                "green canonical gate on the exact SHA, which cannot be claimed while a "
+                "critical finding is still open"
+            )
 
 
 def validate_python_permissions(root: Path) -> None:

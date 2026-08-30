@@ -39,11 +39,18 @@ class GenerationSafetyTests(unittest.TestCase):
             self.assertNotEqual(read_text(path), first)
 
     def test_checker_exception_is_localized_and_other_checks_continue(self) -> None:
-        root = Path(__file__).resolve().parents[2]
-        with patch(
-            "operations.scripts.documents.check.check_structure", side_effect=RuntimeError("boom")
-        ):
-            results = run_all_checks(root)
+        # A synthetic empty root is enough: every other check already
+        # handles a missing file as its own (possibly failing) result
+        # rather than crashing run_all_checks, so this only needs to prove
+        # isolation, not re-run the full real-repo check pass (which cost
+        # ~4.5s here for no additional assertion coverage).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with patch(
+                "operations.scripts.documents.check.check_structure",
+                side_effect=RuntimeError("boom"),
+            ):
+                results = run_all_checks(root)
         by_name = {result.name: result for result in results}
         self.assertIn("structure", by_name)
         self.assertIn("secrets", by_name)
