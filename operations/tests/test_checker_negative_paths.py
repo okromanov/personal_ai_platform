@@ -14,6 +14,7 @@ from operations.scripts.documents.check import (
     check_automation_policy,
     check_business_requirements_coverage,
     check_document_policy,
+    check_markdown_section_order,
     check_metadata,
     check_tasks,
     check_terminal_outcome_delivery_role,
@@ -143,6 +144,92 @@ class CheckerNegativePathTests(unittest.TestCase):
             "но нет ни одного открытого owner_followups",
         ):
             self.assertIn(fragment, joined)
+
+    def test_markdown_section_order_rejects_gap_and_ignores_examples(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bad = root / "bad.md"
+            good = root / "good.md"
+            bad.write_text(
+                "# Bad\n\n## 1. One\n\n## 3. Three\n",
+                encoding="utf-8",
+            )
+            good.write_text(
+                "# Good\n\n## 1. One\n\n"
+                "## 2. Two\n\n## 2.5 Decimal subsection\n\n"
+                "```markdown\n## 9. Example only\n```\n",
+                encoding="utf-8",
+            )
+            result = check_markdown_section_order(root)
+        joined = "\n".join(result.errors)
+        self.assertIn("bad.md", joined)
+        self.assertIn("после 1", joined)
+        self.assertNotIn("good.md", joined)
+
+    def test_task_section_contract_rejects_extra_and_reordered_h2(self) -> None:
+        core = [
+            (1, "Зачем это делаем"),
+            (2, "Результат"),
+            (3, "Где мы сейчас"),
+            (4, "Что делать сейчас"),
+            (5, "План выполнения"),
+            (6, "Состав"),
+            (7, "Проверки и доказательства"),
+            (8, "Готово когда"),
+            (9, "Что будет дальше"),
+            (10, "Что это даёт владельцу"),
+        ]
+
+        def body(
+            task_id: str,
+            sections: list[tuple[int | None, str]],
+            *,
+            followup_action: str = "",
+        ) -> str:
+            rendered = [f"# {task_id} — Test"]
+            for number, title in sections:
+                heading = f"{number}. {title}" if number is not None else title
+                rendered.extend([f"## {heading}", followup_action or "Content"])
+            return "\n\n".join(rendered) + "\n"
+
+        def task(task_id: str, task_body: str, *, open_followup: bool = False) -> dict[str, Any]:
+            return {
+                "id": task_id,
+                "path": f"work/tasks/{task_id.lower()}.md",
+                "body": task_body,
+                "next_actor": "agent",
+                "owner_action": "none",
+                "work_state": "planned",
+                "checklist": [],
+                "steps_remaining": 1,
+                "allowed_paths": [],
+                "blocker": "",
+                "owner_followups": (
+                    [{"status": "open", "action": "Собрать evidence"}] if open_followup else []
+                ),
+            }
+
+        reordered = core[:-1] + [(11, "Подтверждение владельца"), core[-1]]
+        unknown = core + [(11, "Произвольное расширение")]
+        allowed = core + [(None, "Незакрытые действия владельца")]
+        tasks = [
+            task("TASK_001", body("TASK_001", reordered)),
+            task("TASK_002", body("TASK_002", unknown)),
+            task(
+                "TASK_003",
+                body("TASK_003", allowed, followup_action="Собрать evidence"),
+                open_followup=True,
+            ),
+        ]
+        with patch(
+            "operations.scripts.documents.check.collect_tasks",
+            return_value={"tasks": tasks},
+        ):
+            result = check_tasks(Path("."))
+        joined = "\n".join(result.errors)
+        self.assertIn("TASK_001: верхнеуровневые разделы", joined)
+        self.assertIn("TASK_002: верхнеуровневые разделы", joined)
+        self.assertNotIn("TASK_003: верхнеуровневые разделы", joined)
 
     def test_completed_task_rejects_unfilled_auto_generated_result_placeholder(self) -> None:
         def _task(body: str) -> dict[str, Any]:

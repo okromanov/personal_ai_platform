@@ -180,6 +180,7 @@ def _generate_task_document(
                 "или интеграционным испытаниям."
             ),
             "owner_value": "Функционал появится после завершения этой TASK.",
+            "owner_followups_block": "",
         },
     )
 

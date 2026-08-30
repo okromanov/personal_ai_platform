@@ -6,11 +6,13 @@
     ".github/workflows/project_check.yml",
     "operations/template_registry.json",
     "operations/scripts/documents/template_contracts.py",
+    "operations/scripts/documents/check.py",
     "operations/scripts/quality/run_suite.py",
     "operations/scripts/tasks/check_change_scope.py"
   ],
   "enforcement_tests": [
     "operations/tests/test_generation_safety.py",
+    "operations/tests/test_checker_negative_paths.py",
     "operations/tests/test_quality_integration.py",
     "operations/tests/tooling/test_health_check.py",
     "operations/tests/tooling/test_milestone_lifecycle.py",

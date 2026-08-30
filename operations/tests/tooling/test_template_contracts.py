@@ -102,6 +102,56 @@ class TemplateContractTests(unittest.TestCase):
         self.assertNotIn("Подтвердить завершение", fenced)
         self.assertNotIn("предыдущей TASK", fenced)
 
+    def test_task_template_has_fixed_core_and_optional_followup_block(self) -> None:
+        values = {
+            "task_id": "TASK_999",
+            "title": "Contract test",
+            "component": "ARC_CMP_001",
+            "delivery_role": "component",
+            "updated": "2026-08-30",
+            "depends_on_block": "depends_on: []",
+            "task_path": "work/tasks/task_999_contract_test.md",
+            "milestone": "m02",
+            "why": "Why",
+            "result": "Result",
+            "current_state": "Current",
+            "agent_actions": "Act",
+            "plan": "- [ ] Plan",
+            "scope": "Scope",
+            "evidence": "Evidence",
+            "done_when": "- ✅ Done",
+            "next_step": "Next",
+            "owner_value": "Value",
+            "owner_followups_block": "",
+        }
+        rendered = render_contract(ROOT, "task", values)
+        headings = [line for line in rendered.splitlines() if line.startswith("## ")]
+        self.assertEqual(
+            headings,
+            [
+                "## 1. Зачем это делаем",
+                "## 2. Результат",
+                "## 3. Где мы сейчас",
+                "## 4. Что делать сейчас",
+                "## 5. План выполнения",
+                "## 6. Состав",
+                "## 7. Проверки и доказательства",
+                "## 8. Готово когда",
+                "## 9. Что будет дальше",
+                "## 10. Что это даёт владельцу",
+            ],
+        )
+
+        values["owner_followups_block"] = "## Незакрытые действия владельца\n\nСобрать evidence."
+        rendered_with_followup = render_contract(ROOT, "task", values)
+        followup_headings = [
+            line for line in rendered_with_followup.splitlines() if line.startswith("## ")
+        ]
+        self.assertEqual(
+            followup_headings,
+            headings + ["## Незакрытые действия владельца"],
+        )
+
     def test_owner_status_keeps_dated_audit_section(self) -> None:
         rendered = render_repository_project_status(ROOT)
         self.assertIn("audit_register.md", rendered)
