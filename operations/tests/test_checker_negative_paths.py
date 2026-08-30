@@ -205,9 +205,7 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "allowed_paths": [],
                 "blocker": "",
                 "owner_followups": (
-                    [{"status": "open", "action": "Собрать evidence"}]
-                    if open_followup
-                    else []
+                    [{"status": "open", "action": "Собрать evidence"}] if open_followup else []
                 ),
             }
 
