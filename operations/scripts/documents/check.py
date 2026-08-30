@@ -137,6 +137,19 @@ THREAT_REQUIRED_LABELS = (
     "**Остаточный риск:**",
 )
 ALLOWED_WORKFLOW_PERMISSIONS = {"read", "none"}
+TASK_CORE_SECTIONS: tuple[tuple[int, str], ...] = (
+    (1, "Зачем это делаем"),
+    (2, "Результат"),
+    (3, "Где мы сейчас"),
+    (4, "Что делать сейчас"),
+    (5, "План выполнения"),
+    (6, "Состав"),
+    (7, "Проверки и доказательства"),
+    (8, "Готово когда"),
+    (9, "Что будет дальше"),
+    (10, "Что это даёт владельцу"),
+)
+TASK_OWNER_FOLLOWUPS_SECTION = "Незакрытые действия владельца"
 
 
 @dataclass
@@ -827,6 +840,87 @@ def check_terminal_outcome_delivery_role(root: Path) -> CheckResult:
     return _result("terminal_outcome_delivery_role", errors)
 
 
+def _markdown_h2_sections(text: str) -> list[tuple[int | None, str, int]]:
+    """Return real H2 headings, excluding fenced examples.
+
+    Integer headings use the strict form '## N. Title'. Decimal headings
+    such as '## 3.5 Title' remain ordinary unnumbered headings for this
+    parser and therefore cannot reset the integer sequence.
+    """
+    sections: list[tuple[int | None, str, int]] = []
+    fence_character: str | None = None
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        fence = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if fence:
+            character = fence.group(1)[0]
+            if fence_character is None:
+                fence_character = character
+            elif fence_character == character:
+                fence_character = None
+            continue
+        if fence_character is not None:
+            continue
+        heading = re.match(r"^##\s+(?:(\d+)\.\s+)?(.+?)\s*$", line)
+        if not heading:
+            continue
+        number = int(heading.group(1)) if heading.group(1) else None
+        sections.append((number, heading.group(2), line_number))
+    return sections
+
+
+def check_markdown_section_order(root: Path) -> CheckResult:
+    """Reject gaps, duplicates and descending integer H2 headings."""
+    errors: list[str] = []
+    for path in iter_files(root, suffixes={".md"}, include_generated=True):
+        relative = relative_posix(path, root)
+        numbered = [
+            (number, title, line)
+            for number, title, line in _markdown_h2_sections(read_text(path))
+            if number is not None
+        ]
+        for previous, current in zip(numbered, numbered[1:]):
+            previous_number = cast(int, previous[0])
+            current_number = cast(int, current[0])
+            if current_number != previous_number + 1:
+                errors.append(
+                    f"{relative}:{current[2]}: нумерованные разделы должны идти подряд; "
+                    f"после {previous_number} на строке {previous[2]} получен "
+                    f"{current_number} ('{current[1]}')"
+                )
+    return _result("markdown_section_order", errors)
+
+
+def _task_section_contract_errors(
+    identifier: str,
+    body: str,
+    *,
+    has_open_followups: bool,
+) -> list[str]:
+    """Validate the owner-approved TASK H2 contract."""
+    if not re.search(r"(?m)^#\s+TASK_\d{3}\b", body):
+        # Some focused unit tests pass body fragments rather than full cards.
+        return []
+
+    actual = _markdown_h2_sections(body)
+    expected: list[tuple[int | None, str]] = list(TASK_CORE_SECTIONS)
+    if has_open_followups:
+        expected.append((None, TASK_OWNER_FOLLOWUPS_SECTION))
+    actual_contract = [(number, title) for number, title, _line in actual]
+    if actual_contract == expected:
+        return []
+
+    def render(items: list[tuple[int | None, str]]) -> str:
+        return " → ".join(
+            f"{number}. {title}" if number is not None else title
+            for number, title in items
+        )
+
+    return [
+        f"{identifier}: верхнеуровневые разделы не соответствуют TASK-шаблону; "
+        f"ожидалось [{render(expected)}], получено [{render(actual_contract)}]"
+    ]
+
+
 def _markdown_section(body: str, heading: str) -> str:
     match = re.search(
         rf"(?ms)^##\s+(?:\d+\.\s*)?{re.escape(heading)}\s*$\n(.*?)(?=^##\s|\Z)",
@@ -907,6 +1001,13 @@ def check_tasks(root: Path) -> CheckResult:
             errors.append(
                 f"{identifier}: есть раздел 'Незакрытые действия владельца', но нет ни одного открытого owner_followups"
             )
+        errors.extend(
+            _task_section_contract_errors(
+                identifier,
+                body,
+                has_open_followups=bool(open_actions),
+            )
+        )
     if invalid_terminal_actor:
         errors.append("Очередь TASK должна показывать одного следующего исполнителя")
     return _result("tasks", errors)
@@ -1472,6 +1573,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
     # Fast mode: только быстрые структурные проверки (<0.2s каждая)
     fast_checks = [
         ("structure", check_structure),
+        ("markdown_section_order", check_markdown_section_order),
         ("metadata", check_metadata),
         ("frontmatter_standard", check_frontmatter_standard),
         ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
@@ -1480,6 +1582,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
     # Full mode: все проверки (для CI)
     all_checks = [
         ("structure", check_structure),
+        ("markdown_section_order", check_markdown_section_order),
         ("metadata", check_metadata),
         ("frontmatter_standard", check_frontmatter_standard),
         ("traceability", check_traceability),
