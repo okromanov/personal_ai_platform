@@ -142,9 +142,7 @@ class TemplateContractTests(unittest.TestCase):
             ],
         )
 
-        values["owner_followups_block"] = (
-            "## Незакрытые действия владельца\n\nСобрать evidence."
-        )
+        values["owner_followups_block"] = "## Незакрытые действия владельца\n\nСобрать evidence."
         rendered_with_followup = render_contract(ROOT, "task", values)
         followup_headings = [
             line for line in rendered_with_followup.splitlines() if line.startswith("## ")
