@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.1
+version: 2.2
 updated: 2026-08-30
 next_actor: agent
 owner_action: none
@@ -14,6 +14,8 @@ depends_on:
   - TASK_012
 allowed_paths:
   - work/tasks/task_013_inf_008.md
+  - adr/adr_005_first_model_provider_selection.md
+  - adr/adr_006_agent_environment_framework.md
   - adr/adr_007_cloud_provider_selection.md
   - adr/adr_009_secret_management_strategy.md
   - milestones.md
@@ -69,6 +71,8 @@ implements:
 Полный прогон проверки также обнаружил в [`work/audit/audit_register.md`](../audit/audit_register.md) две некликабельные ссылки на [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) (одна — испорченная вложенными скобками от автоматического линкера, добавлена отдельным изменением) — исправлены; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
 
 По прямому запросу владельца проведена сверка синхронизации всех ADR (принятых и `proposed`) с реализованным кодом; найденные расхождения зафиксированы отдельными карточками AUD-022 и AUD-023 в [`work/audit/audit_register.md`](../audit/audit_register.md) — не реализовано решение [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) и разошлось имя контракта модели (`ModelProvider` в тексте [`ADR_003`](../../adr/adr_003_model_provider_interface.md)/[`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)/[`ADR_006`](../../adr/adr_006_agent_environment_framework.md) против `ModelGateway` в коде). Обе оставлены `open`, так как исправление требует решения владельца, а не механической правки; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
+
+По прямому запросу владельца скорректирован процесс формирования ADR ([`operations/adr_lifecycle.md`](../../operations/adr_lifecycle.md) Фаза 0, [`AGENTS.md`](../../AGENTS.md) §5): список кандидатов ADR согласуется с владельцем через диалог до создания текста, а не выбирается агентом в одиночку. По итогам того же диалога (уточняющие вопросы владельцу) переписаны [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) (кандидаты расширены до Claude/GPT/Gemini/отечественных моделей вместо одного Claude) и [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) (кандидаты — LangGraph/CrewAI/собственная реализация вместо одного LangGraph); [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) переформулирован без слова «кандидат» для `.env` — это уже выбранный подход, а не вариант для сравнения, с SOPS+age как согласованным следующим шагом и Vault как отдельно отложенной опцией. [`ADR_008`](../../adr/adr_008_data_storage_schema.md) по решению владельца оставлен без изменений — пересмотр отложен до декомпозиции [`m04`](../../milestones.md#m04). Оба новых файла ([`ADR_005`](../../adr/adr_005_first_model_provider_selection.md), [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)) добавлены в `allowed_paths`; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
 
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
