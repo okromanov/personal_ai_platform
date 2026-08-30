@@ -2,7 +2,7 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 1.5
+version: 1.6
 updated: 2026-08-30
 depends_on: []
 ---
@@ -50,7 +50,7 @@ depends_on: []
 | AUD-022 | high | remediated_pending_verification | 2026-08-30 | 2026-09-06 | repository_owner | [`project_status.md`](../../project_status.md), [`audit_register.md`](#3-реестр), [`AGENTS.md`](../../AGENTS.md), [`project_check.yml`](../../.github/workflows/project_check.yml) | Ссылки исправлены, owner-status перегенерирован, описание CI triggers согласовано с workflow, formatter drift устранён; ожидается полный gate и серверная проверка. |
 | AUD-023 | high | remediated_pending_verification | 2026-08-30 | 2026-09-06 | repository_owner | [`.gitignore`](../../.gitignore), [`.dockerignore`](../../.dockerignore), [`test_security_extended.py`](../../operations/tests/test_security_extended.py) | Root secret dirs закреплены, `src/secrets` видим Git, Docker context исключает `.env`/keys/credentials; добавлены negative policy tests. |
 | AUD-024 | high | open | 2026-08-30 | 2026-09-06 | repository_owner | [`ADR_003`](../../adr/adr_003_model_provider_interface.md), [`TASK_014`](../tasks/task_014_real_runtime.md), [`TASK_018`](../tasks/task_018_runtime_task_events.md), [`TASK_019`](../tasks/task_019_m04_data_storage.md) | Контракт `ModelGateway` и candidate sets согласованы, [`ADR_008`](../../adr/adr_008_data_storage_schema.md) получил owner TASK. Остаётся `open` до реализации событий [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) в [`TASK_018`](../tasks/task_018_runtime_task_events.md). |
-| AUD-025 | medium | open | 2026-08-30 | 2026-09-13 | repository_owner | [`adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`change_process.md`](../../operations/change_process.md), [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`task_template.md`](../../operations/templates/task_template.md), [`milestone_template.md`](../../operations/templates/milestone_template.md) | Процедуры и checker исправлены; защищённые шаблоны сохраняют planned-milestone exception и ожидают отдельного явного разрешения владельца. |
+| AUD-025 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`adr_lifecycle.md`](../../operations/adr_lifecycle.md), [`change_process.md`](../../operations/change_process.md), [`adr_task_coverage.py`](../../operations/scripts/traceability/adr_task_coverage.py), [`task_template.md`](../../operations/templates/task_template.md), [`milestone_template.md`](../../operations/templates/milestone_template.md) | Процедуры, checker и защищённые шаблоны согласованы: каждый proposed ADR любого milestone немедленно получает одну незавершённую TASK-владельца; ожидается полный gate и серверная проверка. |
 | AUD-026 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`TASK_013`](../tasks/task_013_inf_008.md), [`paths_validation.py`](../../operations/scripts/quality/paths_validation.py) | Служебные пути удалены из активной TASK; новая проверка запрещает governance/audit paths в незавершённых product TASK. |
 | AUD-027 | medium | remediated_pending_verification | 2026-08-30 | 2026-09-13 | repository_owner | [`run_eval_suite.py`](../../operations/scripts/eval/run_eval_suite.py), [`test_eval_suite.py`](../../operations/tests/tooling/test_eval_suite.py) | CLI получил явные profiles и SHA-требование для non-stub; degraded non-stub profile проверенно завершает canonical entrypoint с кодом 1. |
 
@@ -324,7 +324,7 @@ depends_on: []
 - **Риск:** ADR можно создать слишком поздно либо принять без решения владельца.
 - **Исправление:** оставить одно правило создания/сравнения/acceptance, удалить PR shortcut и исключение для ADR без TASK.
 - **Критерий закрытия:** negative fixtures блокируют acceptance без owner decision и proposed ADR без единственного незавершённого owner TASK.
-- **Частично исправлено (2026-08-30):** lifecycle и change process теперь разделяют создание proposed ADR, сравнение TASK, явное решение владельца и доставку через PR; переход по одному PR approval удалён. Checker и negative tests требуют единственного незавершённого owner TASK для каждого proposed ADR. Finding остаётся `open`: защищённые [`task_template.md`](../../operations/templates/task_template.md) и [`milestone_template.md`](../../operations/templates/milestone_template.md) всё ещё содержат planned-milestone exception; их изменение требует отдельного явного разрешения владельца и отдельного PR.
+- **Исправлено (2026-08-30):** lifecycle и change process разделяют создание proposed ADR, сравнение TASK, явное решение владельца и доставку через PR; переход по одному PR approval удалён. Checker, negative tests и защищённые [`task_template.md`](../../operations/templates/task_template.md) и [`milestone_template.md`](../../operations/templates/milestone_template.md) требуют единственного незавершённого owner TASK для каждого proposed ADR любого milestone. Изменение шаблонов выполнено по явному разрешению владельца в отдельной ветке; finding ожидает полный gate и серверную проверку.
 
 <a id="aud-026"></a>
 ### AUD-026 — Служебные изменения ретроактивно включены в продуктовую TASK
