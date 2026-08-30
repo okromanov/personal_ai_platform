@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.0
-updated: 2026-08-29
+version: 2.1
+updated: 2026-08-30
 next_actor: agent
 owner_action: none
 owner_followups:
@@ -99,7 +99,7 @@ implements:
 
 Функционал появится после завершения этой TASK.
 
-## 11. Незакрытые действия владельца
+## Незакрытые действия владельца
 
 Выполнить три инструкции развёртывания (Hetzner, DigitalOcean, Selectel) и прислать заполненные evidence-блоки (раздел 11 каждой) — агент не может сам зарегистрировать аккаунты, подключиться по SSH или создать Telegram-бота.
 
