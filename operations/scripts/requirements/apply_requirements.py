@@ -280,7 +280,7 @@ def apply_tests_and_tasks(root: Path, wizard_result: dict) -> list[str]:
                 "done_when": "- ✅ План выполнен\n- ✅ Локальные и серверные проверки успешны",
                 "next_step": "Перейти к следующей карточке очереди.",
                 "owner_value": "Функционал появится после завершения этой TASK.",
-            "owner_followups_block": "",
+                "owner_followups_block": "",
             },
         )
         assert_registered_output(root, "task", task_file)
