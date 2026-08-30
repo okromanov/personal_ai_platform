@@ -292,13 +292,16 @@ def _known_reference_ids(root: Path, document_ids: dict[str, str]) -> set[str]:
     try:
         known.update(identifier.lower() for identifier in collect_traceable_elements(root))
     except (ValueError, OSError) as exc:
-        print(f"WARNING: collect_traceable_elements failed, known IDs under-counted: {exc}",
-              file=sys.stderr)
+        print(
+            f"WARNING: collect_traceable_elements failed, known IDs under-counted: {exc}",
+            file=sys.stderr,
+        )
     try:
         known.update(str(item["id"]).lower() for item in collect_milestones(root)["items"])
     except (ValueError, OSError) as exc:
-        print(f"WARNING: collect_milestones failed, known IDs under-counted: {exc}",
-              file=sys.stderr)
+        print(
+            f"WARNING: collect_milestones failed, known IDs under-counted: {exc}", file=sys.stderr
+        )
     return known
 
 
@@ -911,8 +914,7 @@ def _task_section_contract_errors(
 
     def render(items: list[tuple[int | None, str]]) -> str:
         return " → ".join(
-            f"{number}. {title}" if number is not None else title
-            for number, title in items
+            f"{number}. {title}" if number is not None else title for number, title in items
         )
 
     return [
@@ -1023,8 +1025,10 @@ def check_test_specs(root: Path) -> CheckResult:
     try:
         records = collect_traceable_elements(root)
     except (ValueError, OSError) as exc:
-        print(f"WARNING: collect_traceable_elements failed in check_test_specs: {exc}",
-              file=sys.stderr)
+        print(
+            f"WARNING: collect_traceable_elements failed in check_test_specs: {exc}",
+            file=sys.stderr,
+        )
         records = {}
     try:
         milestone_ids = {str(item["id"]).lower() for item in collect_milestones(root)["items"]}
