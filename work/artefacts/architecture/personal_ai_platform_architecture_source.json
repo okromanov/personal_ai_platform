@@ -7,19 +7,26 @@
   },
   "hierarchy": {
     "order": [
-      "Capability",
       "Skill",
+      "Capability",
       "Tool",
       "Implementation"
     ],
     "cardinality": {
-      "Capability_to_Skill": "1:N"
+      "Skill_to_Capability": "1:N"
     },
     "rules": [
-      "A Skill routes execution through the appropriate Tool.",
+      "A Skill composes one or more reusable Capabilities.",
+      "A Capability routes execution through the appropriate Tool.",
       "Skills are reusable across agents and workflows.",
       "Implementation details do not become Capability or Skill contracts."
     ]
+  },
+  "layout": {
+    "grid_px": 12,
+    "card_gap_px": 24,
+    "alignment": "shared edges and centers",
+    "internal_entity_cards": "equal size"
   },
   "palette": {
     "execution": "#315C88",
@@ -35,7 +42,7 @@
     "Контроль",
     "Состояние",
     "Исполнение",
-    "Возможности",
+    "Capabilities",
     "Проверка",
     "Результат",
     "Эксплуатация",
