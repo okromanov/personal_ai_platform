@@ -71,9 +71,9 @@
   <g transform="translate(80 125)">
     <line x1="0" y1="7" x2="44" y2="7" stroke="#315C88" stroke-width="1" marker-end="url(#arrow-main)"/><text x="58" y="12" class="legend">Ход задачи</text>
     <line x1="190" y1="7" x2="234" y2="7" stroke="#315C88" stroke-width="1" stroke-dasharray="3 5" marker-end="url(#arrow-main)"/><text x="248" y="12" class="legend">Плановый запуск</text>
-    <line x1="420" y1="7" x2="464" y2="7" stroke="#A1463F" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#arrow-control)"/><text x="478" y="12" class="legend">SEC_CTL · Проверка безопасности</text>
-    <line x1="640" y1="7" x2="684" y2="7" stroke="#7D8895" stroke-width="1" stroke-dasharray="2 5" marker-end="url(#arrow-support)"/><text x="698" y="12" class="legend">Поддержка среды</text>
-    <line x1="875" y1="7" x2="919" y2="7" stroke="#A1463F" stroke-width="1" marker-end="url(#arrow-control)"/><text x="933" y="12" class="legend">Контролируемый исход</text>
+    <line x1="420" y1="7" x2="464" y2="7" stroke="#A1463F" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#arrow-control)"/><text x="478" y="12" class="legend">SEC_CTL_* · Контроль безопасности</text>
+    <line x1="720" y1="7" x2="764" y2="7" stroke="#7D8895" stroke-width="1" stroke-dasharray="2 5" marker-end="url(#arrow-support)"/><text x="778" y="12" class="legend">Компоненты размещения → рабочие слои</text>
+    <line x1="1080" y1="7" x2="1124" y2="7" stroke="#A1463F" stroke-width="1" marker-end="url(#arrow-control)"/><text x="1138" y="12" class="legend">Контролируемый исход</text>
   </g>
 
   <!-- Row 3: traceability identifier families -->
@@ -145,7 +145,7 @@
     <text x="338" y="873" class="component-text">Преобразует задачу в исполнимый цикл и подключает выбранную среду агента</text>
     <rect x="338" y="884" width="221" height="68" rx="4" class="inner-card"/>
     <text x="448.5" y="905" class="small-title" text-anchor="middle">Skills</text>
-    <text x="448.5" y="927" class="small-text" text-anchor="middle">Переиспользуемый процесс</text><text x="448.5" y="942" class="small-text" text-anchor="middle">для возможности</text>
+    <text x="448.5" y="927" class="small-text" text-anchor="middle">Переиспользуемая инструкция</text><text x="448.5" y="942" class="small-text" text-anchor="middle">для выполнения задачи</text>
     <path class="branch-line" d="M559 918H579"/>
     <rect x="579" y="884" width="221" height="68" rx="4" class="inner-card"/>
     <text x="689.5" y="905" class="small-title" text-anchor="middle">Capabilities</text>
