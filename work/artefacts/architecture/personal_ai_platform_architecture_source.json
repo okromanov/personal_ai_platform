@@ -1,0 +1,94 @@
+{
+  "artifact": "personal_ai_platform_architecture",
+  "canvas": {
+    "width": 1500,
+    "height": 2610,
+    "format": "svg"
+  },
+  "hierarchy": {
+    "order": [
+      "Skill",
+      "Capability",
+      "Tool",
+      "ImplementationBinding"
+    ],
+    "cardinality": {
+      "Skill_to_Capability": "N:M",
+      "Capability_to_Tool": "N:M",
+      "Tool_to_ImplementationBinding": "1:N"
+    },
+    "rules": [
+      "A Skill defines a reusable instruction or workflow.",
+      "A Skill requests only explicitly allowed Capabilities.",
+      "A Capability authorizes a stable user or system ability.",
+      "A Tool performs an atomic operation inside an allowed Capability.",
+      "ImplementationBinding selects an adapter or provider without becoming a peer contract."
+    ]
+  },
+  "runtime_contracts": {
+    "skill_execution_modes": [
+      "contextual",
+      "stateless",
+      "stateful"
+    ],
+    "task_states": [
+      "accepted",
+      "queued",
+      "running",
+      "waiting_confirmation",
+      "completed",
+      "failed",
+      "cancelled"
+    ],
+    "control_points": [
+      "before_task",
+      "before_model",
+      "before_tool",
+      "after_tool",
+      "before_external_action",
+      "before_result",
+      "on_error",
+      "on_complete"
+    ],
+    "durability": [
+      "runtime_task_id",
+      "checkpoint",
+      "lease",
+      "heartbeat",
+      "idempotency",
+      "event_log"
+    ],
+    "quality_outcomes": [
+      "passed",
+      "retry_as_new_run",
+      "controlled_outcome"
+    ]
+  },
+  "layout": {
+    "grid_px": 12,
+    "card_gap_px": 20,
+    "alignment": "shared edges and centers",
+    "internal_entity_cards": "equal size",
+    "implementation_binding": "distinct pill with dashed binding"
+  },
+  "palette": {
+    "execution": "#315C88",
+    "control": "#A1463F",
+    "data": "#6C8173",
+    "support": "#7D8895",
+    "infrastructure": "#27313D",
+    "surface": "#FFFFFF"
+  },
+  "architecture_sections": [
+    "Владелец",
+    "Интерфейсы",
+    "Безопасность",
+    "Состояние",
+    "Исполнение",
+    "Возможности",
+    "Проверка",
+    "Результат",
+    "Эксплуатация",
+    "Размещение"
+  ]
+}
