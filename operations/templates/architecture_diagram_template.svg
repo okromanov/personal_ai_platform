@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">Шаблон архитектурной схемы</title>
+  <desc id="desc">Минимальный каркас, соответствующий operations/architecture_diagram_style_guide.md — заголовок, легенда, блок метаданных, две карточки компонентов, одна содержательная связь и сноска.</desc>
+  <!-- diagram-metadata
+diagram_id: architecture_diagram_template
+diagram_version: 1.0
+generated_at: 2026-08-31
+status: current
+source: specifications/architecture_baseline.md@1.2
+id: ARC_CMP_001
+id: ARC_CMP_002
+id: ARC_FLOW_001
+end-diagram-metadata -->
+  <defs>
+    <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
+    <style>
+      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
+      .title { font-size: 24px; font-weight: 600; }
+      .subtitle { font-size: 13px; font-weight: 400; fill: #596574; }
+      .legend { font-size: 12px; font-weight: 500; fill: #4E5A68; }
+      .component-id { font-size: 11px; font-weight: 600; fill: #687482; }
+      .component-title { font-size: 15px; font-weight: 600; }
+      .component-category { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; fill: #A1463F; }
+      .component-text { font-size: 12px; font-weight: 400; fill: #53606E; }
+      .flow-text { font-size: 11px; font-weight: 600; fill: #315C88; }
+      .footnote { font-size: 11px; font-weight: 400; fill: #767F8A; }
+      .neutral-card { fill: #FFFFFF; stroke: #A7B0BB; stroke-width: 1.2; }
+      .control-card { fill: #FFF6F5; stroke: #A1463F; stroke-width: 1.4; }
+      .main-line { fill: none; stroke: #315C88; stroke-width: 1; marker-end: url(#arrow-main); }
+      .flow-label { fill: #FFFFFF; stroke: #D9E1E8; stroke-width: 0.9; }
+    </style>
+  </defs>
+  <rect width="900" height="520" fill="#FFFFFF"/>
+
+  <text x="24" y="34" class="title">Шаблон архитектурной схемы</text>
+  <text x="24" y="54" class="subtitle">Каркас: заголовок, легенда, метаданные, карточки, связь, сноска</text>
+
+  <rect x="24" y="66" width="852" height="58" rx="6" fill="#FAFBFC" stroke="#D7DCE2"/>
+  <g transform="translate(34 76)">
+    <rect x="0" y="0" width="16" height="12" rx="2" fill="#FFFFFF" stroke="#A7B0BB"/><text x="24" y="10" class="legend">Граничные узлы (белый + метка «ГРН»)</text>
+    <rect x="270" y="0" width="16" height="12" rx="2" fill="#FFF6F5" stroke="#A1463F"/><text x="294" y="10" class="legend">Полномочия и запреты (красный + метка «ПОЛ»)</text>
+    <line x1="600" y1="6" x2="640" y2="6" stroke="#315C88" stroke-width="1" marker-end="url(#arrow-main)"/><text x="654" y="10" class="legend">Ход задачи · ARC_FLOW_*</text>
+  </g>
+  <text x="34" y="140" class="legend">ARC_CMP_* — логические компоненты</text>
+
+  <text x="24" y="170" class="footnote">01 · ГРАНИЦА</text>
+  <rect x="150" y="156" width="280" height="86" rx="6" class="neutral-card"/>
+  <text x="166" y="178" class="component-id">ARC_CMP_001</text>
+  <text x="196" y="178" class="component-category">ГРН</text>
+  <text x="166" y="200" class="component-title">Пример компонента A</text>
+  <text x="166" y="220" class="component-text">Краткое описание сути компонента</text>
+  <g data-spec-id="ARC_CMP_001"><rect x="150" y="156" width="280" height="86" fill="none" stroke="none"/></g>
+
+  <path class="main-line" d="M430 199H520" data-spec-id="ARC_FLOW_001"/>
+  <rect x="440" y="184" width="60" height="20" rx="4" class="flow-label"/><text x="470" y="198" class="flow-text" text-anchor="middle">пример</text>
+
+  <text x="24" y="286" class="footnote">02 · ПОЛНОМОЧИЯ</text>
+  <rect x="150" y="272" width="280" height="86" rx="6" class="control-card"/>
+  <text x="166" y="294" class="component-id">ARC_CMP_002</text>
+  <text x="196" y="294" class="component-category">ПОЛ</text>
+  <text x="166" y="316" class="component-title">Пример компонента B</text>
+  <text x="166" y="336" class="component-text">Краткое описание сути компонента</text>
+  <g data-spec-id="ARC_CMP_002"><rect x="150" y="272" width="280" height="86" fill="none" stroke="none"/></g>
+
+  <text x="450" y="490" class="footnote" text-anchor="middle">Номера ARC_CMP — идентификаторы реестра, а не порядок слоёв</text>
+</svg>
