@@ -45,6 +45,8 @@
       .data-card { fill: #F3F7F4; stroke: #6C8173; stroke-width: 1.3; }
       .label-box { fill: #FFFFFF; stroke: #D1D7DE; stroke-width: 1; }
       .inner-card { fill: #FFFFFF; stroke: #D1D7DE; stroke-width: 1; }
+      .implementation-pill { fill: #E8EDF2; stroke: #7D8895; stroke-width: 1.1; }
+      .implementation-link { fill: none; stroke: #7D8895; stroke-width: 1; stroke-dasharray: 3 3; stroke-linecap: round; marker-end: url(#arrow-support); }
       .detail-panel { fill: #FAFBFC; stroke: #D7DCE2; stroke-width: 1; }
       .flow-label { fill: #FFFFFF; stroke: #D9E1E8; stroke-width: 0.9; }
     </style>
@@ -152,19 +154,19 @@
     <rect x="820" y="884" width="221" height="68" rx="4" class="inner-card"/>
     <text x="930.5" y="905" class="small-title" text-anchor="middle">Tools</text>
     <text x="930.5" y="927" class="small-text" text-anchor="middle">Атомарная операция</text><text x="930.5" y="942" class="small-text" text-anchor="middle">с явными полномочиями</text>
-    <path class="branch-line" d="M1041 918H1061"/>
-    <rect x="1061" y="884" width="221" height="68" rx="4" class="inner-card"/>
-    <text x="1171.5" y="905" class="small-title" text-anchor="middle">Реализации</text>
-    <text x="1171.5" y="927" class="small-text" text-anchor="middle">Сменный адаптер</text><text x="1171.5" y="942" class="small-text" text-anchor="middle">или поставщик</text>
+    <path class="implementation-link" d="M1041 918H1073"/>
+    <rect x="1073" y="890" width="209" height="56" rx="28" class="implementation-pill"/>
+    <text x="1177.5" y="914" class="small-title" text-anchor="middle">Реализация</text>
+    <text x="1177.5" y="934" class="small-text" text-anchor="middle">Адаптер или поставщик</text>
   </g>
 
   <g transform="translate(0 150)">
   <!-- Branch to capabilities -->
   <path class="bus-line" d="M810 896V944H468.5M810 944H1151"/>
   <path class="branch-line" d="M468.5 944V968"/><path class="branch-line" d="M810 944V968"/><path class="branch-line" d="M1151 944V968"/>
-  <rect x="387" y="932" width="163" height="24" rx="4" class="flow-label"/><text x="468.5" y="948" class="flow-text" text-anchor="middle">ARC_FLOW_003 · Контекст</text>
-  <rect x="727" y="932" width="166" height="24" rx="4" class="flow-label"/><text x="810" y="948" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Модель</text>
-    <rect x="1018" y="932" width="266" height="24" rx="4" class="flow-label"/><text x="1151" y="948" class="flow-text" text-anchor="middle">ARC_FLOW_002 / SEC_CTL_007–008 · Действие</text>
+  <rect x="378.5" y="932" width="180" height="24" rx="4" class="flow-label"/><text x="468.5" y="948" class="flow-text" text-anchor="middle">ARC_FLOW_003 · Контекст</text>
+  <rect x="720" y="932" width="180" height="24" rx="4" class="flow-label"/><text x="810" y="948" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Модель</text>
+    <rect x="1001" y="932" width="300" height="24" rx="4" class="flow-label"/><text x="1151" y="948" class="flow-text" text-anchor="middle">ARC_FLOW_002 / SEC_CTL_007–008 · Действие</text>
 
   <!-- 06 Capabilities: equal columns; horizontal padding 28 px -->
   <g>
@@ -191,13 +193,13 @@
 
   <!-- Convergence to quality -->
   <path class="bus-line" d="M468.5 1136V1187H1151M810 1136V1187M1151 1136V1187"/><path class="branch-line" d="M810 1187V1208"/>
-  <rect x="690" y="1179" width="240" height="25" rx="4" class="flow-label"/><text x="810" y="1196" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Результаты выполнения</text>
+  <rect x="660" y="1179" width="300" height="25" rx="4" class="flow-label"/><text x="810" y="1196" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Результаты выполнения</text>
 
   <!-- 07 Quality -->
   <g transform="translate(0 20)">
     <rect x="310" y="1188" width="1000" height="92" rx="7" class="execution-card"/>
     <text x="338" y="1216" class="component-id">ARC_CMP_008</text><text x="338" y="1243" class="component-title">Проверка качества</text>
-    <text x="338" y="1268" class="component-text">Детерминированные проверки · Evals · Проверка материалов · Оценка моделью</text>
+    <text x="338" y="1268" class="component-text">Детерминированные проверки · Evals · Проверка материалов · LLM-as-a-judge</text>
   </g>
 
   <!-- Quality produces either a ready result or a controlled outcome -->
@@ -256,17 +258,17 @@
 
   <!-- ARC_FLOW_004 starts in Operations and returns to Owner Control -->
   <path class="scheduled-line" d="M1310 1720H1390V560H1310"/>
-  <g transform="translate(1407 1140) rotate(90)"><text x="0" y="0" class="flow-text" text-anchor="middle">ARC_FLOW_004 / SEC_CTL_017 · ПЛАНОВАЯ ЗАДАЧА БЕЗ ДОПОЛНИТЕЛЬНЫХ ПОЛНОМОЧИЙ</text></g>
+  <g transform="translate(1407 1140) rotate(90)"><rect x="-300" y="-14" width="600" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_004 / SEC_CTL_017 · ПЛАНОВАЯ ЗАДАЧА БЕЗ ДОПОЛНИТЕЛЬНЫХ ПОЛНОМОЧИЙ</text></g>
 
   <!-- Owner Control is rechecked before sensitive execution -->
   <path class="control-rail" d="M1310 595H1345V1720"/><path class="control-line" d="M1345 959H1310"/><path class="control-line" d="M1345 1202H1310"/><path class="control-line" d="M1345 1720H1310"/>
-  <g transform="translate(1362 1160) rotate(90)"><text x="0" y="0" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · АВАРИЙНЫЙ ВЫКЛЮЧАТЕЛЬ</text></g>
+  <g transform="translate(1362 1160) rotate(90)"><rect x="-180" y="-14" width="360" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · АВАРИЙНЫЙ ВЫКЛЮЧАТЕЛЬ</text></g>
 
   <!-- Return is drawn above the control rails; the white halo separates crossings -->
   <path d="M810 1630H1435V400H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
   <path class="main-line" d="M810 1630H1435V400H1310"/>
   <circle cx="810" cy="1630" r="3.5" fill="#315C88"/>
-  <g transform="translate(1452 1015) rotate(90)"><text x="0" y="0" class="flow-text" text-anchor="middle">ARC_FLOW_001 · ВОЗВРАТ ЧЕРЕЗ ВЫБРАННЫЙ КАНАЛ</text></g>
+  <g transform="translate(1452 1015) rotate(90)"><rect x="-205" y="-14" width="410" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · ВОЗВРАТ ЧЕРЕЗ ВЫБРАННЫЙ КАНАЛ</text></g>
 
   <!-- Spacious flow labels -->
   <g>
