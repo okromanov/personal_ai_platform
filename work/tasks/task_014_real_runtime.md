@@ -6,7 +6,7 @@ component: ARC_CMP_003
 delivery_role: terminal_outcome
 work_state: planned
 version: 1.6
-updated: 2026-08-30
+updated: 2026-08-31
 next_actor: agent
 owner_action: none
 depends_on:
