@@ -1,8 +1,8 @@
 {
   "artifact": "personal_ai_platform_architecture",
   "canvas": {
-    "width": 1600,
-    "height": 1120,
+    "width": 1500,
+    "height": 1900,
     "format": "svg"
   },
   "hierarchy": {
@@ -22,20 +22,23 @@
     ]
   },
   "palette": {
-    "navy": "#172554",
-    "capability": "#0f9f9a",
-    "skill": "#7c5ce7",
-    "tool": "#f59e0b",
-    "implementation": "#64748b",
-    "control": "#e11d48",
-    "surface": "#ffffff",
-    "background": "#eef4fb"
+    "execution": "#315C88",
+    "control": "#A1463F",
+    "data": "#6C8173",
+    "support": "#7D8895",
+    "infrastructure": "#27313D",
+    "surface": "#FFFFFF"
   },
   "architecture_sections": [
-    "Owner Control Plane",
-    "Request and Execution Path",
-    "Project Entity Hierarchy",
-    "Authorized Execution",
-    "Platform Services"
+    "Владелец",
+    "Интерфейсы",
+    "Контроль",
+    "Состояние",
+    "Исполнение",
+    "Возможности",
+    "Проверка",
+    "Результат",
+    "Эксплуатация",
+    "Размещение"
   ]
 }

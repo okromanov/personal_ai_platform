@@ -7,6 +7,8 @@ description: Create or update the personal_ai_platform architecture infographic 
 
 Maintain the repository's architecture infographic as an editable, evidence-based SVG.
 
+Treat the current SVG as the design baseline. Make the smallest layout change that satisfies the request; do not rebuild, restyle, simplify, or replace the existing composition unless the user explicitly asks for a redesign.
+
 ## Repository context
 
 Before editing, read `AGENTS.md`, `project_status.md`, and the relevant parts of:
@@ -43,7 +45,7 @@ For this infographic, preserve the declared project hierarchy:
 ## Editing workflow
 
 1. Inspect the current SVG and source JSON before changing labels, relationships, or layout.
-2. Preserve the owner-control plane, emergency switch priority, RuntimePort boundary, model gateway, tool gateway, quality checks, and platform services unless the requested change supersedes them.
+2. Preserve the existing canvas structure, typography, palette, ARC/INF identifiers, layer numbering, owner-control plane, emergency switch priority, RuntimePort boundary, gateways, quality checks, feedback rails, and infrastructure layer unless the requested change explicitly supersedes them.
 3. Keep the hierarchy visually legible as a directional flow. When one Capability groups several Skills, show the cardinality or branching explicitly.
 4. Update the source JSON whenever hierarchy, palette, canvas, or section names change.
 5. Render the SVG with Inkscape:
