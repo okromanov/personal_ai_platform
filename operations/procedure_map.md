@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 1.9
+version: 2.0
 updated: 2026-08-31
 depends_on:
   - operations_change_process
@@ -26,6 +26,7 @@ depends_on:
 | [`acceptance.md`](acceptance.md) | Принять этап и перейти в следующее состояние | Все доказательства собраны | Этап переводится в `completed` |
 | [`adr_lifecycle.md`](adr_lifecycle.md) | Как создаются, обновляются и архивируются ADR | Нужно принять или изменить архитектурное решение | ADR в состоянии `proposed`/`accepted`/`superseded` |
 | [`skill_lifecycle.md`](skill_lifecycle.md) | Как скилл проходит проверку, отработку и обкатку прежде чем попасть в закрытый внутренний хаб | Есть кандидат-скилл (внутренний или внешний), закрывающий Capability | Скилл в состоянии `candidate`/`in_review`/`hardening`/`probation`/`accepted`/`rejected`/`retired` |
+| [`tool_lifecycle.md`](tool_lifecycle.md) | Как новый инструмент проходит проверку, отработку и обкатку прежде чем быть зарегистрированным в `ARC_CMP_005` | Есть кандидат-инструмент (внутренний или внешний) с полномочиями на ресурсы | Инструмент в состоянии `candidate`/`in_review`/`hardening`/`probation`/`accepted`/`rejected`/`retired` |
 | [`state_machines.md`](state_machines.md) | Диаграммы допустимых переходов состояний (TASK, ADR, milestone) | Непонятен допустимый следующий `work_state`/`decision_state` | Подтверждённый допустимый переход |
 | [`threat_review_triggers.md`](threat_review_triggers.md) | Какое событие означает, что угроза из модели угроз реализовалась, и что делать | Аномалия, ошибка или инцидент, потенциально связанный с [`threat_model.md`](../specifications/threat_model.md) | Решение: инцидент подтверждён/отклонён, процедура реагирования |
 | [`license_policy.md`](license_policy.md) | Почему в репозитории нет корневого `LICENSE` и что это означает | Вопрос о лицензировании/распространении кода | Понимание текущего закрытого режима |
