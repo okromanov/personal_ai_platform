@@ -1,0 +1,41 @@
+{
+  "artifact": "personal_ai_platform_architecture",
+  "canvas": {
+    "width": 1600,
+    "height": 1120,
+    "format": "svg"
+  },
+  "hierarchy": {
+    "order": [
+      "Capability",
+      "Skill",
+      "Tool",
+      "Implementation"
+    ],
+    "cardinality": {
+      "Capability_to_Skill": "1:N"
+    },
+    "rules": [
+      "A Skill routes execution through the appropriate Tool.",
+      "Skills are reusable across agents and workflows.",
+      "Implementation details do not become Capability or Skill contracts."
+    ]
+  },
+  "palette": {
+    "navy": "#172554",
+    "capability": "#0f9f9a",
+    "skill": "#7c5ce7",
+    "tool": "#f59e0b",
+    "implementation": "#64748b",
+    "control": "#e11d48",
+    "surface": "#ffffff",
+    "background": "#eef4fb"
+  },
+  "architecture_sections": [
+    "Owner Control Plane",
+    "Request and Execution Path",
+    "Project Entity Hierarchy",
+    "Authorized Execution",
+    "Platform Services"
+  ]
+}
