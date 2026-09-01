@@ -324,8 +324,8 @@
   </g>
   <path class="main-line" d="M569 1788V1872"/>
   <path class="failure-line" d="M1051 1788V1872"/>
-  <path class="retry-line" d="M1310 1722H1390V1192H1310"/>
-  <g transform="translate(1390 1457) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
+  <path class="retry-line" d="M1310 1722H1390V1176H1310"/>
+  <g transform="translate(1390 1449) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
 
   <!-- 08 Outcomes and result envelope -->
   <g transform="translate(0 36)">
@@ -405,7 +405,7 @@
   <path class="scheduled-line" d="M1310 2184H1430V688H1310" data-spec-id="ARC_FLOW_004"/>
   <g transform="translate(1430 1436) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
   <path class="control-rail" d="M1310 720H1350V2216"/>
-  <path class="control-line" d="M1350 1224H1310"/><path class="control-line" d="M1350 1480H1310"/><path class="control-line" d="M1350 2216H1310"/>
+  <path class="control-line" d="M1350 1238H1310"/><path class="control-line" d="M1350 1480H1310"/><path class="control-line" d="M1350 2216H1310"/>
   <g transform="translate(1350 1468) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
