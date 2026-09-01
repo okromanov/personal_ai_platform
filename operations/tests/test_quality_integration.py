@@ -115,7 +115,6 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertNotIn("failed (see output above)", helper)
         self.assertNotIn("exit 0", helper)
 
-    @unittest.skipIf(os.name == "nt", "the canonical helper is a Bash script")
     def test_dashboard_regeneration_propagates_generator_failure(self) -> None:
         helper = ROOT / "operations/hooks/pre_commit_regenerate_dashboards.sh"
         with tempfile.TemporaryDirectory() as tmp:
@@ -142,6 +141,17 @@ class QualityIntegrationTests(unittest.TestCase):
                     encoding="utf-8",
                 )
                 fake_python.chmod(0o755)
+                # On Windows, os.chmod() cannot set a POSIX execute bit --
+                # NTFS has none, so this call above only clears the
+                # read-only attribute. Git Bash's own MSYS runtime tracks
+                # executability separately from that attribute, so a script
+                # written and chmod'd from a native Windows Python process
+                # is not guaranteed executable from bash's exec() check.
+                # Running chmod through the same bash that will later exec
+                # these shims makes their permissions match what that
+                # check actually reads, on every platform (redundant with
+                # the os.chmod above on POSIX, where it's a no-op).
+                subprocess.run(["bash", "-c", f"chmod +x '{fake_python.as_posix()}'"], check=True)
             environment = os.environ.copy()
             environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
 

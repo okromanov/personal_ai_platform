@@ -45,25 +45,6 @@ class QualityRunnerTests(unittest.TestCase):
             )
             self.assertEqual(run_tests(root, start_dir="tests", verbosity=0), 0)
 
-    def test_canonical_unittest_runner_allows_the_documented_platform_skip(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            tests = root / "tests"
-            tests.mkdir()
-            (tests / "test_platform_skip.py").write_text(
-                "import unittest\n"
-                "class Sample(unittest.TestCase):\n"
-                "    @unittest.skip('the canonical helper is a Bash script')\n"
-                "    def test_skip(self): pass\n",
-                encoding="utf-8",
-            )
-            with patch.object(
-                unittest.defaultTestLoader,
-                "_top_level_dir",
-                str(Path(__file__).resolve().parents[3]),
-            ):
-                self.assertEqual(run_tests(root, start_dir="tests", verbosity=0), 0)
-
     def test_canonical_unittest_runner_gives_unexpected_success_its_own_exit_code(
         self,
     ) -> None:

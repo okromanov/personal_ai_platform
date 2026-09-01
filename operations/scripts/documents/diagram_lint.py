@@ -151,9 +151,7 @@ def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: Lint
                 "(проверено через тот же реестр, что использует traceability для .md-документов)"
             )
 
-    body_ids = {
-        _normalize_id(i) for raw_attr in _DATA_SPEC_ID.findall(body_text) for i in raw_attr.split()
-    }
+    body_ids = {_normalize_id(i) for i in _DATA_SPEC_ID.findall(body_text)}
     missing_in_body = declared_normalized - body_ids
     for identifier in sorted(missing_in_body):
         result.errors.append(
