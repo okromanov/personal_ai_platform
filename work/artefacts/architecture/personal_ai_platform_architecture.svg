@@ -47,10 +47,6 @@
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
     <marker id="arrow-control" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#A1463F"/></marker>
-    <marker id="arrow-return-dual" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
-      <path d="M0 0L12 6L0 12Z" fill="#A1463F"/>
-      <path d="M2.4 2.2L9.6 6L2.4 9.8Z" fill="#315C88"/>
-    </marker>
     <marker id="arrow-support" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#7D8895"/></marker>
     <marker id="arrow-infra" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#D6DEE7"/></marker>
     <style>
@@ -409,11 +405,10 @@
   <g transform="translate(1367 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path d="M554 2014V2054H1066" fill="none" stroke="#315C88" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M1066 2014V2054" fill="none" stroke="#A1463F" stroke-width="1" stroke-linecap="round"/>
-  <path d="M1066 2054H1490V492H1310" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M1066 2054H1490V492H1310" fill="none" stroke="#A1463F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M1066 2054H1490V492H1310" fill="none" stroke="#315C88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow-return-dual)"/>
-  <g transform="translate(1507 1273) rotate(90)"><rect x="-172" y="-14" width="344" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Возврат через выбранный канал</text></g>
+  <path d="M554 2014V2054H1486V486H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1066 2014V2038H1498V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="main-line" d="M554 2014V2054H1486V486H1310"/>
+  <path class="failure-line" d="M1066 2014V2038H1498V498H1310"/>
+  <g transform="translate(1515 1268) rotate(90)"><rect x="-172" y="-14" width="344" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Возврат через выбранный канал</text></g>
   </g>
 </svg>
