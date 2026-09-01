@@ -343,8 +343,6 @@
     <text x="1066" y="1943" class="small-text" text-anchor="middle">Ошибка · Отказ · Отмена · Изоляция · Лимит</text>
     <text x="1066" y="1957" class="small-text" text-anchor="middle">Task ID · Состояние · Причина · Безопасная диагностика</text>
   </g>
-  <path class="bus-line" d="M554 1982V2022H1066M1066 1982V2022"/>
-  <circle cx="810" cy="2022" r="3.5" fill="#315C88"/>
   </g>
 
   <g transform="translate(0 24)">
@@ -407,8 +405,9 @@
   <g transform="translate(1367 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path d="M810 2054H1490V492H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path class="main-line" d="M810 2054H1490V492H1310"/>
+  <path d="M554 1998V2054H1490V492H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="main-line" d="M554 1998V2054H1490V492H1310"/>
+  <path d="M1066 1998V2054" fill="none" stroke="#A1463F" stroke-width="1" stroke-linecap="round"/>
   <g transform="translate(1507 1273) rotate(90)"><rect x="-172" y="-14" width="344" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Возврат через выбранный канал</text></g>
   </g>
 </svg>
