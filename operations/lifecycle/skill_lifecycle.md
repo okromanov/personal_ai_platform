@@ -3,7 +3,7 @@ id: operations_skill_lifecycle
 type: operations
 document_state: current
 version: 1.2
-updated: 2026-08-31
+updated: 2026-09-01
 depends_on:
   - operations_change_process
   - operations_tool_lifecycle

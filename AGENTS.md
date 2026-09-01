@@ -2,8 +2,8 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 3.7
-updated: 2026-08-31
+version: 3.8
+updated: 2026-09-01
 depends_on:
   - project_rules
   - project_milestones

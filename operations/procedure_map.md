@@ -3,7 +3,7 @@ id: operations_procedure_map
 type: operations
 document_state: current
 version: 2.2
-updated: 2026-08-31
+updated: 2026-09-01
 depends_on:
   - operations_change_process
   - coding_agent_instruction

@@ -3,7 +3,7 @@ id: state_machines
 type: guide
 document_state: current
 version: 1.2
-updated: 2026-08-23
+updated: 2026-09-01
 depends_on:
   - project_rules
 ---

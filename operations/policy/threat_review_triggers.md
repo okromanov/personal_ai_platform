@@ -3,7 +3,7 @@ id: threat_review_triggers
 type: guide
 document_state: current
 version: 1.0
-updated: 2026-08-24
+updated: 2026-09-01
 depends_on:
   - threat_model
   - system_specification

@@ -3,7 +3,7 @@ id: operations_tool_lifecycle
 type: operations
 document_state: current
 version: 1.0
-updated: 2026-08-31
+updated: 2026-09-01
 depends_on:
   - operations_change_process
   - architecture_baseline

@@ -2,8 +2,8 @@
 id: project_rules
 type: project_rules
 document_state: current
-version: 1.4
-updated: 2026-08-31
+version: 1.5
+updated: 2026-09-01
 depends_on: []
 ---
 

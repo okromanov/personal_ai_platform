@@ -3,7 +3,7 @@ id: license_policy
 type: operations
 document_state: current
 version: 1.0
-updated: 2026-08-28
+updated: 2026-09-01
 depends_on:
   - project_rules
 ---
