@@ -3,7 +3,7 @@ id: state_machines
 type: guide
 document_state: current
 version: 1.2
-updated: 2026-08-23
+updated: 2026-09-01
 depends_on:
   - project_rules
 ---
@@ -162,7 +162,7 @@ depends_on:
 
 ## 5. Состояния этапов (`work_state`)
 
-Каждый milestone имеет явное поле `work_state` в [`milestones.md`](../milestones.md). Готовность к смысловой проверке и принятию вычисляется из доказательств и не является отдельным редактируемым состоянием.
+Каждый milestone имеет явное поле `work_state` в [`milestones.md`](../../milestones.md). Готовность к смысловой проверке и принятию вычисляется из доказательств и не является отдельным редактируемым состоянием.
 
 ```
 planned
@@ -203,7 +203,7 @@ completed
 
 - `work_state` — единственное редактируемое состояние milestone; `ready-for-semantic-review` и `ready-for-acceptance` — вычисляемые режимы готовности.
 - Транзакция: если хотя бы одна проверка не пройдена, этап не может быть принят.
-- Начало этапа атомарно: [`operations/scripts/milestones/start.py`](scripts/milestones/start.py) сначала выполняет полный preflight без записи и меняет только `work_state` и `updated` после успеха всех условий.
+- Начало этапа атомарно: [`operations/scripts/milestones/start.py`](../scripts/milestones/start.py) сначала выполняет полный preflight без записи и меняет только `work_state` и `updated` после успеха всех условий.
 - Откат: владелец может отклонить этап на принятие, тогда работа продолжается.
 
 ## 6. Переходы, которые НЕДОПУСТИМЫ

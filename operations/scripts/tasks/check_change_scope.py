@@ -49,6 +49,11 @@ MAINTENANCE_PATH_PATTERNS = [
     "operations/**",
     "project_rules.md",
     "pyproject.toml",
+    # Архитектурные схемы — производное представление спецификаций
+    # (architecture_diagram_style_guide.md §1: "не отдельный источник
+    # истины"), а не продуктовая поставка, поэтому границы задач их не
+    # покрывают — так же, как operations/**.
+    "work/artefacts/**",
     "work/acceptance/**",
     "work/audit/**",
     "work/evidence/**",
