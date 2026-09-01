@@ -16,8 +16,8 @@ depends_on:
 
 ## 2. Зависимости и артефакты
 
-- прямые dev-зависимости задаются в [`requirements_dev.in`](quality/requirements_dev.in);
-- полный транзитивный состав и SHA-256 хеши фиксируются в [`requirements_dev.txt`](quality/requirements_dev.txt);
+- прямые dev-зависимости задаются в [`requirements_dev.in`](../quality/requirements_dev.in);
+- полный транзитивный состав и SHA-256 хеши фиксируются в [`requirements_dev.txt`](../quality/requirements_dev.txt);
 - CI проверяет уязвимости полного lock-файла, строит контейнер из закреплённого base digest и сохраняет SPDX JSON SBOM как SHA-bound artifact;
 - сторонние компоненты сохраняют собственные лицензии; эта политика не переопределяет их условия.
 

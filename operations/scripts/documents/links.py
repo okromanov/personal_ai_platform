@@ -427,7 +427,15 @@ def check_markdown_links(root: Path) -> list[str]:
 
     for path in iter_files(root, suffixes={".md"}, include_generated=True):
         text = path.read_text(encoding="utf-8-sig")
-        for raw_target in LINK_PATTERN.findall(text):
+        # Dated audit snapshots are immutable once published (see
+        # change_process.md / _IMMUTABLE_AUDIT_BASELINE): a later repository
+        # reorganisation legitimately moves a file such a snapshot once
+        # linked to, and the frozen snapshot is never edited to catch up --
+        # so its link targets are not required to still resolve.
+        is_immutable_baseline = bool(
+            _IMMUTABLE_AUDIT_BASELINE.fullmatch(relative_posix(path, root))
+        )
+        for raw_target in [] if is_immutable_baseline else LINK_PATTERN.findall(text):
             target = raw_target.strip().split(maxsplit=1)[0].strip("<>")
             if not target or target.startswith(("http://", "https://", "mailto:")):
                 continue
