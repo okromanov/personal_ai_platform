@@ -95,10 +95,10 @@
     <text x="80" y="806" class="layer-no">04 · СОСТОЯНИЕ</text>
     <text x="80" y="1016" class="layer-no">05 · ИСПОЛНЕНИЕ</text>
     <text x="80" y="1326" class="layer-no">06 · ВОЗМОЖНОСТИ</text>
-    <text x="80" y="1642" class="layer-no">07 · ПРОВЕРКА</text>
-    <text x="80" y="1874" class="layer-no">08 · РЕЗУЛЬТАТ</text>
-    <text x="80" y="2096" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
-    <text x="80" y="2278" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
+    <text x="80" y="1594" class="layer-no">07 · ПРОВЕРКА</text>
+    <text x="80" y="1826" class="layer-no">08 · РЕЗУЛЬТАТ</text>
+    <text x="80" y="2048" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
+    <text x="80" y="2230" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
   </g>
 
   <!-- 01 Owner -->
@@ -183,12 +183,12 @@
     <rect x="1061" y="1088" width="221" height="104" rx="4" class="implementation-pill"/>
     <text x="1171.5" y="1112" class="small-title" text-anchor="middle">Реализация</text>
     <text x="1171.5" y="1129" class="micro-text" text-anchor="middle">Адаптер или поставщик</text>
-    <rect x="1073" y="1136" width="197" height="13" rx="3" class="implementation-sub"/>
-    <rect x="1073" y="1154" width="197" height="13" rx="3" class="implementation-sub"/>
-    <rect x="1073" y="1172" width="197" height="13" rx="3" class="implementation-sub"/>
-    <text x="1171.5" y="1147" class="micro-text" text-anchor="middle">Режим выполнения</text>
-    <text x="1171.5" y="1165" class="micro-text" text-anchor="middle">Управление процессом</text>
-    <text x="1171.5" y="1183" class="micro-text" text-anchor="middle">Hooks и события</text>
+    <rect x="1073" y="1136" width="197" height="12" rx="3" class="implementation-sub"/>
+    <rect x="1073" y="1152" width="197" height="12" rx="3" class="implementation-sub"/>
+    <rect x="1073" y="1168" width="197" height="12" rx="3" class="implementation-sub"/>
+    <text x="1171.5" y="1146" class="micro-text" text-anchor="middle">Режим выполнения</text>
+    <text x="1171.5" y="1162" class="micro-text" text-anchor="middle">Управление процессом</text>
+    <text x="1171.5" y="1178" class="micro-text" text-anchor="middle">Hooks и события</text>
 
   </g>
 
@@ -211,36 +211,28 @@
 
   <!-- 06 Capabilities -->
   <g>
-    <rect x="310" y="1288" width="317" height="228" rx="7" class="data-card"/>
+    <rect x="310" y="1288" width="317" height="180" rx="7" class="data-card"/>
     <text x="338" y="1316" class="component-id">ARC_CMP_006</text>
     <text x="338" y="1343" class="component-title">Контекст, память</text><text x="338" y="1367" class="component-title">и доказательства</text>
-    <text x="338" y="1404" class="small-title">Сборщик разрешённого контекста</text>
-    <text x="338" y="1428" class="small-text">Профиль · Цели · Режим · Проект</text>
-    <text x="338" y="1452" class="small-text">Память · Граф знаний · Доказательства</text>
-    <text x="338" y="1476" class="small-text">Доверие · Происхождение · Минимизация</text>
-    <text x="338" y="1500" class="small-text">Исправление · Удаление · Области данных</text>
+    <text x="338" y="1416" class="small-text">Память · Граф знаний · Доказательства</text>
+    <text x="338" y="1440" class="small-text">Профиль · Проект · Доверие · Минимизация</text>
   </g>
   <g>
-    <rect x="651" y="1288" width="317" height="228" rx="7" class="execution-card"/>
+    <rect x="651" y="1288" width="317" height="180" rx="7" class="execution-card"/>
     <text x="679" y="1316" class="component-id">ARC_CMP_004</text>
     <text x="679" y="1343" class="component-title">Шлюз моделей</text>
-    <text x="679" y="1404" class="small-title">Маршрутизация по задаче</text>
-    <text x="679" y="1428" class="small-text">Отдельный Run и сессия выполнения</text>
-    <text x="679" y="1452" class="small-text">Бюджет · Timeout · Повтор · Fallback</text>
-    <text x="679" y="1476" class="small-text">Качество · Скорость · Стоимость</text>
-    <text x="679" y="1500" class="small-text">Сменный адаптер поставщика</text>
+    <text x="679" y="1416" class="small-text">Run · Сессия · Бюджет · Timeout</text>
+    <text x="679" y="1440" class="small-text">Качество · Скорость · Стоимость · Fallback</text>
   </g>
   <g>
-    <rect x="992" y="1288" width="318" height="228" rx="7" class="execution-card"/>
+    <rect x="992" y="1288" width="318" height="180" rx="7" class="execution-card"/>
     <text x="1020" y="1316" class="component-id">ARC_CMP_005</text>
     <text x="1020" y="1343" class="component-title">Шлюз инструментов</text>
-    <text x="1020" y="1404" class="small-title">Динамическая выдача Tools</text>
-    <text x="1020" y="1428" class="small-text">MCP · API · Адаптеры</text>
-    <text x="1020" y="1446" class="small-text">Изолированная среда:</text>
-    <text x="1020" y="1464" class="small-text">Файлы · Код · Команды</text>
-    <text x="1020" y="1482" class="small-text">Сеть · Секреты · Аудит · Подтверждение</text>
-    <text x="1020" y="1500" class="small-text">Изоляция и лимиты конкретной задачи</text>
+    <text x="1020" y="1416" class="small-text">Tools · MCP · API · Адаптеры</text>
+    <text x="1020" y="1440" class="small-text">Изоляция · Сеть · Секреты · Подтверждение</text>
   </g>
+
+  <g transform="translate(0 -48)">
 
   <!-- Convergence to quality -->
   <path class="bus-line" d="M468.5 1516V1558H1151M810 1516V1558M1151 1516V1558"/>
@@ -264,9 +256,9 @@
     <rect x="820" y="1736" width="462" height="28" rx="4" class="control-card"/>
     <text x="836" y="1755" class="control-flow-text">Интерфейс контролируемого исхода</text>
   </g>
-  <path class="main-line" d="M569 1776V1836"/>
-  <path class="failure-line" d="M1051 1776V1836"/>
-  <path class="retry-line" d="M1310 1690H1395V1124H1310"/>
+  <path class="main-line" d="M569 1764V1836"/>
+  <path class="failure-line" d="M1051 1764V1836"/>
+  <path class="retry-line" d="M1310 1690H1395V1172H1310"/>
   <g transform="translate(1412 1440) rotate(90)"><rect x="-145" y="-14" width="290" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
 
   <!-- 08 Outcomes and result envelope -->
@@ -275,18 +267,18 @@
     <text x="338" y="1868" class="component-title">Готовый результат или материал</text>
     <text x="338" y="1892" class="component-text">Подтверждённый результат проверки</text>
     <rect x="338" y="1904" width="432" height="62" rx="4" class="inner-card"/>
-    <text x="354" y="1927" class="small-title">Единый формат результата</text>
-    <text x="354" y="1947" class="micro-text">Текст · Файл · Данные · Карточка</text>
-    <text x="354" y="1961" class="micro-text">Виджет · Уведомление · Доказательства</text>
+    <text x="354" y="1925" class="small-title">Единый формат результата</text>
+    <text x="354" y="1943" class="small-text">Текст · Файл · Данные · Карточка</text>
+    <text x="354" y="1957" class="small-text">Виджет · Уведомление · Доказательства</text>
   </g>
   <g>
     <rect x="822" y="1836" width="488" height="146" rx="7" class="control-card"/>
     <text x="850" y="1868" class="component-title">Контролируемый исход</text>
     <text x="850" y="1892" class="component-text">Безопасно завершённая задача</text>
     <rect x="850" y="1904" width="432" height="62" rx="4" class="inner-card"/>
-    <text x="866" y="1927" class="small-title">Проверяемый итог</text>
-    <text x="866" y="1947" class="micro-text">Ошибка · Отказ · Отмена · Изоляция · Лимит</text>
-    <text x="866" y="1961" class="micro-text">Task ID · Состояние · Причина · Безопасная диагностика</text>
+    <text x="866" y="1925" class="small-title">Проверяемый итог</text>
+    <text x="866" y="1943" class="small-text">Ошибка · Отказ · Отмена · Изоляция · Лимит</text>
+    <text x="866" y="1957" class="small-text">Task ID · Состояние · Причина · Безопасная диагностика</text>
   </g>
   <path class="bus-line" d="M554 1982V2022H1066M1066 1982V2022"/>
   <circle cx="810" cy="2022" r="3.5" fill="#315C88"/>
@@ -295,15 +287,15 @@
   <g>
     <rect x="310" y="2058" width="1000" height="142" rx="7" class="neutral-card"/>
     <text x="338" y="2086" class="component-id">ARC_CMP_009 · СКВОЗНОЙ СЛОЙ</text><text x="338" y="2113" class="component-title">Эксплуатационные функции</text>
-    <rect x="338" y="2124" width="300" height="60" rx="4" class="inner-card"/>
-    <text x="488" y="2146" class="small-title" text-anchor="middle">Планирование и запуски</text>
-    <text x="488" y="2164" class="micro-text" text-anchor="middle">Расписание · Очередь · События</text><text x="488" y="2178" class="micro-text" text-anchor="middle">Task ID · Корреляция</text>
-    <rect x="650" y="2124" width="300" height="60" rx="4" class="inner-card"/>
-    <text x="800" y="2146" class="small-title" text-anchor="middle">Надёжность и восстановление</text>
-    <text x="800" y="2164" class="micro-text" text-anchor="middle">Heartbeat · Lease · Checkpoint</text><text x="800" y="2178" class="micro-text" text-anchor="middle">Recovery · Резервные копии</text>
-    <rect x="962" y="2124" width="320" height="60" rx="4" class="inner-card"/>
-    <text x="1122" y="2146" class="small-title" text-anchor="middle">Наблюдаемость и изменения</text>
-    <text x="1122" y="2164" class="micro-text" text-anchor="middle">Работоспособность · Аудит · Стоимость</text><text x="1122" y="2178" class="micro-text" text-anchor="middle">Версии · Обновления · Откат</text>
+    <rect x="338" y="2124" width="300" height="62" rx="4" class="inner-card"/>
+    <text x="488" y="2145" class="small-title" text-anchor="middle">Планирование и запуски</text>
+    <text x="488" y="2163" class="small-text" text-anchor="middle">Расписание · Очередь · События</text><text x="488" y="2177" class="small-text" text-anchor="middle">Task ID · Корреляция</text>
+    <rect x="650" y="2124" width="300" height="62" rx="4" class="inner-card"/>
+    <text x="800" y="2145" class="small-title" text-anchor="middle">Надёжность и восстановление</text>
+    <text x="800" y="2163" class="small-text" text-anchor="middle">Heartbeat · Lease · Checkpoint</text><text x="800" y="2177" class="small-text" text-anchor="middle">Recovery · Резервные копии</text>
+    <rect x="962" y="2124" width="320" height="62" rx="4" class="inner-card"/>
+    <text x="1122" y="2145" class="small-title" text-anchor="middle">Контроль эксплуатации и изменений</text>
+    <text x="1122" y="2163" class="small-text" text-anchor="middle">Работоспособность · Аудит · Стоимость</text><text x="1122" y="2177" class="small-text" text-anchor="middle">Версии · Обновления · Откат</text>
   </g>
 
   <!-- 10 Placement -->
@@ -329,22 +321,24 @@
 
   </g>
 
+  </g>
+
   <!-- Placement supports every working layer -->
-  <path class="support-rail" d="M310 2368H270V432"/>
+  <path class="support-rail" d="M310 2320H270V432"/>
   <path class="support-line" d="M270 432H310"/><path class="support-line" d="M270 634H310"/><path class="support-line" d="M270 855H310"/>
-  <path class="support-line" d="M270 1140H310"/><path class="support-line" d="M270 1418H310"/><path class="support-line" d="M270 1706H310"/>
-  <path class="support-line" d="M270 1925H310"/><path class="support-line" d="M270 2145H310"/><path class="support-line" d="M270 2368H310"/>
+  <path class="support-line" d="M270 1140H310"/><path class="support-line" d="M270 1378H310"/><path class="support-line" d="M270 1658H310"/>
+  <path class="support-line" d="M270 1877H310"/><path class="support-line" d="M270 2097H310"/><path class="support-line" d="M270 2320H310"/>
 
   <!-- Scheduled flow and security rail -->
-  <path class="scheduled-line" d="M1310 2145H1440V635H1310"/>
+  <path class="scheduled-line" d="M1310 2097H1440V635H1310"/>
   <g transform="translate(1457 1350) rotate(90)"><rect x="-300" y="-14" width="600" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_004 / SEC_CTL_017 · Плановая задача без дополнительных полномочий</text></g>
-  <path class="control-rail" d="M1310 675H1350V2145"/>
-  <path class="control-line" d="M1350 1140H1310"/><path class="control-line" d="M1350 1418H1310"/><path class="control-line" d="M1350 2145H1310"/>
+  <path class="control-rail" d="M1310 675H1350V2097"/>
+  <path class="control-line" d="M1350 1140H1310"/><path class="control-line" d="M1350 1378H1310"/><path class="control-line" d="M1350 2097H1310"/>
   <g transform="translate(1367 1430) rotate(90)"><rect x="-180" y="-14" width="360" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path d="M810 2038H1490V432H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path class="main-line" d="M810 2038H1490V432H1310"/>
+  <path d="M810 1990H1490V432H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="main-line" d="M810 1990H1490V432H1310"/>
   <g transform="translate(1507 1270) rotate(90)"><rect x="-205" y="-14" width="410" height="22" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Возврат через выбранный канал</text></g>
   </g>
 </svg>
