@@ -1,6 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1900" height="2558" viewBox="0 0 1900 2558" role="img" aria-labelledby="title desc">
   <title id="title">Вертикальная архитектура Personal AI Platform</title>
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
+  <!-- diagram-metadata
+  diagram_id: personal_ai_platform_architecture
+  diagram_version: 1.0
+  generated_at: 2026-09-01
+  status: current
+  source: specifications/architecture_baseline.md@1.3
+  source: specifications/system_specification.md@1.3
+  source: specifications/infrastructure_baseline.md@1.2
+  id: ARC_CMP_001
+  id: ARC_CMP_002
+  id: ARC_CMP_003
+  id: ARC_CMP_004
+  id: ARC_CMP_005
+  id: ARC_CMP_006
+  id: ARC_CMP_007
+  id: ARC_CMP_008
+  id: ARC_CMP_009
+  id: ARC_FLOW_001
+  id: ARC_FLOW_002
+  id: ARC_FLOW_003
+  id: ARC_FLOW_004
+  id: SEC_CTL_002
+  id: SEC_CTL_004
+  id: SEC_CTL_006
+  id: SEC_CTL_007
+  id: SEC_CTL_008
+  id: SEC_CTL_009
+  id: SEC_CTL_015
+  id: SEC_CTL_017
+  id: INF_CMP_001
+  id: INF_CMP_002
+  id: INF_CMP_003
+  id: INF_CMP_004
+  id: INF_CMP_005
+  id: INF_CMP_006
+  id: INF_CMP_007
+  id: INF_CMP_008
+  id: INF_FLOW_001
+  id: INF_FLOW_002
+  id: INF_FLOW_003
+  id: INF_FLOW_004
+  id: INF_FLOW_005
+  end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
     <marker id="arrow-control" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#A1463F"/></marker>
@@ -78,7 +121,7 @@
     <line x1="1564" y1="383" x2="1604" y2="383" stroke="#315C88" stroke-width="1" stroke-dasharray="3 5" marker-end="url(#arrow-main)"/><text x="1618" y="388" class="legend">Плановый запуск</text>
     <line x1="1564" y1="413" x2="1604" y2="413" stroke="#A1463F" stroke-width="1" stroke-dasharray="5 5" marker-end="url(#arrow-control)"/><text x="1618" y="418" class="legend">Контроль безопасности</text>
     <line x1="1564" y1="443" x2="1604" y2="443" stroke="#315C88" stroke-width="1" stroke-dasharray="7 5" marker-end="url(#arrow-main)"/><text x="1618" y="448" class="legend">Повтор после проверки</text>
-    <line x1="1564" y1="473" x2="1604" y2="473" stroke="#7D8895" stroke-width="1" stroke-dasharray="2 5" marker-end="url(#arrow-support)"/><text x="1618" y="478" class="legend">Поддержка рабочих слоёв</text>
+    <line x1="1564" y1="473" x2="1604" y2="473" stroke="#7D8895" stroke-width="1" stroke-dasharray="2 5" marker-end="url(#arrow-support)"/><text x="1618" y="478" class="legend">Поддержка логических компонентов</text>
     <line x1="1564" y1="503" x2="1604" y2="503" stroke="#A1463F" stroke-width="1" marker-end="url(#arrow-control)"/><text x="1618" y="508" class="legend">Контролируемый исход</text>
     <text x="1564" y="546" class="legend-section">ИДЕНТИФИКАТОРЫ</text>
     <text x="1564" y="576" class="legend-id">ARC_CMP_*</text><text x="1658" y="576" class="legend">Логические компоненты</text>
@@ -109,18 +152,18 @@
     <text x="810" y="264" class="component-title" text-anchor="middle">Владелец платформы</text>
     <text x="810" y="289" class="component-text" text-anchor="middle">Постановка задач, принятие решений и окончательный контроль платформы</text>
   </g>
-  <path class="main-line" d="M810 312V380"/>
+  <path class="main-line" d="M810 312V380" data-spec-id="ARC_FLOW_001"/>
   <rect x="722" y="332" width="176" height="28" rx="4" class="flow-label"/><text x="810" y="351" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Запрос</text>
 
   <!-- 02 Interfaces -->
-  <g>
+  <g data-spec-id="ARC_CMP_001">
     <rect x="310" y="380" width="1000" height="148" rx="7" class="neutral-card"/>
     <text x="338" y="408" class="component-id">ARC_CMP_001</text><text x="338" y="434" class="component-title">Каналы</text>
     <text x="338" y="458" class="component-text">Приём запросов и возврат результатов через пользовательские каналы</text>
     <rect x="338" y="468" width="221" height="48" rx="4" class="inner-card"/><rect x="579" y="468" width="221" height="48" rx="4" class="inner-card"/>
     <rect x="820" y="468" width="221" height="48" rx="4" class="inner-card"/><rect x="1061" y="468" width="221" height="48" rx="4" class="inner-card"/>
     <text x="448.5" y="489" class="small-title" text-anchor="middle">Telegram</text><text x="448.5" y="507" class="small-text" text-anchor="middle">Основной канал</text>
-    <text x="689.5" y="489" class="small-title" text-anchor="middle">CLI</text><text x="689.5" y="507" class="small-text" text-anchor="middle">Точное управление</text>
+    <text x="689.5" y="489" class="small-title" text-anchor="middle">CLI</text><text x="689.5" y="507" class="small-text" text-anchor="middle">Диагностика и управление</text>
     <text x="930.5" y="489" class="small-title" text-anchor="middle">Voice</text><text x="930.5" y="507" class="small-text" text-anchor="middle">Голосовой режим</text>
     <text x="1171.5" y="489" class="small-title" text-anchor="middle">Web</text><text x="1171.5" y="507" class="small-text" text-anchor="middle">Веб-интерфейс</text>
   </g>
@@ -130,16 +173,16 @@
   <g transform="translate(0 44)">
 
   <!-- 03 Ingress security and owner control -->
-  <g>
+  <g data-spec-id="ARC_CMP_002">
     <rect x="310" y="552" width="1000" height="164" rx="7" class="control-card"/>
     <text x="338" y="580" class="component-id">ARC_CMP_002</text><text x="338" y="607" class="component-title">Безопасность и контроль владельца</text>
     <text x="338" y="631" class="component-text">Проверка недоверенного ввода до модели и повторный контроль чувствительных действий перед исполнением</text>
     <rect x="338" y="642" width="221" height="64" rx="4" class="inner-card"/>
     <text x="448.5" y="663" class="small-title" text-anchor="middle">Контроль входа</text>
-    <text x="448.5" y="681" class="small-text" text-anchor="middle">Личность · Квоты</text><text x="448.5" y="695" class="small-text" text-anchor="middle">Тип · Размер · Инъекции</text>
+    <text x="448.5" y="681" class="small-text" text-anchor="middle">Личность · Квоты</text><text x="448.5" y="695" class="small-text" text-anchor="middle">Тип · Размер · Доверие</text>
     <rect x="579" y="642" width="221" height="64" rx="4" class="inner-card"/>
     <text x="689.5" y="663" class="small-title" text-anchor="middle">Контроль данных</text>
-    <text x="689.5" y="681" class="small-text" text-anchor="middle">Доверие · Секреты</text><text x="689.5" y="695" class="small-text" text-anchor="middle">Область · Класс риска</text>
+    <text x="689.5" y="681" class="small-text" text-anchor="middle">Контент · Секреты</text><text x="689.5" y="695" class="small-text" text-anchor="middle">Область · Класс воздействия</text>
     <rect x="820" y="642" width="221" height="64" rx="4" class="inner-card"/>
     <text x="930.5" y="663" class="small-title" text-anchor="middle">Контроль полномочий</text>
     <text x="930.5" y="681" class="small-text" text-anchor="middle">Разрешения · Лимиты</text><text x="930.5" y="695" class="small-text" text-anchor="middle">Подтверждения</text>
@@ -151,10 +194,10 @@
   <rect x="676" y="736" width="268" height="28" rx="4" class="flow-label"/><text x="810" y="755" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Разрешённая задача</text>
 
   <!-- 04 Durable task runtime state -->
-  <g>
+  <g data-spec-id="ARC_CMP_007">
     <rect x="310" y="784" width="1000" height="170" rx="7" class="data-card"/>
     <text x="338" y="812" class="component-id">ARC_CMP_007</text><text x="338" y="839" class="component-title">Состояние задач</text>
-    <text x="338" y="863" class="component-text">Каноническое состояние, очередь выполнения и восстановление задач</text>
+    <text x="338" y="863" class="component-text">Каноническое состояние, жизненный цикл и восстановление задач</text>
     <rect x="338" y="874" width="300" height="64" rx="4" class="inner-card"/>
     <text x="488" y="895" class="small-title" text-anchor="middle">Жизненный цикл</text>
     <text x="488" y="913" class="small-text" text-anchor="middle">ID · Очередь · Статус</text><text x="488" y="927" class="small-text" text-anchor="middle">Повтор · Отмена</text>
@@ -169,7 +212,7 @@
   <rect x="680" y="974" width="260" height="28" rx="4" class="flow-label"/><text x="810" y="993" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Исполнимая задача</text>
 
   <!-- 05 Orchestration and runtime contract -->
-  <g transform="translate(0 28)">
+  <g transform="translate(0 28)" data-spec-id="ARC_CMP_003">
     <rect x="310" y="994" width="1000" height="214" rx="7" class="execution-card"/>
     <text x="338" y="1022" class="component-id">ARC_CMP_003</text><text x="338" y="1049" class="component-title">Оркестрация и RuntimePort</text>
     <text x="338" y="1073" class="component-text">Преобразование задачи в исполнимый цикл и подключение выбранной среды агента</text>
@@ -206,19 +249,23 @@
   <path class="bus-line" d="M810 1192V1244H468.5M810 1244H1151"/>
   <path class="branch-line" d="M468.5 1244V1288"/><path class="branch-line" d="M810 1244V1288"/><path class="branch-line" d="M1151 1244V1288"/>
   <rect x="381" y="1212" width="176" height="44" rx="4" class="flow-label"/>
-  <text x="469" y="1229" class="flow-text" text-anchor="middle">ARC_FLOW_003</text>
+  <text x="469" y="1229" class="flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_003">ARC_FLOW_003</text>
   <text x="469" y="1244" class="small-text" text-anchor="middle">Минимальный контекст</text>
+  <g data-spec-id="SEC_CTL_004"><g data-spec-id="SEC_CTL_006"><g data-spec-id="SEC_CTL_015">
   <rect x="590" y="1200" width="440" height="68" rx="5" class="control-card"/>
-  <text x="810" y="1217" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · SEC_CTL_004 / 006 / 015</text>
+  <text x="810" y="1217" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 / 003 · SEC_CTL_004 / 006 / 015</text>
   <text x="810" y="1234" class="small-title" text-anchor="middle">Контроль данных перед моделью</text>
   <text x="810" y="1249" class="gate-note" text-anchor="middle">Недоверенный контент · Область данных</text>
   <text x="810" y="1262" class="gate-note" text-anchor="middle">Допуск модели/поставщика · Минимальный контекст</text>
+  </g></g></g>
   <rect x="1040" y="1212" width="228" height="44" rx="4" class="flow-label"/>
-  <text x="1154" y="1229" class="flow-text" text-anchor="middle">ARC_FLOW_002 · Действие</text>
+  <text x="1154" y="1229" class="flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_002">ARC_FLOW_002 · Действие</text>
+  <g data-spec-id="SEC_CTL_007"><g data-spec-id="SEC_CTL_008"><g data-spec-id="SEC_CTL_009">
   <text x="1154" y="1244" class="control-flow-text" text-anchor="middle">SEC_CTL_007–009 · Авторизация</text>
+  </g></g></g>
 
   <!-- 06 Capabilities -->
-  <g>
+  <g data-spec-id="ARC_CMP_006">
     <rect x="310" y="1288" width="317" height="172" rx="7" class="data-card"/>
     <text x="468.5" y="1316" class="component-id" text-anchor="middle">ARC_CMP_006</text>
     <text x="468.5" y="1343" class="component-title" text-anchor="middle">Контекст, память</text><text x="468.5" y="1367" class="component-title" text-anchor="middle">и доказательства</text>
@@ -227,7 +274,7 @@
     <text x="468.5" y="1429" class="small-text" text-anchor="middle">Память · Граф знаний · Доказательства</text>
     <text x="468.5" y="1443" class="small-text" text-anchor="middle">Профиль · Проект · Доверие · Минимизация</text>
   </g>
-  <g>
+  <g data-spec-id="ARC_CMP_004">
     <rect x="651" y="1288" width="317" height="172" rx="7" class="execution-card"/>
     <text x="809.5" y="1316" class="component-id" text-anchor="middle">ARC_CMP_004</text>
     <text x="809.5" y="1355" class="component-title" text-anchor="middle">Шлюз моделей</text>
@@ -236,7 +283,7 @@
     <text x="809.5" y="1429" class="small-text" text-anchor="middle">Run · Сессия · Бюджет · Timeout</text>
     <text x="809.5" y="1443" class="small-text" text-anchor="middle">Качество · Скорость · Стоимость · Fallback</text>
   </g>
-  <g>
+  <g data-spec-id="ARC_CMP_005">
     <rect x="992" y="1288" width="318" height="172" rx="7" class="execution-card"/>
     <text x="1151" y="1316" class="component-id" text-anchor="middle">ARC_CMP_005</text>
     <text x="1151" y="1355" class="component-title" text-anchor="middle">Шлюз инструментов</text>
@@ -254,7 +301,7 @@
   <rect x="666" y="1556" width="288" height="28" rx="4" class="flow-label"/><text x="810" y="1575" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Результаты выполнения</text>
 
   <!-- 07 Quality component and architectural output contracts -->
-  <g>
+  <g data-spec-id="ARC_CMP_008">
     <rect x="310" y="1604" width="1000" height="196" rx="7" class="execution-card"/>
     <text x="338" y="1632" class="component-id">ARC_CMP_008</text><text x="338" y="1659" class="component-title">Проверка качества</text>
     <text x="338" y="1683" class="component-text">Проверка формата, качества, источников и безопасности результата</text>
@@ -303,10 +350,10 @@
   <g transform="translate(0 24)">
 
   <!-- 09 Operations -->
-  <g>
+  <g data-spec-id="ARC_CMP_009">
     <rect x="310" y="2058" width="1000" height="166" rx="7" class="neutral-card"/>
-    <text x="338" y="2086" class="component-id">ARC_CMP_009 · СКВОЗНОЙ СЛОЙ</text><text x="338" y="2113" class="component-title">Эксплуатационные функции</text>
-    <text x="338" y="2137" class="component-text">Сквозное планирование, наблюдаемость, восстановление и управление изменениями</text>
+    <text x="338" y="2086" class="component-id">ARC_CMP_009</text><text x="338" y="2113" class="component-title">Эксплуатационные функции</text>
+    <text x="338" y="2137" class="component-text">Планирование, наблюдаемость, восстановление и управление изменениями</text>
     <rect x="338" y="2148" width="300" height="62" rx="4" class="inner-card"/>
     <text x="488" y="2169" class="small-title" text-anchor="middle">Планирование и запуски</text>
     <text x="488" y="2187" class="small-text" text-anchor="middle">Расписание · Очередь · События</text><text x="488" y="2201" class="small-text" text-anchor="middle">Task ID · Корреляция</text>
@@ -324,8 +371,8 @@
     <text x="338" y="2268" class="infra-component-id">INF_CMP_001–008</text>
     <text x="338" y="2295" class="infra-component-title">Компоненты размещения</text>
     <text x="338" y="2319" class="infra-component-text">Физическая среда выполнения и инфраструктурные контуры платформы</text>
-    <text x="338" y="2344" class="infra-small-text">Вычислительная среда выполнения · Сеть и контроль исходящего трафика · Хранилище секретов · Рабочая область задачи</text>
-    <text x="338" y="2362" class="infra-small-text">Постоянное хранилище · Хранилище резервных копий · Наблюдаемость · Управление развёртыванием</text>
+    <text x="338" y="2344" class="infra-small-text"><tspan data-spec-id="INF_CMP_001">Вычислительная среда выполнения</tspan> · <tspan data-spec-id="INF_CMP_002">Сеть и контроль исходящего трафика</tspan> · <tspan data-spec-id="INF_CMP_003">Хранилище секретов</tspan> · <tspan data-spec-id="INF_CMP_004">Рабочая область задачи</tspan></text>
+    <text x="338" y="2362" class="infra-small-text"><tspan data-spec-id="INF_CMP_005">Постоянное хранилище</tspan> · <tspan data-spec-id="INF_CMP_006">Хранилище резервных копий</tspan> · <tspan data-spec-id="INF_CMP_007">Наблюдаемость</tspan> · <tspan data-spec-id="INF_CMP_008">Управление развёртыванием</tspan></text>
 
     <text x="338" y="2389" class="infra-header">ИНФРАСТРУКТУРНЫЕ ПОТОКИ</text>
     <rect x="338" y="2402" width="179" height="68" rx="4" class="infra-inner-card"/>
@@ -333,11 +380,11 @@
     <rect x="720" y="2402" width="179" height="68" rx="4" class="infra-inner-card"/>
     <rect x="911" y="2402" width="179" height="68" rx="4" class="infra-inner-card"/>
     <rect x="1102" y="2402" width="180" height="68" rx="4" class="infra-inner-card"/>
-    <text x="427.5" y="2424" class="infra-chip" text-anchor="middle">INF_FLOW_001</text><text x="427.5" y="2455" class="infra-small-text" text-anchor="middle">Развёртывание</text>
-    <text x="618.5" y="2424" class="infra-chip" text-anchor="middle">INF_FLOW_002</text><text x="618.5" y="2455" class="infra-small-text" text-anchor="middle">Откат</text>
-    <text x="809.5" y="2424" class="infra-chip" text-anchor="middle">INF_FLOW_003</text><text x="809.5" y="2445" class="infra-small-text" text-anchor="middle">Контролируемый</text><text x="809.5" y="2460" class="infra-small-text" text-anchor="middle">исходящий трафик</text>
-    <text x="1000.5" y="2424" class="infra-chip" text-anchor="middle">INF_FLOW_004</text><text x="1000.5" y="2445" class="infra-small-text" text-anchor="middle">Резервное копирование</text><text x="1000.5" y="2460" class="infra-small-text" text-anchor="middle">и восстановление</text>
-    <text x="1192" y="2424" class="infra-chip" text-anchor="middle">INF_FLOW_005</text><text x="1192" y="2445" class="infra-small-text" text-anchor="middle">Восстановление</text><text x="1192" y="2460" class="infra-small-text" text-anchor="middle">в новой среде</text>
+    <text x="427.5" y="2424" class="infra-chip" text-anchor="middle" data-spec-id="INF_FLOW_001">INF_FLOW_001</text><text x="427.5" y="2455" class="infra-small-text" text-anchor="middle">Развёртывание</text>
+    <text x="618.5" y="2424" class="infra-chip" text-anchor="middle" data-spec-id="INF_FLOW_002">INF_FLOW_002</text><text x="618.5" y="2455" class="infra-small-text" text-anchor="middle">Откат</text>
+    <text x="809.5" y="2424" class="infra-chip" text-anchor="middle" data-spec-id="INF_FLOW_003">INF_FLOW_003</text><text x="809.5" y="2445" class="infra-small-text" text-anchor="middle">Контролируемый</text><text x="809.5" y="2460" class="infra-small-text" text-anchor="middle">исходящий трафик</text>
+    <text x="1000.5" y="2424" class="infra-chip" text-anchor="middle" data-spec-id="INF_FLOW_004">INF_FLOW_004</text><text x="1000.5" y="2445" class="infra-small-text" text-anchor="middle">Резервное копирование</text><text x="1000.5" y="2460" class="infra-small-text" text-anchor="middle">и восстановление</text>
+    <text x="1192" y="2424" class="infra-chip" text-anchor="middle" data-spec-id="INF_FLOW_005">INF_FLOW_005</text><text x="1192" y="2445" class="infra-small-text" text-anchor="middle">Восстановление</text><text x="1192" y="2460" class="infra-small-text" text-anchor="middle">в новой среде</text>
   </g>
 
   </g>
@@ -346,18 +393,18 @@
 
   </g>
 
-  <!-- Placement supports every working layer -->
+  <!-- Placement supports logical components -->
   <path class="support-rail" d="M310 2452H270V454"/>
   <path class="support-line" d="M270 454H310"/><path class="support-line" d="M270 678H310"/><path class="support-line" d="M270 913H310"/>
   <path class="support-line" d="M270 1212H310"/><path class="support-line" d="M270 1462H310"/><path class="support-line" d="M270 1714H310"/>
   <path class="support-line" d="M270 1953H310"/><path class="support-line" d="M270 2177H310"/><path class="support-line" d="M270 2452H310"/>
 
   <!-- Scheduled flow and security rail -->
-  <path class="scheduled-line" d="M1310 2177H1440V679H1310"/>
-  <g transform="translate(1457 1428) rotate(90)"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_004 / SEC_CTL_017 · Плановая задача без дополнительных полномочий</text></g>
+  <path class="scheduled-line" d="M1310 2177H1440V679H1310" data-spec-id="ARC_FLOW_004"/>
+  <g transform="translate(1457 1428) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_004 / SEC_CTL_017 · Плановая задача без дополнительных полномочий</text></g>
   <path class="control-rail" d="M1310 718H1350V2177"/>
   <path class="control-line" d="M1350 1212H1310"/><path class="control-line" d="M1350 1462H1310"/><path class="control-line" d="M1350 2177H1310"/>
-  <g transform="translate(1367 1448) rotate(90)"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
+  <g transform="translate(1367 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
   <path d="M810 2088H1490V454H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
