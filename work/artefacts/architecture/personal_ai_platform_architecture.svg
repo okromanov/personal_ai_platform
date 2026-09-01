@@ -95,6 +95,8 @@
       .implementation-link { fill: none; stroke: #7D8895; stroke-width: 1; stroke-dasharray: 3 3; stroke-linecap: round; marker-end: url(#arrow-support); }
       .detail-panel { fill: #FAFBFC; stroke: #D7DCE2; stroke-width: 1; }
       .flow-label { fill: #FFFFFF; stroke: #D9E1E8; stroke-width: 0.9; }
+      .flow-label-blue { fill: #F3F7FB; stroke: #315C88; stroke-width: 0.9; }
+      .flow-label-red { fill: #FFF6F5; stroke: #A1463F; stroke-width: 0.9; }
       .gate-note { font-size: 10px; font-weight: 500; fill: #53606E; }
     </style>
   </defs>
@@ -213,7 +215,7 @@
 
   <!-- 05 Orchestration and runtime contract -->
   <g transform="translate(0 28)" data-spec-id="ARC_CMP_003">
-    <rect x="310" y="994" width="1000" height="214" rx="7" class="execution-card"/>
+    <rect x="310" y="994" width="1000" height="222" rx="7" class="execution-card"/>
     <text x="338" y="1022" class="component-id">ARC_CMP_003</text><text x="338" y="1049" class="component-title">Оркестрация и RuntimePort</text>
     <text x="338" y="1073" class="component-text">Преобразование задачи в исполнимый цикл и подключение выбранной среды агента</text>
 
@@ -320,8 +322,8 @@
   </g>
   <path class="main-line" d="M569 1788V1868"/>
   <path class="failure-line" d="M1051 1788V1868"/>
-  <path class="retry-line" d="M1310 1714H1395V1200H1310"/>
-  <g transform="translate(1412 1458) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
+  <path class="retry-line" d="M1310 1714H1390V1200H1310"/>
+  <g transform="translate(1390 1457) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
 
   <!-- 08 Outcomes and result envelope -->
   <g transform="translate(0 32)">
@@ -398,18 +400,18 @@
   <path class="support-line" d="M270 1953H310"/><path class="support-line" d="M270 2177H310"/><path class="support-line" d="M270 2452H310"/>
 
   <!-- Scheduled flow and security rail -->
-  <path class="scheduled-line" d="M1310 2177H1440V679H1310" data-spec-id="ARC_FLOW_004"/>
-  <g transform="translate(1457 1428) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
+  <path class="scheduled-line" d="M1310 2177H1430V679H1310" data-spec-id="ARC_FLOW_004"/>
+  <g transform="translate(1430 1428) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
   <path class="control-rail" d="M1310 718H1350V2177"/>
   <path class="control-line" d="M1350 1212H1310"/><path class="control-line" d="M1350 1462H1310"/><path class="control-line" d="M1350 2177H1310"/>
-  <g transform="translate(1367 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
+  <g transform="translate(1350 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path d="M554 2014V2054H1486V486H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M1066 2014V2038H1498V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path class="main-line" d="M554 2014V2054H1486V486H1310"/>
-  <path class="failure-line" d="M1066 2014V2038H1498V498H1310"/>
-  <g transform="translate(1515 900) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
-  <g transform="translate(1515 1550) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
+  <path d="M554 2014V2054H1470V486H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1066 2014V2038H1510V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="main-line" d="M554 2014V2054H1470V486H1310"/>
+  <path class="failure-line" d="M1066 2014V2038H1510V498H1310"/>
+  <g transform="translate(1470 1270) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
+  <g transform="translate(1510 1268) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
   </g>
 </svg>
