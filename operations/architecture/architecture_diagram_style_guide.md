@@ -31,10 +31,10 @@ depends_on:
 
 Перед отрисовкой определяется набор источников:
 
-1. `project_rules.md` — общие ограничения и управление изменениями.
-2. `specifications/architecture_baseline.md` — логические компоненты и архитектурные потоки.
-3. `specifications/infrastructure_baseline.md` — компоненты размещения и инфраструктурные потоки.
-4. `specifications/system_specification.md` — системные требования и меры контроля.
+1. [`project_rules.md`](../../project_rules.md) — общие ограничения и управление изменениями.
+2. [`architecture_baseline.md`](../../specifications/architecture_baseline.md) — логические компоненты и архитектурные потоки.
+3. [`infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md) — компоненты размещения и инфраструктурные потоки.
+4. [`system_specification.md`](../../specifications/system_specification.md) — системные требования и меры контроля.
 5. Применимые ADR и операционные документы.
 6. Предоставленный шаблон PPTX или другой визуальный референс — только для оформления и композиции.
 
