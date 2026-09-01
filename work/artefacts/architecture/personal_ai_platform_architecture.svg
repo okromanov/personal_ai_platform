@@ -20,6 +20,7 @@
       .small-title { font-size: 14px; font-weight: 600; }
       .small-text { font-size: 12px; font-weight: 400; fill: #5E6875; }
       .micro-text { font-size: 10.5px; font-weight: 400; fill: #5E6875; }
+      .implementation-sub-text { font-size: 9.5px; font-weight: 400; fill: #5E6875; }
       .flow-text { font-size: 11px; font-weight: 600; fill: #315C88; }
       .control-flow-text { font-size: 11px; font-weight: 600; fill: #A1463F; }
       .inverse-title { font-size: 14px; font-weight: 600; fill: #FFFFFF; }
@@ -140,7 +141,7 @@
     <text x="930.5" y="681" class="small-text" text-anchor="middle">Разрешения · Лимиты</text><text x="930.5" y="695" class="small-text" text-anchor="middle">Подтверждения</text>
     <rect x="1061" y="642" width="221" height="64" rx="4" fill="#A1463F"/>
     <text x="1171.5" y="663" class="inverse-title" text-anchor="middle">Аварийное управление</text>
-    <text x="1171.5" y="681" class="inverse-text" text-anchor="middle">Безусловный приоритет</text><text x="1171.5" y="695" class="inverse-text" text-anchor="middle">над моделью и Runtime</text>
+    <text x="1171.5" y="681" class="inverse-text" text-anchor="middle">Безусловный приоритет</text><text x="1171.5" y="695" class="inverse-text" text-anchor="middle">над моделью и исполнением</text>
   </g>
   <path class="main-line" d="M810 716V784"/>
   <rect x="676" y="736" width="268" height="28" rx="4" class="flow-label"/><text x="810" y="755" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Разрешённая задача</text>
@@ -166,29 +167,29 @@
   <g>
     <rect x="310" y="994" width="1000" height="214" rx="7" class="execution-card"/>
     <text x="338" y="1022" class="component-id">ARC_CMP_003</text><text x="338" y="1049" class="component-title">Оркестрация и RuntimePort</text>
-    <text x="338" y="1075" class="component-text">Преобразование задачи в исполнимый цикл и подключение выбранной среды агента</text>
+    <text x="338" y="1073" class="component-text">Преобразование задачи в исполнимый цикл и подключение выбранной среды агента</text>
 
-    <rect x="338" y="1088" width="221" height="104" rx="4" class="inner-card"/>
-    <text x="448.5" y="1115" class="small-title" text-anchor="middle">Skills</text>
-    <text x="448.5" y="1139" class="micro-text" text-anchor="middle">Переиспользуемые инструкции</text><text x="448.5" y="1154" class="micro-text" text-anchor="middle">для выполнения задач</text>
+    <rect x="338" y="1084" width="221" height="116" rx="4" class="inner-card"/>
+    <text x="448.5" y="1110" class="small-title" text-anchor="middle">Skills</text>
+    <text x="448.5" y="1128" class="small-text" text-anchor="middle">Переиспользуемые инструкции</text><text x="448.5" y="1142" class="small-text" text-anchor="middle">для выполнения задач</text>
     <path class="branch-line" d="M559 1140H579"/>
-    <rect x="579" y="1088" width="221" height="104" rx="4" class="inner-card"/>
-    <text x="689.5" y="1115" class="small-title" text-anchor="middle">Capabilities</text>
-    <text x="689.5" y="1139" class="micro-text" text-anchor="middle">Устойчивые способности</text><text x="689.5" y="1154" class="micro-text" text-anchor="middle">пользователя или системы</text>
+    <rect x="579" y="1084" width="221" height="116" rx="4" class="inner-card"/>
+    <text x="689.5" y="1110" class="small-title" text-anchor="middle">Capabilities</text>
+    <text x="689.5" y="1128" class="small-text" text-anchor="middle">Устойчивые способности</text><text x="689.5" y="1142" class="small-text" text-anchor="middle">пользователя или системы</text>
     <path class="branch-line" d="M800 1140H820"/>
-    <rect x="820" y="1088" width="221" height="104" rx="4" class="inner-card"/>
-    <text x="930.5" y="1115" class="small-title" text-anchor="middle">Tools</text>
-    <text x="930.5" y="1139" class="micro-text" text-anchor="middle">Атомарные операции</text><text x="930.5" y="1154" class="micro-text" text-anchor="middle">с явными полномочиями</text>
+    <rect x="820" y="1084" width="221" height="116" rx="4" class="inner-card"/>
+    <text x="930.5" y="1110" class="small-title" text-anchor="middle">Tools</text>
+    <text x="930.5" y="1128" class="small-text" text-anchor="middle">Атомарные операции</text><text x="930.5" y="1142" class="small-text" text-anchor="middle">с явными полномочиями</text>
     <path class="implementation-link" d="M1041 1140H1061"/>
-    <rect x="1061" y="1088" width="221" height="104" rx="4" class="implementation-pill"/>
-    <text x="1171.5" y="1112" class="small-title" text-anchor="middle">Реализация</text>
-    <text x="1171.5" y="1129" class="micro-text" text-anchor="middle">Адаптер или поставщик</text>
-    <rect x="1073" y="1136" width="197" height="12" rx="3" class="implementation-sub"/>
-    <rect x="1073" y="1152" width="197" height="12" rx="3" class="implementation-sub"/>
-    <rect x="1073" y="1168" width="197" height="12" rx="3" class="implementation-sub"/>
-    <text x="1171.5" y="1146" class="micro-text" text-anchor="middle">Режим выполнения</text>
-    <text x="1171.5" y="1162" class="micro-text" text-anchor="middle">Управление процессом</text>
-    <text x="1171.5" y="1178" class="micro-text" text-anchor="middle">Hooks и события</text>
+    <rect x="1061" y="1084" width="221" height="116" rx="4" class="implementation-pill"/>
+    <text x="1171.5" y="1110" class="small-title" text-anchor="middle">Реализация</text>
+    <text x="1171.5" y="1128" class="small-text" text-anchor="middle">Адаптер или поставщик</text>
+    <rect x="1073" y="1136" width="197" height="16" rx="3" class="implementation-sub"/>
+    <rect x="1073" y="1156" width="197" height="16" rx="3" class="implementation-sub"/>
+    <rect x="1073" y="1176" width="197" height="16" rx="3" class="implementation-sub"/>
+    <text x="1171.5" y="1147" class="implementation-sub-text" text-anchor="middle">Режим выполнения</text>
+    <text x="1171.5" y="1167" class="implementation-sub-text" text-anchor="middle">Управление процессом</text>
+    <text x="1171.5" y="1187" class="implementation-sub-text" text-anchor="middle">Hooks и события</text>
 
   </g>
 
