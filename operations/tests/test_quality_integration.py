@@ -11,6 +11,27 @@ from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS, PYTHON_SOURCE
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def _bash_executable() -> str:
+    """Resolve the real Git-for-Windows bash, not the plain "bash" name.
+
+    On GitHub's windows-latest runners, bare "bash" on PATH resolves to
+    Windows' own WSL launcher stub (C:\\Windows\\System32\\bash.exe), which
+    ships even when no WSL distribution is installed and just prints an
+    error and exits -- it is not Git Bash. Git for Windows is installed at
+    a fixed, documented location on these runners; every other platform
+    just uses "bash" from PATH as before.
+    """
+    if os.name != "nt":
+        return "bash"
+    for candidate in (
+        r"C:\Program Files\Git\bin\bash.exe",
+        r"C:\Program Files\Git\usr\bin\bash.exe",
+    ):
+        if Path(candidate).is_file():
+            return candidate
+    raise RuntimeError("Git Bash not found at any expected Windows install location")
+
+
 class QualityIntegrationTests(unittest.TestCase):
     def test_event_gate_covers_push_pr_and_manual(self) -> None:
         workflow = (ROOT / ".github/workflows/project_check.yml").read_text(encoding="utf-8")
@@ -134,22 +155,18 @@ class QualityIntegrationTests(unittest.TestCase):
             # Shim every name the loop tries so this is deterministic.
             fake_bin = root / "fake_bin"
             fake_bin.mkdir()
+            bash = _bash_executable()
             shim_body = '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n'
             for name in ("python3.14", "python3.13", "python3.12", "python3", "python"):
                 fake_python = fake_bin / name
-                # On Windows, a file written via Python's native filesystem
-                # API and then chmod'd (even via a separate `bash -c chmod`
-                # call) is not reliably executable from bash's own exec()
-                # check afterwards: NTFS has no POSIX execute bit, and Git
-                # Bash's MSYS runtime tracks executability through its own
-                # metadata that a cross-process, after-the-fact chmod does
-                # not reliably set. Writing the shim's content *and* setting
-                # its permissions from a single bash invocation avoids that
-                # boundary entirely -- bash is the only thing that ever
-                # touches the file, on every platform.
+                # Writing the shim's content *and* setting its executable
+                # permission from a single bash invocation, rather than
+                # Python's own filesystem API plus a separate chmod, keeps
+                # the file's permissions consistent with whatever bash's own
+                # exec() check reads -- on every platform.
                 subprocess.run(
                     [
-                        "bash",
+                        bash,
                         "-c",
                         f"cat > '{fake_python.as_posix()}' && chmod +x '{fake_python.as_posix()}'",
                     ],
@@ -161,7 +178,7 @@ class QualityIntegrationTests(unittest.TestCase):
             environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
 
             completed = subprocess.run(
-                ["bash", str(helper)],
+                [bash, str(helper)],
                 cwd=root,
                 env=environment,
                 text=True,
