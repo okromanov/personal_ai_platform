@@ -138,14 +138,14 @@
   <g>
     <text x="80" y="256" class="layer-no">01 · ВЛАДЕЛЕЦ</text>
     <text x="80" y="402" class="layer-no">02 · ИНТЕРФЕЙСЫ</text>
-    <text x="80" y="618" class="layer-no">03 · БЕЗОПАСНОСТЬ</text>
-    <text x="80" y="850" class="layer-no">04 · СОСТОЯНИЕ</text>
-    <text x="80" y="1088" class="layer-no">05 · ИСПОЛНЕНИЕ</text>
-    <text x="80" y="1398" class="layer-no">06 · ВОЗМОЖНОСТИ</text>
-    <text x="80" y="1638" class="layer-no">07 · ПРОВЕРКА</text>
-    <text x="80" y="1902" class="layer-no">08 · РЕЗУЛЬТАТ</text>
-    <text x="80" y="2116" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
-    <text x="80" y="2350" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
+    <text x="80" y="622" class="layer-no">03 · БЕЗОПАСНОСТЬ</text>
+    <text x="80" y="860" class="layer-no">04 · СОСТОЯНИЕ</text>
+    <text x="80" y="1098" class="layer-no">05 · ИСПОЛНЕНИЕ</text>
+    <text x="80" y="1416" class="layer-no">06 · ВОЗМОЖНОСТИ</text>
+    <text x="80" y="1656" class="layer-no">07 · ПРОВЕРКА</text>
+    <text x="80" y="1924" class="layer-no">08 · РЕЗУЛЬТАТ</text>
+    <text x="80" y="2138" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
+    <text x="80" y="2374" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
   </g>
 
   <!-- 01 Owner -->
@@ -159,7 +159,7 @@
 
   <!-- 02 Interfaces -->
   <g data-spec-id="ARC_CMP_001">
-    <rect x="310" y="380" width="1000" height="148" rx="7" class="neutral-card"/>
+    <rect x="310" y="380" width="1000" height="152" rx="7" class="neutral-card"/>
     <text x="338" y="408" class="component-id">ARC_CMP_001</text><text x="338" y="434" class="component-title">Каналы</text>
     <text x="338" y="458" class="component-text">Приём запросов и возврат результатов через пользовательские каналы</text>
     <rect x="338" y="468" width="221" height="48" rx="4" class="inner-card"/><rect x="579" y="468" width="221" height="48" rx="4" class="inner-card"/>
@@ -169,14 +169,14 @@
     <text x="930.5" y="489" class="small-title" text-anchor="middle">Voice</text><text x="930.5" y="507" class="small-text" text-anchor="middle">Голосовой режим</text>
     <text x="1171.5" y="489" class="small-title" text-anchor="middle">Web</text><text x="1171.5" y="507" class="small-text" text-anchor="middle">Веб-интерфейс</text>
   </g>
-  <path class="main-line" d="M810 528V596"/>
-  <rect x="668" y="548" width="284" height="28" rx="4" class="flow-label"/><text x="810" y="567" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Нормализованный ввод</text>
+  <path class="main-line" d="M810 532V600"/>
+  <rect x="668" y="552" width="284" height="28" rx="4" class="flow-label"/><text x="810" y="571" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Нормализованный ввод</text>
 
-  <g transform="translate(0 44)">
+  <g transform="translate(0 48)">
 
   <!-- 03 Ingress security and owner control -->
   <g data-spec-id="ARC_CMP_002">
-    <rect x="310" y="552" width="1000" height="164" rx="7" class="control-card"/>
+    <rect x="310" y="552" width="1000" height="170" rx="7" class="control-card"/>
     <text x="338" y="580" class="component-id">ARC_CMP_002</text><text x="338" y="607" class="component-title">Безопасность и контроль владельца</text>
     <text x="338" y="631" class="component-text">Проверка недоверенного ввода до модели и повторный контроль чувствительных действий перед исполнением</text>
     <rect x="338" y="642" width="221" height="64" rx="4" class="inner-card"/>
@@ -192,6 +192,7 @@
     <text x="1171.5" y="663" class="inverse-title" text-anchor="middle">Аварийное управление</text>
     <text x="1171.5" y="681" class="inverse-text" text-anchor="middle">Безусловный приоритет</text><text x="1171.5" y="695" class="inverse-text" text-anchor="middle">над моделью и исполнением</text>
   </g>
+  <g transform="translate(0 6)">
   <path class="main-line" d="M810 716V784"/>
   <rect x="676" y="736" width="268" height="28" rx="4" class="flow-label"/><text x="810" y="755" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Разрешённая задача</text>
 
@@ -244,8 +245,9 @@
   </g>
 
   </g>
+  </g>
 
-  <g transform="translate(0 88)">
+  <g transform="translate(0 106)">
 
   <!-- Branches to capabilities -->
   <path class="bus-line" d="M810 1192V1244H468.5M810 1244H1151"/>
@@ -304,7 +306,7 @@
 
   <!-- 07 Quality component and architectural output contracts -->
   <g data-spec-id="ARC_CMP_008">
-    <rect x="310" y="1604" width="1000" height="196" rx="7" class="execution-card"/>
+    <rect x="310" y="1604" width="1000" height="200" rx="7" class="execution-card"/>
     <text x="338" y="1632" class="component-id">ARC_CMP_008</text><text x="338" y="1659" class="component-title">Проверка качества</text>
     <text x="338" y="1683" class="component-text">Проверка формата, качества, источников и безопасности результата</text>
     <rect x="338" y="1698" width="221" height="48" rx="4" class="inner-card"/>
@@ -320,13 +322,13 @@
     <rect x="820" y="1760" width="462" height="28" rx="4" class="control-card"/>
     <text x="1051" y="1779" class="control-flow-text" text-anchor="middle">Интерфейс контролируемого исхода</text>
   </g>
-  <path class="main-line" d="M569 1788V1868"/>
-  <path class="failure-line" d="M1051 1788V1868"/>
-  <path class="retry-line" d="M1310 1714H1390V1200H1310"/>
-  <g transform="translate(1390 1457) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
+  <path class="main-line" d="M569 1788V1872"/>
+  <path class="failure-line" d="M1051 1788V1872"/>
+  <path class="retry-line" d="M1310 1722H1390V1194H1310"/>
+  <g transform="translate(1390 1458) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
 
   <!-- 08 Outcomes and result envelope -->
-  <g transform="translate(0 32)">
+  <g transform="translate(0 36)">
   <g>
     <rect x="310" y="1836" width="488" height="146" rx="7" class="neutral-card"/>
     <text x="338" y="1868" class="component-title">Готовый результат или материал</text>
@@ -347,11 +349,11 @@
   </g>
   </g>
 
-  <g transform="translate(0 24)">
+  <g transform="translate(0 28)">
 
   <!-- 09 Operations -->
   <g data-spec-id="ARC_CMP_009">
-    <rect x="310" y="2058" width="1000" height="166" rx="7" class="neutral-card"/>
+    <rect x="310" y="2058" width="1000" height="168" rx="7" class="neutral-card"/>
     <text x="338" y="2086" class="component-id">ARC_CMP_009</text><text x="338" y="2113" class="component-title">Эксплуатационные функции</text>
     <text x="338" y="2137" class="component-text">Планирование, наблюдаемость, восстановление и управление изменениями</text>
     <rect x="338" y="2148" width="300" height="62" rx="4" class="inner-card"/>
@@ -366,8 +368,8 @@
   </g>
 
   <!-- 10 Placement -->
-  <g transform="translate(0 52)">
-    <rect x="310" y="2240" width="1000" height="248" rx="7" fill="#27313D"/>
+  <g transform="translate(0 54)">
+    <rect x="310" y="2240" width="1000" height="246" rx="7" fill="#27313D"/>
     <text x="338" y="2268" class="infra-component-id">INF_CMP_001–008</text>
     <text x="338" y="2295" class="infra-component-title">Компоненты размещения</text>
     <text x="338" y="2319" class="infra-component-text">Физическая среда выполнения и инфраструктурные контуры платформы</text>
@@ -394,24 +396,24 @@
   </g>
 
   <!-- Placement supports logical components -->
-  <path class="support-rail" d="M310 2452H270V454"/>
-  <path class="support-line" d="M270 454H310"/><path class="support-line" d="M270 678H310"/><path class="support-line" d="M270 913H310"/>
-  <path class="support-line" d="M270 1212H310"/><path class="support-line" d="M270 1462H310"/><path class="support-line" d="M270 1714H310"/>
-  <path class="support-line" d="M270 1953H310"/><path class="support-line" d="M270 2177H310"/><path class="support-line" d="M270 2452H310"/>
+  <path class="support-rail" d="M310 2475H270V456"/>
+  <path class="support-line" d="M270 456H310"/><path class="support-line" d="M270 685H310"/><path class="support-line" d="M270 923H310"/>
+  <path class="support-line" d="M270 1187H310"/><path class="support-line" d="M270 1480H310"/><path class="support-line" d="M270 1734H310"/>
+  <path class="support-line" d="M270 1975H310"/><path class="support-line" d="M270 2200H310"/><path class="support-line" d="M270 2475H310"/>
 
   <!-- Scheduled flow and security rail -->
-  <path class="scheduled-line" d="M1310 2177H1430V679H1310" data-spec-id="ARC_FLOW_004"/>
-  <g transform="translate(1430 1428) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
-  <path class="control-rail" d="M1310 718H1350V2177"/>
-  <path class="control-line" d="M1350 1212H1310"/><path class="control-line" d="M1350 1462H1310"/><path class="control-line" d="M1350 2177H1310"/>
-  <g transform="translate(1350 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
+  <path class="scheduled-line" d="M1310 2200H1430V685H1310" data-spec-id="ARC_FLOW_004"/>
+  <g transform="translate(1430 1442.5) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
+  <path class="control-rail" d="M1310 722H1350V2200"/>
+  <path class="control-line" d="M1350 1222H1310"/><path class="control-line" d="M1350 1480H1310"/><path class="control-line" d="M1350 2200H1310"/>
+  <g transform="translate(1350 1461) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path d="M554 2014V2054H1470V486H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M1066 2014V2038H1510V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path class="main-line" d="M554 2014V2054H1470V486H1310"/>
-  <path class="failure-line" d="M1066 2014V2038H1510V498H1310"/>
-  <g transform="translate(1470 1270) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
-  <g transform="translate(1510 1268) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
+  <path d="M554 2048V2080H1470V486H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1066 2048V2064H1510V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="main-line" d="M554 2048V2080H1470V486H1310"/>
+  <path class="failure-line" d="M1066 2048V2064H1510V498H1310"/>
+  <g transform="translate(1470 1283) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
+  <g transform="translate(1510 1281) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
   </g>
 </svg>
