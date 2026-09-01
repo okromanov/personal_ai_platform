@@ -90,16 +90,16 @@
 
   <!-- Layer labels -->
   <g>
-    <text x="80" y="277" class="layer-no">01 · ВЛАДЕЛЕЦ</text>
-    <text x="80" y="446" class="layer-no">02 · ИНТЕРФЕЙСЫ</text>
-    <text x="80" y="658" class="layer-no">03 · БЕЗОПАСНОСТЬ</text>
-    <text x="80" y="879" class="layer-no">04 · СОСТОЯНИЕ</text>
-    <text x="80" y="1125" class="layer-no">05 · ИСПОЛНЕНИЕ</text>
-    <text x="80" y="1396" class="layer-no">06 · ВОЗМОЖНОСТИ</text>
-    <text x="80" y="1618" class="layer-no">07 · ПРОВЕРКА</text>
-    <text x="80" y="1845" class="layer-no">08 · РЕЗУЛЬТАТ</text>
-    <text x="80" y="2057" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
-    <text x="80" y="2308" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
+    <text x="80" y="256" class="layer-no">01 · ВЛАДЕЛЕЦ</text>
+    <text x="80" y="402" class="layer-no">02 · ИНТЕРФЕЙСЫ</text>
+    <text x="80" y="594" class="layer-no">03 · БЕЗОПАСНОСТЬ</text>
+    <text x="80" y="826" class="layer-no">04 · СОСТОЯНИЕ</text>
+    <text x="80" y="1036" class="layer-no">05 · ИСПОЛНЕНИЕ</text>
+    <text x="80" y="1346" class="layer-no">06 · ВОЗМОЖНОСТИ</text>
+    <text x="80" y="1550" class="layer-no">07 · ПРОВЕРКА</text>
+    <text x="80" y="1790" class="layer-no">08 · РЕЗУЛЬТАТ</text>
+    <text x="80" y="2004" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
+    <text x="80" y="2214" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
   </g>
 
   <!-- 01 Owner -->
@@ -173,15 +173,15 @@
 
     <rect x="338" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="448.5" y="1110" class="small-title" text-anchor="middle">Skills</text>
-    <text x="448.5" y="1128" class="small-text" text-anchor="middle">Переиспользуемые инструкции</text><text x="448.5" y="1142" class="small-text" text-anchor="middle">для выполнения задач</text>
+    <text x="448.5" y="1140" class="small-text" text-anchor="middle">Переиспользуемые инструкции</text><text x="448.5" y="1154" class="small-text" text-anchor="middle">для выполнения задач</text>
     <path class="branch-line" d="M559 1140H579"/>
     <rect x="579" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="689.5" y="1110" class="small-title" text-anchor="middle">Capabilities</text>
-    <text x="689.5" y="1128" class="small-text" text-anchor="middle">Устойчивые способности</text><text x="689.5" y="1142" class="small-text" text-anchor="middle">пользователя или системы</text>
+    <text x="689.5" y="1140" class="small-text" text-anchor="middle">Устойчивые способности</text><text x="689.5" y="1154" class="small-text" text-anchor="middle">пользователя или системы</text>
     <path class="branch-line" d="M800 1140H820"/>
     <rect x="820" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="930.5" y="1110" class="small-title" text-anchor="middle">Tools</text>
-    <text x="930.5" y="1128" class="small-text" text-anchor="middle">Атомарные операции</text><text x="930.5" y="1142" class="small-text" text-anchor="middle">с явными полномочиями</text>
+    <text x="930.5" y="1140" class="small-text" text-anchor="middle">Атомарные операции</text><text x="930.5" y="1154" class="small-text" text-anchor="middle">с явными полномочиями</text>
     <path class="implementation-link" d="M1041 1140H1061"/>
     <rect x="1061" y="1084" width="221" height="116" rx="4" class="implementation-pill"/>
     <text x="1171.5" y="1110" class="small-title" text-anchor="middle">Реализация</text>
