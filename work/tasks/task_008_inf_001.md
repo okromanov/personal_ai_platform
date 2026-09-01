@@ -5,7 +5,7 @@ title: Реализация INF_CMP_001
 component: INF_CMP_001
 work_state: completed
 version: 2.6
-updated: 2026-08-30
+updated: 2026-09-01
 next_actor: none
 owner_action: none
 owner_followups:
@@ -21,7 +21,7 @@ allowed_paths:
   - operations/tests/product/test_compute_environment.py
   - work/tests/test_014.md
   - operations/scripts/documents/check.py
-  - work/audit/repository_audit_system_prompt.md
+  - operations/repository_audit_system_prompt.md
 traces_to:
   - m02
 implements:
