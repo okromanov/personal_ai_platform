@@ -399,7 +399,7 @@
 
   <!-- Scheduled flow and security rail -->
   <path class="scheduled-line" d="M1310 2177H1440V679H1310" data-spec-id="ARC_FLOW_004"/>
-  <g transform="translate(1457 1428) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_004 / SEC_CTL_017 · Плановая задача без дополнительных полномочий</text></g>
+  <g transform="translate(1457 1428) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
   <path class="control-rail" d="M1310 718H1350V2177"/>
   <path class="control-line" d="M1350 1212H1310"/><path class="control-line" d="M1350 1462H1310"/><path class="control-line" d="M1350 2177H1310"/>
   <g transform="translate(1367 1448) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
@@ -409,6 +409,7 @@
   <path d="M1066 2014V2038H1498V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
   <path class="main-line" d="M554 2014V2054H1486V486H1310"/>
   <path class="failure-line" d="M1066 2014V2038H1498V498H1310"/>
-  <g transform="translate(1515 1268) rotate(90)"><rect x="-172" y="-14" width="344" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Возврат через выбранный канал</text></g>
+  <g transform="translate(1515 900) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
+  <g transform="translate(1515 1550) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
   </g>
 </svg>
