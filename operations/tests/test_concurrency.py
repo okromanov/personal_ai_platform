@@ -83,7 +83,14 @@ class AtomicWriteConcurrencyTest(unittest.TestCase):
             while not stop.is_set():
                 try:
                     content = read_text(target).rstrip("\n")
-                except FileNotFoundError:
+                except (FileNotFoundError, PermissionError):
+                    # Windows has no POSIX-style guarantee that a concurrent
+                    # os.replace() leaves the destination openable at every
+                    # instant -- a reader can transiently see the file as
+                    # briefly missing OR briefly access-denied while the
+                    # rename is in flight. Neither is a torn/invalid read;
+                    # it's the same "nothing to observe yet" case as
+                    # FileNotFoundError above, just Windows' error for it.
                     continue
                 if content not in stable_values:
                     observed_invalid.append(content)

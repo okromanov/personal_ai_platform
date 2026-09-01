@@ -70,8 +70,8 @@ def read_text(path: Path) -> str:
         raise ValueError(f"{path}: файл не в UTF-8 ({exc})") from exc
 
 
-_REPLACE_RETRY_ATTEMPTS = 5
-_REPLACE_RETRY_DELAY_SECONDS = 0.05
+_REPLACE_RETRY_ATTEMPTS = 40
+_REPLACE_RETRY_DELAY_SECONDS = 0.02
 
 
 def _replace_with_retry(temp_name: str, path: Path) -> None:

@@ -12,6 +12,14 @@ if __package__ in {None, ""}:
 
 from operations.scripts.common.project import find_project_root
 
+# Skips are forbidden as a rule -- an unexplained skip hides a test that
+# should either run or be deleted. The one standing exception is a test
+# whose *implementation*, not its assertion, is platform-bound (here: a
+# helper written in Bash, which Windows CI has no shell for); that is a
+# permanent, documented fact about the environment, not something to
+# "eventually fix" the way an ordinary skip is.
+_ALLOWED_SKIP_REASONS = frozenset({"the canonical helper is a Bash script"})
+
 
 def run_tests(root: Path, *, start_dir: str = "operations/tests", verbosity: int = 1) -> int:
     discovery_root = (root / start_dir).resolve()
@@ -22,9 +30,12 @@ def run_tests(root: Path, *, start_dir: str = "operations/tests", verbosity: int
         top_level_dir=str(discovery_root),
     )
     result = unittest.TextTestRunner(verbosity=verbosity).run(suite)
-    if result.skipped:
+    unexplained_skips = [
+        (test, reason) for test, reason in result.skipped if reason not in _ALLOWED_SKIP_REASONS
+    ]
+    if unexplained_skips:
         print("\nSkipped tests are forbidden:", file=sys.stderr)
-        for test, reason in result.skipped:
+        for test, reason in unexplained_skips:
             print(f"- {test}: {reason}", file=sys.stderr)
         return 2
     if result.unexpectedSuccesses:
