@@ -3,7 +3,7 @@ id: repository_audit_system_prompt
 type: audit_prompt
 document_state: current
 version: 4.0
-updated: 2026-08-31
+updated: 2026-09-01
 depends_on:
   - project_rules
   - coding_agent_instruction
@@ -13,7 +13,7 @@ depends_on:
 ## Проверка контракта, кода, безопасности, защиты данных, тестов, трассируемости и цепочки поставки
 
 **Версия:** 4.0
-**Дата:** 2026-08-31
+**Дата:** 2026-09-01
 
 ---
 
@@ -135,16 +135,16 @@ conditional_areas: [agent_loop, personal_data]  # применимые усло�
 
 Внутри репозитория используй назначение документов из Repository Profile (раздел 0):
 
-1. rules ([`project_rules.md`](../../project_rules.md)) — устойчивые принципы и иерархия;
-2. применимый agents ([`AGENTS.md`](../../AGENTS.md)) — операционный контракт для агента;
-3. [`specifications/`](../../specifications/) — канонические требования и устойчивые контракты;
-4. [`adr/`](../../adr/) — принятые архитектурные решения;
-5. [`operations/`](../../operations/) — процедуры изменения и проверки;
-6. [`work/tasks/`](../../work/tasks/) и [`work/tests/`](../../work/tests/) — границы конкретной работы и критерии evidence;
+1. rules ([`project_rules.md`](../project_rules.md)) — устойчивые принципы и иерархия;
+2. применимый agents ([`AGENTS.md`](../AGENTS.md)) — операционный контракт для агента;
+3. [`specifications/`](../specifications/) — канонические требования и устойчивые контракты;
+4. [`adr/`](../adr/) — принятые архитектурные решения;
+5. [`operations/`](../operations/) — процедуры изменения и проверки;
+6. [`work/tasks/`](../work/tasks/) и [`work/tests/`](../work/tests/) — границы конкретной работы и критерии evidence;
 7. `src/` — наблюдаемая реализация, но не источник продуктовых полномочий;
-8. Зарегистрированные производные документы — только выходы из [`operations/template_registry.json`](../../operations/template_registry.json), требующие проверки drift либо SHA-bound runtime evidence.
+8. Зарегистрированные производные документы — только выходы из [`operations/template_registry.json`](../operations/template_registry.json), требующие проверки drift либо SHA-bound runtime evidence.
 
-[`AGENTS.md`](../../AGENTS.md) не является универсальным источником продуктовой истины. `allowed_paths` определяет границу разрешённых изменений TASK, но само по себе не доказывает реализацию требования или компонента.
+[`AGENTS.md`](../AGENTS.md) не является универсальным источником продуктовой истины. `allowed_paths` определяет границу разрешённых изменений TASK, но само по себе не доказывает реализацию требования или компонента.
 
 При конфликте источников:
 
@@ -172,7 +172,7 @@ conditional_areas: [agent_loop, personal_data]  # применимые усло�
 
 Исключение из read-only: выполнение канонических gates, генераторов и тестов допустимо, но только в изолированной среде по разделу 3.4. Запись разрешена в изолированную копию/worktree либо в явно перечисленные runtime-пути из profile. После завершения зафиксируй состояние дерева и откати любые изменения вне изолированной копии.
 
-Изменения по содержанию допустимы только после явного запроса на реализацию. Даже тогда соблюдай [`AGENTS.md`](../../AGENTS.md), TASK/`allowed_paths`, branch/PR process и разделение критических security boundary изменений.
+Изменения по содержанию допустимы только после явного запроса на реализацию. Даже тогда соблюдай [`AGENTS.md`](../AGENTS.md), TASK/`allowed_paths`, branch/PR process и разделение критических security boundary изменений.
 
 ### 3.3. Обращение с секретами
 

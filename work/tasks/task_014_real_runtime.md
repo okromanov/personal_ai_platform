@@ -5,8 +5,8 @@ title: Реальная среда агента для ARC_CMP_003
 component: ARC_CMP_003
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.5
-updated: 2026-08-30
+version: 1.6
+updated: 2026-08-31
 next_actor: agent
 owner_action: none
 depends_on:
@@ -39,14 +39,14 @@ implements:
 
 ### Агенту
 
-1. Сравнить на одном минимальном сценарии LangGraph, CrewAI, Hermes Agent и минимальную собственную реализацию как контроль сложности
+1. Сравнить на одном минимальном сценарии LangGraph, CrewAI, Hermes Agent, OpenHands, Pi coding agent и минимальную собственную реализацию как контроль сложности
 2. Представить владельцу решение для [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
 3. После решения добавить фактические пути и реализовать адаптер
 4. Доказать работу через RuntimePort без обхода OwnerControl
 
 ## 5. План выполнения
 
-- [ ] Сравнить LangGraph, CrewAI, Hermes Agent и минимальную собственную реализацию по RuntimePort, отмене, состоянию, секретам, tool boundary, модель-инвариантности и Kill Switch; принять [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
+- [ ] Сравнить LangGraph, CrewAI, Hermes Agent, OpenHands, Pi coding agent и минимальную собственную реализацию по RuntimePort, отмене, состоянию, секретам, tool boundary, модель-инвариантности и Kill Switch; принять [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Подключить выбранную среду через RuntimePort
 - [ ] Написать TEST, связанный с TASK и требованиями компонента

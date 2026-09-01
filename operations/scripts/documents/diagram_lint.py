@@ -1,21 +1,15 @@
-"""Проверка блока метаданных управляемых SVG-схем (архитектурных и процессных).
+"""Проверка архитектурных SVG-схем на соответствие
+operations/architecture/architecture_diagram_style_guide.md.
 
-Общий формат блока метаданных определён в architecture_diagram_style_guide.md
-§3 и process_diagram_style_guide.md §2.1 (governed-вариант). Отдельный,
-незащищённый скрипт (не входит в protected_paths и не вызывается из
-check.py --all автоматически — см. architecture_diagram_style_guide.md §2).
-Проверяет только то, что можно проверить без рендеринга SVG: блок метаданных,
-дрейф заявленного source@версия от фактической version источника, наличие
-каждого заявленного id в реестре трассируемости (если id вообще заявлены —
-для процессных схем список может быть пустым), взаимное соответствие
-заявленных id и data-spec-id в теле файла, базовую структуру
-(viewBox/title/desc/role/aria-labelledby).
+Вызывается из check.py --all автоматически (см.
+architecture_diagram_style_guide.md раздел 2). Проверяет только то, что
+можно проверить без рендеринга SVG: блок метаданных, дрейф заявленной
+версии источника от фактической, наличие каждого заявленного ID в
+спецификации, взаимное соответствие списка ID и data-spec-id в теле файла,
+базовую структуру (viewBox/title/desc).
 
-Не проверяет: сетку, отступы, симметрию, контраст, реальное визуальное
-наложение текста, читаемость после масштабирования — это остаётся ручными
-пунктами чек-листов (diagram_geometry_foundations.md §14 и предметный гайд).
-Свободные (ad-hoc) процессные схемы не проходят этот скрипт вовсе —
-process_diagram_style_guide.md §2.2.
+Не проверяет: контраст, реальное визуальное наложение текста, читаемость
+после масштабирования — это остаётся ручным пунктом чек-листа (раздел 17).
 """
 
 from __future__ import annotations
@@ -62,14 +56,19 @@ class LintResult:
         return not self.errors
 
 
-def _parse_metadata_block(text: str, result: LintResult) -> dict[str, object] | None:
+@dataclass
+class _ParsedMetadata:
+    scalars: dict[str, str]
+    sources: list[str]
+    ids: list[str]
+
+
+def _parse_metadata_block(text: str, result: LintResult) -> _ParsedMetadata | None:
     match = _METADATA_BLOCK.search(text)
     if match is None:
         result.errors.append(
             "не найден обязательный блок метаданных "
-            "(<!-- diagram-metadata ... end-diagram-metadata -->) — см. "
-            "architecture_diagram_style_guide.md §3 или "
-            "process_diagram_style_guide.md §2.1"
+            "(<!-- diagram-metadata ... end-diagram-metadata -->), см. раздел 3 гайда"
         )
         return None
 
@@ -109,7 +108,7 @@ def _parse_metadata_block(text: str, result: LintResult) -> dict[str, object] | 
     if not sources:
         result.errors.append("в блоке метаданных нет ни одной строки 'source: путь@версия'")
 
-    return {"scalars": scalars, "sources": sources, "ids": ids}
+    return _ParsedMetadata(scalars=scalars, sources=sources, ids=ids)
 
 
 def _check_sources(sources: list[str], root: Path, result: LintResult) -> None:
@@ -133,17 +132,15 @@ def _check_sources(sources: list[str], root: Path, result: LintResult) -> None:
             result.errors.append(
                 f"дрейф версии: схема заявляет {m.group('path')}@{declared_version}, "
                 f"фактическая version в frontmatter — {actual_version}. "
-                "Схема требует повторной сверки (architecture_diagram_style_guide.md "
-                "§2 / process_diagram_style_guide.md §2.1)."
+                "Схема требует повторной сверки (раздел 2 гайда)."
             )
 
 
 def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: LintResult) -> None:
-    # Пустой список id допустим: процессная схема (process_diagram_style_guide.md
-    # §2.1) может не трассировать ни один элемент реестра — тогда достаточно
-    # заявленных source. Архитектурная схема по своему собственному чек-листу
-    # (architecture_diagram_style_guide.md §7, пункт 2) обычно несёт id, но это
-    # проверяется человеком по чек-листу, а не этим скриптом принудительно.
+    if not declared_ids:
+        result.errors.append("в блоке метаданных нет ни одной строки 'id: ARC_CMP_...'")
+        return
+
     known = collect_traceable_elements(root)
     declared_normalized = {_normalize_id(i) for i in declared_ids}
     for identifier in declared_ids:
@@ -230,13 +227,13 @@ def lint_file(path: Path, root: Path) -> LintResult:
 
     metadata = _parse_metadata_block(text, result)
     if metadata is not None:
-        _check_sources(metadata["sources"], root, result)
-        _check_ids(metadata["ids"], text, root, result)
+        _check_sources(metadata.sources, root, result)
+        _check_ids(metadata.ids, text, root, result)
 
     return result
 
 
-def _default_targets(root: Path) -> list[Path]:
+def default_targets(root: Path) -> list[Path]:
     artefacts_dir = root / "work" / "artefacts"
     if not artefacts_dir.is_dir():
         return []
@@ -244,7 +241,7 @@ def _default_targets(root: Path) -> list[Path]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Проверка блока метаданных управляемых SVG-схем")
+    parser = argparse.ArgumentParser(description="Проверка архитектурных SVG-схем")
     parser.add_argument(
         "paths",
         nargs="*",
@@ -255,7 +252,7 @@ def main() -> int:
     require_supported_python()
     root = find_project_root(Path.cwd())
 
-    targets = [p if p.is_absolute() else Path.cwd() / p for p in args.paths] or _default_targets(
+    targets = [p if p.is_absolute() else Path.cwd() / p for p in args.paths] or default_targets(
         root
     )
     if not targets:
