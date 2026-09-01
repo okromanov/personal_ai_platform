@@ -63,15 +63,31 @@ def find_project_root(start: Path | None = None) -> Path:
     )
 
 
+_REPLACE_RETRY_ATTEMPTS = 40
+_REPLACE_RETRY_DELAY_SECONDS = 0.02
+
+
 def read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8-sig")
-    except UnicodeDecodeError as exc:
-        raise ValueError(f"{path}: файл не в UTF-8 ({exc})") from exc
+    """Read a UTF-8(-sig) text file.
 
-
-_REPLACE_RETRY_ATTEMPTS = 5
-_REPLACE_RETRY_DELAY_SECONDS = 0.05
+    A concurrent atomic_write's os.replace() onto this same path can leave
+    it transiently inaccessible on Windows, which has no POSIX-style
+    guarantee that opening a file for reading succeeds while a rename onto
+    it is in flight elsewhere (see _replace_with_retry for the writer side
+    of the same gap). A bounded retry absorbs that here too, so callers get
+    a real read of one atomic value or the other -- never an exception for
+    a race that resolves within milliseconds -- without changing behavior
+    on POSIX, where the first attempt always succeeds."""
+    for attempt in range(_REPLACE_RETRY_ATTEMPTS):
+        try:
+            return path.read_text(encoding="utf-8-sig")
+        except UnicodeDecodeError as exc:
+            raise ValueError(f"{path}: файл не в UTF-8 ({exc})") from exc
+        except PermissionError:
+            if attempt == _REPLACE_RETRY_ATTEMPTS - 1:
+                raise
+            time.sleep(_REPLACE_RETRY_DELAY_SECONDS)
+    raise AssertionError("unreachable: loop above always returns or raises")
 
 
 def _replace_with_retry(temp_name: str, path: Path) -> None:

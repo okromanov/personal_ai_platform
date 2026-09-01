@@ -3,7 +3,7 @@
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.0
+  diagram_version: 1.2
   generated_at: 2026-09-01
   status: current
   source: specifications/architecture_baseline.md@1.3

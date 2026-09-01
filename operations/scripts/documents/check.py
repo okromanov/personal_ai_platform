@@ -20,6 +20,7 @@ from operations.scripts.common.project import (
     relative_posix,
     require_supported_python,
 )
+from operations.scripts.documents.diagram_lint import default_targets, lint_file
 from operations.scripts.documents.index import is_primary_markdown
 from operations.scripts.documents.links import check_markdown_links
 from operations.scripts.documents.metadata import (
@@ -1446,6 +1447,19 @@ def check_audit_register_cards(root: Path) -> CheckResult:
     return _result("audit_register_cards", errors)
 
 
+def check_architecture_diagrams(root: Path) -> CheckResult:
+    """Архитектурные SVG-схемы (work/artefacts/**/*.svg) соответствуют
+    operations/architecture/architecture_diagram_style_guide.md — см. diagram_lint.py.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    for target in default_targets(root):
+        result = lint_file(target, root)
+        errors.extend(f"{result.file}: {message}" for message in result.errors)
+        warnings.extend(f"{result.file}: {message}" for message in result.warnings)
+    return _result("architecture_diagrams", errors, warnings)
+
+
 def check_generated(root: Path) -> CheckResult:
     errors: list[str] = []
     status_path = root / "project_status.md"
@@ -1709,6 +1723,7 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("acceptance_adr_transitions", check_acceptance_adr_transitions),
         ("automation_policy", check_automation_policy),
         ("audit_register_cards", check_audit_register_cards),
+        ("architecture_diagrams", check_architecture_diagrams),
         ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
         ("generated", check_generated),
         ("owner_interface", check_owner_interface),

@@ -1,11 +1,12 @@
-"""Проверка архитектурных SVG-схем на соответствие operations/architecture_diagram_style_guide.md.
+"""Проверка архитектурных SVG-схем на соответствие
+operations/architecture/architecture_diagram_style_guide.md.
 
-Отдельный, незащищённый скрипт (не входит в protected_paths и не вызывается
-из check.py --all автоматически — см. architecture_diagram_style_guide.md
-раздел 2). Проверяет только то, что можно проверить без рендеринга SVG:
-блок метаданных, дрейф заявленной версии источника от фактической, наличие
-каждого заявленного ID в спецификации, взаимное соответствие списка ID и
-data-spec-id в теле файла, базовую структуру (viewBox/title/desc).
+Вызывается из check.py --all автоматически (см.
+architecture_diagram_style_guide.md раздел 2). Проверяет только то, что
+можно проверить без рендеринга SVG: блок метаданных, дрейф заявленной
+версии источника от фактической, наличие каждого заявленного ID в
+спецификации, взаимное соответствие списка ID и data-spec-id в теле файла,
+базовую структуру (viewBox/title/desc).
 
 Не проверяет: контраст, реальное визуальное наложение текста, читаемость
 после масштабирования — это остаётся ручным пунктом чек-листа (раздел 17).
@@ -55,7 +56,14 @@ class LintResult:
         return not self.errors
 
 
-def _parse_metadata_block(text: str, result: LintResult) -> dict[str, object] | None:
+@dataclass
+class _ParsedMetadata:
+    scalars: dict[str, str]
+    sources: list[str]
+    ids: list[str]
+
+
+def _parse_metadata_block(text: str, result: LintResult) -> _ParsedMetadata | None:
     match = _METADATA_BLOCK.search(text)
     if match is None:
         result.errors.append(
@@ -100,7 +108,7 @@ def _parse_metadata_block(text: str, result: LintResult) -> dict[str, object] | 
     if not sources:
         result.errors.append("в блоке метаданных нет ни одной строки 'source: путь@версия'")
 
-    return {"scalars": scalars, "sources": sources, "ids": ids}
+    return _ParsedMetadata(scalars=scalars, sources=sources, ids=ids)
 
 
 def _check_sources(sources: list[str], root: Path, result: LintResult) -> None:
@@ -219,13 +227,13 @@ def lint_file(path: Path, root: Path) -> LintResult:
 
     metadata = _parse_metadata_block(text, result)
     if metadata is not None:
-        _check_sources(metadata["sources"], root, result)
-        _check_ids(metadata["ids"], text, root, result)
+        _check_sources(metadata.sources, root, result)
+        _check_ids(metadata.ids, text, root, result)
 
     return result
 
 
-def _default_targets(root: Path) -> list[Path]:
+def default_targets(root: Path) -> list[Path]:
     artefacts_dir = root / "work" / "artefacts"
     if not artefacts_dir.is_dir():
         return []
@@ -244,7 +252,7 @@ def main() -> int:
     require_supported_python()
     root = find_project_root(Path.cwd())
 
-    targets = [p if p.is_absolute() else Path.cwd() / p for p in args.paths] or _default_targets(
+    targets = [p if p.is_absolute() else Path.cwd() / p for p in args.paths] or default_targets(
         root
     )
     if not targets:

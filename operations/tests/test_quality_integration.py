@@ -11,6 +11,27 @@ from operations.scripts.quality.scope import PYTHON_QUALITY_PATHS, PYTHON_SOURCE
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def _bash_executable() -> str:
+    """Resolve the real Git-for-Windows bash, not the plain "bash" name.
+
+    On GitHub's windows-latest runners, bare "bash" on PATH resolves to
+    Windows' own WSL launcher stub (C:\\Windows\\System32\\bash.exe), which
+    ships even when no WSL distribution is installed and just prints an
+    error and exits -- it is not Git Bash. Git for Windows is installed at
+    a fixed, documented location on these runners; every other platform
+    just uses "bash" from PATH as before.
+    """
+    if os.name != "nt":
+        return "bash"
+    for candidate in (
+        r"C:\Program Files\Git\bin\bash.exe",
+        r"C:\Program Files\Git\usr\bin\bash.exe",
+    ):
+        if Path(candidate).is_file():
+            return candidate
+    raise RuntimeError("Git Bash not found at any expected Windows install location")
+
+
 class QualityIntegrationTests(unittest.TestCase):
     def test_event_gate_covers_push_pr_and_manual(self) -> None:
         workflow = (ROOT / ".github/workflows/project_check.yml").read_text(encoding="utf-8")
@@ -115,7 +136,6 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertNotIn("failed (see output above)", helper)
         self.assertNotIn("exit 0", helper)
 
-    @unittest.skipIf(os.name == "nt", "the canonical helper is a Bash script")
     def test_dashboard_regeneration_propagates_generator_failure(self) -> None:
         helper = ROOT / "operations/hooks/pre_commit_regenerate_dashboards.sh"
         with tempfile.TemporaryDirectory() as tmp:
@@ -135,18 +155,30 @@ class QualityIntegrationTests(unittest.TestCase):
             # Shim every name the loop tries so this is deterministic.
             fake_bin = root / "fake_bin"
             fake_bin.mkdir()
+            bash = _bash_executable()
+            shim_body = '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n'
             for name in ("python3.14", "python3.13", "python3.12", "python3", "python"):
                 fake_python = fake_bin / name
-                fake_python.write_text(
-                    '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n',
-                    encoding="utf-8",
+                # Writing the shim's content *and* setting its executable
+                # permission from a single bash invocation, rather than
+                # Python's own filesystem API plus a separate chmod, keeps
+                # the file's permissions consistent with whatever bash's own
+                # exec() check reads -- on every platform.
+                subprocess.run(
+                    [
+                        bash,
+                        "-c",
+                        f"cat > '{fake_python.as_posix()}' && chmod +x '{fake_python.as_posix()}'",
+                    ],
+                    input=shim_body,
+                    text=True,
+                    check=True,
                 )
-                fake_python.chmod(0o755)
             environment = os.environ.copy()
             environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
 
             completed = subprocess.run(
-                ["bash", str(helper)],
+                [bash, str(helper)],
                 cwd=root,
                 env=environment,
                 text=True,

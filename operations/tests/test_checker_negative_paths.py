@@ -12,6 +12,7 @@ from operations.scripts.documents.check import (
     _task_test_plan_item_errors,
     check_acceptance_adr_transitions,
     check_acceptance_model,
+    check_architecture_diagrams,
     check_audit_register_cards,
     check_authority_graph,
     check_automation_policy,
@@ -782,6 +783,58 @@ class AuditRegisterCardFormatTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             result = check_audit_register_cards(Path(tmp))
         self.assertEqual(result.errors, [])
+
+
+class ArchitectureDiagramCheckTests(unittest.TestCase):
+    def test_no_targets_is_not_an_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = check_architecture_diagrams(Path(tmp))
+        self.assertEqual(result.errors, [])
+        self.assertEqual(result.warnings, [])
+
+    def test_aggregates_lint_errors_and_warnings_across_targets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            artefacts = root / "work" / "artefacts"
+            artefacts.mkdir(parents=True)
+            (artefacts / "broken.svg").write_text(
+                '<svg width="10" height="10"></svg>', encoding="utf-8"
+            )
+            result = check_architecture_diagrams(root)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("broken.svg" in error for error in result.errors))
+
+    def test_passes_on_well_formed_diagram(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            spec = root / "specifications" / "example.md"
+            spec.parent.mkdir(parents=True)
+            spec.write_text(
+                "---\nversion: 1.0\n---\n\n### ARC_CMP_001 — Test\n\nBody.\n",
+                encoding="utf-8",
+            )
+            artefacts = root / "work" / "artefacts"
+            artefacts.mkdir(parents=True)
+            (artefacts / "diagram.svg").write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" '
+                'viewBox="0 0 10 10" role="img" aria-labelledby="title desc">\n'
+                '  <title id="title">Title</title>\n'
+                '  <desc id="desc">Desc</desc>\n'
+                "  <!-- diagram-metadata\n"
+                "diagram_id: test\n"
+                "diagram_version: 1.0\n"
+                "generated_at: 2026-09-01\n"
+                "status: current\n"
+                "source: specifications/example.md@1.0\n"
+                "id: ARC_CMP_001\n"
+                "end-diagram-metadata -->\n"
+                '  <g data-spec-id="ARC_CMP_001"></g>\n'
+                "</svg>\n",
+                encoding="utf-8",
+            )
+            result = check_architecture_diagrams(root)
+        self.assertEqual(result.errors, [])
+        self.assertEqual(result.warnings, [])
 
 
 if __name__ == "__main__":
