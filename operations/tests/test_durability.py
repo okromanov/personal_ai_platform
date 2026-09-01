@@ -21,7 +21,7 @@ from unittest import mock
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from operations.scripts.common.project import atomic_write, read_text
+from operations.scripts.common.project import _REPLACE_RETRY_ATTEMPTS, atomic_write, read_text
 
 
 class CrashDuringWriteTest(unittest.TestCase):
@@ -147,7 +147,7 @@ class ReplaceRetryTest(unittest.TestCase):
                 atomic_write(target, "content that must not land")
 
         # Every configured attempt was made, not just one.
-        self.assertEqual(len(calls), 5)
+        self.assertEqual(len(calls), _REPLACE_RETRY_ATTEMPTS)
         # The original file survives, and the temp file was cleaned up.
         self.assertEqual(read_text(target), "original content\n")
         leftover_temp_files = [path for path in self.root.iterdir() if path.name != "data.txt"]
