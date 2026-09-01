@@ -134,24 +134,29 @@ class QualityIntegrationTests(unittest.TestCase):
             # Shim every name the loop tries so this is deterministic.
             fake_bin = root / "fake_bin"
             fake_bin.mkdir()
+            shim_body = '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n'
             for name in ("python3.14", "python3.13", "python3.12", "python3", "python"):
                 fake_python = fake_bin / name
-                fake_python.write_text(
-                    '#!/bin/sh\nif [ "$1" = "-c" ]; then exit 0; fi\nexit 23\n',
-                    encoding="utf-8",
+                # On Windows, a file written via Python's native filesystem
+                # API and then chmod'd (even via a separate `bash -c chmod`
+                # call) is not reliably executable from bash's own exec()
+                # check afterwards: NTFS has no POSIX execute bit, and Git
+                # Bash's MSYS runtime tracks executability through its own
+                # metadata that a cross-process, after-the-fact chmod does
+                # not reliably set. Writing the shim's content *and* setting
+                # its permissions from a single bash invocation avoids that
+                # boundary entirely -- bash is the only thing that ever
+                # touches the file, on every platform.
+                subprocess.run(
+                    [
+                        "bash",
+                        "-c",
+                        f"cat > '{fake_python.as_posix()}' && chmod +x '{fake_python.as_posix()}'",
+                    ],
+                    input=shim_body,
+                    text=True,
+                    check=True,
                 )
-                fake_python.chmod(0o755)
-                # On Windows, os.chmod() cannot set a POSIX execute bit --
-                # NTFS has none, so this call above only clears the
-                # read-only attribute. Git Bash's own MSYS runtime tracks
-                # executability separately from that attribute, so a script
-                # written and chmod'd from a native Windows Python process
-                # is not guaranteed executable from bash's exec() check.
-                # Running chmod through the same bash that will later exec
-                # these shims makes their permissions match what that
-                # check actually reads, on every platform (redundant with
-                # the os.chmod above on POSIX, where it's a no-op).
-                subprocess.run(["bash", "-c", f"chmod +x '{fake_python.as_posix()}'"], check=True)
             environment = os.environ.copy()
             environment["PATH"] = f"{fake_bin}{os.pathsep}{environment['PATH']}"
 
