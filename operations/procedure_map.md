@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 2.2
+version: 2.3
 updated: 2026-09-01
 depends_on:
   - operations_change_process
@@ -29,6 +29,7 @@ depends_on:
 | [`tool_lifecycle.md`](lifecycle/tool_lifecycle.md) | Как новый инструмент проходит проверку, отработку и обкатку прежде чем быть зарегистрированным в `ARC_CMP_005` | Есть кандидат-инструмент (внутренний или внешний) с полномочиями на ресурсы | Инструмент в состоянии `candidate`/`in_review`/`hardening`/`probation`/`accepted`/`rejected`/`retired` |
 | [`state_machines.md`](lifecycle/state_machines.md) | Диаграммы допустимых переходов состояний (TASK, ADR, milestone) | Непонятен допустимый следующий `work_state`/`decision_state` | Подтверждённый допустимый переход |
 | [`architecture_diagram_style_guide.md`](architecture/architecture_diagram_style_guide.md) | Правила оформления и структурирования архитектурных SVG-схем; исполняемая проверка — `diagram_lint.py` | Нужно подготовить новую или обновить существующую архитектурную схему | Схема, прошедшая чек-лист раздела 17 и `diagram_lint.py` без ошибок |
+| [`agent_roles_and_delegation.md`](architecture/agent_roles_and_delegation.md) | Решения владельца о ролях агентов, развитии роли, субагентах и границах делегирования; заранее подготовленный дизайн без `BR_*` | Оценивается среда выполнения агента или планируется многоагентное направление на [`m07`](../milestones.md#m07) | Понимание, какие свойства среды и какие открытые вопросы влияют на решение |
 | [`threat_review_triggers.md`](policy/threat_review_triggers.md) | Какое событие означает, что угроза из модели угроз реализовалась, и что делать | Аномалия, ошибка или инцидент, потенциально связанный с [`threat_model.md`](../specifications/threat_model.md) | Решение: инцидент подтверждён/отклонён, процедура реагирования |
 | [`license_policy.md`](policy/license_policy.md) | Почему в репозитории нет корневого `LICENSE` и что это означает | Вопрос о лицензировании/распространении кода | Понимание текущего закрытого режима |
 | [`procedures/file_update_dependencies.md`](procedures/file_update_dependencies.md) | Какие производные файлы нужно обновить при правке конкретного первичного файла | Правка файла с известными зависимыми генераторами/документами | Полный список файлов для синхронной правки |
