@@ -27,7 +27,6 @@
       .infra-component-id { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; fill: #C8D1DB; }
       .infra-component-title { font-size: 19px; font-weight: 600; fill: #FFFFFF; }
       .infra-small-text { font-size: 12px; font-weight: 400; fill: #FFFFFF; }
-      .infra-role-text { font-size: 10.5px; font-weight: 400; fill: #FFFFFF; }
       .infra-chip { font-size: 11px; font-weight: 600; fill: #FFFFFF; }
       .infra-header { font-size: 10px; font-weight: 600; letter-spacing: 0.7px; fill: #C8D1DB; }
       .infra-inner-card { fill: #FFFFFF; fill-opacity: 0.08; stroke: #66717E; stroke-width: 1; }
@@ -309,38 +308,23 @@
 
   <!-- 10 Placement -->
   <g>
-    <rect x="310" y="2240" width="1000" height="250" rx="7" fill="#27313D"/>
+    <rect x="310" y="2240" width="1000" height="224" rx="7" fill="#27313D"/>
     <text x="338" y="2268" class="infra-component-id">INF_CMP_001–008</text>
     <text x="338" y="2295" class="infra-component-title">Компоненты размещения</text>
-    <text x="338" y="2320" class="infra-header">СОСТАВ · ЧТО СУЩЕСТВУЕТ</text>
-    <rect x="338" y="2331" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <rect x="577" y="2331" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <rect x="816" y="2331" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <rect x="1055" y="2331" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <text x="451.5" y="2349" class="infra-role-text" text-anchor="middle">Вычислительная среда выполнения</text>
-    <text x="690.5" y="2349" class="infra-role-text" text-anchor="middle">Сеть · Контроль исходящего трафика</text>
-    <text x="929.5" y="2349" class="infra-role-text" text-anchor="middle">Хранилище секретов</text>
-    <text x="1168.5" y="2349" class="infra-role-text" text-anchor="middle">Рабочая область задачи</text>
-    <rect x="338" y="2363" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <rect x="577" y="2363" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <rect x="816" y="2363" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <rect x="1055" y="2363" width="227" height="26" rx="4" class="infra-inner-card"/>
-    <text x="451.5" y="2381" class="infra-role-text" text-anchor="middle">Постоянное хранилище</text>
-    <text x="690.5" y="2381" class="infra-role-text" text-anchor="middle">Хранилище резервных копий</text>
-    <text x="929.5" y="2381" class="infra-role-text" text-anchor="middle">Наблюдаемость</text>
-    <text x="1168.5" y="2381" class="infra-role-text" text-anchor="middle">Управление развёртыванием</text>
+    <text x="338" y="2320" class="infra-small-text">Вычислительная среда выполнения · Сеть и контроль исходящего трафика · Хранилище секретов · Рабочая область задачи</text>
+    <text x="338" y="2338" class="infra-small-text">Постоянное хранилище · Хранилище резервных копий · Наблюдаемость · Управление развёртыванием</text>
 
-    <text x="338" y="2410" class="infra-header">ИНФРАСТРУКТУРНЫЕ ПОТОКИ · ЧТО ПРОИСХОДИТ</text>
-    <rect x="338" y="2421" width="179" height="58" rx="4" class="infra-inner-card"/>
-    <rect x="529" y="2421" width="179" height="58" rx="4" class="infra-inner-card"/>
-    <rect x="720" y="2421" width="179" height="58" rx="4" class="infra-inner-card"/>
-    <rect x="911" y="2421" width="179" height="58" rx="4" class="infra-inner-card"/>
-    <rect x="1102" y="2421" width="180" height="58" rx="4" class="infra-inner-card"/>
-    <text x="427.5" y="2439" class="infra-chip" text-anchor="middle">INF_FLOW_001</text><text x="427.5" y="2466" class="infra-small-text" text-anchor="middle">Развёртывание</text>
-    <text x="618.5" y="2439" class="infra-chip" text-anchor="middle">INF_FLOW_002</text><text x="618.5" y="2466" class="infra-small-text" text-anchor="middle">Откат</text>
-    <text x="809.5" y="2439" class="infra-chip" text-anchor="middle">INF_FLOW_003</text><text x="809.5" y="2458" class="infra-small-text" text-anchor="middle">Контролируемый</text><text x="809.5" y="2472" class="infra-small-text" text-anchor="middle">исходящий трафик</text>
-    <text x="1000.5" y="2439" class="infra-chip" text-anchor="middle">INF_FLOW_004</text><text x="1000.5" y="2458" class="infra-small-text" text-anchor="middle">Резервное копирование</text><text x="1000.5" y="2472" class="infra-small-text" text-anchor="middle">и восстановление</text>
-    <text x="1192" y="2439" class="infra-chip" text-anchor="middle">INF_FLOW_005</text><text x="1192" y="2458" class="infra-small-text" text-anchor="middle">Восстановление</text><text x="1192" y="2472" class="infra-small-text" text-anchor="middle">в новой среде</text>
+    <text x="338" y="2365" class="infra-header">ИНФРАСТРУКТУРНЫЕ ПОТОКИ</text>
+    <rect x="338" y="2378" width="179" height="68" rx="4" class="infra-inner-card"/>
+    <rect x="529" y="2378" width="179" height="68" rx="4" class="infra-inner-card"/>
+    <rect x="720" y="2378" width="179" height="68" rx="4" class="infra-inner-card"/>
+    <rect x="911" y="2378" width="179" height="68" rx="4" class="infra-inner-card"/>
+    <rect x="1102" y="2378" width="180" height="68" rx="4" class="infra-inner-card"/>
+    <text x="427.5" y="2400" class="infra-chip" text-anchor="middle">INF_FLOW_001</text><text x="427.5" y="2431" class="infra-small-text" text-anchor="middle">Развёртывание</text>
+    <text x="618.5" y="2400" class="infra-chip" text-anchor="middle">INF_FLOW_002</text><text x="618.5" y="2431" class="infra-small-text" text-anchor="middle">Откат</text>
+    <text x="809.5" y="2400" class="infra-chip" text-anchor="middle">INF_FLOW_003</text><text x="809.5" y="2421" class="infra-small-text" text-anchor="middle">Контролируемый</text><text x="809.5" y="2436" class="infra-small-text" text-anchor="middle">исходящий трафик</text>
+    <text x="1000.5" y="2400" class="infra-chip" text-anchor="middle">INF_FLOW_004</text><text x="1000.5" y="2421" class="infra-small-text" text-anchor="middle">Резервное копирование</text><text x="1000.5" y="2436" class="infra-small-text" text-anchor="middle">и восстановление</text>
+    <text x="1192" y="2400" class="infra-chip" text-anchor="middle">INF_FLOW_005</text><text x="1192" y="2421" class="infra-small-text" text-anchor="middle">Восстановление</text><text x="1192" y="2436" class="infra-small-text" text-anchor="middle">в новой среде</text>
   </g>
 
   </g>
