@@ -257,9 +257,9 @@
     <rect x="1061" y="1674" width="221" height="48" rx="4" class="inner-card"/>
     <text x="1171.5" y="1695" class="small-title" text-anchor="middle">Безопасность результата</text><text x="1171.5" y="1713" class="small-text" text-anchor="middle">Секреты · Политики · Воздействие</text>
     <rect x="338" y="1736" width="462" height="28" rx="4" class="flow-label"/>
-    <text x="354" y="1755" class="flow-text">Интерфейс проверенного результата</text>
+    <text x="569" y="1755" class="flow-text" text-anchor="middle">Интерфейс проверенного результата</text>
     <rect x="820" y="1736" width="462" height="28" rx="4" class="control-card"/>
-    <text x="836" y="1755" class="control-flow-text">Интерфейс контролируемого исхода</text>
+    <text x="1051" y="1755" class="control-flow-text" text-anchor="middle">Интерфейс контролируемого исхода</text>
   </g>
   <path class="main-line" d="M569 1764V1844"/>
   <path class="failure-line" d="M1051 1764V1844"/>
