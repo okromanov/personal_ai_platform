@@ -3,7 +3,7 @@ id: repository_audit_system_prompt
 type: audit_prompt
 document_state: current
 version: 4.0
-updated: 2026-08-31
+updated: 2026-09-01
 depends_on:
   - project_rules
   - coding_agent_instruction
@@ -13,7 +13,7 @@ depends_on:
 ## Проверка контракта, кода, безопасности, защиты данных, тестов, трассируемости и цепочки поставки
 
 **Версия:** 4.0
-**Дата:** 2026-08-31
+**Дата:** 2026-09-01
 
 ---
 
