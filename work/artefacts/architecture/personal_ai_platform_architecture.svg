@@ -45,10 +45,10 @@
   id: INF_FLOW_005
   end-diagram-metadata -->
   <defs>
-    <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
-    <marker id="arrow-control" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#A1463F"/></marker>
-    <marker id="arrow-support" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#7D8895"/></marker>
-    <marker id="arrow-infra" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#D6DEE7"/></marker>
+    <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
+    <marker id="arrow-control" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#A1463F"/></marker>
+    <marker id="arrow-support" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#7D8895"/></marker>
+    <marker id="arrow-infra" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#D6DEE7"/></marker>
     <style>
       text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
       .title { font-size: 34px; font-weight: 600; }
@@ -402,15 +402,13 @@
   <path class="support-line" d="M270 1975H310"/><path class="support-line" d="M270 2200H310"/><path class="support-line" d="M270 2475H310"/>
 
   <!-- Scheduled flow and security rail -->
-  <path class="scheduled-line" d="M1310 2200H1430V685H1310" data-spec-id="ARC_FLOW_004"/>
-  <g transform="translate(1430 1442.5) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
-  <path class="control-rail" d="M1310 722H1350V2200"/>
-  <path class="control-line" d="M1350 1222H1310"/><path class="control-line" d="M1350 1480H1310"/><path class="control-line" d="M1350 2200H1310"/>
-  <g transform="translate(1350 1461) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
+  <path class="scheduled-line" d="M1310 2184H1430V685H1310" data-spec-id="ARC_FLOW_004"/>
+  <g transform="translate(1430 1434.5) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
+  <path class="control-rail" d="M1310 722H1350V2216"/>
+  <path class="control-line" d="M1350 1222H1310"/><path class="control-line" d="M1350 1480H1310"/><path class="control-line" d="M1350 2216H1310"/>
+  <g transform="translate(1350 1469) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path d="M554 2048V2080H1470V486H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M1066 2048V2064H1510V498H1310" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
   <path class="main-line" d="M554 2048V2080H1470V486H1310"/>
   <path class="failure-line" d="M1066 2048V2064H1510V498H1310"/>
   <g transform="translate(1470 1283) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
