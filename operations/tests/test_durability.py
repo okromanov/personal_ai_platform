@@ -169,6 +169,79 @@ class ReplaceRetryTest(unittest.TestCase):
         self.assertEqual(len(calls), 1, "Non-PermissionError failures must not be retried")
 
 
+class ReadTextRetryTest(unittest.TestCase):
+    """The reader side of the same Windows rename-vs-open-handle gap
+    ReplaceRetryTest covers for the writer: opening a file for reading can
+    also transiently raise PermissionError while a concurrent os.replace()
+    is in flight onto that same path."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+
+    def test_succeeds_after_transient_permission_errors(self) -> None:
+        target = self.root / "data.txt"
+        atomic_write(target, "eventually readable")
+        real_read_text = Path.read_text
+        calls: list[int] = []
+
+        def flaky_read_text(
+            self: Path, encoding: str | None = None, errors: str | None = None
+        ) -> str:
+            calls.append(1)
+            if len(calls) < 3:
+                raise PermissionError("transient lock, simulating Windows contention")
+            return real_read_text(self, encoding, errors)
+
+        with (
+            mock.patch.object(Path, "read_text", flaky_read_text),
+            mock.patch("time.sleep") as sleep_mock,
+        ):
+            result = read_text(target)
+
+        self.assertEqual(result, "eventually readable\n")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(sleep_mock.call_count, 2)
+
+    def test_gives_up_after_exhausting_retry_attempts(self) -> None:
+        target = self.root / "data.txt"
+        atomic_write(target, "content")
+        calls: list[int] = []
+
+        def always_locked(
+            _self: Path, encoding: str | None = None, errors: str | None = None
+        ) -> str:
+            calls.append(1)
+            raise PermissionError("destination permanently locked")
+
+        with (
+            mock.patch.object(Path, "read_text", always_locked),
+            mock.patch("time.sleep"),
+        ):
+            with self.assertRaises(PermissionError):
+                read_text(target)
+
+        self.assertEqual(len(calls), _REPLACE_RETRY_ATTEMPTS)
+
+    def test_non_permission_error_is_not_retried(self) -> None:
+        target = self.root / "data.txt"
+        atomic_write(target, "content")
+        calls: list[int] = []
+
+        def unrelated_failure(
+            _self: Path, encoding: str | None = None, errors: str | None = None
+        ) -> str:
+            calls.append(1)
+            raise OSError("disk full, unrelated to Windows file locking")
+
+        with mock.patch.object(Path, "read_text", unrelated_failure):
+            with self.assertRaises(OSError):
+                read_text(target)
+
+        self.assertEqual(len(calls), 1, "Non-PermissionError failures must not be retried")
+
+
 class ContentIntegrityTest(unittest.TestCase):
     """A successful write must be byte-for-byte recoverable on read."""
 

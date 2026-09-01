@@ -132,7 +132,12 @@ class DiagramLintTests(unittest.TestCase):
             any("ARC_CMP_888" in error and "не заявлен" in error for error in result.errors)
         )
 
-    def test_check_ids_accepts_space_separated_data_spec_id_list(self) -> None:
+    def test_check_ids_rejects_a_compressed_multi_id_attribute(self) -> None:
+        """The style guide requires exactly one ID per data-spec-id-bearing
+        element -- a node that visually compresses several IDs into one
+        label must still tag each with its own element (see the
+        INF_CMP_001..008 tspans in the real diagram), not a combined,
+        space-separated attribute value."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             spec = root / "specifications" / "example.md"
@@ -152,6 +157,37 @@ class DiagramLintTests(unittest.TestCase):
                 _svg_text(
                     metadata_block=metadata,
                     data_spec_ids='data-spec-id="ARC_CMP_001 ARC_CMP_002"',
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("ARC_CMP_001 ARC_CMP_002" in error for error in result.errors))
+
+    def test_check_ids_accepts_one_id_per_tspan_for_a_compressed_label(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            spec = root / "specifications" / "example.md"
+            spec.parent.mkdir(parents=True, exist_ok=True)
+            spec.write_text(
+                "---\nversion: 1.0\n---\n\n"
+                "### ARC_CMP_001 — First\n\nBody.\n\n"
+                "### ARC_CMP_002 — Second\n\nBody.\n",
+                encoding="utf-8",
+            )
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"],
+                ids=["ARC_CMP_001", "ARC_CMP_002"],
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata,
+                    data_spec_ids="",
+                ).replace(
+                    "<g ></g>",
+                    '<text><tspan data-spec-id="ARC_CMP_001">First</tspan> · '
+                    '<tspan data-spec-id="ARC_CMP_002">Second</tspan></text>',
                 ),
                 encoding="utf-8",
             )
