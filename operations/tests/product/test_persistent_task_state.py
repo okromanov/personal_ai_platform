@@ -84,16 +84,25 @@ class SQLiteTaskLifecycleStoreCorruptionTests(unittest.TestCase):
         self.store = SQLiteTaskLifecycleStore(self.database_path)
 
     def _insert_task_message(self, *, metadata_json: str, state: str) -> None:
-        with sqlite3.connect(self.database_path) as connection:
-            connection.execute(
-                """
-                INSERT INTO task_messages (
-                    task_id, channel_type, user_input, metadata_json, state,
-                    created_at, completed_at, error_message
-                ) VALUES ('task-1', 'telegram', 'hi', ?, ?, '2026-08-29T00:00:00', NULL, NULL)
-                """,
-                (metadata_json, state),
-            )
+        # sqlite3.Connection's context manager only commits/rolls back the
+        # transaction on exit -- it does not close the connection. An
+        # unclosed connection keeps the database file open, which is a
+        # silent no-op on POSIX but a PermissionError on Windows when the
+        # enclosing TemporaryDirectory tries to delete it during teardown.
+        connection = sqlite3.connect(self.database_path)
+        try:
+            with connection:
+                connection.execute(
+                    """
+                    INSERT INTO task_messages (
+                        task_id, channel_type, user_input, metadata_json, state,
+                        created_at, completed_at, error_message
+                    ) VALUES ('task-1', 'telegram', 'hi', ?, ?, '2026-08-29T00:00:00', NULL, NULL)
+                    """,
+                    (metadata_json, state),
+                )
+        finally:
+            connection.close()
 
     def test_load_task_with_invalid_metadata_json_fails_closed(self) -> None:
         self._insert_task_message(metadata_json="not json", state=TaskState.PENDING.value)
@@ -111,24 +120,32 @@ class SQLiteTaskLifecycleStoreCorruptionTests(unittest.TestCase):
             self.store.load_task("task-1")
 
     def test_get_state_with_invalid_checkpoint_data_json_fails_closed(self) -> None:
-        with sqlite3.connect(self.database_path) as connection:
-            connection.execute(
-                """
-                INSERT INTO task_states (task_id, checkpoint_step, checkpoint_data_json)
-                VALUES ('task-1', 'tool_called', 'not json')
-                """
-            )
+        connection = sqlite3.connect(self.database_path)
+        try:
+            with connection:
+                connection.execute(
+                    """
+                    INSERT INTO task_states (task_id, checkpoint_step, checkpoint_data_json)
+                    VALUES ('task-1', 'tool_called', 'not json')
+                    """
+                )
+        finally:
+            connection.close()
         with self.assertRaises(TaskLifecycleError):
             self.store.get_state("task-1")
 
     def test_get_state_with_non_dict_checkpoint_data_json_fails_closed(self) -> None:
-        with sqlite3.connect(self.database_path) as connection:
-            connection.execute(
-                """
-                INSERT INTO task_states (task_id, checkpoint_step, checkpoint_data_json)
-                VALUES ('task-1', 'tool_called', '"just a string"')
-                """
-            )
+        connection = sqlite3.connect(self.database_path)
+        try:
+            with connection:
+                connection.execute(
+                    """
+                    INSERT INTO task_states (task_id, checkpoint_step, checkpoint_data_json)
+                    VALUES ('task-1', 'tool_called', '"just a string"')
+                    """
+                )
+        finally:
+            connection.close()
         with self.assertRaises(TaskLifecycleError):
             self.store.get_state("task-1")
 
