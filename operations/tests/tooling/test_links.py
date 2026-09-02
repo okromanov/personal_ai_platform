@@ -35,6 +35,28 @@ class LinkTests(unittest.TestCase):
             )
             self.assertEqual(check_markdown_links(root), [])
 
+    def test_filename_existence_is_case_sensitive_on_every_platform(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            operations = root / "operations"
+            operations.mkdir()
+            (operations / "repository_audit_system_prompt.md").write_text(
+                "# Current prompt\n", encoding="utf-8"
+            )
+            (root / "source.md").write_text(
+                "Historical file: `REPOSITORY_AUDIT_SYSTEM_PROMPT.md`.\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(check_markdown_links(root), [])
+            self.assertIsNone(
+                _resolve_document_reference(
+                    root,
+                    root / "source.md",
+                    "REPOSITORY_AUDIT_SYSTEM_PROMPT.md",
+                )
+            )
+
     def test_rejects_link_from_document_to_itself(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

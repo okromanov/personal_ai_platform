@@ -103,23 +103,54 @@ def collect_anchors(text: str) -> set[str]:
     return {anchor for anchor in anchors if anchor}
 
 
+def _exact_project_document(root: Path, candidate: Path) -> Path | None:
+    """Return a document only when every path component has canonical case.
+
+    Windows resolves file names case-insensitively.  Repository references do
+    not: GitHub and Linux treat a historical ``OLD_NAME.md`` mention as
+    distinct from a current ``old_name.md`` file.  Walk the directory entries
+    before asking the host filesystem whether the candidate exists so link
+    policy is identical on every runner.
+    """
+    root_absolute = Path(os.path.abspath(root))
+    candidate_absolute = Path(os.path.abspath(candidate))
+    try:
+        relative = candidate_absolute.relative_to(root_absolute)
+    except ValueError:
+        return None
+
+    current = root_absolute
+    for part in relative.parts:
+        try:
+            exact_entries = {entry.name: entry for entry in current.iterdir()}
+        except OSError:
+            return None
+        current = exact_entries.get(part)
+        if current is None:
+            return None
+    if not current.is_file():
+        return None
+    try:
+        parts = current.resolve().relative_to(root.resolve()).parts
+    except ValueError:
+        return None
+    if any(part.lower() in IGNORED_DIRS for part in parts):
+        return None
+    return current
+
+
 def _reference_exists(root: Path, source: Path, reference: str) -> bool:
     without_anchor = unquote(reference.split("#", 1)[0]).replace("\\", "/")
     candidates = [source.parent / without_anchor, root / without_anchor]
 
-    def is_project_document(candidate: Path) -> bool:
-        if not candidate.is_file():
-            return False
-        try:
-            parts = candidate.resolve().relative_to(root.resolve()).parts
-        except ValueError:
-            return False
-        return not any(part.lower() in IGNORED_DIRS for part in parts)
-
-    if any(is_project_document(candidate) for candidate in candidates):
+    if any(_exact_project_document(root, candidate) is not None for candidate in candidates):
         return True
     if "/" not in without_anchor:
-        matches = [path for path in root.rglob(without_anchor) if is_project_document(path)]
+        matches = [
+            path
+            for path in root.rglob("*")
+            if path.name == without_anchor and _exact_project_document(root, path) is not None
+        ]
         return len(matches) == 1
     return False
 
@@ -130,20 +161,16 @@ def _resolve_document_reference(root: Path, source: Path, reference: str) -> Pat
     without_anchor = unquote(reference.split("#", 1)[0]).replace("\\", "/")
     candidates = [source.parent / without_anchor, root / without_anchor]
 
-    def is_project_document(candidate: Path) -> bool:
-        if not candidate.is_file():
-            return False
-        try:
-            parts = candidate.resolve().relative_to(root.resolve()).parts
-        except ValueError:
-            return False
-        return not any(part.lower() in IGNORED_DIRS for part in parts)
-
     for candidate in candidates:
-        if is_project_document(candidate):
-            return candidate
+        resolved = _exact_project_document(root, candidate)
+        if resolved is not None:
+            return resolved
     if "/" not in without_anchor:
-        matches = [path for path in root.rglob(without_anchor) if is_project_document(path)]
+        matches = [
+            path
+            for path in root.rglob("*")
+            if path.name == without_anchor and _exact_project_document(root, path) is not None
+        ]
         if len(matches) == 1:
             return matches[0]
     return None
