@@ -20,6 +20,7 @@ from operations.scripts.documents.check import (
     check_document_policy,
     check_markdown_section_order,
     check_metadata,
+    check_secrets,
     check_tasks,
     check_terminal_outcome_delivery_role,
     check_test_specs,
@@ -998,6 +999,62 @@ class ArchitectureDiagramCheckTests(unittest.TestCase):
             result = check_architecture_diagrams(root)
         self.assertEqual(result.errors, [])
         self.assertEqual(result.warnings, [])
+
+
+class SecretScanTests(unittest.TestCase):
+    """check_secrets — единственный контроль секретов в профиле `--fast`,
+    то есть в pre-commit. До этих тестов весь SECRET_PATTERNS можно было
+    обезвредить, не уронив ни одного из 636 тестов.
+
+    Секретоподобные строки собираются из кусков: check_secrets сканирует в
+    том числе `operations/tests/**/*.py`, поэтому цельный литерал сделал бы
+    проверку самого репозитория красной.
+    """
+
+    def _scan(self, name: str, body: str = "") -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(body, encoding="utf-8")
+            return check_secrets(root).errors
+
+    def test_forbidden_file_names_are_reported_regardless_of_content(self) -> None:
+        for name in (".env", "id_rsa", "id_ed25519", "credentials.json"):
+            with self.subTest(name=name):
+                errors = self._scan(name, "harmless\n")
+                self.assertTrue(
+                    any(name in error for error in errors),
+                    f"{name} должен считаться потенциальным секретом",
+                )
+
+    def test_private_key_suffixes_are_reported_regardless_of_content(self) -> None:
+        for name in ("server.pem", "bundle.p12", "bundle.pfx"):
+            with self.subTest(name=name):
+                errors = self._scan(name, "harmless\n")
+                self.assertTrue(any(name in error for error in errors), name)
+
+    def test_each_secret_pattern_is_detected_in_a_scanned_text_file(self) -> None:
+        cases = {
+            "assignment": "api" + "_key = " + "A" * 24,
+            "colon_form": "secret" + ": " + "b" * 20,
+            "private_key_header": "-----BEGIN RSA PRIVATE" + " KEY-----",
+            "provider_token": "gh" + "p_" + "0123456789abcdefghij",
+        }
+        for label, payload in cases.items():
+            with self.subTest(case=label):
+                errors = self._scan("notes.md", f"prefix\n{payload}\nsuffix\n")
+                self.assertTrue(
+                    any("похожий на секрет" in error for error in errors),
+                    f"{label} не обнаружен",
+                )
+
+    def test_clean_scanned_file_produces_no_finding(self) -> None:
+        self.assertEqual(self._scan("notes.md", "обычный текст без секретов\n"), [])
+
+    def test_unscanned_suffix_is_skipped(self) -> None:
+        payload = "gh" + "p_" + "0123456789abcdefghij"
+        self.assertEqual(self._scan("blob.bin", payload), [])
 
 
 if __name__ == "__main__":

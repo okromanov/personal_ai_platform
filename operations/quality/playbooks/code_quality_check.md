@@ -2,8 +2,8 @@
 id: code_quality_check
 type: guide
 document_state: current
-version: 1.1
-updated: 2026-08-28
+version: 1.3
+updated: 2026-09-02
 ---
 
 # Code Quality Check Skill
@@ -44,8 +44,13 @@ Verifies:
    - Functions with only `pass` (true stubs, not legitimate exception handlers)
    - `raise NotImplementedError` in production code
    - TODOs/FIXMEs in function docstrings (not in file paths or URLs)
-   - Unused imports and variables (excludes `_` prefixed names)
-   - Cyclomatic complexity per function
+
+   Only stub findings are blocking (exit 1). Неиспользуемые импорты — не его
+   задача: их ловит Ruff `F401`, выбранный в `pyproject.toml` и блокирующий
+   в шаге «Ruff lint» канонического набора. Собственный детектор в
+   `code_analyzer.py` дублировал это правило, но не мог уронить гейт, и был
+   удалён вместе с не имевшим порога и потребителей счётчиком цикломатической
+   сложности.
 
 2. **Search for hardcoded values (regex-based, human review):**
    ```bash
@@ -77,10 +82,11 @@ Verifies:
 
    The pinned Actionlint and Gitleaks binaries are downloaded and SHA-256 verified by GitHub Actions; they are not silently skipped when unavailable.
 
-6. **Analyze code metrics:**
+6. **Analyze code metrics** (человеческое суждение, не автоматический порог):
    - Average function length (prefer <50 lines)
    - Cyclomatic complexity (prefer <10)
-   - Import organization (stdlib, third-party, local)
+   - Import organization (stdlib, third-party, local) — механически проверяется
+     правилом Ruff `I`
 
 ## Success Criteria
 
@@ -96,9 +102,11 @@ Verifies:
 Generate report with:
 1. **Summary:** Pass/Fail, critical findings count
 2. **Stubs found:** File, line number, context
-3. **Dead code:** Unused imports/functions with usage count
+3. **Dead code:** Unused functions/attributes from the Vulture step; unused
+   imports from Ruff `F401`
 4. **Security concerns:** Patterns to review, risk level
-5. **Code quality metrics:** Function complexity, import hygiene
+5. **Code quality metrics:** Function complexity and import hygiene — read
+   from the sources above, not from `code_analysis.json`
 6. **Recommendations:** Specific improvements with priority
 
 ## When to Run
