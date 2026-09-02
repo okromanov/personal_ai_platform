@@ -19,7 +19,8 @@ from operations.scripts.tasks.generate import ACTOR_LABELS, collect_tasks, selec
 
 _LINK_TARGET_PATTERN = re.compile(r"(\[[^\]]*\]\()([^)]+)(\))")
 _AUDIT_ROW_PATTERN = re.compile(
-    r"^\|\s*AUD-\d{3}\s*\|\s*(critical|high|medium|low)\s*\|\s*"
+    r"^\|\s*(?:\[AUD-\d{3}\]\([^)]+\)|AUD-\d{3})\s*\|\s*"
+    r"(critical|high|medium|low)\s*\|\s*"
     r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
     r"\d{4}-\d{2}-\d{2}\s*\|\s*(\d{4}-\d{2}-\d{2}|—)\s*\|"
 )

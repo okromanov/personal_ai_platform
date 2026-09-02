@@ -85,7 +85,8 @@ class QualityRunnerTests(unittest.TestCase):
             audit_baseline = root / run_suite.AUDIT_REGISTER_PATH
             audit_baseline.parent.mkdir(parents=True)
             audit_baseline.write_text(
-                "| AUD-001 | low | resolved | 2026-08-27 | — | none | evidence | done |\n",
+                "| [AUD-001](audit_adhoc_cards.md#aud-001) | low | resolved | "
+                "2026-08-27 | — | none | evidence | done |\n",
                 encoding="utf-8",
             )
             (root / "valid.json").write_text(json.dumps({"ok": True}), encoding="utf-8")

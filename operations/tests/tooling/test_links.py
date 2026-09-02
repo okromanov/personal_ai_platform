@@ -395,6 +395,52 @@ class LinksInternalHelpersTests(unittest.TestCase):
             self.assertEqual(changed, set())
 
 
+class AuditRegisterLinkTests(unittest.TestCase):
+    def test_register_table_id_is_checked_and_auto_linked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            audit = root / "work/audit"
+            audit.mkdir(parents=True)
+            register = audit / "audit_register.md"
+            register.write_text(
+                "| ID | Evidence |\n|---|---|\n| AUD-001 | proof |\n",
+                encoding="utf-8",
+            )
+            (audit / "audit_baseline_2026_09_02.md").write_text(
+                '<a id="aud-001"></a>\n### AUD-001 — title\n', encoding="utf-8"
+            )
+
+            errors = check_markdown_links(root)
+            self.assertTrue(any("ID AUD-001" in error for error in errors))
+
+            changed = fix_markdown_links(root, only_files={"work/audit/audit_register.md"})
+
+            self.assertEqual(changed, ["work/audit/audit_register.md"])
+            self.assertIn(
+                "[AUD-001](audit_baseline_2026_09_02.md#aud-001)",
+                register.read_text(encoding="utf-8"),
+            )
+            self.assertFalse(any("ID AUD-001" in error for error in check_markdown_links(root)))
+
+    def test_register_fixer_corrects_misdirected_id_link(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            audit = root / "work/audit"
+            audit.mkdir(parents=True)
+            register = audit / "audit_register.md"
+            register.write_text("| [AUD-001](wrong.md#aud-001) | proof |\n", encoding="utf-8")
+            (audit / "audit_adhoc_cards.md").write_text(
+                '<a id="aud-001"></a>\n### AUD-001 — title\n', encoding="utf-8"
+            )
+
+            fix_markdown_links(root, only_files={"work/audit/audit_register.md"})
+
+            self.assertIn(
+                "[AUD-001](audit_adhoc_cards.md#aud-001)",
+                register.read_text(encoding="utf-8"),
+            )
+
+
 class DirectoryReferenceTests(unittest.TestCase):
     """KNOWN_DOCUMENT_DIRECTORIES (project_rules.md §2's own registry) must
     be linked exactly like a bare .md reference already must be -- this is

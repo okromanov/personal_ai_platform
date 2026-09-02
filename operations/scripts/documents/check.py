@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -1417,10 +1418,15 @@ _AUDIT_CARD_SPLIT = re.compile(r'(?=<a id="aud-\d{3}"></a>)')
 _AUDIT_CARD_ID = re.compile(r'<a id="(aud-\d{3})"></a>')
 _AUDIT_CARD_FIELD = re.compile(r"^-\s+\*\*([^*:]+?):\*\*", re.MULTILINE)
 _AUDIT_CARD_DATE_SUFFIX = re.compile(r"\s*\([^)]*\)\s*$")
-_AUDIT_REGISTER_ROW_ID = re.compile(r"^\|\s*(AUD-\d{3})\s*\|", re.MULTILINE)
+_AUDIT_REGISTER_ID_CELL = re.compile(
+    r"(?:\[(?P<linked>AUD-\d{3})\]\((?P<href>[^)]+)\)|(?P<bare>AUD-\d{3}))"
+)
+_AUDIT_CARD_LINK = re.compile(
+    r"\]\((?:[^)]*/)?audit_(?:baseline_\d{4}_\d{2}_\d{2}|adhoc_cards)\.md#aud-\d{3}\)"
+)
 _AUDIT_CARD_ARCHIVE_PATTERNS = (
     "audit_baseline_*.md",
-    "audit_card_archive_*.md",
+    "audit_adhoc_cards.md",
 )
 
 
@@ -1436,9 +1442,26 @@ def check_audit_register_cards(root: Path) -> CheckResult:
     path = root / "work/audit/audit_register.md"
     if not path.is_file():
         return _result("audit_register_cards", [])
-    register_ids = set(_AUDIT_REGISTER_ROW_ID.findall(read_text(path)))
+    register_text = read_text(path)
     errors: list[str] = []
-    cards: dict[str, list[str]] = {}
+    register_rows: list[tuple[str, str | None, str]] = []
+    for line in register_text.splitlines():
+        if not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if not cells:
+            continue
+        match = _AUDIT_REGISTER_ID_CELL.fullmatch(cells[0])
+        if match:
+            register_rows.append(
+                (
+                    match.group("linked") or match.group("bare"),
+                    match.group("href"),
+                    cells[6] if len(cells) > 6 else "",
+                )
+            )
+    register_ids = {card_id for card_id, _, _ in register_rows}
+    cards: dict[str, list[tuple[str, str]]] = {}
     archive_paths = sorted(
         {
             archive_path
@@ -1454,7 +1477,11 @@ def check_audit_register_cards(root: Path) -> CheckResult:
             if not card_id_match:
                 continue
             card_id = card_id_match.group(1).upper()
-            cards.setdefault(card_id, []).append(relative)
+            href = (
+                f"{Path(os.path.relpath(archive_path, path.parent)).as_posix()}"
+                f"#{card_id_match.group(1)}"
+            )
+            cards.setdefault(card_id, []).append((relative, href))
             fields = _AUDIT_CARD_FIELD.findall(block)
             # A date suffix belongs to a resolution value, not its field name.
             normalized = [_AUDIT_CARD_DATE_SUFFIX.sub("", field).strip() for field in fields]
@@ -1468,7 +1495,7 @@ def check_audit_register_cards(root: Path) -> CheckResult:
             # Baselines published before the unified schema are immutable.
             # Preserve their finite legacy labels, while every dedicated
             # archive and current baseline must use the canonical field order.
-            strict_schema = archive_path.name.startswith("audit_card_archive_") or (
+            strict_schema = archive_path.name == "audit_adhoc_cards.md" or (
                 archive_path.name >= "audit_baseline_2026_09_02.md"
             )
             if strict_schema:
@@ -1486,14 +1513,31 @@ def check_audit_register_cards(root: Path) -> CheckResult:
             elif not {"Наблюдение", "Наблюдаемое поведение"}.intersection(normalized):
                 errors.append(f"{card_id}: в legacy-карточке отсутствует наблюдение")
 
-    for card_id in sorted(register_ids):
+    if re.search(r"^##\s+\d+\.\s+Индекс совместимости\s*$", register_text, re.MULTILINE):
+        errors.append("audit_register.md: отдельный индекс совместимости запрещён")
+
+    for card_id, row_href, evidence in register_rows:
         locations = cards.get(card_id, [])
         if not locations:
             errors.append(
                 f"{card_id}: для строки реестра отсутствует карточка в датированном архиве"
             )
         elif len(locations) > 1:
-            errors.append(f"{card_id}: карточка дублируется: {', '.join(locations)}")
+            errors.append(
+                f"{card_id}: карточка дублируется: "
+                f"{', '.join(location for location, _ in locations)}"
+            )
+        else:
+            expected_href = locations[0][1]
+            if row_href is None:
+                errors.append(f"{card_id}: ID в реестре должен быть ссылкой на {expected_href}")
+            elif row_href != expected_href:
+                errors.append(
+                    f"{card_id}: ID в реестре ведёт на {row_href}, "
+                    f"ожидалась карточка {expected_href}"
+                )
+        if _AUDIT_CARD_LINK.search(evidence):
+            errors.append(f"{card_id}: Evidence не должен дублировать ссылку на AUD-карточку")
     for card_id in sorted(set(cards) - register_ids):
         errors.append(f"{card_id}: архивная карточка отсутствует в реестре")
     return _result("audit_register_cards", errors)

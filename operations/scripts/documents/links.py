@@ -84,6 +84,12 @@ KNOWN_DOCUMENT_DIRECTORIES = (
 # / check_change_scope.py AUDIT_HISTORY_PATH) -- never rewritten to satisfy
 # a check introduced after they were written.
 _IMMUTABLE_AUDIT_BASELINE = re.compile(r"^work/audit/audit_baseline_\d{4}_\d{2}_\d{2}\.md$")
+_AUDIT_REGISTER = "work/audit/audit_register.md"
+_AUDIT_CARD_PATTERNS = ("audit_baseline_*.md", "audit_adhoc_cards.md")
+_AUDIT_CARD_ID = re.compile(r'<a id="(aud-\d{3})"></a>')
+_AUDIT_REGISTER_ID_CELL = re.compile(
+    r"^\|\s*(?:\[(?P<linked>AUD-\d{3})\]\((?P<href>[^)]+)\)|(?P<bare>AUD-\d{3}))\s*\|"
+)
 HEADING_PATTERN = re.compile(r"(?m)^#{1,6}\s+(.+?)\s*$")
 EXPLICIT_ANCHOR_PATTERN = re.compile(r"""<a\s+(?:id|name)=["']([^"']+)["']""")
 MARKDOWN_LINK_TEXT_PATTERN = re.compile(r"\[([^\]]*)\]\([^)]*\)")
@@ -361,6 +367,54 @@ def _check_bare_identifier_references(
     return errors
 
 
+def _audit_card_targets(root: Path) -> dict[str, list[str]]:
+    """Return every canonical audit-card href as seen from the register."""
+    register = root / _AUDIT_REGISTER
+    targets: dict[str, list[str]] = {}
+    for pattern in _AUDIT_CARD_PATTERNS:
+        for card_file in sorted(register.parent.glob(pattern)):
+            relative = Path(os.path.relpath(card_file, register.parent)).as_posix()
+            text = card_file.read_text(encoding="utf-8-sig")
+            for match in _AUDIT_CARD_ID.finditer(text):
+                card_id = match.group(1).upper()
+                targets.setdefault(card_id, []).append(f"{relative}#{match.group(1)}")
+    return targets
+
+
+def _check_audit_register_id_links(root: Path, path: Path, text: str) -> list[str]:
+    """The audit register table is intentionally skipped by the prose rule.
+
+    Its ID column is a structured navigation field, so validate it with an
+    explicit rule and the same canonical card inventory used by the fixer.
+    """
+    if relative_posix(path, root) != _AUDIT_REGISTER:
+        return []
+
+    targets = _audit_card_targets(root)
+    errors: list[str] = []
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        match = _AUDIT_REGISTER_ID_CELL.match(line)
+        if not match:
+            continue
+        card_id = match.group("linked") or match.group("bare")
+        candidates = targets.get(card_id, [])
+        if len(candidates) != 1:
+            continue
+        expected = candidates[0]
+        href = match.group("href")
+        if href is None:
+            errors.append(
+                f"{_AUDIT_REGISTER}:{line_number}: ID {card_id} в реестре должен быть "
+                f"кликабельной ссылкой на каноническую карточку {expected}"
+            )
+        elif href != expected:
+            errors.append(
+                f"{_AUDIT_REGISTER}:{line_number}: ID {card_id} ведёт на {href}, "
+                f"ожидалась каноническая карточка {expected}"
+            )
+    return errors
+
+
 def _check_shorthand_range_tail_references(
     root: Path, path: Path, text: str, records: dict[str, dict[str, object]]
 ) -> list[str]:
@@ -500,6 +554,7 @@ def check_markdown_links(root: Path) -> list[str]:
         errors.extend(_check_clickable_directory_references(root, path, text))
         errors.extend(_check_bare_identifier_references(root, path, text, records))
         errors.extend(_check_shorthand_range_tail_references(root, path, text, records))
+        errors.extend(_check_audit_register_id_links(root, path, text))
     return errors
 
 
@@ -569,6 +624,34 @@ def _fix_bare_identifier_references(
         if new_text != text and atomic_write(path, new_text):
             changed.add(file)
     return changed
+
+
+def _fix_audit_register_id_links(root: Path, only_files: set[str] | None) -> set[str]:
+    """Link bare or misdirected AUD IDs to their one canonical card."""
+    if only_files is not None and _AUDIT_REGISTER not in only_files:
+        return set()
+    path = root / _AUDIT_REGISTER
+    if not path.is_file():
+        return set()
+
+    targets = _audit_card_targets(root)
+    text = path.read_text(encoding="utf-8-sig")
+    lines = text.split("\n")
+    for index, line in enumerate(lines):
+        match = _AUDIT_REGISTER_ID_CELL.match(line)
+        if not match:
+            continue
+        card_id = match.group("linked") or match.group("bare")
+        candidates = targets.get(card_id, [])
+        if len(candidates) != 1:
+            continue
+        replacement = f"| [{card_id}]({candidates[0]}) |"
+        lines[index] = replacement + line[match.end() :]
+
+    new_text = "\n".join(lines)
+    if new_text != text and atomic_write(path, new_text):
+        return {_AUDIT_REGISTER}
+    return set()
 
 
 def _fix_shorthand_range_tail_references(
@@ -723,7 +806,8 @@ def fix_markdown_links(
 ) -> list[str]:
     """Auto-fix what check_markdown_links can safely rewrite on its own:
     wrapping bare mentions of tracked IDs and existing-document references in
-    clickable links. Several passes may be needed because a line reporting
+    clickable links. The structured ID column in the audit register is also
+    linked directly to each card's canonical anchor. Several passes may be needed because a line reporting
     one bare mention can still contain a second, distinct one after the
     first is fixed (the checker dedupes per line, not per occurrence).
 
@@ -735,7 +819,8 @@ def fix_markdown_links(
     for _ in range(max_passes):
         errors = check_markdown_links(root)
         records = collect_traceable_elements(root)
-        progressed = _fix_bare_identifier_references(root, errors, records, only_files)
+        progressed = _fix_audit_register_id_links(root, only_files)
+        progressed |= _fix_bare_identifier_references(root, errors, records, only_files)
         progressed |= _fix_shorthand_range_span_references(root, errors, records, only_files)
         progressed |= _fix_shorthand_range_tail_references(root, errors, records, only_files)
         progressed |= _fix_clickable_document_references(root, errors, only_files)
