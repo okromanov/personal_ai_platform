@@ -33,7 +33,13 @@ def _metadata_block(*, sources: list[str], ids: list[str]) -> str:
         "status: current",
         *(f"source: {value}" for value in sources),
         *(f"id: {value}" for value in ids),
-        "end-diagram-metadata -->\n",
+        "end-diagram-metadata -->",
+        # A compliant header caption matching diagram_version/generated_at
+        # above (diagram_geometry_foundations.md §13.1) -- present here so
+        # every other test in this file, unrelated to that check, does not
+        # also have to know about it. See CheckVisibleMetaTests for the
+        # dedicated coverage of _check_visible_meta itself.
+        '  <text data-diagram-meta="version">Версия 1.0 · Обновлено 2026-09-01</text>\n',
     ]
     return "\n".join(lines)
 
@@ -242,6 +248,169 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(
             any("ARC_CMP_001" in error and "не заявлен" in error for error in result.errors)
         )
+
+    def _svg_with_caption(self, *, diagram_version: str, generated_at: str, caption: str) -> str:
+        lines = [
+            "  <!-- diagram-metadata",
+            "diagram_id: test",
+            f"diagram_version: {diagram_version}",
+            f"generated_at: {generated_at}",
+            "status: current",
+            "source: specifications/example.md@1.0",
+            "id: ARC_CMP_001",
+            "end-diagram-metadata -->",
+            f'  <text data-diagram-meta="version">{caption}</text>\n',
+        ]
+        metadata = "\n".join(lines)
+        return _svg_text(metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"')
+
+    def test_check_visible_meta_reports_a_missing_caption(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            # Strip the auto-injected caption _metadata_block() normally adds,
+            # to exercise the "absent entirely" case on its own.
+            metadata = metadata.split("  <text data-diagram-meta")[0]
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any(
+                "отсутствует видимая строка версии" in error and "data-diagram-meta" in error
+                for error in result.errors
+            )
+        )
+
+    def test_check_visible_meta_accepts_a_matching_caption(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._svg_with_caption(
+                    diagram_version="1.4",
+                    generated_at="2026-09-02T17:20:00+00:00",
+                    caption="Версия 1.4 · Обновлено 2026-09-02 17:20 UTC",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_check_visible_meta_reports_version_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._svg_with_caption(
+                    diagram_version="1.4",
+                    generated_at="2026-09-02T17:20:00+00:00",
+                    caption="Версия 1.9 · Обновлено 2026-09-02 17:20 UTC",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any(
+                "'1.9'" in error and "diagram_version" in error and "'1.4'" in error
+                for error in result.errors
+            )
+        )
+
+    def test_check_visible_meta_reports_date_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._svg_with_caption(
+                    diagram_version="1.4",
+                    generated_at="2026-09-02T17:20:00+00:00",
+                    caption="Версия 1.4 · Обновлено 2026-09-03 17:20 UTC",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any(
+                "'2026-09-03'" in error and "Даты обязаны совпадать" in error
+                for error in result.errors
+            )
+        )
+
+    def test_check_visible_meta_reports_time_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._svg_with_caption(
+                    diagram_version="1.4",
+                    generated_at="2026-09-02T17:20:00+00:00",
+                    caption="Версия 1.4 · Обновлено 2026-09-02 18:45 UTC",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(any("'18:45'" in error and "время" in error for error in result.errors))
+
+    def test_check_visible_meta_reports_time_missing_from_metadata(self) -> None:
+        """generated_at with a date but no time, alongside a caption that
+        does show a time: the caption is claiming a fact the metadata does
+        not actually carry, which is exactly the drift this check exists
+        to catch (diagram_geometry_foundations.md §13.1)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._svg_with_caption(
+                    diagram_version="1.4",
+                    generated_at="2026-09-02",
+                    caption="Версия 1.4 · Обновлено 2026-09-02 17:20 UTC",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any(
+                "'17:20'" in error and "не содержит совпадающего времени" in error
+                for error in result.errors
+            )
+        )
+
+    def test_check_visible_meta_skips_a_non_numeric_placeholder_caption(self) -> None:
+        """Template skeletons (operations/architecture/templates/) carry a
+        literal, non-numeric placeholder caption on purpose -- it has
+        nothing real to compare against its own diagram_version/generated_at
+        (which describe the skeleton's own revision, not the eventual
+        filled-in diagram's), so no drift error is expected here."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._svg_with_caption(
+                    diagram_version="1.1",
+                    generated_at="2026-09-02",
+                    caption="Версия X.Y · Обновлено ГГГГ-ММ-ДД ЧЧ:ММ",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
 
     def test_geometry_check_passes_grid_aligned_svg(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

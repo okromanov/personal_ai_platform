@@ -25,6 +25,7 @@
       .legend-section { font-size: 11px; font-weight: 700; letter-spacing: 1px; fill: #707B89; }
       .legend-heading { font-size: 14px; font-weight: 600; }
       .template-note { font-size: 11px; font-weight: 400; fill: #8792A0; }
+      .gate-note { font-size: 10px; font-weight: 500; fill: #53606E; }
       .execution-card { fill: #F3F7FB; stroke: #315C88; stroke-width: 1.4; }
       .neutral-card { fill: #FFFFFF; stroke: #A7B0BB; stroke-width: 1.2; }
       .control-card { fill: #FFF6F5; stroke: #A1463F; stroke-width: 1.4; }
@@ -40,6 +41,7 @@
   <!-- Header -->
   <text x="40" y="44" class="title">Шаблон процессной схемы</text>
   <text x="40" y="72" class="subtitle">Скопируйте файл, переименуйте и замените плейсхолдеры реальным процессом</text>
+  <text x="1087" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия X.Y · Обновлено ГГГГ-ММ-ДД ЧЧ:ММ</text>
   <!-- Header rule stops before the legend column so its border does not
        coincide with the box's top edge at the same y (foundations §12). -->
   <line x1="40" y1="100" x2="1087" y2="100" stroke="#D7DCE2"/>

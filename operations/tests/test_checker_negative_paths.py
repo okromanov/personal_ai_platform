@@ -990,6 +990,7 @@ class ArchitectureDiagramCheckTests(unittest.TestCase):
                 "source: specifications/example.md@1.0\n"
                 "id: ARC_CMP_001\n"
                 "end-diagram-metadata -->\n"
+                '  <text data-diagram-meta="version">Версия 1.0 · Обновлено 2026-09-01</text>\n'
                 '  <g data-spec-id="ARC_CMP_001"></g>\n'
                 "</svg>\n",
                 encoding="utf-8",
