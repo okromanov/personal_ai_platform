@@ -2,8 +2,8 @@
 id: coding_agent_instruction
 type: agent_instruction
 document_state: current
-version: 3.8
-updated: 2026-09-01
+version: 3.9
+updated: 2026-09-02
 depends_on:
   - project_rules
   - project_milestones
@@ -208,6 +208,7 @@ Hook проверит структуру документов, целостно�
 | Каковы этапы? | [`milestones.md`](milestones.md) |
 | Какая текущая работа? | [`project_status.md`](project_status.md); текущая карточка определяется его ссылкой |
 | Как тестировать? | [`work/tests/`](work/tests/) |
+| Как оформить архитектурную/процессную SVG-схему? | [`operations/architecture/diagram_geometry_foundations.md`](operations/architecture/diagram_geometry_foundations.md) (общие правила) → [`architecture_diagram_style_guide.md`](operations/architecture/architecture_diagram_style_guide.md) / [`process_diagram_style_guide.md`](operations/architecture/process_diagram_style_guide.md) (профиль); готовые шаблоны — [`operations/architecture/templates/`](operations/architecture/templates/) |
 
 Не переносить логику из одного документа в другой. Не дублировать одну связь в прямом и обратном направлении. Не добавлять реализацию, которой не требует текущий этап.
 
