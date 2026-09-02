@@ -40,7 +40,9 @@
   <!-- Header -->
   <text x="40" y="44" class="title">Шаблон процессной схемы</text>
   <text x="40" y="72" class="subtitle">Скопируйте файл, переименуйте и замените плейсхолдеры реальным процессом</text>
-  <line x1="40" y1="100" x2="1346" y2="100" stroke="#D7DCE2"/>
+  <!-- Header rule stops before the legend column so its border does not
+       coincide with the box's top edge at the same y (foundations §12). -->
+  <line x1="40" y1="100" x2="1087" y2="100" stroke="#D7DCE2"/>
 
   <!-- Connectors first: each ends exactly on the boundary of its target (foundations §10) -->
   <path class="main-line" d="M237 220H297"/>
