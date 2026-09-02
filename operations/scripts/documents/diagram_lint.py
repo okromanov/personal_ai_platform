@@ -55,6 +55,17 @@ _DATA_SPEC_ID = re.compile(r'data-spec-id="([^"]+)"')
 _SOURCE_LINE = re.compile(r"^(?P<path>[^@\s]+)@(?P<version>\S+)$")
 _REQUIRED_SCALAR_KEYS = ("diagram_id", "diagram_version", "generated_at", "status")
 _VALID_STATUS = {"current", "superseded"}
+_VISIBLE_META = re.compile(
+    r'data-diagram-meta="version"[^>]*>(?P<text>[^<]*)<',
+)
+_VERSION_TOKEN = re.compile(r"\d+\.\d+")
+_DATE_TOKEN = re.compile(r"\d{4}-\d{2}-\d{2}")
+# No \b anchors: an ISO timestamp's "T17:20:00" has a word character (the
+# "T") immediately before the hour digits, so \b would never match there --
+# it only matches a transition between \w and \W. The narrow, controlled
+# inputs this pattern searches (a generated_at scalar, a short header
+# caption) carry no other colon-separated digit pairs to false-positive on.
+_TIME_TOKEN = re.compile(r"(?P<hour>\d{2}):(?P<minute>\d{2})")
 _STYLE_BLOCK = re.compile(r"<style[^>]*>(?P<body>.*?)</style>", re.DOTALL)
 _CLASS_RULE = re.compile(
     r"(?:^|[,{}])\s*\.(?P<name>[A-Za-z_][A-Za-z0-9_-]*)\s*(?=[,{])", re.MULTILINE
@@ -200,6 +211,72 @@ def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: Lint
         )
 
 
+def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
+    r"""Header содержит видимую строку версии/даты, читаемую человеком без
+    обращения к исходнику (diagram_geometry_foundations.md §5, §13.1) —
+    `<text data-diagram-meta="version">Версия N · Обновлено ...</text>`.
+    Её отсутствие для любой схемы, соблюдающей контракт метаданных, —
+    ошибка того же рода, что отсутствие обязательного поля метаданных.
+
+    Если найденный текст содержит числовой токен версии (`\d+\.\d+`), он
+    обязан буквально совпадать с `diagram_version`; аналогично для даты и
+    времени внутри `generated_at`. Шаблонные скелеты намеренно несут
+    нечисловые плейсхолдеры («Версия X.Y · Обновлено ГГГГ-ММ-ДД ЧЧ:ММ») —
+    отсутствие числового токена version/date/time тихо пропускает
+    соответствующее сравнение, а не считается ошибкой: сверять плейсхолдер
+    не с чем, и это отличает шаблон от реальной схемы без служебного флага
+    «это шаблон» (diagram_geometry_foundations.md §13.1).
+
+    Область: `diagram_version` здесь двухкомпонентный (`N.N`), как во всех
+    текущих схемах репозитория; трёхкомпонентный semver `_VERSION_TOKEN` не
+    захватит целиком.
+    """
+
+    match = _VISIBLE_META.search(body_text)
+    if match is None:
+        result.errors.append(
+            "в header отсутствует видимая строка версии "
+            '(элемент с data-diagram-meta="version"), см. '
+            "diagram_geometry_foundations.md §13.1"
+        )
+        return
+
+    caption = match.group("text")
+
+    version_token = _VERSION_TOKEN.search(caption)
+    if version_token is not None:
+        declared_version = scalars.get("diagram_version", "")
+        if version_token.group(0) != declared_version:
+            result.errors.append(
+                f"видимая строка версии в header заявляет {version_token.group(0)!r}, "
+                f"а diagram_version в метаданных — {declared_version!r}. Значения обязаны "
+                "совпадать (diagram_geometry_foundations.md §13.1)."
+            )
+
+    generated_at = scalars.get("generated_at", "")
+
+    caption_date = _DATE_TOKEN.search(caption)
+    if caption_date is not None:
+        metadata_date = _DATE_TOKEN.search(generated_at)
+        if metadata_date is None or caption_date.group(0) != metadata_date.group(0):
+            result.errors.append(
+                f"видимая строка версии в header показывает дату {caption_date.group(0)!r}, "
+                f"а generated_at в метаданных — {generated_at!r}. Даты обязаны совпадать "
+                "(diagram_geometry_foundations.md §13.1)."
+            )
+
+    caption_time = _TIME_TOKEN.search(caption)
+    if caption_time is not None:
+        metadata_time = _TIME_TOKEN.search(generated_at)
+        if metadata_time is None or caption_time.group(0) != metadata_time.group(0):
+            result.errors.append(
+                f"видимая строка версии в header показывает время {caption_time.group(0)!r}, "
+                f"но generated_at в метаданных не содержит совпадающего времени "
+                f"({generated_at!r}). Схема с видимым временем обязана нести полный "
+                "generated_at с этим же временем (diagram_geometry_foundations.md §13.1)."
+            )
+
+
 def _check_structure(text: str, result: LintResult) -> ElementTree.Element | None:
     try:
         root_el = ElementTree.fromstring(text)
@@ -325,6 +402,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     if metadata is not None:
         _check_sources(metadata.sources, root, result)
         _check_ids(metadata.ids, text, root, result)
+        _check_visible_meta(metadata.scalars, text, result)
 
     geometry = check_geometry(text)
     result.errors.extend(geometry.errors)
@@ -334,10 +412,21 @@ def lint_file(path: Path, root: Path) -> LintResult:
 
 
 def default_targets(root: Path) -> list[Path]:
-    artefacts_dir = root / "work" / "artefacts"
-    if not artefacts_dir.is_dir():
-        return []
-    return sorted(artefacts_dir.rglob("*.svg"))
+    """Поставленные схемы плюс шаблонные скелеты.
+
+    Шаблоны из operations/architecture/templates/ обязаны проходить те же
+    проверки (diagram_geometry_foundations.md §15.1) — они демонстрируют
+    эталонную геометрию, и их копируют. Пока они лежали вне цели по
+    умолчанию, обязанность существовала только на словах: дефекты шаблона
+    не видел ни один автоматический прогон.
+    """
+
+    targets: list[Path] = []
+    for relative in (Path("work") / "artefacts", Path("operations") / "architecture" / "templates"):
+        directory = root / relative
+        if directory.is_dir():
+            targets.extend(directory.rglob("*.svg"))
+    return sorted(targets)
 
 
 def main() -> int:
