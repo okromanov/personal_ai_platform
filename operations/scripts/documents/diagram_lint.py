@@ -1,15 +1,22 @@
-"""Проверка архитектурных SVG-схем на соответствие
-operations/architecture/architecture_diagram_style_guide.md.
+"""Проверка блока метаданных управляемых SVG-схем (архитектурных и процессных).
 
-Вызывается из check.py --all автоматически (см.
-architecture_diagram_style_guide.md раздел 2). Проверяет только то, что
-можно проверить без рендеринга SVG: блок метаданных, дрейф заявленной
-версии источника от фактической, наличие каждого заявленного ID в
-спецификации, взаимное соответствие списка ID и data-spec-id в теле файла,
-базовую структуру (viewBox/title/desc).
+Общий формат блока метаданных определён в operations/architecture/
+diagram_geometry_foundations.md §13; предметная специфика — в
+operations/architecture/architecture_diagram_style_guide.md §3 и
+operations/architecture/process_diagram_style_guide.md §2.1 (governed-
+вариант). Вызывается из check.py --all автоматически (проверка
+architecture_diagrams). Проверяет только то, что можно проверить без
+рендеринга SVG: блок метаданных, дрейф заявленного source@версия от
+фактической version источника, наличие каждого заявленного id в реестре
+трассируемости (если id вообще заявлены — для процессных схем список
+может быть пустым), взаимное соответствие заявленных id и data-spec-id
+в теле файла, базовую структуру (viewBox/title/desc/role/aria-labelledby).
 
-Не проверяет: контраст, реальное визуальное наложение текста, читаемость
-после масштабирования — это остаётся ручным пунктом чек-листа (раздел 17).
+Не проверяет: сетку, отступы, симметрию, контраст, реальное визуальное
+наложение текста, читаемость после масштабирования — это остаётся ручными
+пунктами блокирующего чек-листа (diagram_geometry_foundations.md §17 и
+предметный гайд). Свободные (ad-hoc) схемы не проходят этот скрипт вовсе —
+process_diagram_style_guide.md §2.2.
 """
 
 from __future__ import annotations
@@ -68,7 +75,8 @@ def _parse_metadata_block(text: str, result: LintResult) -> _ParsedMetadata | No
     if match is None:
         result.errors.append(
             "не найден обязательный блок метаданных "
-            "(<!-- diagram-metadata ... end-diagram-metadata -->), см. раздел 3 гайда"
+            "(<!-- diagram-metadata ... end-diagram-metadata -->) — см. "
+            "diagram_geometry_foundations.md §13"
         )
         return None
 
@@ -132,15 +140,16 @@ def _check_sources(sources: list[str], root: Path, result: LintResult) -> None:
             result.errors.append(
                 f"дрейф версии: схема заявляет {m.group('path')}@{declared_version}, "
                 f"фактическая version в frontmatter — {actual_version}. "
-                "Схема требует повторной сверки (раздел 2 гайда)."
+                "Схема требует повторной сверки (diagram_geometry_foundations.md §13)."
             )
 
 
 def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: LintResult) -> None:
-    if not declared_ids:
-        result.errors.append("в блоке метаданных нет ни одной строки 'id: ARC_CMP_...'")
-        return
-
+    # Пустой список id допустим: процессная схема (process_diagram_style_guide.md
+    # §2.1) может не трассировать ни один элемент реестра — тогда достаточно
+    # заявленных source (diagram_geometry_foundations.md §13). Архитектурная
+    # схема по своему собственному чек-листу практически всегда несёт id, но
+    # это проверяется человеком по чек-листу, а не этим скриптом принудительно.
     known = collect_traceable_elements(root)
     declared_normalized = {_normalize_id(i) for i in declared_ids}
     for identifier in declared_ids:
@@ -241,7 +250,7 @@ def default_targets(root: Path) -> list[Path]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Проверка архитектурных SVG-схем")
+    parser = argparse.ArgumentParser(description="Проверка блока метаданных управляемых SVG-схем")
     parser.add_argument(
         "paths",
         nargs="*",
