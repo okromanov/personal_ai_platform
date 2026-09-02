@@ -219,6 +219,11 @@ def validate_change_scope(
     правка спецификаций относится к базовой редакции и покрывается профилем
     основы, а не карточкой задачи. Требовать TASK в этом состоянии — значит
     блокировать работу над основой требованием, которое правила прямо не ставят.
+
+    `AUTHORITY_DOCUMENTS` исключены из этой проверки безусловно, а не только
+    пока этап не объявил продуктовый состав: правку authority-документа видно
+    через обязательную смену версии (`validate_document_metadata`), а не через
+    границы TASK — так же, как остальные пути `MAINTENANCE_PATH_PATTERNS`.
     """
     normalized_paths = sorted(
         dict.fromkeys(_normalize(path) for path in changed_paths if path.strip())
@@ -231,7 +236,11 @@ def validate_change_scope(
         for path in normalized_paths
         if not _matches(path, list(DERIVED_PATH_PATTERNS)) and path not in controlled
     ]
-    project_paths = [path for path in substantive if not _matches(path, MAINTENANCE_PATH_PATTERNS)]
+    project_paths = [
+        path
+        for path in substantive
+        if not _matches(path, MAINTENANCE_PATH_PATTERNS) and path not in AUTHORITY_DOCUMENTS
+    ]
     if not project_paths:
         return []
     if not _milestone_declares_product_scope(root):

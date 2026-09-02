@@ -48,18 +48,18 @@ class ChangeScopeTests(unittest.TestCase):
                     task_id="TASK_001",
                     state="in-progress",
                     path=path,
-                    allowed=[path, "specifications/**"],
+                    allowed=[path, "src/product.py"],
                 ),
                 encoding="utf-8",
             )
             self.assertEqual(
-                validate_change_scope(root, ["specifications/system_specification.md"]),
+                validate_change_scope(root, ["src/product.py"]),
                 [],
             )
             self.assertTrue(validate_change_scope(root, ["tasks.md"]))
             self.assertEqual(validate_change_scope(root, [".github/workflows/check.yml"]), [])
             self.assertEqual(validate_change_scope(root, [".gitleaksignore"]), [])
-            self.assertTrue(validate_change_scope(root, ["src/product.py"]))
+            self.assertTrue(validate_change_scope(root, ["src/other_product.py"]))
 
     def test_completed_task_is_eligible_only_when_its_card_changes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -72,14 +72,12 @@ class ChangeScopeTests(unittest.TestCase):
                     task_id="TASK_001",
                     state="completed",
                     path=path,
-                    allowed=[path, "specifications/system_specification.md"],
+                    allowed=[path, "src/product.py"],
                 ),
                 encoding="utf-8",
             )
-            self.assertTrue(validate_change_scope(root, ["specifications/system_specification.md"]))
-            self.assertEqual(
-                validate_change_scope(root, [path, "specifications/system_specification.md"]), []
-            )
+            self.assertTrue(validate_change_scope(root, ["src/product.py"]))
+            self.assertEqual(validate_change_scope(root, [path, "src/product.py"]), [])
 
     def test_foundation_milestone_does_not_require_task_for_specifications(self) -> None:
         """Пока активный этап не объявляет продуктовый состав, поставки продукта нет:
@@ -102,6 +100,36 @@ class ChangeScopeTests(unittest.TestCase):
                 ),
                 [],
             )
+
+    def test_authority_documents_never_require_task_coverage(self) -> None:
+        """AUTHORITY_DOCUMENTS — видимость через обязательную смену версии
+        (validate_document_metadata), а не через границы TASK, независимо от
+        того, объявляет ли активный этап продуктовый состав."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "work/tasks").mkdir(parents=True)
+            (root / "specifications").mkdir(parents=True)
+            (root / "milestones.md").write_text(
+                "## m02 — Продукт\n\n- work_state: `in-progress`\n- состав: BR_001\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                validate_change_scope(
+                    root,
+                    [
+                        "project_rules.md",
+                        "AGENTS.md",
+                        "operations/change_process.md",
+                        "specifications/business_requirements.md",
+                        "specifications/threat_model.md",
+                        "specifications/system_specification.md",
+                        "specifications/architecture_baseline.md",
+                        "specifications/infrastructure_baseline.md",
+                    ],
+                ),
+                [],
+            )
+            self.assertTrue(validate_change_scope(root, ["src/product.py"]))
 
     def test_dated_audit_history_is_append_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
