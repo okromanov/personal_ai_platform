@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_009
 component: ARC_CMP_009
 work_state: completed
-version: 2.2
-updated: 2026-09-01
+version: 2.3
+updated: 2026-09-03
 next_actor: none
 owner_action: none
 depends_on:
@@ -18,7 +18,6 @@ allowed_paths:
   - src/operations/scheduler_state.py
   - operations/tests/product/test_operations_state.py
   - work/tests/test_013.md
-  - operations/repository_audit_system_prompt.md
 traces_to:
   - m02
 implements:

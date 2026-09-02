@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_005
 component: ARC_CMP_005
 work_state: completed
-version: 2.2
-updated: 2026-08-30
+version: 2.3
+updated: 2026-09-03
 next_actor: none
 owner_action: none
 depends_on:
@@ -18,7 +18,6 @@ allowed_paths:
   - src/tools/registry.py
   - operations/tests/product/test_tool_gateway.py
   - work/tests/test_011.md
-  - operations/tests/test_owner_usability.py
 traces_to:
   - m02
 implements:

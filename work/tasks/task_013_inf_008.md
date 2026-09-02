@@ -4,18 +4,16 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.7
-updated: 2026-09-02
+version: 2.8
+updated: 2026-09-03
 next_actor: agent
 owner_action: none
 owner_followups:
-  - "[open] Выполнить четыре инструкции развёртывания (Hetzner, DigitalOcean, Selectel, OVHcloud) и прислать заполненные evidence-блоки (раздел 11 каждой) — агент не может сам зарегистрировать аккаунты, подключиться по SSH или создать Telegram-бота. Инструкция для OVHcloud — черновая (dummy), не проверена практически ни разу, в отличие от остальных трёх."
+  - "[open] Предоставить evidence практического развёртывания по Hetzner, одной альтернативе сценария A (DigitalOcean или OVHcloud) и Selectel для выбора площадки размещения."
 depends_on:
   - TASK_012
 allowed_paths:
   - work/tasks/task_013_inf_008.md
-  - adr/adr_005_first_model_provider_selection.md
-  - adr/adr_006_agent_environment_framework.md
   - adr/adr_007_cloud_provider_selection.md
   - adr/adr_009_secret_management_strategy.md
 traces_to:
@@ -64,18 +62,6 @@ implements:
 
 **В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `infrastructure/deploy/` или конфигурации существующего CI), добавит их в `allowed_paths` и создаст связанную карточку TEST.
 
-По прямому запросу владельца, не относящемуся к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008): в [`milestones.md`](../../milestones.md) добавлена строка «ADR этого этапа» для каждого `mXX` и убран необязательный текст из раздела «Готовность этапа [`m01`](../../milestones.md#m01)»; в [`work/audit/audit_register.md`](../audit/audit_register.md) убрана вспомогательная запись, ссылавшаяся на этот текст. Оба файла теперь покрыты `MAINTENANCE_PATH_PATTERNS` в `check_change_scope.py` (governance/audit-трейл, не продуктовая поставка) — в `allowed_paths` этой TASK не добавлялись.
-
-Полный прогон проверки также обнаружил в [`work/audit/audit_register.md`](../audit/audit_register.md) две некликабельные ссылки на [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) (одна — испорченная вложенными скобками от автоматического линкера, добавлена отдельным изменением) — исправлены; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
-
-По прямому запросу владельца проведена сверка синхронизации всех ADR (принятых и `proposed`) с реализованным кодом; найденные расхождения зафиксированы карточками [`AUD-029`](../audit/audit_adhoc_cards.md#aud-029) и [`AUD-030`](../audit/audit_adhoc_cards.md#aud-030) в [`work/audit/audit_register.md`](../audit/audit_register.md) — не реализовано решение [`ADR_004`](../../adr/adr_004_task_events_and_logging.md) и разошлось имя контракта модели против `ModelGateway` в коде. При слиянии с `main` выяснилось, что обе находки уже независимо отслежены/устранены параллельной сессией ([`AUD-024`](../audit/audit_baseline_2026_08_30.md#aud-024), [`TASK_018`](task_018_runtime_task_events.md), переименование [`ADR_003`](../../adr/adr_003_model_provider_interface.md) на `ModelGateway`) — [`AUD-029`](../audit/audit_adhoc_cards.md#aud-029)/[`AUD-030`](../audit/audit_adhoc_cards.md#aud-030) переномерованы из-за коллизии ID и закрыты как дубликаты; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
-
-По прямому запросу владельца скорректирован процесс формирования ADR ([`operations/lifecycle/adr_lifecycle.md`](../../operations/lifecycle/adr_lifecycle.md) Фаза 0, [`AGENTS.md`](../../AGENTS.md) §5): список кандидатов ADR согласуется с владельцем через диалог до создания текста, а не выбирается агентом в одиночку. По итогам того же диалога (уточняющие вопросы владельцу) переписаны [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) (кандидаты расширены до Claude/GPT/Gemini/отечественных моделей вместо одного Claude) и [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) (кандидаты — LangGraph/CrewAI/собственная реализация вместо одного LangGraph); [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) переформулирован без слова «кандидат» для `.env` — это уже выбранный подход, а не вариант для сравнения, с SOPS+age как согласованным следующим шагом и Vault как отдельно отложенной опцией. [`ADR_008`](../../adr/adr_008_data_storage_schema.md) по решению владельца оставлен без изменений — пересмотр отложен до декомпозиции [`m04`](../../milestones.md#m04). Оба файла ([`ADR_005`](../../adr/adr_005_first_model_provider_selection.md), [`ADR_006`](../../adr/adr_006_agent_environment_framework.md)) добавлены в `allowed_paths`; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
-
-По прямому запросу владельца добавлен [`project_rules.md`](../../project_rules.md) Принцип 19: выбор технологии для ADR-кандидатов и решения при написании кода опираются на текущие лучшие практики отрасли для контекста задачи, а не на интуицию или аналогию с уже существующим в репозитории кодом. Со ссылкой на него дополнены [`operations/lifecycle/adr_lifecycle.md`](../../operations/lifecycle/adr_lifecycle.md) Фаза 0 и [`AGENTS.md`](../../AGENTS.md) §3. [`project_rules.md`](../../project_rules.md) покрыт `MAINTENANCE_PATH_PATTERNS` — в `allowed_paths` не добавлялся.
-
-При слиянии этой ветки с `main` обнаружились два независимых, недоступных друг другу диалога с владельцем по [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) и [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) — зафиксировано и разрешено владельцем как [`AUD-028`](../audit/audit_adhoc_cards.md#aud-028): [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) объединён в четыре кандидата (LangGraph, CrewAI, Hermes Agent, собственная реализация), [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) вернулся к двухсценарной структуре. Одновременно владелец вернул деференциальное правило для `proposed` ADR `planned` milestone (см. [`AUD-025`](../audit/audit_baseline_2026_08_30.md#aud-025) — обновление 2026-08-30), отменив немедленное требование TASK для [`ADR_008`](../../adr/adr_008_data_storage_schema.md)/[`m04`](../../milestones.md#m04), введённое параллельной сессией; не относится к реализации [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008).
-
 **Ожидаемые файлы:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
 - `work/tests/test_00X.md` — описание проверок
@@ -109,6 +95,4 @@ implements:
 
 ## Незакрытые действия владельца
 
-Выполнить четыре инструкции развёртывания (Hetzner, DigitalOcean, Selectel, OVHcloud) и прислать заполненные evidence-блоки (раздел 11 каждой) — агент не может сам зарегистрировать аккаунты, подключиться по SSH или создать Telegram-бота. Инструкция для OVHcloud — черновая (dummy), не проверена практически ни разу, в отличие от остальных трёх.
-
-Инструкции отправлены владельцу как PDF (не в репозитории), также сохранены в Google Drive (папка `personal_ai_platform`). Инструкция для OVHcloud — черновая (`v0.1 dummy`), не проверена практически ни разу, в отличие от Hetzner/DigitalOcean/Selectel: конкретные названия экранов OVHcloud Control Panel могут не совпасть с актуальным интерфейсом. Пока не пришли evidence-блоки по Hetzner и минимум одной альтернативе сценария A, [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) не может перейти из `proposed`: §6 ADR требует Hetzner и минимум одну альтернативу сценария A (DigitalOcean или OVHcloud), а также отдельно оценённый сценарий B (Selectel). Можно проходить инструкции по одной, в любом порядке, и присылать evidence по мере готовности — это не блокирует ничего кроме самого решения по [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md).
+Предоставить evidence практического развёртывания по Hetzner, одной альтернативе сценария A (DigitalOcean или OVHcloud) и Selectel для выбора площадки размещения.
