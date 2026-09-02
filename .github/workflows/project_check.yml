@@ -232,7 +232,9 @@ jobs:
             --output runtime/pip_audit.json
           /tmp/gitleaks dir . --redact --no-banner 2>&1 | tee runtime/gitleaks_directory.txt
           echo "gitleaks directory scan passed" >> runtime/gitleaks_directory.txt
-          /tmp/gitleaks git . --redact --no-banner 2>&1 | tee runtime/gitleaks_history.txt
+          /tmp/gitleaks git . --redact --no-banner \
+            --report-format json --report-path runtime/gitleaks_history.json \
+            2>&1 | tee runtime/gitleaks_history.txt
           echo "gitleaks history scan passed" >> runtime/gitleaks_history.txt
 
       - name: Run canonical full quality suite
@@ -307,6 +309,7 @@ jobs:
             --artifact runtime/pip_audit.json \
             --artifact runtime/gitleaks_directory.txt \
             --artifact runtime/gitleaks_history.txt \
+            --artifact runtime/gitleaks_history.json \
             --artifact runtime/container_base_digest.txt \
             --artifact runtime/container_image_digest.txt \
             --artifact runtime/container_health.json \
@@ -348,6 +351,7 @@ jobs:
             runtime/pip_audit.json
             runtime/gitleaks_directory.txt
             runtime/gitleaks_history.txt
+            runtime/gitleaks_history.json
             runtime/container_base_digest.txt
             runtime/container_image_digest.txt
             runtime/container_health.json

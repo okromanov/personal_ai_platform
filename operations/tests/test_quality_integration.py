@@ -70,6 +70,7 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn("--unshallow", workflow)
         self.assertIn("runtime/gitleaks_directory.txt", workflow)
         self.assertIn("runtime/gitleaks_history.txt", workflow)
+        self.assertIn("runtime/gitleaks_history.json", workflow)
         fingerprints = (ROOT / ".gitleaksignore").read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(fingerprints), 4)
         self.assertTrue(all(":generic-api-key:" in fingerprint for fingerprint in fingerprints))
