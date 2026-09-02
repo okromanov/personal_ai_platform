@@ -46,6 +46,11 @@ AUDIT_ROW = re.compile(
 # iterates context.arch_components directly instead.
 VULTURE_IGNORED_NAMES = "evidence_ref,semantic_review_ref,arch_count"
 
+# Оба профиля сторожат одни и те же производные пути. Пока списки жили
+# врозь, `fast` проверял на дрейф ещё и `generated`, а `full` — нет: более
+# полный профиль давал более слабую гарантию, чем более быстрый.
+GENERATED_DRIFT_PATHS = ("project_status.md", "generated")
+
 
 def _ignored_config_path(path: Path) -> bool:
     return bool(IGNORED_CONFIG_DIRS.intersection(path.parts))
@@ -311,7 +316,7 @@ def run_fast(root: Path, python: str) -> None:
     run_step(
         root,
         "Generated drift",
-        ["git", "diff", "--exit-code", "--", "project_status.md", "generated"],
+        ["git", "diff", "--exit-code", "--", *GENERATED_DRIFT_PATHS],
     )
 
 
@@ -450,7 +455,7 @@ def run_full(root: Path, python: str, base: str | None) -> None:
     run_step(
         root,
         "Generated drift",
-        ["git", "diff", "--exit-code", "--", "project_status.md"],
+        ["git", "diff", "--exit-code", "--", *GENERATED_DRIFT_PATHS],
     )
     run_step(
         root,

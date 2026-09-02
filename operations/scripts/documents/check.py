@@ -1635,9 +1635,14 @@ def check_secrets(root: Path) -> CheckResult:
 
 
 def check_test_coverage_quality(root: Path) -> CheckResult:
-    """Проверка покрытия требований тестами (включается на m02+)."""
-    # На m01 только подготовка основы, требования будут протестированы на m02+
-    # Эта проверка информационная и не блокирует принятие m01
+    """Проверка покрытия требований TEST-спецификациями (включается на m02+).
+
+    Проверка блокирующая, как и все остальные: её ошибки попадают в
+    `errors`, а не в `warnings`. Пусто она возвращает не потому, что
+    «информационная», а потому, что `validate_test_coverage()` сама
+    пропускает текущий m01 и любой ещё не начатый этап. Как только текущим
+    станет m02, тот же код начнёт валить гейт — без изменений здесь.
+    """
     try:
         from operations.scripts.quality.test_coverage import validate_test_coverage
 
@@ -1760,8 +1765,16 @@ def check_frontmatter_standard(root: Path) -> CheckResult:
         if doc_type == "task":
             next_actor = str(doc.metadata.get("next_actor", "")).strip()
             if next_actor == "owner":
-                owner_action = str(doc.metadata.get("owner_action", "")).strip()
-                if owner_action == "none":
+                # Frontmatter здесь читается сырым, без нормализации, которую
+                # делает collect_tasks() для check_tasks. Разбор превращает
+                # `owner_action: none` в Python None, поэтому сравнение
+                # str(...) == "none" давало "None" и не срабатывало никогда:
+                # правило было мёртвым, хотя в репозитории десятки задач с
+                # `owner_action: none`. Отсутствующее и пустое значение
+                # означают ровно то же самое — действия владельца нет.
+                raw_action = doc.metadata.get("owner_action")
+                owner_action = "none" if raw_action is None else str(raw_action).strip().lower()
+                if owner_action in {"none", ""}:
                     errors.append(
                         f"{relative}: при next_actor=owner, owner_action не должен быть 'none'"
                     )
@@ -1789,17 +1802,21 @@ def check_frontmatter_standard(root: Path) -> CheckResult:
     return _result("frontmatter_standard", errors)
 
 
+# Профиль `--fast` — подмножество полного набора, а не второй список: пока
+# состав дублировался литерально, переименование или замена проверки молча
+# расходились между профилями. Имена ниже обязаны существовать в ALL_CHECKS,
+# что подтверждается тестом.
+FAST_CHECK_NAMES = (
+    "structure",
+    "markdown_section_order",
+    "metadata",
+    "frontmatter_standard",
+    "links",
+    "secrets",
+)
+
+
 def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
-    # Fast mode: только быстрые структурные проверки (<0.2s каждая)
-    fast_checks = [
-        ("structure", check_structure),
-        ("markdown_section_order", check_markdown_section_order),
-        ("metadata", check_metadata),
-        ("frontmatter_standard", check_frontmatter_standard),
-        ("links", lambda project_root: _result("links", check_markdown_links(project_root))),
-        ("secrets", check_secrets),
-    ]
-    # Full mode: все проверки (для CI)
     all_checks = [
         ("structure", check_structure),
         ("markdown_section_order", check_markdown_section_order),
@@ -1830,7 +1847,15 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("owner_actions", check_owner_action_quality),
         ("allowed_paths", check_allowed_paths_quality),
     ]
-    checks = fast_checks if fast else all_checks
+    if fast:
+        # Быстрый профиль: только структурные проверки (<0.2s каждая).
+        by_name = dict(all_checks)
+        missing = [name for name in FAST_CHECK_NAMES if name not in by_name]
+        if missing:
+            raise KeyError(f"FAST_CHECK_NAMES ссылается на несуществующие проверки: {missing}")
+        checks = [(name, by_name[name]) for name in FAST_CHECK_NAMES]
+    else:
+        checks = all_checks
     results: list[CheckResult] = []
     for name, checker in checks:
         try:

@@ -67,3 +67,27 @@ class MypyBaselineTests(unittest.TestCase):
             patch.object(run_mypy_baseline.subprocess, "run", return_value=completed),
         ):
             self.assertEqual(run_mypy_baseline.main(), 1)
+
+
+class CommittedBaselineRatchetTests(unittest.TestCase):
+    """`run_mypy_baseline.py` enforces the budget it is given — it cannot
+    notice that the budget itself was raised. AGENTS.md §5.1 forbids widening
+    a baseline instead of fixing the cause, and quality_baseline.json states
+    "Debt may only decrease", but until this test nothing held the committed
+    file to either: editing one number turned the gate green.
+
+    Lowering the numbers below is always allowed. Raising one is a deliberate
+    owner decision that has to change this test too, in the same commit,
+    where a reviewer sees it.
+    """
+
+    def _committed(self) -> dict[str, object]:
+        root = Path(__file__).resolve().parents[3]
+        raw = (root / "operations" / "quality_baseline.json").read_text(encoding="utf-8")
+        return dict(json.loads(raw))
+
+    def test_total_error_budget_stays_at_zero(self) -> None:
+        self.assertEqual(self._committed()["mypy_error_budget"], 0)
+
+    def test_no_per_file_or_per_code_exemptions_are_carried(self) -> None:
+        self.assertEqual(self._committed()["mypy_error_budget_by_file_and_code"], {})

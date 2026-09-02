@@ -1,11 +1,16 @@
-"""
-Advanced code quality analysis using AST (Abstract Syntax Tree).
+"""AST-based detection of stub implementations and unresolved TODOs.
 
-Replaces primitive regex patterns with proper Python AST analysis for:
-- Detection of stub implementations (pass, NotImplementedError)
-- Finding unresolved TODOs in function bodies, not in paths
-- Dead code detection (unused imports, variables)
-- Complexity metrics
+Only `stubs` gates: main() exits 1 when a function body is nothing but
+`pass` or `raise NotImplementedError`, which regex-based scanning cannot
+tell apart from a legitimate `pass` inside a branch. `todos` is reported
+for the evidence artifact and does not fail the run.
+
+Removed in the 2026-09-02 checker review, deliberately and not because it
+was failing: an `UnusedDetector` that re-implemented Ruff's F401 (which is
+selected in pyproject.toml and *does* block the gate) while itself only
+ever incrementing an advisory warning counter, and a `ComplexityAnalyzer`
+whose numbers had no threshold and no consumer anywhere in the repository.
+Neither could turn the gate red, so neither is missed by deleting it.
 """
 
 from __future__ import annotations
@@ -89,83 +94,6 @@ class StubDetector(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-class UnusedDetector(ast.NodeVisitor):
-    """Find unused imports and variables."""
-
-    def __init__(self, filepath: str):
-        self.filepath = filepath
-        self.imports: dict[str, int] = {}
-        self.used_names: set[str] = set()
-        self.unused: list[dict[str, Any]] = []
-
-    def visit_Import(self, node: ast.Import) -> None:
-        for alias in node.names:
-            name = alias.asname or alias.name
-            self.imports[name] = node.lineno
-        self.generic_visit(node)
-
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        # `from __future__ import annotations` (and other future features)
-        # is a compiler directive, not a runtime name that a Name/Attribute
-        # visit could ever mark used - counting it as an unused import is a
-        # false positive on a pattern nearly every file in this repo uses.
-        if node.module == "__future__":
-            self.generic_visit(node)
-            return
-        for alias in node.names:
-            if alias.name != "*":
-                name = alias.asname or alias.name
-                self.imports[name] = node.lineno
-        self.generic_visit(node)
-
-    def visit_Name(self, node: ast.Name) -> None:
-        if isinstance(node.ctx, ast.Load):
-            self.used_names.add(node.id)
-        self.generic_visit(node)
-
-    def visit_Attribute(self, node: ast.Attribute) -> None:
-        if isinstance(node.value, ast.Name):
-            self.used_names.add(node.value.id)
-        self.generic_visit(node)
-
-    def finalize(self) -> None:
-        """Check which imports are unused."""
-        for import_name, lineno in self.imports.items():
-            if import_name not in self.used_names and not import_name.startswith("_"):
-                self.unused.append(
-                    {
-                        "type": "unused_import",
-                        "name": import_name,
-                        "line": lineno,
-                        "severity": "medium",
-                    }
-                )
-
-
-class ComplexityAnalyzer(ast.NodeVisitor):
-    """Calculate cyclomatic complexity."""
-
-    def __init__(self, filepath: str):
-        self.filepath = filepath
-        self.complexity = 0
-        self.functions: dict[str, int] = {}
-        self.current_function: str | None = None
-
-    def visit_FunctionDef(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
-        self.current_function = node.name
-        complexity = 1
-        complexity += sum(1 for _ in ast.walk(node) if isinstance(_, ast.If))
-        complexity += sum(1 for _ in ast.walk(node) if isinstance(_, ast.For))
-        complexity += sum(1 for _ in ast.walk(node) if isinstance(_, ast.While))
-        complexity += sum(1 for _ in ast.walk(node) if isinstance(_, ast.ExceptHandler))
-
-        self.functions[node.name] = complexity
-        self.generic_visit(node)
-
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        self.visit_FunctionDef(node)  # Same logic
-
-
 def analyze_file(filepath: Path) -> dict[str, Any]:
     """Run all analyzers on a single Python file."""
     try:
@@ -180,24 +108,10 @@ def analyze_file(filepath: Path) -> dict[str, Any]:
     stub_detector = StubDetector(str(filepath))
     stub_detector.visit(tree)
 
-    unused_detector = UnusedDetector(str(filepath))
-    unused_detector.visit(tree)
-    unused_detector.finalize()
-
-    complexity_analyzer = ComplexityAnalyzer(str(filepath))
-    complexity_analyzer.visit(tree)
-
     return {
         "filepath": str(filepath),
         "stubs": stub_detector.stubs,
         "todos": stub_detector.todos,
-        "unused": unused_detector.unused,
-        "complexity": {
-            "by_function": complexity_analyzer.functions,
-            "max_complexity": max(complexity_analyzer.functions.values())
-            if complexity_analyzer.functions
-            else 0,
-        },
     }
 
 
@@ -223,7 +137,6 @@ def main() -> int:
         if "error" not in findings:
             critical_count += len([s for s in findings["stubs"] if s.get("severity") == "high"])
             warning_count += len([s for s in findings["stubs"] if s.get("severity") == "medium"])
-            warning_count += len(findings["unused"])
 
     # Output JSON report
     report = {

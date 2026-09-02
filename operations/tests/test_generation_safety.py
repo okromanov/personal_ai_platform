@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from operations.scripts.common.project import atomic_write_generated, read_text
-from operations.scripts.documents.check import run_all_checks
+from operations.scripts.documents.check import FAST_CHECK_NAMES, run_all_checks
 from operations.scripts.documents.generate import generate_all
 
 
@@ -56,6 +56,33 @@ class GenerationSafetyTests(unittest.TestCase):
         self.assertIn("secrets", by_name)
         self.assertFalse(by_name["structure"].ok)
         self.assertIn("RuntimeError: boom", by_name["structure"].errors[0])
+
+
+class CheckProfileCompositionTests(unittest.TestCase):
+    """The `--fast` profile is what the pre-commit hook runs, so what it does
+    and does not contain is an operational fact, not an implementation
+    detail. It used to be a second literal list beside the full one, where a
+    renamed check would silently drop out of one profile only.
+    """
+
+    def _names(self, *, fast: bool) -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            return [result.name for result in run_all_checks(Path(tmp), fast=fast)]
+
+    def test_fast_profile_is_exactly_the_declared_subset(self) -> None:
+        self.assertEqual(self._names(fast=True), list(FAST_CHECK_NAMES))
+
+    def test_every_fast_check_also_runs_in_the_full_profile(self) -> None:
+        self.assertEqual(set(FAST_CHECK_NAMES) - set(self._names(fast=False)), set())
+
+    def test_secrets_is_in_the_fast_profile(self) -> None:
+        # The pre-commit hook is the only gate a commit is guaranteed to
+        # pass through; dropping the secret scan from it would move the
+        # first detection of a committed secret to CI, after push.
+        self.assertIn("secrets", FAST_CHECK_NAMES)
+
+    def test_full_profile_is_a_strict_superset(self) -> None:
+        self.assertGreater(len(self._names(fast=False)), len(FAST_CHECK_NAMES))
 
 
 if __name__ == "__main__":

@@ -2,8 +2,8 @@
 id: integration_tests
 type: guide
 document_state: current
-version: 1.0
-updated: 2026-08-25
+version: 1.2
+updated: 2026-09-02
 ---
 
 # Integration Tests Playbook
@@ -38,17 +38,24 @@ python3.12 -m unittest discover -s operations/tests/integration -p "test_*.py" -
 
 **File:** `test_quality_pipeline.py`
 
-Verifies:
-- Code analyzer produces valid JSON output
-- Ruff linter integration with project config
-- Bandit SAST scanner runs correctly
-- Vulture dead code detection works
-- Mypy type checking processes baseline correctly
+Verifies the CLI contract of `code_analyzer.py` — единственного инструмента
+качества, который принадлежит этому репозиторию:
+- JSON-форма отчёта, который `record_quality_suite.py` записывает как доказательство
+- Чистый прогон по текущему дереву (ровно `exit 0`, а не «0 или 1»)
 
 **Success Criteria:**
-- All tools run without crashing
-- All tools produce valid output format
-- Exit codes indicate correct pass/fail state
+- Отчёт разбирается и содержит непустой `summary.files_analyzed`
+- Код возврата ровно 0, stderr пуст
+
+**Что здесь сознательно НЕ проверяется (ревизия чекеров 2026-09-02).** Ruff,
+Bandit, mypy и Vulture — блокирующие шаги `run_suite.py full`, который
+выполняют и `pre_push_hook.sh`, и job `quality-skills` в CI. Их дубли жили
+здесь с проверкой `returncode in [0, 1]` — то есть с обоими кодами, которыми
+эти инструменты и отвечают «чисто» и «есть находки». Пробный файл с
+настоящими нарушениями F401/F841, настоящей ошибкой mypy `import-not-found`
+и настоящей находкой Bandit оставлял все эти тесты зелёными, пока
+соответствующие шаги `run_suite.py` краснели. Гарантию даёт блокирующий шаг,
+а не тест, который не отличает чистое дерево от грязного.
 
 ### Acceptance Workflow Integration
 
