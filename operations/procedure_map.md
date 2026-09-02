@@ -2,7 +2,7 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 2.4
+version: 2.5
 updated: 2026-09-02
 depends_on:
   - operations_change_process
@@ -32,6 +32,7 @@ depends_on:
 | [`architecture_diagram_style_guide.md`](architecture/architecture_diagram_style_guide.md) | Специфика архитектурных SVG-схем поверх [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md): профиль, метаданные, размещение в `work/artefacts/architecture/` | Нужно подготовить новую или обновить существующую архитектурную схему | Схема, прошедшая оба чек-листа (раздел 17 основы + раздел 5 этого гайда) и `diagram_lint.py` без ошибок |
 | [`process_diagram_style_guide.md`](architecture/process_diagram_style_guide.md) | Специфика процессных SVG-схем и PPTX-визуалов поверх [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md): охват (governed/ad-hoc), процессная семантика, ориентация, профиль PPTX, размещение в `work/artefacts/process/` | Нужно подготовить новую или обновить существующую процессную схему либо SVG-визуал для PPTX | Схема, прошедшая оба чек-листа (раздел 17 основы + раздел 7 этого гайда) и, для управляемого варианта, `diagram_lint.py` без ошибок |
 | [`agent_roles_and_delegation.md`](architecture/agent_roles_and_delegation.md) | Решения владельца о ролях агентов, развитии роли, субагентах и границах делегирования; заранее подготовленный дизайн без `BR_*` | Оценивается среда выполнения агента или планируется многоагентное направление на [`m07`](../milestones.md#m07) | Понимание, какие свойства среды и какие открытые вопросы влияют на решение |
+| [`family_multi_user_candidate.md`](architecture/family_multi_user_candidate.md) | Решения владельца о контроле члена семьи над своей памятью, возрастных уровнях доступа, жизненном цикле идентичности и учёте стоимости по человеку; заранее подготовленный дизайн без `BR_*` | Планируется семейный многопользовательский режим ([`BR_025`](../specifications/business_requirements.md#br_025)) на [`m07`](../milestones.md#m07) | Понимание решений владельца и открытых вопросов до формулирования требований |
 | [`threat_review_triggers.md`](policy/threat_review_triggers.md) | Какое событие означает, что угроза из модели угроз реализовалась, и что делать | Аномалия, ошибка или инцидент, потенциально связанный с [`threat_model.md`](../specifications/threat_model.md) | Решение: инцидент подтверждён/отклонён, процедура реагирования |
 | [`license_policy.md`](policy/license_policy.md) | Почему в репозитории нет корневого `LICENSE` и что это означает | Вопрос о лицензировании/распространении кода | Понимание текущего закрытого режима |
 | [`procedures/file_update_dependencies.md`](procedures/file_update_dependencies.md) | Какие производные файлы нужно обновить при правке конкретного первичного файла | Правка файла с известными зависимыми генераторами/документами | Полный список файлов для синхронной правки |
