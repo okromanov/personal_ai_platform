@@ -55,6 +55,12 @@ _DATA_SPEC_ID = re.compile(r'data-spec-id="([^"]+)"')
 _SOURCE_LINE = re.compile(r"^(?P<path>[^@\s]+)@(?P<version>\S+)$")
 _REQUIRED_SCALAR_KEYS = ("diagram_id", "diagram_version", "generated_at", "status")
 _VALID_STATUS = {"current", "superseded"}
+_STYLE_BLOCK = re.compile(r"<style[^>]*>(?P<body>.*?)</style>", re.DOTALL)
+_CLASS_RULE = re.compile(
+    r"(?:^|[,{}])\s*\.(?P<name>[A-Za-z_][A-Za-z0-9_-]*)\s*(?=[,{])", re.MULTILINE
+)
+_MARKER_ID = re.compile(r"<marker\b[^>]*\bid=\"(?P<name>[^\"]+)\"")
+_URL_REF = re.compile(r"url\(#(?P<name>[^)]+)\)")
 
 
 @dataclass
@@ -194,17 +200,17 @@ def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: Lint
         )
 
 
-def _check_structure(text: str, result: LintResult) -> None:
+def _check_structure(text: str, result: LintResult) -> ElementTree.Element | None:
     try:
         root_el = ElementTree.fromstring(text)
     except (ElementTree.ParseError, DefusedXmlException) as exc:
         result.errors.append(f"файл не является корректным XML/SVG: {exc}")
-        return
+        return None
 
     tag = root_el.tag
     if tag not in (f"{_SVG_NS}svg", "svg"):
         result.errors.append(f"корневой элемент не <svg>: {tag}")
-        return
+        return None
 
     width = root_el.get("width")
     height = root_el.get("height")
@@ -238,6 +244,66 @@ def _check_structure(text: str, result: LintResult) -> None:
         result.errors.append('корневой <svg> должен иметь role="img"')
     if not root_el.get("aria-labelledby"):
         result.errors.append("отсутствует aria-labelledby на корневом <svg>")
+    return root_el
+
+
+def _check_dead_definitions(text: str, root_el: ElementTree.Element, result: LintResult) -> None:
+    """Раздел 15 стандарта: неиспользуемые маркеры, классы и элементы удаляются.
+
+    Мёртвое определение ничего не ломает визуально, поэтому не обнаруживается
+    ни рендерингом, ни ручным просмотром, и накапливается от правки к правке.
+    Проверка сверяет объявленные CSS-классы и `<marker>` с фактическими
+    ссылками на них: `class="..."` в теле схемы и `url(#...)` в стилях и
+    атрибутах. Обратное направление (использован необъявленный класс)
+    проверяется тем же сопоставлением.
+    """
+
+    used_classes: set[str] = set()
+    for element in root_el.iter():
+        class_attr = element.get("class")
+        if class_attr:
+            used_classes.update(class_attr.split())
+
+    declared_classes: set[str] = set()
+    for style_match in _STYLE_BLOCK.finditer(text):
+        declared_classes.update(
+            match.group("name") for match in _CLASS_RULE.finditer(style_match.group("body"))
+        )
+
+    dead_classes = sorted(declared_classes - used_classes)
+    if dead_classes:
+        result.errors.append(
+            "объявлены, но не используются CSS-классы: "
+            + ", ".join(f".{name}" for name in dead_classes)
+            + " — удалите их (раздел 15 стандарта)"
+        )
+
+    undeclared_classes = sorted(used_classes - declared_classes)
+    if undeclared_classes:
+        result.errors.append(
+            "используются необъявленные CSS-классы: "
+            + ", ".join(f".{name}" for name in undeclared_classes)
+        )
+
+    declared_markers = {match.group("name") for match in _MARKER_ID.finditer(text)}
+    referenced = {match.group("name") for match in _URL_REF.finditer(text)}
+    dead_markers = sorted(declared_markers - referenced)
+    if dead_markers:
+        result.errors.append(
+            "объявлены, но не используются маркеры: "
+            + ", ".join(f"#{name}" for name in dead_markers)
+            + " — удалите их (раздел 15 стандарта)"
+        )
+
+    # url(#...) адресует не только маркеры (градиенты, фильтры, clipPath), поэтому
+    # незакрытой ссылкой считается только та, для которой в файле нет элемента с
+    # таким id вообще.
+    defined_ids = {element.get("id") for element in root_el.iter() if element.get("id")}
+    missing_targets = sorted(referenced - defined_ids)
+    if missing_targets:
+        result.errors.append(
+            "ссылка на неопределённый элемент: " + ", ".join(f"#{name}" for name in missing_targets)
+        )
 
 
 def _display_name(path: Path, root: Path) -> str:
@@ -251,7 +317,9 @@ def lint_file(path: Path, root: Path) -> LintResult:
     result = LintResult(file=_display_name(path, root))
     text = read_text(path)
 
-    _check_structure(text, result)
+    root_el = _check_structure(text, result)
+    if root_el is not None:
+        _check_dead_definitions(text, root_el, result)
 
     metadata = _parse_metadata_block(text, result)
     if metadata is not None:
