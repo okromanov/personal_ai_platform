@@ -447,6 +447,28 @@ class DiagramLintTests(unittest.TestCase):
             svg_a.write_text("<svg></svg>", encoding="utf-8")
             self.assertEqual(diagram_lint.default_targets(root), [svg_a, svg_b])
 
+    def test_default_targets_also_covers_the_template_skeletons(self) -> None:
+        """Шаблоны обязаны проходить линтер (foundations §15.1).
+
+        Пока они не входили в цель по умолчанию, эта обязанность не
+        исполнялась ни одним автоматическим прогоном — и геометрические
+        дефекты шаблонов накапливались незамеченными.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            artefacts = root / "work" / "artefacts" / "architecture"
+            artefacts.mkdir(parents=True)
+            delivered = artefacts / "delivered.svg"
+            delivered.write_text("<svg></svg>", encoding="utf-8")
+
+            templates = root / "operations" / "architecture" / "templates"
+            templates.mkdir(parents=True)
+            skeleton = templates / "architecture_diagram_template.svg"
+            skeleton.write_text("<svg></svg>", encoding="utf-8")
+
+            self.assertEqual(diagram_lint.default_targets(root), sorted([delivered, skeleton]))
+
     def test_main_reports_no_targets_when_artefacts_directory_is_empty(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

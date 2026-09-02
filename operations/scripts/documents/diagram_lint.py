@@ -334,10 +334,21 @@ def lint_file(path: Path, root: Path) -> LintResult:
 
 
 def default_targets(root: Path) -> list[Path]:
-    artefacts_dir = root / "work" / "artefacts"
-    if not artefacts_dir.is_dir():
-        return []
-    return sorted(artefacts_dir.rglob("*.svg"))
+    """Поставленные схемы плюс шаблонные скелеты.
+
+    Шаблоны из operations/architecture/templates/ обязаны проходить те же
+    проверки (diagram_geometry_foundations.md §15.1) — они демонстрируют
+    эталонную геометрию, и их копируют. Пока они лежали вне цели по
+    умолчанию, обязанность существовала только на словах: дефекты шаблона
+    не видел ни один автоматический прогон.
+    """
+
+    targets: list[Path] = []
+    for relative in (Path("work") / "artefacts", Path("operations") / "architecture" / "templates"):
+        directory = root / relative
+        if directory.is_dir():
+            targets.extend(directory.rglob("*.svg"))
+    return sorted(targets)
 
 
 def main() -> int:
