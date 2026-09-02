@@ -5,7 +5,7 @@ title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
 version: 2.8
-updated: 2026-09-02
+updated: 2026-09-03
 next_actor: agent
 owner_action: none
 owner_followups:

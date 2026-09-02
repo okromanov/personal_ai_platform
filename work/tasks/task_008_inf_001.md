@@ -5,7 +5,7 @@ title: Реализация INF_CMP_001
 component: INF_CMP_001
 work_state: completed
 version: 2.7
-updated: 2026-09-02
+updated: 2026-09-03
 next_actor: none
 owner_action: none
 owner_followups: []

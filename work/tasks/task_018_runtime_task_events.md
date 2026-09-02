@@ -6,7 +6,7 @@ component: ARC_CMP_007
 delivery_role: component
 work_state: planned
 version: 1.3
-updated: 2026-09-02
+updated: 2026-09-03
 depends_on:
   - TASK_017
 next_actor: agent
