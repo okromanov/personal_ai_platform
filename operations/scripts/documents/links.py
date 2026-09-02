@@ -125,9 +125,10 @@ def _exact_project_document(root: Path, candidate: Path) -> Path | None:
             exact_entries = {entry.name: entry for entry in current.iterdir()}
         except OSError:
             return None
-        current = exact_entries.get(part)
-        if current is None:
+        matched = exact_entries.get(part)
+        if matched is None:
             return None
+        current = matched
     if not current.is_file():
         return None
     try:

@@ -71,6 +71,8 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn("runtime/gitleaks_directory.txt", workflow)
         self.assertIn("runtime/gitleaks_history.txt", workflow)
         self.assertIn("runtime/gitleaks_history.json", workflow)
+        self.assertIn('python-version: "3.12"', workflow)
+        self.assertNotIn('python-version: "3.14"', workflow)
         fingerprints = (ROOT / ".gitleaksignore").read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(fingerprints), 4)
         self.assertTrue(all(":generic-api-key:" in fingerprint for fingerprint in fingerprints))
