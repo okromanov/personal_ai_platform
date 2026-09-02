@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_003
 component: INF_CMP_003
 work_state: completed
-version: 2.0
-updated: 2026-08-29
+version: 2.1
+updated: 2026-09-02
 next_actor: none
 owner_action: none
 depends_on:
@@ -18,9 +18,6 @@ allowed_paths:
   - src/secrets/env_provider.py
   - src/channels/telegram.py
   - operations/tests/product/test_secrets.py
-  - operations/scripts/documents/generate.py
-  - operations/scripts/status/human_status.py
-  - project_status.md
 traces_to:
   - m02
 implements:
@@ -41,7 +38,7 @@ tests:
 
 ## 3. Где мы сейчас
 
-Спецификация [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003) определяет [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006). Выбран минимальный для [`m02`](../../milestones.md#m02) вариант: переменные окружения с заменяемым контрактом. Конкретного шлюза моделей пока нет, поэтому ключ поставщика будет запрошен этим же контрактом при его реализации. Зависит от [`TASK_009`](task_009_inf_002.md).
+Спецификация [`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003) определяет [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006). Выбран минимальный для [`m02`](../../milestones.md#m02) вариант: переменные окружения с заменяемым контрактом. Реальный поставщик модели должен получать ключ через этот же контракт. Зависимость от [`TASK_009`](task_009_inf_002.md) выполнена.
 
 ## 4. Что делать сейчас
 
@@ -66,15 +63,12 @@ tests:
 
 `operations/tests/product/test_secrets.py` проверяет выдачу, ошибки и интеграцию Telegram; шесть целевых тестов пройдены. [`TEST_016`](../tests/test_016.md) связан с [`INF_REQ_006`](../../specifications/infrastructure_baseline.md#inf_req_006).
 
-Полный серверный GitHub Actions gate намеренно отложен до 1 сентября 2026 года: бесплатный месячный лимит Actions исчерпан. Это ограничение верификации, а не заявленный успешный результат.
-
 ## 8. Готово когда
 
 - [x] Шесть тестов `operations/tests/product/test_secrets.py` прошли;
-- [~] Полный server gate GitHub Actions отложен до 1 сентября 2026 года из-за исчерпанного лимита; успешный результат не заявляется;
-- [x] [`project_status.md`](../../project_status.md) обновлён на этой ветке;
 - [x] Все пути поставки входят в `allowed_paths`;
-- [x] [`TEST_016`](../tests/test_016.md) имеет актуальную спецификацию и автоматическое evidence.
+- [x] [`TEST_016`](../tests/test_016.md) имеет актуальную спецификацию и автоматическое evidence;
+- [x] Канонический CI успешен.
 
 ## 9. Что будет дальше
 

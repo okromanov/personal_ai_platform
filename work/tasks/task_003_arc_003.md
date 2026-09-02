@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_003
 component: ARC_CMP_003
 work_state: completed
-version: 2.2
-updated: 2026-08-30
+version: 2.3
+updated: 2026-09-02
 next_actor: none
 owner_action: none
 depends_on:
@@ -19,15 +19,6 @@ allowed_paths:
   - src/orchestration/orchestrator.py
   - operations/tests/product/test_orchestration.py
   - work/tests/test_009.md
-  - adr/adr_005_first_model_provider_selection.md
-  - adr/adr_006_agent_environment_framework.md
-  - adr/adr_007_cloud_provider_selection.md
-  - adr/adr_008_data_storage_schema.md
-  - adr/adr_009_secret_management_strategy.md
-  - milestones.md
-  - specifications/architecture_baseline.md
-  - specifications/system_specification.md
-  - specifications/infrastructure_baseline.md
 traces_to:
   - m02
 implements:
@@ -48,7 +39,7 @@ tests:
 
 ## 3. Где мы сейчас
 
-Спецификация и реализация [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) полностью завершены и покрыты [`TEST_009`](../tests/test_009.md). Не зависит от хранения состояния задачи ([`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007), [`TASK_006`](task_006_arc_007.md)): та TASK ещё не выполнена и отвечает за отдельную заботу — контрольные точки, повтор и возобновление после сбоя, а не за проведение задачи через один цикл выполнения.
+Спецификация и реализация [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) полностью завершены и покрыты [`TEST_009`](../tests/test_009.md). Хранение состояния задачи ([`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007), [`TASK_006`](task_006_arc_007.md)) остаётся отдельной заботой: оно отвечает за контрольные точки, повтор и возобновление после сбоя, а не за проведение задачи через один цикл выполнения.
 
 ## 4. Что делать сейчас
 
@@ -68,8 +59,6 @@ tests:
 ## 6. Состав
 
 [`src/orchestration/`](../../src/orchestration/) — стабильный контракт `RuntimePort` ([`runtime_port.py`](../../src/orchestration/runtime_port.py)), тестовый переходный слой `StubRuntimePort` ([`stub_runtime.py`](../../src/orchestration/stub_runtime.py)) и `Orchestrator` ([`orchestrator.py`](../../src/orchestration/orchestrator.py)), проводящий задачу через [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001). [`work/tests/test_009.md`](../tests/test_009.md) — описание проверок компонента. [`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py) — юнит-тесты, проверяющие компонент.
-
-[`adr/adr_005_first_model_provider_selection.md`](../../adr/adr_005_first_model_provider_selection.md)–[`adr/adr_009_secret_management_strategy.md`](../../adr/adr_009_secret_management_strategy.md), [`milestones.md`](../../milestones.md), [`specifications/architecture_baseline.md`](../../specifications/architecture_baseline.md), [`specifications/system_specification.md`](../../specifications/system_specification.md) и [`specifications/infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md) добавлены в `allowed_paths` по прямому решению владельца отдельно от реализации [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) — они покрывают правку кликабельности ссылок на трассируемые элементы, включая упоминания внутри строк `traces_to` (см. [`work/tasks/task_001_arc_001.md`](task_001_arc_001.md)), и удаление раздела «Верхнеуровневая схема» из [`architecture_baseline.md`](../../specifications/architecture_baseline.md), а не оркестрацию задач.
 
 ## 7. Проверки и доказательства
 

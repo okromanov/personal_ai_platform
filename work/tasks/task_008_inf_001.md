@@ -4,12 +4,11 @@ type: task
 title: Реализация INF_CMP_001
 component: INF_CMP_001
 work_state: completed
-version: 2.6
-updated: 2026-09-01
+version: 2.7
+updated: 2026-09-02
 next_actor: none
 owner_action: none
-owner_followups:
-  - "[done] Docker-образ собран владельцем 2026-08-26."
+owner_followups: []
 depends_on:
   - TASK_007
 allowed_paths:
@@ -20,8 +19,6 @@ allowed_paths:
   - src/operations/__init__.py
   - operations/tests/product/test_compute_environment.py
   - work/tests/test_014.md
-  - operations/scripts/documents/check.py
-  - operations/repository_audit_system_prompt.md
 traces_to:
   - m02
 implements:
@@ -69,9 +66,7 @@ tests:
 
 Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_014`](../tests/test_014.md): юнит-тесты [`operations/tests/product/test_compute_environment.py`](../../operations/tests/product/test_compute_environment.py), часть обязательного gate `Quality skills`.
 
-Локальная среда без Docker daemon выполняет статическую проверку digest, непривилегированного пользователя, `HEALTHCHECK` и аргумента версии. Канонический Linux CI дополнительно собирает образ на точном SHA, запускает встроенную проверку работоспособности, сверяет `APP_VERSION` с source SHA и сохраняет base digest, image digest и SPDX JSON SBOM в evidence artifact. До восстановления GitHub Actions minutes этот серверный слой остаётся ожидающей внешней проверкой и не выдаётся за пройденный.
-
-Владелец подтвердил успешную сборку Docker-образа 2026-08-26. Некритичное внешнее действие закрыто; подтверждение хранится в `owner_followups` со статусом `[done]`, а не в отдельном верхнеуровневом разделе.
+Локальная среда без Docker daemon выполняет статическую проверку digest, непривилегированного пользователя, `HEALTHCHECK` и аргумента версии. Канонический Linux CI дополнительно собирает образ на точном SHA, запускает встроенную проверку работоспособности, сверяет `APP_VERSION` с source SHA и сохраняет base digest, image digest и SPDX JSON SBOM в evidence artifact.
 
 **Ручные (code review):**
 1. `dockerfile` не содержит секретов или конкретных учётных данных — подтверждено сканером секретов ([`check.py`](../../operations/scripts/documents/check.py))

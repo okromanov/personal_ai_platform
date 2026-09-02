@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_005
 component: INF_CMP_005
 work_state: completed
-version: 2.1
-updated: 2026-08-29
+version: 2.2
+updated: 2026-09-02
 next_actor: none
 owner_action: none
 depends_on:
@@ -17,7 +17,6 @@ allowed_paths:
   - src/task_state/__init__.py
   - src/task_state/store.py
   - operations/tests/product/test_persistent_task_state.py
-  - project_status.md
 traces_to:
   - m02
 implements:
@@ -62,9 +61,9 @@ SQLite выбран для [`m02`](../../milestones.md#m02): это встрое
 ## 7. Проверки и доказательства
 
 **Автоматические:**
-1. Три теста `test_persistent_task_state.py` прошли: восстановление сообщения и состояния, новое подключение и сохранение checkpoint;
+1. `test_persistent_task_state.py`: 8/8 тестов прошли, включая восстановление после перезапуска, checkpoint и отклонение повреждённых сохранённых данных;
 2. Ruff и MyPy для SQLite-адаптера прошли;
-3. Документный аудит прошёл 22 из 22 проверок.
+3. Канонический CI успешен.
 
 **Ручные (code review):**
 1. Реализация подключается через существующий контракт `TaskLifecycleStore` без его изменения
@@ -73,8 +72,8 @@ SQLite выбран для [`m02`](../../milestones.md#m02): это встрое
 ## 8. Готово когда
 
 - [x] Все шаги плана выполнены;
-- [x] Целевые локальные проверки успешны;
-- [~] Серверный GitHub Actions gate отложен до 1 сентября 2026 года из-за исчерпанного лимита; успешный CI не заявляется;
+- [x] 8/8 целевых тестов прошли;
+- [x] Канонический CI успешен;
 - [x] Реализация проверена по контракту и evidence.
 
 ## 9. Что будет дальше

@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_004
 component: ARC_CMP_004
 work_state: completed
-version: 2.1
-updated: 2026-08-30
+version: 2.2
+updated: 2026-09-02
 next_actor: none
 owner_action: none
 depends_on:
@@ -19,8 +19,6 @@ allowed_paths:
   - src/models/runtime_adapter.py
   - operations/tests/product/test_model_gateway.py
   - work/tests/test_010.md
-  - operations/scripts/status/human_status.py
-  - operations/tests/test_owner_usability.py
 traces_to:
   - m02
 implements:
@@ -41,7 +39,7 @@ tests:
 
 ## 3. Где мы сейчас
 
-Спецификация и реализация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) полностью завершены и покрыты [`TEST_010`](../tests/test_010.md). Не зависит от выбора реального поставщика: как и `RuntimePort` в [`TASK_003`](task_003_arc_003.md), контракт `ModelGateway` проверен тестовым переходным слоем, а сравнение поставщиков для [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) остаётся отдельной, ещё не проведённой работой подэтапа 4 [`m02`](../../milestones.md#m02) — она требует сравнительного evidence, решения владельца и хранилища секретов ([`TASK_010`](task_010_inf_003.md), ещё не реализовано) для API-ключа поставщика.
+Спецификация и реализация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) полностью завершены и покрыты [`TEST_010`](../tests/test_010.md). Не зависит от выбора реального поставщика: как и `RuntimePort` в [`TASK_003`](task_003_arc_003.md), контракт `ModelGateway` проверен тестовым переходным слоем, а подключение поставщика остаётся отдельной работой подэтапа 4 [`m02`](../../milestones.md#m02) с использованием хранилища секретов из [`TASK_010`](task_010_inf_003.md).
 
 ## 4. Что делать сейчас
 
@@ -61,8 +59,6 @@ tests:
 ## 6. Состав
 
 [`src/models/`](../../src/models/) — стабильный контракт `ModelGateway` ([`base.py`](../../src/models/base.py)), тестовый переходный слой `StubModelGateway` ([`stub_gateway.py`](../../src/models/stub_gateway.py)) и адаптер к границе `RuntimePort` `ModelBackedRuntimePort` ([`runtime_adapter.py`](../../src/models/runtime_adapter.py)). [`work/tests/test_010.md`](../tests/test_010.md) — описание проверок компонента. [`operations/tests/product/test_model_gateway.py`](../../operations/tests/product/test_model_gateway.py) — юнит-тесты, проверяющие компонент, включая полный цикл задачи через [`Orchestrator`](task_003_arc_003.md).
-
-Шаг 6 плана («проверить интеграцию») выявил, что `_capability_rows` в [`operations/scripts/status/human_status.py`](../../operations/scripts/status/human_status.py) не перебазировал относительные ссылки из раздела «Что это даёт владельцу» при встраивании текста TASK в [`project_status.md`](../../project_status.md) у корня репозитория — та же категория ошибки, что `_rebase_relative_links` уже чинит для `step_lines`/`next_text`. Исправлено и покрыто тестом в [`operations/tests/test_owner_usability.py`](../../operations/tests/test_owner_usability.py).
 
 ## 7. Проверки и доказательства
 

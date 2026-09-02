@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_007
 component: INF_CMP_007
 work_state: completed
-version: 1.9
-updated: 2026-08-29
+version: 2.0
+updated: 2026-09-02
 next_actor: none
 owner_action: none
 depends_on:
@@ -61,7 +61,7 @@ tests:
 ## 7. Проверки и доказательства
 
 **Автоматические:**
-1. [`test_observability.py`](../../operations/tests/product/test_observability.py): 5/5 тестов прошли локально 2026-08-28;
+1. [`test_observability.py`](../../operations/tests/product/test_observability.py): 5/5 тестов прошли;
 2. новый экземпляр SQLite-хранилища восстанавливает resource и external-usage observations;
 3. свободный текст и отрицательные измерения отклоняются;
 4. health failure локализуется по зависимости без сохранения detail.
@@ -73,7 +73,7 @@ tests:
 - [x] Все шаги плана выполнены;
 - [x] [`TEST_018`](../tests/test_018.md) связан с TASK и требованиями компонента;
 - [x] 5/5 целевых тестов прошли локально;
-- [~] серверный GitHub Actions gate ожидает восстановления квоты после 1 сентября 2026 года; успешный CI не заявляется;
+- [x] Канонический CI успешен;
 - [x] реализация и evidence проверены по контракту.
 
 ## 9. Что будет дальше

@@ -4,16 +4,14 @@ type: task
 title: Реализация ARC_CMP_007
 component: ARC_CMP_007
 work_state: completed
-version: 2.3
-updated: 2026-08-30
+version: 2.4
+updated: 2026-09-02
 next_actor: none
 owner_action: none
 depends_on:
   - TASK_005
 allowed_paths:
   - work/tasks/task_006_arc_007.md
-  - operations/scripts/status/human_status.py
-  - operations/tests/test_owner_usability.py
   - src/task_state/
   - src/task_state/__init__.py
   - src/task_state/base.py
@@ -36,7 +34,7 @@ tests:
 
 ## 2. Результат
 
-Стабильный контракт `TaskLifecycleStore`: хранит саму задачу как сообщение и её состояние исполнения — текущий шаг, контрольные точки, счётчик повторов, флаг отмены. [`TASK_002`](task_002_arc_002.md) реализует не хранилище задач, а [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) (Контроль владельца) — более ранняя редакция этой карточки ошибочно предполагала обратное. Состояние задачи явно не является внутренним состоянием конкретной среды агента (`RuntimePort`), поэтому переживает смену реализации среды.
+Стабильный контракт `TaskLifecycleStore`: хранит саму задачу как сообщение и её состояние исполнения — текущий шаг, контрольные точки, счётчик повторов, флаг отмены. Состояние задачи не является внутренним состоянием конкретной среды агента (`RuntimePort`), поэтому переживает смену реализации среды.
 
 ## 3. Где мы сейчас
 
@@ -60,8 +58,6 @@ tests:
 ## 6. Состав
 
 [`src/task_state/`](../../src/task_state/) — стабильный контракт `TaskLifecycleStore` ([`base.py`](../../src/task_state/base.py)) и эталонная реализация `InMemoryTaskLifecycleStore` ([`store.py`](../../src/task_state/store.py)). [`work/tests/test_012.md`](../tests/test_012.md) — описание проверок компонента. [`operations/tests/product/test_task_state.py`](../../operations/tests/product/test_task_state.py) — юнит-тесты, проверяющие компонент.
-
-`capability_summary.md`, [`operations/scripts/status/human_status.py`](../../operations/scripts/status/human_status.py) и [`operations/tests/test_owner_usability.py`](../../operations/tests/test_owner_usability.py) добавлены в `allowed_paths` по отдельному решению владельца, не относящемуся к реализации [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007): раздел «Что уже умеет решение» в [`project_status.md`](../../project_status.md) заменён с автосписка по TASK на связную сводку, вручную поддерживаемую в `capability_summary.md` — карточки TASK свой текст «Что это даёт владельцу» не меняют. `capability_summary.md` и раздел «Что уже умеет решение» позже удалены отдельным решением владельца.
 
 ## 7. Проверки и доказательства
 
