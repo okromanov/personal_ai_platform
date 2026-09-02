@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="460" viewBox="0 0 940 460" role="img" aria-labelledby="title desc">
+  <title id="title">Шаблон архитектурной схемы</title>
+  <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента, коннектор с плашкой подписи, легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
+  <!-- diagram-metadata
+  diagram_id: architecture_diagram_template
+  diagram_version: 1.0
+  generated_at: 2026-09-02
+  status: current
+  source: operations/architecture/diagram_geometry_foundations.md@1.0
+  end-diagram-metadata -->
+  <defs>
+    <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
+    <style>
+      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
+      .title { font-size: 34px; font-weight: 600; }
+      .subtitle { font-size: 15px; font-weight: 400; fill: #596574; }
+      .component-id { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; fill: #687482; }
+      .component-title { font-size: 19px; font-weight: 600; }
+      .component-text { font-size: 13px; font-weight: 400; fill: #53606E; }
+      .nested-title { font-size: 14px; font-weight: 600; }
+      .nested-text { font-size: 12px; font-weight: 400; fill: #5E6875; }
+      .flow-text { font-size: 11px; font-weight: 600; fill: #315C88; }
+      .legend { font-size: 12px; font-weight: 500; fill: #4E5A68; }
+      .legend-section { font-size: 11px; font-weight: 700; letter-spacing: 1px; fill: #707B89; }
+      .legend-id { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; fill: #566271; }
+      .legend-heading { font-size: 14px; font-weight: 600; }
+      .template-note { font-size: 11px; font-weight: 400; fill: #8792A0; }
+      .execution-card { fill: #F3F7FB; stroke: #315C88; stroke-width: 1.4; }
+      .neutral-card { fill: #FFFFFF; stroke: #A7B0BB; stroke-width: 1.2; }
+      .inner-card { fill: #FFFFFF; stroke: #D1D7DE; stroke-width: 1; }
+      .flow-label { fill: #F3F7FB; stroke: #315C88; stroke-width: 0.9; }
+      .main-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-main); }
+    </style>
+  </defs>
+  <rect width="940" height="460" fill="#FFFFFF"/>
+
+  <!-- Header -->
+  <text x="40" y="44" class="title">Шаблон архитектурной схемы</text>
+  <text x="40" y="72" class="subtitle">Скопируйте файл, переименуйте и замените плейсхолдеры реальным содержимым</text>
+  <line x1="40" y1="100" x2="900" y2="100" stroke="#D7DCE2"/>
+
+  <!-- Legend -->
+  <g>
+    <rect x="700" y="100" width="200" height="260" rx="7" fill="#FAFBFC" stroke="#D7DCE2" stroke-width="1"/>
+    <text x="724" y="124" class="legend-heading">Легенда</text>
+    <text x="724" y="150" class="legend-section">ОБЪЕКТЫ</text>
+    <rect x="724" y="164" width="18" height="14" rx="2" fill="#F3F7FB" stroke="#315C88"/><text x="754" y="176" class="legend">Исполнение и проверка</text>
+    <rect x="724" y="194" width="18" height="14" rx="2" fill="#FFFFFF" stroke="#A7B0BB"/><text x="754" y="206" class="legend">Граничные и поддерживающие узлы</text>
+    <text x="724" y="238" class="legend-section">ЛИНИИ</text>
+    <line x1="724" y1="258" x2="764" y2="258" stroke="#315C88" stroke-width="1" marker-end="url(#arrow-main)"/><text x="778" y="262" class="legend">Ход задачи</text>
+    <text x="724" y="294" class="legend-section">ИДЕНТИФИКАТОРЫ</text>
+    <text x="724" y="318" class="legend-id">ARC_CMP_*</text><text x="814" y="318" class="legend">Логический компонент</text>
+  </g>
+
+  <!-- Component card: ID -> title -> short description -> nested object -->
+  <g>
+    <rect x="40" y="140" width="560" height="156" rx="7" class="execution-card"/>
+    <text x="68" y="168" class="component-id">ARC_CMP_XXX</text>
+    <text x="68" y="193" class="component-title">Название компонента (плейсхолдер)</text>
+    <text x="68" y="217" class="component-text">Краткое функциональное описание — что делает компонент и для чего он существует.</text>
+    <rect x="68" y="240" width="220" height="40" rx="4" class="inner-card"/>
+    <text x="80" y="256" class="nested-title">Внутренний узел</text>
+    <text x="80" y="270" class="nested-text">Пример вложенного элемента</text>
+  </g>
+
+  <!-- Connector with label plaque -->
+  <path class="main-line" d="M320 296V336"/>
+  <rect x="250" y="308" width="140" height="28" rx="4" class="flow-label"/>
+  <text x="320" y="327" class="flow-text" text-anchor="middle">ARC_FLOW_XXX · Поток</text>
+
+  <!-- Result / port node -->
+  <g>
+    <rect x="40" y="344" width="560" height="80" rx="7" class="neutral-card"/>
+    <text x="68" y="372" class="component-title">Результат или порт (плейсхолдер)</text>
+    <text x="68" y="396" class="component-text">Место для контракта результата, интерфейса или выходного порта</text>
+  </g>
+
+  <text x="40" y="448" class="template-note">Шаблон — заполните ID, названия и описания реальным содержимым перед публикацией; см. diagram_geometry_foundations.md §15.1.</text>
+</svg>
