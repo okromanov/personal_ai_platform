@@ -2,8 +2,8 @@
 id: document_frontmatter_standard
 type: guide
 document_state: superseded
-version: 1.4
-updated: 2026-09-01
+version: 1.5
+updated: 2026-09-02
 depends_on:
   - project_rules
 ---

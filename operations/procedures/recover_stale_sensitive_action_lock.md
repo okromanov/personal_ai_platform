@@ -2,9 +2,9 @@
 id: recover_stale_sensitive_action_lock
 type: procedure_reference
 document_state: current
-version: 1.0
+version: 1.1
 created: 2026-08-29
-updated: 2026-08-29
+updated: 2026-09-02
 ---
 
 # Восстановление после зависшей блокировки sensitive-action
