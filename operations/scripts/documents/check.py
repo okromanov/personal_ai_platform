@@ -1544,8 +1544,10 @@ def check_audit_register_cards(root: Path) -> CheckResult:
 
 
 def check_architecture_diagrams(root: Path) -> CheckResult:
-    """Архитектурные SVG-схемы (work/artefacts/**/*.svg) соответствуют
-    operations/architecture/architecture_diagram_style_guide.md — см. diagram_lint.py.
+    """SVG-схемы (work/artefacts/**/*.svg) соответствуют
+    operations/architecture/diagram_geometry_foundations.md и предметным
+    гайдам (architecture_diagram_style_guide.md,
+    process_diagram_style_guide.md) — см. diagram_lint.py.
     """
     errors: list[str] = []
     warnings: list[str] = []

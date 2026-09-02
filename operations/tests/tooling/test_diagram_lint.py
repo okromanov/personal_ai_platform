@@ -214,6 +214,130 @@ class DiagramLintTests(unittest.TestCase):
             result = diagram_lint.lint_file(svg, root)
         self.assertEqual(result.errors, [])
 
+    def test_lint_file_accepts_empty_id_list_with_no_data_spec_id(self) -> None:
+        """process_diagram_style_guide.md §2.1 / diagram_geometry_foundations.md
+        §13: a diagram tracing no registry element may omit `id` lines
+        entirely while still carrying `source` lines."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(sources=["specifications/example.md@1.0"], ids=[])
+            svg = root / "diagram.svg"
+            svg.write_text(_svg_text(metadata_block=metadata), encoding="utf-8")
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_lint_file_rejects_untracked_data_spec_id_with_empty_id_list(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(sources=["specifications/example.md@1.0"], ids=[])
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("ARC_CMP_001" in error and "не заявлен" in error for error in result.errors)
+        )
+
+    def test_geometry_check_passes_grid_aligned_svg(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    '<g data-spec-id="ARC_CMP_001"></g>',
+                    '<g data-spec-id="ARC_CMP_001">'
+                    '<rect x="8" y="8.5" width="20" height="16" rx="4"/>'
+                    '<line x1="4" y1="4" x2="8" y2="8"/>'
+                    '<path d="M0 0L10 5.5L0 10Z"/>'
+                    "</g>",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_geometry_check_reports_off_grid_fractional_coordinate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    '<g data-spec-id="ARC_CMP_001"></g>',
+                    '<g data-spec-id="ARC_CMP_001">'
+                    '<rect x="8.33" y="8" width="20" height="16"/>'
+                    "</g>",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("8.33" in error and "дробная координата" in error for error in result.errors)
+        )
+
+    def test_geometry_check_passes_consistent_marker_sizes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    "<title",
+                    '<marker id="a" markerWidth="6" markerHeight="6"></marker>'
+                    '<marker id="b" markerWidth="6" markerHeight="6"></marker><title',
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_geometry_check_reports_inconsistent_marker_sizes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    "<title",
+                    '<marker id="a" markerWidth="6" markerHeight="6"></marker>'
+                    '<marker id="b" markerWidth="8" markerHeight="6"></marker><title',
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("markerWidth" in error and "не единообразен" in error for error in result.errors)
+        )
+
     def test_default_targets_empty_without_artefacts_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
