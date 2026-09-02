@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -1395,61 +1396,158 @@ AUDIT_CARD_OPTIONAL_FIELDS = frozenset(
         "Рекомендованное исправление",
         "Как проверить исправление",
         "Критерий закрытия",
+        "Evidence state",
+    }
+)
+AUDIT_CARD_LEGACY_FIELDS = frozenset(
+    {
+        "Наблюдение",
+        "Риск",
+        "Ожидаемое состояние",
+        "Исправление",
+        "Проверка",
+        "Почему это пропустил предыдущий аудит",
+        "Воздействие",
     }
 )
 AUDIT_CARD_RESOLUTION_LABELS = frozenset({"Исправлено", "Частично исправлено", "Уточнение"})
-AUDIT_CARD_ALLOWED_FIELDS = frozenset(AUDIT_CARD_REQUIRED_FIELDS) | AUDIT_CARD_OPTIONAL_FIELDS
+AUDIT_CARD_ALLOWED_FIELDS = (
+    frozenset(AUDIT_CARD_REQUIRED_FIELDS) | AUDIT_CARD_OPTIONAL_FIELDS | AUDIT_CARD_LEGACY_FIELDS
+)
 _AUDIT_CARD_SPLIT = re.compile(r'(?=<a id="aud-\d{3}"></a>)')
 _AUDIT_CARD_ID = re.compile(r'<a id="(aud-\d{3})"></a>')
 _AUDIT_CARD_FIELD = re.compile(r"^-\s+\*\*([^*:]+?):\*\*", re.MULTILINE)
 _AUDIT_CARD_DATE_SUFFIX = re.compile(r"\s*\([^)]*\)\s*$")
+_AUDIT_REGISTER_ID_CELL = re.compile(
+    r"(?:\[(?P<linked>AUD-\d{3})\]\((?P<href>[^)]+)\)|(?P<bare>AUD-\d{3}))"
+)
+_AUDIT_CARD_LINK = re.compile(
+    r"\]\((?:[^)]*/)?audit_(?:baseline_\d{4}_\d{2}_\d{2}|adhoc_cards)\.md#aud-\d{3}\)"
+)
+_AUDIT_CARD_ARCHIVE_PATTERNS = (
+    "audit_baseline_*.md",
+    "audit_adhoc_cards.md",
+)
 
 
 def check_audit_register_cards(root: Path) -> CheckResult:
-    """Каждая карточка AUD-NNN использует один и тот же набор названий полей.
+    """Every register row has exactly one well-formed card in an archive.
 
-    Свободные названия (например, придуманный на месте `Статус`) означают,
-    что реестр расходится сам с собой карточка от карточки — эта проверка
-    ловит любое имя поля, не входящее в согласованный список (см.
-    `work/audit/audit_register.md` §4), до того как оно попадёт в главную
-    ветку.
+    The compact register owns mutable state. Dated baselines and dedicated
+    card archives own immutable card bodies. This check prevents either side
+    from drifting: unknown fields, missing cards, duplicate cards, and cards
+    without a register row are all blocking errors (AUD-038).
     """
 
     path = root / "work/audit/audit_register.md"
     if not path.is_file():
         return _result("audit_register_cards", [])
-    text = read_text(path)
+    register_text = read_text(path)
     errors: list[str] = []
-    for block in _AUDIT_CARD_SPLIT.split(text)[1:]:
-        card_id_match = _AUDIT_CARD_ID.match(block)
-        if not card_id_match:
+    register_rows: list[tuple[str, str | None, str]] = []
+    for line in register_text.splitlines():
+        if not line.startswith("|"):
             continue
-        card_id = card_id_match.group(1).upper()
-        fields = _AUDIT_CARD_FIELD.findall(block)
-        # Дата в скобках — часть значения ресолюшн-полей (Исправлено (2026-08-30)),
-        # а не отдельное название поля; отделяем её перед сверкой со списком.
-        normalized = [_AUDIT_CARD_DATE_SUFFIX.sub("", f).strip() for f in fields]
-        for label in normalized:
-            if label in AUDIT_CARD_ALLOWED_FIELDS or label in AUDIT_CARD_RESOLUTION_LABELS:
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if not cells:
+            continue
+        match = _AUDIT_REGISTER_ID_CELL.fullmatch(cells[0])
+        if match:
+            register_rows.append(
+                (
+                    match.group("linked") or match.group("bare"),
+                    match.group("href"),
+                    cells[6] if len(cells) > 6 else "",
+                )
+            )
+    register_ids = {card_id for card_id, _, _ in register_rows}
+    cards: dict[str, list[tuple[str, str]]] = {}
+    archive_paths = sorted(
+        {
+            archive_path
+            for pattern in _AUDIT_CARD_ARCHIVE_PATTERNS
+            for archive_path in path.parent.glob(pattern)
+        }
+    )
+    for archive_path in archive_paths:
+        text = read_text(archive_path)
+        relative = relative_posix(archive_path, root)
+        for block in _AUDIT_CARD_SPLIT.split(text)[1:]:
+            card_id_match = _AUDIT_CARD_ID.match(block)
+            if not card_id_match:
                 continue
-            errors.append(
-                f"{card_id}: неизвестное название поля «{label}» — используйте только поля "
-                "из списка в audit_register.md §4, не изобретайте новое"
+            card_id = card_id_match.group(1).upper()
+            href = (
+                f"{Path(os.path.relpath(archive_path, path.parent)).as_posix()}"
+                f"#{card_id_match.group(1)}"
             )
-        leading = normalized[: len(AUDIT_CARD_REQUIRED_FIELDS)]
-        if tuple(leading) != AUDIT_CARD_REQUIRED_FIELDS:
-            errors.append(
-                f"{card_id}: первые три поля карточки должны быть ровно "
-                f"{', '.join(AUDIT_CARD_REQUIRED_FIELDS)} в этом порядке; найдено {leading}"
+            cards.setdefault(card_id, []).append((relative, href))
+            fields = _AUDIT_CARD_FIELD.findall(block)
+            # A date suffix belongs to a resolution value, not its field name.
+            normalized = [_AUDIT_CARD_DATE_SUFFIX.sub("", field).strip() for field in fields]
+            for label in normalized:
+                if label in AUDIT_CARD_ALLOWED_FIELDS or label in AUDIT_CARD_RESOLUTION_LABELS:
+                    continue
+                errors.append(
+                    f"{card_id}: неизвестное название поля «{label}» — используйте только "
+                    "поля архивной карточки, не изобретайте новое"
+                )
+            # Baselines published before the unified schema are immutable.
+            # Preserve their finite legacy labels, while every dedicated
+            # archive and current baseline must use the canonical field order.
+            strict_schema = archive_path.name == "audit_adhoc_cards.md" or (
+                archive_path.name >= "audit_baseline_2026_09_02.md"
             )
-        if "Наблюдаемое поведение" not in normalized:
-            errors.append(f"{card_id}: отсутствует обязательное поле «Наблюдаемое поведение»")
+            if strict_schema:
+                leading = normalized[: len(AUDIT_CARD_REQUIRED_FIELDS)]
+                if tuple(leading) != AUDIT_CARD_REQUIRED_FIELDS:
+                    errors.append(
+                        f"{card_id}: первые три поля карточки должны быть ровно "
+                        f"{', '.join(AUDIT_CARD_REQUIRED_FIELDS)} в этом порядке; "
+                        f"найдено {leading}"
+                    )
+                if "Наблюдаемое поведение" not in normalized:
+                    errors.append(
+                        f"{card_id}: отсутствует обязательное поле «Наблюдаемое поведение»"
+                    )
+            elif not {"Наблюдение", "Наблюдаемое поведение"}.intersection(normalized):
+                errors.append(f"{card_id}: в legacy-карточке отсутствует наблюдение")
+
+    if re.search(r"^##\s+\d+\.\s+Индекс совместимости\s*$", register_text, re.MULTILINE):
+        errors.append("audit_register.md: отдельный индекс совместимости запрещён")
+
+    for card_id, row_href, evidence in register_rows:
+        locations = cards.get(card_id, [])
+        if not locations:
+            errors.append(
+                f"{card_id}: для строки реестра отсутствует карточка в датированном архиве"
+            )
+        elif len(locations) > 1:
+            errors.append(
+                f"{card_id}: карточка дублируется: "
+                f"{', '.join(location for location, _ in locations)}"
+            )
+        else:
+            expected_href = locations[0][1]
+            if row_href is None:
+                errors.append(f"{card_id}: ID в реестре должен быть ссылкой на {expected_href}")
+            elif row_href != expected_href:
+                errors.append(
+                    f"{card_id}: ID в реестре ведёт на {row_href}, "
+                    f"ожидалась карточка {expected_href}"
+                )
+        if _AUDIT_CARD_LINK.search(evidence):
+            errors.append(f"{card_id}: Evidence не должен дублировать ссылку на AUD-карточку")
+    for card_id in sorted(set(cards) - register_ids):
+        errors.append(f"{card_id}: архивная карточка отсутствует в реестре")
     return _result("audit_register_cards", errors)
 
 
 def check_architecture_diagrams(root: Path) -> CheckResult:
-    """Архитектурные SVG-схемы (work/artefacts/**/*.svg) соответствуют
-    operations/architecture/architecture_diagram_style_guide.md — см. diagram_lint.py.
+    """SVG-схемы (work/artefacts/**/*.svg) соответствуют
+    operations/architecture/diagram_geometry_foundations.md и предметным
+    гайдам (architecture_diagram_style_guide.md,
+    process_diagram_style_guide.md) — см. diagram_lint.py.
     """
     errors: list[str] = []
     warnings: list[str] = []

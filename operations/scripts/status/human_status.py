@@ -19,7 +19,8 @@ from operations.scripts.tasks.generate import ACTOR_LABELS, collect_tasks, selec
 
 _LINK_TARGET_PATTERN = re.compile(r"(\[[^\]]*\]\()([^)]+)(\))")
 _AUDIT_ROW_PATTERN = re.compile(
-    r"^\|\s*AUD-\d{3}\s*\|\s*(critical|high|medium|low)\s*\|\s*"
+    r"^\|\s*(?:\[AUD-\d{3}\]\([^)]+\)|AUD-\d{3})\s*\|\s*"
+    r"(critical|high|medium|low)\s*\|\s*"
     r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
     r"\d{4}-\d{2}-\d{2}\s*\|\s*(\d{4}-\d{2}-\d{2}|—)\s*\|"
 )
@@ -138,11 +139,15 @@ def _audit_status(root: Path) -> str:
         record_severity == "critical" and record_state != "resolved"
         for record_severity, record_state, _ in records
     )
-    gate_text = (
+    critical_text = (
         f"**ЕСТЬ незакрытые критические замечания ({critical_open})** — "
-        "не полагайтесь на статус CI/gate без проверки карточек ниже"
+        "проект не готов к эксплуатации"
         if critical_open
         else "критических незакрытых замечаний нет"
+    )
+    project_check_text = (
+        "для текущей редакции не подтверждён в репозитории — "
+        "проверьте Project check в GitHub Actions"
     )
 
     return f"""## Контроль результатов аудита
@@ -155,7 +160,8 @@ def _audit_status(root: Path) -> str:
 | Риски приняты владельцем | **{state_counts["accepted_risk"]}** |
 | Закрыты | **{state_counts["resolved"]}** |
 | Критичность | {severity_text} |
-| Состояние gate/CI | {gate_text} |
+| Состояние критических замечаний | {critical_text} |
+| Последний подтверждённый Project check | {project_check_text} |
 | Ближайшая дата проверки | **{review_text}** |
 | Полное описание и доказательства | [`{relative_baseline}`]({relative_baseline}) |"""
 

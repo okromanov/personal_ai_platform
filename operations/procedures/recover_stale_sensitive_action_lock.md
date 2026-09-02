@@ -2,16 +2,16 @@
 id: recover_stale_sensitive_action_lock
 type: procedure_reference
 document_state: current
-version: 1.0
+version: 1.1
 created: 2026-08-29
-updated: 2026-08-29
+updated: 2026-09-02
 ---
 
 # Восстановление после зависшей блокировки sensitive-action
 
 ## 1. Когда это нужно
 
-[`OwnerControlGate`](../../src/owner_control/control.py) ([`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002)) сериализует чувствительные действия через директорию-блокировку `owner_control_actions.lock` (`os.mkdir`, fail-closed). Крах процесса между созданием блокировки и её снятием оставляет блокировку навсегда: все последующие вызовы `authorize_sensitive_action` получают `OwnerControlStateError`, пока блокировка не будет снята вручную. Это осознанный fail-closed дизайн ([`AUD-013`](../../work/audit/audit_register.md#aud-013)), а не баг — но без runbook он превращается в незадокументированную ловушку для владельца.
+[`OwnerControlGate`](../../src/owner_control/control.py) ([`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002)) сериализует чувствительные действия через директорию-блокировку `owner_control_actions.lock` (`os.mkdir`, fail-closed). Крах процесса между созданием блокировки и её снятием оставляет блокировку навсегда: все последующие вызовы `authorize_sensitive_action` получают `OwnerControlStateError`, пока блокировка не будет снята вручную. Это осознанный fail-closed дизайн ([`AUD-013`](../../work/audit/audit_baseline_2026_08_29.md#aud-013)), а не баг — но без runbook он превращается в незадокументированную ловушку для владельца.
 
 ## 2. Диагностика
 

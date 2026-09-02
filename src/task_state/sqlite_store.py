@@ -10,6 +10,12 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from src.channels.base import TaskMessage, TaskState
+from src.observability import (
+    TaskEventResult,
+    TaskEventSink,
+    TaskEventType,
+    emit_task_event,
+)
 
 from .base import Checkpoint, TaskLifecycleError, TaskLifecycleState, TaskLifecycleStore
 
@@ -17,10 +23,11 @@ from .base import Checkpoint, TaskLifecycleError, TaskLifecycleState, TaskLifecy
 class SQLiteTaskLifecycleStore(TaskLifecycleStore):
     """A durable, single-node TaskLifecycleStore backed by SQLite."""
 
-    def __init__(self, database_path: str | Path) -> None:
+    def __init__(self, database_path: str | Path, event_sink: TaskEventSink | None = None) -> None:
         if not str(database_path):
             raise ValueError("database_path must not be empty")
         self._database_path = Path(database_path).expanduser()
+        self._event_sink = event_sink
         self._database_path.parent.mkdir(parents=True, exist_ok=True)
         self._initialize()
 
@@ -46,6 +53,7 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 """
                 CREATE TABLE IF NOT EXISTS task_messages (
                     task_id TEXT PRIMARY KEY,
+                    runtime_task_id TEXT NOT NULL DEFAULT '',
                     channel_type TEXT NOT NULL,
                     user_input TEXT NOT NULL,
                     metadata_json TEXT NOT NULL,
@@ -66,6 +74,43 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 );
                 """
             )
+            columns = {
+                str(row[1])
+                for row in connection.execute("PRAGMA table_info(task_messages)").fetchall()
+            }
+            if "runtime_task_id" not in columns:
+                connection.execute("ALTER TABLE task_messages ADD COLUMN runtime_task_id TEXT")
+                connection.execute(
+                    "UPDATE task_messages SET runtime_task_id = task_id "
+                    "WHERE runtime_task_id IS NULL"
+                )
+
+    def _runtime_task_id(self, task_id: str) -> str:
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT runtime_task_id FROM task_messages WHERE task_id = ?", (task_id,)
+            ).fetchone()
+        if row is None or not row[0]:
+            return task_id
+        return str(row[0])
+
+    def _emit(
+        self,
+        task_id: str,
+        event_type: TaskEventType,
+        operation: str,
+        *,
+        attributes: dict[str, int] | None = None,
+    ) -> None:
+        emit_task_event(
+            self._event_sink,
+            runtime_task_id=self._runtime_task_id(task_id),
+            event_type=event_type,
+            component="task_lifecycle",
+            operation=operation,
+            result=TaskEventResult.RECORDED,
+            attributes=attributes,
+        )
 
     @staticmethod
     def _encode(value: dict[str, Any]) -> str:
@@ -89,10 +134,11 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
             connection.execute(
                 """
                 INSERT INTO task_messages (
-                    task_id, channel_type, user_input, metadata_json, state,
+                    task_id, runtime_task_id, channel_type, user_input, metadata_json, state,
                     created_at, completed_at, error_message
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(task_id) DO UPDATE SET
+                    runtime_task_id = excluded.runtime_task_id,
                     channel_type = excluded.channel_type,
                     user_input = excluded.user_input,
                     metadata_json = excluded.metadata_json,
@@ -103,6 +149,7 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 """,
                 (
                     message.task_id,
+                    message.runtime_task_id,
                     message.channel_type,
                     message.user_input,
                     self._encode(message.metadata),
@@ -126,6 +173,7 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
             )
             return TaskMessage(
                 task_id=row["task_id"],
+                runtime_task_id=row["runtime_task_id"],
                 channel_type=row["channel_type"],
                 user_input=row["user_input"],
                 metadata=self._decode(row["metadata_json"]),
@@ -168,6 +216,7 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 """,
                 (task_id, step, self._encode(data)),
             )
+        self._emit(task_id, TaskEventType.CHECKPOINT, "save_checkpoint")
 
     def increment_retry(self, task_id: str) -> int:
         with self._connection() as connection:
@@ -183,7 +232,14 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 "SELECT retry_count FROM task_states WHERE task_id = ?", (task_id,)
             ).fetchone()
         assert row is not None
-        return int(row["retry_count"])
+        retry_count = int(row["retry_count"])
+        self._emit(
+            task_id,
+            TaskEventType.RETRY,
+            "increment_retry",
+            attributes={"retry_count": retry_count},
+        )
+        return retry_count
 
     def cancel(self, task_id: str) -> None:
         with self._connection() as connection:
@@ -194,6 +250,7 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 """,
                 (task_id,),
             )
+        self._emit(task_id, TaskEventType.STATE_TRANSITION, "cancel_task")
 
     def has_executed(self, action_id: str) -> bool:
         with self._connection() as connection:

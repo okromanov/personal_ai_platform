@@ -81,6 +81,26 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("title" in error for error in result.errors))
         self.assertTrue(any('role="img"' in error for error in result.errors))
 
+    def test_lint_file_rejects_xml_entities_without_expansion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sentinel = "ENTITY_CONTENT_MUST_NOT_BE_EXPANDED"
+            svg = root / "diagram.svg"
+            svg.write_text(
+                "<!DOCTYPE svg [<!ENTITY payload '" + sentinel + "'>]>\n"
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" '
+                'role="img" aria-labelledby="title desc">\n'
+                '<title id="title">&payload;</title><desc id="desc">Desc</desc>\n'
+                "</svg>\n",
+                encoding="utf-8",
+            )
+
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("корректным XML/SVG" in error for error in result.errors))
+        self.assertNotIn(sentinel, " ".join(result.errors))
+
     def test_check_sources_reports_bad_format_missing_file_and_drift(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -194,10 +214,138 @@ class DiagramLintTests(unittest.TestCase):
             result = diagram_lint.lint_file(svg, root)
         self.assertEqual(result.errors, [])
 
+    def test_lint_file_accepts_empty_id_list_with_no_data_spec_id(self) -> None:
+        """process_diagram_style_guide.md §2.1 / diagram_geometry_foundations.md
+        §13: a diagram tracing no registry element may omit `id` lines
+        entirely while still carrying `source` lines."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(sources=["specifications/example.md@1.0"], ids=[])
+            svg = root / "diagram.svg"
+            svg.write_text(_svg_text(metadata_block=metadata), encoding="utf-8")
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_lint_file_rejects_untracked_data_spec_id_with_empty_id_list(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(sources=["specifications/example.md@1.0"], ids=[])
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("ARC_CMP_001" in error and "не заявлен" in error for error in result.errors)
+        )
+
+    def test_geometry_check_passes_grid_aligned_svg(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    '<g data-spec-id="ARC_CMP_001"></g>',
+                    '<g data-spec-id="ARC_CMP_001">'
+                    '<rect x="8" y="8.5" width="20" height="16" rx="4"/>'
+                    '<line x1="4" y1="4" x2="8" y2="8"/>'
+                    '<path d="M0 0L10 5.5L0 10Z"/>'
+                    "</g>",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_geometry_check_reports_off_grid_fractional_coordinate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    '<g data-spec-id="ARC_CMP_001"></g>',
+                    '<g data-spec-id="ARC_CMP_001">'
+                    '<rect x="8.33" y="8" width="20" height="16"/>'
+                    "</g>",
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("8.33" in error and "дробная координата" in error for error in result.errors)
+        )
+
+    def test_geometry_check_passes_consistent_marker_sizes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"')
+                .replace(
+                    "<title",
+                    '<marker id="a" markerWidth="6" markerHeight="6"></marker>'
+                    '<marker id="b" markerWidth="6" markerHeight="6"></marker><title',
+                    1,
+                )
+                .replace(
+                    "</svg>",
+                    '  <path marker-end="url(#a)"/>\n  <path marker-end="url(#b)"/>\n</svg>',
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertEqual(result.errors, [])
+
+    def test_geometry_check_reports_inconsistent_marker_sizes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(
+                    metadata_block=metadata, data_spec_ids='data-spec-id="ARC_CMP_001"'
+                ).replace(
+                    "<title",
+                    '<marker id="a" markerWidth="6" markerHeight="6"></marker>'
+                    '<marker id="b" markerWidth="8" markerHeight="6"></marker><title',
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("markerWidth" in error and "не единообразен" in error for error in result.errors)
+        )
+
     def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:
         return (
-            '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" '
-            'viewBox="0 0 10 10" role="img" aria-labelledby="title desc">\n'
+            '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" '
+            'viewBox="0 0 12 12" role="img" aria-labelledby="title desc">\n'
             '  <title id="title">Title</title>\n'
             '  <desc id="desc">Desc</desc>\n'
             f"  <defs>{defs}<style>{style}</style></defs>\n"
@@ -206,11 +354,11 @@ class DiagramLintTests(unittest.TestCase):
         )
 
     def test_check_dead_definitions_reports_unused_class_and_marker(self) -> None:
-        """Раздел 15 стандарта: мёртвое определение — ошибка, а не косметика.
+        """Мёртвое определение — ошибка, а не косметика.
 
-        Именно этот дрейф накопился в эталонной схеме незамеченным: неиспользуемый
-        класс и маркер ничего не ломают визуально, поэтому без проверки их
-        обнаружить нечем.
+        Неиспользуемый класс и маркер ничего не ломают визуально, поэтому
+        ни рендеринг, ни ручной просмотр их не находят: именно так дрейф
+        накопился в эталонной схеме незамеченным.
         """
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -219,7 +367,8 @@ class DiagramLintTests(unittest.TestCase):
             svg.write_text(
                 self._dead_definition_svg(
                     style=".used { fill: #000; } .orphan { fill: #111; }",
-                    defs='<marker id="arrow-live"></marker><marker id="arrow-dead"></marker>',
+                    defs='<marker id="arrow-live" markerWidth="6" markerHeight="6"></marker>'
+                    '<marker id="arrow-dead" markerWidth="6" markerHeight="6"></marker>',
                     body='  <g class="used" marker-end="url(#arrow-live)"></g>',
                 ),
                 encoding="utf-8",
@@ -241,7 +390,6 @@ class DiagramLintTests(unittest.TestCase):
             ),
             result.errors,
         )
-        # Живые определения не должны попадать в отчёт.
         self.assertFalse(any(".used" in error for error in result.errors), result.errors)
         self.assertFalse(any("#arrow-live" in error for error in result.errors), result.errors)
 
@@ -263,10 +411,7 @@ class DiagramLintTests(unittest.TestCase):
             any(".ghost" in error and "необъявленные" in error for error in result.errors),
             result.errors,
         )
-        self.assertTrue(
-            any("#nowhere" in error for error in result.errors),
-            result.errors,
-        )
+        self.assertTrue(any("#nowhere" in error for error in result.errors), result.errors)
 
     def test_check_dead_definitions_accepts_a_fully_used_stylesheet(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -275,7 +420,7 @@ class DiagramLintTests(unittest.TestCase):
             svg.write_text(
                 self._dead_definition_svg(
                     style=".a { fill: #000; } .b { marker-end: url(#arrow); }",
-                    defs='<marker id="arrow"></marker>',
+                    defs='<marker id="arrow" markerWidth="6" markerHeight="6"></marker>',
                     body='  <g class="a"></g>\n  <g class="b"></g>',
                 ),
                 encoding="utf-8",

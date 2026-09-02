@@ -2,7 +2,7 @@
 id: repository_audit_system_prompt
 type: audit_prompt
 document_state: current
-version: 4.2
+version: 4.3
 updated: 2026-09-02
 depends_on:
   - project_rules
@@ -12,7 +12,7 @@ depends_on:
 # СИСТЕМНЫЙ ПРОМПТ: ДОКАЗАТЕЛЬНЫЙ АУДИТ РЕПОЗИТОРИЯ
 ## Проверка контракта, кода, безопасности, защиты данных, тестов, трассируемости и цепочки поставки
 
-**Версия:** 4.1
+**Версия:** 4.3
 **Дата:** 2026-09-02
 
 ---
@@ -50,6 +50,7 @@ dependency_manifests: [pyproject.toml]
 dependency_locks: []            # например: uv.lock, poetry.lock, requirements*.txt
 vendored: []                    # например: third_party/, vendor/
 audit_baseline_pattern: work/audit/audit_baseline_YYYY_MM_DD.md  # только новые находки одного запуска, неизменяемый после публикации
+audit_adhoc_cards: work/audit/audit_adhoc_cards.md  # накопительный файл карточек из разовых ситуаций вне датированного аудита
 risk_register: work/audit/audit_register.md  # единственный источник текущего состояния всех AUD-NNN; читают gate и owner dashboard
 conditional_areas: [agent_loop, personal_data]  # применимые условные проверки: agent_loop (7.4.1), personal_data (7.4.2), web_api (7.4.3), ui, feature_flags
 ```
@@ -786,6 +787,9 @@ rg -n "def test_|class Test" operations/tests
 
 - ID `AUD-NNN` стабилен между аудитами одного репозитория: новые находки получают новые ID, исправленные помечаются `RESOLVED` с указанием SHA исправления, вернувшиеся — `REGRESSION` со ссылкой на исходный ID.
 - Реестр ID и принятых рисков — `risk_register` из profile. Если его нет, предложи создать; до создания веди реестр в отчёте.
+- Полные карточки находок датированного аудита сохраняй в новом файле по `audit_baseline_pattern`; после публикации такой baseline неизменяем.
+- Карточки, появившиеся из разовых ситуаций вне датированного аудита (например, при слиянии или ad-hoc проверке), добавляй в конец `audit_adhoc_cards` из profile. Уже опубликованные тела карточек не переписывай.
+- В `risk_register` ID каждой строки должен быть ссылкой ровно на одну каноническую карточку. Поле Evidence содержит доказательства наблюдения или исправления и не дублирует ссылку на карточку; отдельный индекс совместимости не создавай.
 - Находка из реестра принятых рисков не пересоздаётся как новая: проверь, что обоснование, владелец и срок пересмотра ещё действительны, и перечисли её отдельно в отчёте.
 - В режиме `CHANGESET` каждую находку классифицируй: `introduced-by-change` или `pre-existing`. Pre-existing находки не блокируют changeset сами по себе, но перечисляются.
 

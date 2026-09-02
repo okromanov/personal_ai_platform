@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-09-02T06:06:00+00:00
+generated_at: 2026-09-02T16:12:00+03:00
 version: 1.0
 ---
 
@@ -59,9 +59,9 @@ version: 1.0
 | [`TASK_013`](work/tasks/task_013_inf_008.md) | [`INF_CMP_008`](specifications/infrastructure_baseline.md#inf_cmp_008) | — | выполняется |
 | [`TASK_014`](work/tasks/task_014_real_runtime.md) | [`ARC_CMP_003`](specifications/architecture_baseline.md#arc_cmp_003) | — | запланирована — закрывает результат этапа |
 | [`TASK_015`](work/tasks/task_015_real_model_provider.md) | [`ARC_CMP_004`](specifications/architecture_baseline.md#arc_cmp_004) | — | запланирована — закрывает результат этапа |
-| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | — | запланирована — закрывает результат этапа |
+| [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | [`TEST_020`](work/tests/test_020.md) | запланирована — закрывает результат этапа |
 | [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована — закрывает результат этапа |
-| [`TASK_018`](work/tasks/task_018_runtime_task_events.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | — | запланирована |
+| [`TASK_018`](work/tasks/task_018_runtime_task_events.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | [`TEST_019`](work/tests/test_019.md) | запланирована |
 
 ## Шаги текущей работы
 
@@ -81,13 +81,14 @@ version: 1.0
 | Параметр | Значение |
 |---|---|
 | Всего замечаний | **40** |
-| Исправлены, ожидают проверки | **31** |
-| Открыты | **9** |
+| Исправлены, ожидают проверки | **0** |
+| Открыты | **0** |
 | Риски приняты владельцем | **0** |
-| Закрыты | **0** |
+| Закрыты | **40** |
 | Критичность | critical: **1**, high: **8**, medium: **21**, low: **10** |
-| Состояние gate/CI | **ЕСТЬ незакрытые критические замечания (1)** — не полагайтесь на статус CI/gate без проверки карточек ниже |
-| Ближайшая дата проверки | **2026-09-02** |
+| Состояние критических замечаний | критических незакрытых замечаний нет |
+| Последний подтверждённый Project check | для текущей редакции не подтверждён в репозитории — проверьте Project check в GitHub Actions |
+| Ближайшая дата проверки | **не требуется** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |
 
 ## Незакрытые действия владельца (необязательные)

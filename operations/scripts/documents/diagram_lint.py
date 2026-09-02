@@ -1,15 +1,24 @@
-"""Проверка архитектурных SVG-схем на соответствие
-operations/architecture/architecture_diagram_style_guide.md.
+"""Проверка SVG-схем (архитектурных и процессных) на соответствие
+operations/architecture/diagram_geometry_foundations.md и предметным гайдам
+(architecture_diagram_style_guide.md, process_diagram_style_guide.md).
 
 Вызывается из check.py --all автоматически (см.
-architecture_diagram_style_guide.md раздел 2). Проверяет только то, что
-можно проверить без рендеринга SVG: блок метаданных, дрейф заявленной
-версии источника от фактической, наличие каждого заявленного ID в
-спецификации, взаимное соответствие списка ID и data-spec-id в теле файла,
-базовую структуру (viewBox/title/desc).
+diagram_geometry_foundations.md §13). Проверяет только то, что можно
+проверить без рендеринга SVG: блок метаданных, дрейф заявленной версии
+источника от фактической, наличие каждого заявленного ID в спецификации,
+взаимное соответствие списка ID и data-spec-id в теле файла, базовую
+структуру (viewBox/title/desc), а также — через diagram_geometry_lint —
+узкий набор координатных геометрических инвариантов, честно
+задокументированный в diagram_geometry_foundations.md §6.1:
+дисциплину половинных координат и единый размер наконечника стрелки.
 
 Не проверяет: контраст, реальное визуальное наложение текста, читаемость
-после масштабирования — это остаётся ручным пунктом чек-листа (раздел 17).
+после масштабирования, буквальную кратность 4 px для каждой координаты,
+`layer-gap`/`right-port-gap`/`right-rail-gap` — это остаётся ручными
+пунктами чек-листа (diagram_geometry_foundations.md §17), поскольку требует
+либо измеренного рендеринга текста, либо разрешения произвольного стека
+`transform` (поворот, масштаб), которое нельзя сделать корректно без риска
+ложных срабатываний.
 """
 
 from __future__ import annotations
@@ -19,7 +28,9 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree  # type: ignore[import-untyped]  # no PEP 561 marker
+from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped]  # same package
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -30,6 +41,7 @@ from operations.scripts.common.project import (
     relative_posix,
     require_supported_python,
 )
+from operations.scripts.documents.diagram_geometry_lint import check_geometry
 from operations.scripts.documents.metadata import load_document
 from operations.scripts.documents.traceability import _normalize_id, collect_traceable_elements
 
@@ -74,7 +86,8 @@ def _parse_metadata_block(text: str, result: LintResult) -> _ParsedMetadata | No
     if match is None:
         result.errors.append(
             "не найден обязательный блок метаданных "
-            "(<!-- diagram-metadata ... end-diagram-metadata -->), см. раздел 3 гайда"
+            "(<!-- diagram-metadata ... end-diagram-metadata -->), "
+            "см. diagram_geometry_foundations.md §13"
         )
         return None
 
@@ -138,13 +151,28 @@ def _check_sources(sources: list[str], root: Path, result: LintResult) -> None:
             result.errors.append(
                 f"дрейф версии: схема заявляет {m.group('path')}@{declared_version}, "
                 f"фактическая version в frontmatter — {actual_version}. "
-                "Схема требует повторной сверки (раздел 2 гайда)."
+                "Схема требует повторной сверки (diagram_geometry_foundations.md §13)."
             )
 
 
 def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: LintResult) -> None:
+    # An empty `id` list is legitimate for a diagram that traces no registry
+    # element at all — an ad-hoc process illustration, or a template skeleton
+    # (diagram_geometry_foundations.md §13, process_diagram_style_guide.md
+    # §2.1: "id не обязателен... строк id может не быть вовсе"). Such a
+    # diagram still requires the metadata block and its `source` lines
+    # (enforced above); it just carries nothing here to cross-check against
+    # the traceability registry. A diagram that DOES declare at least one id
+    # is still held to the full checks below: unknown ids, missing
+    # data-spec-id coverage, and untracked extra data-spec-id all still
+    # apply.
     if not declared_ids:
-        result.errors.append("в блоке метаданных нет ни одной строки 'id: ARC_CMP_...'")
+        body_ids = {_normalize_id(i) for i in _DATA_SPEC_ID.findall(body_text)}
+        for identifier in sorted(body_ids):
+            result.errors.append(
+                f'элемент схемы несёт data-spec-id="{identifier}", '
+                "но этот id не заявлен в блоке метаданных"
+            )
         return
 
     known = collect_traceable_elements(root)
@@ -175,7 +203,7 @@ def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: Lint
 def _check_structure(text: str, result: LintResult) -> ElementTree.Element | None:
     try:
         root_el = ElementTree.fromstring(text)
-    except ElementTree.ParseError as exc:
+    except (ElementTree.ParseError, DefusedXmlException) as exc:
         result.errors.append(f"файл не является корректным XML/SVG: {exc}")
         return None
 
@@ -297,6 +325,10 @@ def lint_file(path: Path, root: Path) -> LintResult:
     if metadata is not None:
         _check_sources(metadata.sources, root, result)
         _check_ids(metadata.ids, text, root, result)
+
+    geometry = check_geometry(text)
+    result.errors.extend(geometry.errors)
+    result.warnings.extend(geometry.warnings)
 
     return result
 
