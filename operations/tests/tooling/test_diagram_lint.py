@@ -81,6 +81,26 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("title" in error for error in result.errors))
         self.assertTrue(any('role="img"' in error for error in result.errors))
 
+    def test_lint_file_rejects_xml_entities_without_expansion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sentinel = "ENTITY_CONTENT_MUST_NOT_BE_EXPANDED"
+            svg = root / "diagram.svg"
+            svg.write_text(
+                "<!DOCTYPE svg [<!ENTITY payload '" + sentinel + "'>]>\n"
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" '
+                'role="img" aria-labelledby="title desc">\n'
+                '<title id="title">&payload;</title><desc id="desc">Desc</desc>\n'
+                "</svg>\n",
+                encoding="utf-8",
+            )
+
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("корректным XML/SVG" in error for error in result.errors))
+        self.assertNotIn(sentinel, " ".join(result.errors))
+
     def test_check_sources_reports_bad_format_missing_file_and_drift(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

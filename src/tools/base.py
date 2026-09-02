@@ -33,6 +33,8 @@ class ToolCall:
         network_target: Network destination requested by the call, if any.
         confirmed: Whether the owner has confirmed these exact parameters;
             required before a sensitive call is authorized.
+        runtime_task_id: Internal correlation identifier when this call belongs
+            to a task execution (ADR_004).
     """
 
     action_id: str
@@ -43,6 +45,7 @@ class ToolCall:
     secret_refs: frozenset[str] = field(default_factory=frozenset)
     network_target: str | None = None
     confirmed: bool = False
+    runtime_task_id: str | None = None
 
 
 @dataclass(frozen=True)

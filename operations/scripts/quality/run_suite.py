@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 import tomllib
+from datetime import date
 from pathlib import Path
 
 if __package__ in {None, ""}:
@@ -148,12 +149,13 @@ def validate_configuration_files(root: Path) -> None:
     validate_audit_baseline(root)
 
 
-def validate_audit_baseline(root: Path) -> None:
+def validate_audit_baseline(root: Path, *, today: date | None = None) -> None:
     path = root / AUDIT_REGISTER_PATH
     if not path.is_file():
         raise QualityFailure(f"Missing audit register at {AUDIT_REGISTER_PATH.as_posix()}")
     relative_path = path.relative_to(root).as_posix()
     records: dict[str, tuple[str, str, str, str]] = {}
+    current_date = today or date.today()
     for line_number, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
         if not line.lstrip().startswith("| AUD-"):
             continue
@@ -168,6 +170,18 @@ def validate_audit_baseline(root: Path) -> None:
             raise QualityFailure(
                 f"{relative_path}:{line_number}: {finding_id} requires owner and review date"
             )
+        if state != "resolved" and review_date != "—":
+            try:
+                parsed_review_date = date.fromisoformat(review_date)
+            except ValueError as exc:
+                raise QualityFailure(
+                    f"{relative_path}:{line_number}: {finding_id} has invalid review date"
+                ) from exc
+            if parsed_review_date < current_date:
+                raise QualityFailure(
+                    f"{relative_path}:{line_number}: {finding_id} review date "
+                    f"{review_date} is overdue as of {current_date.isoformat()}"
+                )
         records[finding_id] = (severity, state, owner, review_date)
     if not records:
         raise QualityFailure(f"{relative_path} contains no AUD records")

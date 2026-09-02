@@ -36,10 +36,13 @@ class ModelRequest:
     Attributes:
         prompt: The text to send to the model.
         timeout_seconds: Maximum time to wait for a response (SYS_004).
+        runtime_task_id: Internal correlation identifier when the call belongs
+            to a task execution (ADR_004).
     """
 
     prompt: str
     timeout_seconds: float = 30.0
+    runtime_task_id: str | None = None
 
 
 @dataclass(frozen=True)

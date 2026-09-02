@@ -97,6 +97,8 @@ class OwnerUsabilityTests(unittest.TestCase):
             "Шаги текущей работы",
             "Контроль результатов аудита",
             "Исправлены, ожидают проверки",
+            "Состояние критических замечаний",
+            "Последний подтверждённый Project check",
             "work/audit/audit_register.md",
             "выполнено",
             "осталось",
@@ -119,6 +121,8 @@ class OwnerUsabilityTests(unittest.TestCase):
             self.assertIn("откройте новый сеанс агента", rendered)
             self.assertIn("Проектных TASK нет", rendered)
         self.assertNotIn("Сейчас от вас ничего не требуется", rendered)
+        self.assertNotIn("Состояние gate/CI", rendered)
+        self.assertIn("не подтверждён в репозитории", rendered)
         self.assertNotIn("%", rendered)
         for internal in [
             "in-review",

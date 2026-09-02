@@ -230,8 +230,10 @@ jobs:
             --requirement operations/quality/requirements_dev.txt \
             --format json \
             --output runtime/pip_audit.json
-          /tmp/gitleaks dir . --redact --no-banner 2>&1 | tee runtime/gitleaks.txt
-          echo "gitleaks passed" >> runtime/gitleaks.txt
+          /tmp/gitleaks dir . --redact --no-banner 2>&1 | tee runtime/gitleaks_directory.txt
+          echo "gitleaks directory scan passed" >> runtime/gitleaks_directory.txt
+          /tmp/gitleaks git . --redact --no-banner 2>&1 | tee runtime/gitleaks_history.txt
+          echo "gitleaks history scan passed" >> runtime/gitleaks_history.txt
 
       - name: Run canonical full quality suite
         shell: bash
@@ -303,7 +305,8 @@ jobs:
             --artifact runtime/actionlint.txt \
             --artifact runtime/shellcheck.txt \
             --artifact runtime/pip_audit.json \
-            --artifact runtime/gitleaks.txt \
+            --artifact runtime/gitleaks_directory.txt \
+            --artifact runtime/gitleaks_history.txt \
             --artifact runtime/container_base_digest.txt \
             --artifact runtime/container_image_digest.txt \
             --artifact runtime/container_health.json \
@@ -343,7 +346,8 @@ jobs:
             runtime/actionlint.txt
             runtime/shellcheck.txt
             runtime/pip_audit.json
-            runtime/gitleaks.txt
+            runtime/gitleaks_directory.txt
+            runtime/gitleaks_history.txt
             runtime/container_base_digest.txt
             runtime/container_image_digest.txt
             runtime/container_health.json

@@ -9,7 +9,7 @@ component's data (no full administrative access).
 
 from dataclasses import dataclass
 
-from src.task_state import TaskLifecycleStore
+from src.task_state.base import TaskLifecycleStore
 
 
 @dataclass(frozen=True)

@@ -19,7 +19,9 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree  # type: ignore[import-untyped]  # no PEP 561 marker
+from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped]  # same package
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -169,7 +171,7 @@ def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: Lint
 def _check_structure(text: str, result: LintResult) -> None:
     try:
         root_el = ElementTree.fromstring(text)
-    except ElementTree.ParseError as exc:
+    except (ElementTree.ParseError, DefusedXmlException) as exc:
         result.errors.append(f"файл не является корректным XML/SVG: {exc}")
         return
 

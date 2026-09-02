@@ -34,6 +34,7 @@ class SQLiteTaskLifecycleStoreTests(unittest.TestCase):
             state = restored.get_state("task-1")
 
             assert loaded_message is not None
+            self.assertEqual(loaded_message.runtime_task_id, message.runtime_task_id)
             self.assertEqual(loaded_message.channel_type, "telegram")
             self.assertEqual(loaded_message.user_input, "prepare report")
             self.assertEqual(loaded_message.metadata, {"user_id": "42"})

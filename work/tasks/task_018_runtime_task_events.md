@@ -5,8 +5,8 @@ title: Корреляция структурированных событий з
 component: ARC_CMP_007
 delivery_role: component
 work_state: planned
-version: 1.1
-updated: 2026-08-30
+version: 1.2
+updated: 2026-09-02
 depends_on:
   - TASK_017
 next_actor: agent
@@ -14,6 +14,22 @@ owner_action: none
 owner_followups: []
 allowed_paths:
   - work/tasks/task_018_runtime_task_events.md
+  - work/tests/test_019.md
+  - src/channels/base.py
+  - src/models/base.py
+  - src/models/runtime_adapter.py
+  - src/observability/__init__.py
+  - src/observability/task_events.py
+  - src/orchestration/orchestrator.py
+  - src/operations/scheduler_state.py
+  - src/task_state/sqlite_store.py
+  - src/task_state/store.py
+  - src/tools/base.py
+  - src/tools/registry.py
+  - operations/tests/product/test_model_gateway.py
+  - operations/tests/product/test_persistent_task_state.py
+  - operations/tests/product/test_task_events.py
+  - operations/tests/product/test_tool_gateway.py
 traces_to:
   - m02
 decides: []
@@ -39,27 +55,27 @@ implements:
 
 ### Агенту
 
-1. Определить минимальную схему события и место создания `runtime_task_id`.
-2. Провести идентификатор через состояние, модель, инструменты, правила и ошибки.
-3. Добавить автоматические positive/negative tests, включая redaction известных секретов.
-4. Зафиксировать TEST и evidence для точного SHA.
+1. Переносимая схема события и отдельный системный `runtime_task_id` реализованы без свободного текста в attributes.
+2. Идентификатор проведён через оркестратор, модель, инструменты, правила, checkpoints, retries и ошибки.
+3. Добавлены автоматические positive/negative tests, включая sentinel-проверку утечек.
+4. [`TEST_019`](../tests/test_019.md) создан; SHA-bound evidence появится в штатной очереди этой TASK.
 
 ## 5. План выполнения
 
-- [ ] Определить минимальную схему структурированного события
-- [ ] Дополнить allowed_paths реальными путями реализации и TEST
-- [ ] Реализовать создание и распространение `runtime_task_id`
-- [ ] Связать ключевые события одного исполнения
-- [ ] Проверить ошибки, retries, checkpoints и redaction
-- [ ] Написать TEST, связанный с TASK и требованиями компонента
+- [x] Определить минимальную схему структурированного события
+- [x] Дополнить allowed_paths реальными путями реализации и TEST
+- [x] Реализовать создание и распространение `runtime_task_id`
+- [x] Связать ключевые события одного исполнения
+- [x] Проверить ошибки, retries, checkpoints и redaction
+- [x] Написать [`TEST_019`](../tests/test_019.md), связанный с TASK и требованиями компонента
 
 ## 6. Состав
 
-До начала реализации `allowed_paths` содержит только эту карточку. После начала в TASK войдут минимальная модель событий, интеграционные точки оркестратора/шлюзов, автоматические тесты и TEST-карточка.
+По явному разрешению владельца core реализован досрочно для закрытия аудита, но порядок очереди и `work_state: planned` не изменены: штатная поставка `TASK_018` остаётся после [`TASK_017`](task_017_m02_live_e2e.md). В состав вошли минимальная модель событий, интеграционные точки оркестратора, model/tool gateway и lifecycle store, автоматические тесты и [`TEST_019`](../tests/test_019.md).
 
 ## 7. Проверки и доказательства
 
-Тест должен собрать события одного исполнения, доказать единый `runtime_task_id`, ожидаемые event types, нормализованную ошибку и отсутствие секретного sentinel. Отдельно проверяется, что события разных исполнений не смешиваются.
+[`TEST_019`](../tests/test_019.md) собирает события одного исполнения, доказывает единый `runtime_task_id`, ожидаемые event types, нормализованную ошибку и отсутствие секретного sentinel. Отдельно проверяется, что события разных исполнений не смешиваются. Формальное SHA-bound evidence будет записано каноническим gate при штатном завершении задачи.
 
 ## 8. Готово когда
 

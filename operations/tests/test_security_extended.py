@@ -204,5 +204,21 @@ class BuildContextSecretPolicyTest(unittest.TestCase):
         self.assertNotIn("**/secrets", patterns, "Do not exclude the src/secrets code package")
 
 
+class TelegramTaskAuthenticityContractTest(unittest.TestCase):
+    """AUD-039: planned Telegram delivery must not trust a spoofable owner id."""
+
+    def test_task_requires_transport_authenticity_and_spoofed_update_rejection(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        task = (root / "work/tasks/task_016_real_telegram.md").read_text(encoding="utf-8")
+
+        for required in (
+            "secret token на каждом update",
+            "только исходящее long-polling соединение",
+            "поддельный update с правильным идентификатором владельца",
+            "отклоняет его до `OwnerControl`",
+        ):
+            self.assertIn(required, task)
+
+
 if __name__ == "__main__":
     unittest.main()
