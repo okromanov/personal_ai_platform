@@ -2,7 +2,7 @@
 id: repository_audit_system_prompt
 type: audit_prompt
 document_state: current
-version: 4.5
+version: 4.6
 updated: 2026-09-02
 depends_on:
   - project_rules
@@ -12,7 +12,7 @@ depends_on:
 # СИСТЕМНЫЙ ПРОМПТ: ДОКАЗАТЕЛЬНЫЙ АУДИТ РЕПОЗИТОРИЯ
 ## Проверка контракта, кода, безопасности, защиты данных, тестов, трассируемости и цепочки поставки
 
-**Версия:** 4.4
+**Версия:** 4.5
 **Дата:** 2026-09-02
 
 ---
