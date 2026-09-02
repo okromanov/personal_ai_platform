@@ -2,8 +2,8 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 2.3
-updated: 2026-09-01
+version: 2.5
+updated: 2026-09-02
 depends_on: []
 ---
 
@@ -59,6 +59,13 @@ depends_on: []
 | AUD-031 | medium | remediated_pending_verification | 2026-09-01 | 2026-09-08 | repository_owner | [`run_unittests.py`](../../operations/scripts/quality/run_unittests.py), [`test_quality_integration.py`](../../operations/tests/test_quality_integration.py) | Агент без согласования владельца ослабил политику «любой skip = провал» персональным исключением для одной причины skip, вместо того чтобы устранить сам skip. Откачено; настоящая причина (`os.chmod()` не выставляет POSIX exec-бит на Windows) исправлена в самом тесте. |
 | AUD-032 | medium | remediated_pending_verification | 2026-09-01 | 2026-09-08 | repository_owner | [`test_concurrency.py`](../../operations/tests/test_concurrency.py), [`project.py`](../../operations/scripts/common/project.py) | Агент без согласования владельца заглушил `PermissionError` в тесте вместо того чтобы чинить продуктовый код. Откачено; `read_text()` теперь сам переживает эту гонку через bounded retry, симметрично уже принятому `_replace_with_retry`. |
 | AUD-033 | medium | remediated_pending_verification | 2026-09-01 | 2026-09-08 | repository_owner | [`diagram_lint.py`](../../operations/scripts/documents/diagram_lint.py), [`architecture_diagram_style_guide.md`](../../operations/architecture/architecture_diagram_style_guide.md), [`personal_ai_platform_architecture.svg`](../../work/artefacts/architecture/personal_ai_platform_architecture.svg) | Агент без согласования владельца расширил формат `data-spec-id`, чтобы один узел мог заявлять несколько ID через пробел, вместо того чтобы разнести их по отдельным элементам. Откачено; линтер снова требует ровно один ID на элемент, схема переработана на `<tspan>`-теги. |
+| AUD-034 | high | open | 2026-09-02 | 2026-09-09 | repository_owner | [`diagram_lint.py`](../../operations/scripts/documents/diagram_lint.py) | Канонический gate падает на шаге Bandit (B314) на проверяемом SHA. Не исправлено. |
+| AUD-035 | medium | open | 2026-09-02 | 2026-09-16 | repository_owner | [`project_check.yml`](../../.github/workflows/project_check.yml) | Секрет-скан CI покрывает только рабочее дерево, git-историю не сканирует. Не исправлено. |
+| AUD-036 | medium | open | 2026-09-02 | 2026-09-16 | repository_owner | [`human_status.py`](../../operations/scripts/status/human_status.py) | Строка «Состояние gate/CI» вычисляется из реестра, а не из результата gate. Не исправлено. |
+| AUD-037 | low | open | 2026-09-02 | 2026-09-23 | repository_owner | [`run_suite.py`](../../operations/scripts/quality/run_suite.py) | `review_date` разбирается, но никогда не сравнивается с текущей датой. Не исправлено. |
+| AUD-038 | low | open | 2026-09-02 | 2026-09-23 | repository_owner | [Раздел 4](#4-карточки-findings) | Реестр совмещает машинно-читаемую таблицу состояния и неограниченно растущий архив карточек. Не исправлено. |
+| AUD-039 | medium | open | 2026-09-02 | 2026-09-16 | repository_owner | [`task_016_real_telegram.md`](../tasks/task_016_real_telegram.md) | Карточка реального Telegram-канала не требует подлинности входящего update. Не исправлено. |
+| AUD-040 | low | open | 2026-09-02 | 2026-09-23 | repository_owner | [`pyproject.toml`](../../pyproject.toml) | В корне нет LICENSE, у публичного репозитория нет канала сообщений об уязвимостях. Не исправлено. |
 
 ## 4. Карточки findings
 
@@ -483,6 +490,99 @@ depends_on: []
 - **Рекомендованное исправление:** откатить парсинг `data-spec-id` в `diagram_lint.py` к строго одному ID на атрибут; в схеме заменить узлы с несколькими ID на структуру, где каждый ID помечен отдельным элементом (например, `<tspan>` внутри общего `<text>`, если узлы физически совмещены на одной строке — по аналогии с уже существующими пятью отдельными чипами потоков размещения).
 - **Как проверить исправление:** `python operations/scripts/documents/diagram_lint.py work/artefacts/architecture/personal_ai_platform_architecture.svg` — 0 ошибок при строгом одиночном парсинге; `grep -c "data-spec-id=\"[A-Z_0-9]* [A-Z_0-9]" work/artefacts/architecture/personal_ai_platform_architecture.svg` — 0 совпадений (ни одного составного атрибута).
 - **Исправлено (2026-09-01):** `diagram_lint.py` вернулся к строгому одному ID на `data-spec-id`; новый тест `test_check_ids_rejects_a_compressed_multi_id_attribute` фиксирует это как регрессионный барьер. В схеме [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)–[`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008) переведены на восемь отдельных `<tspan data-spec-id="...">` внутри одной строки описания (заодно исправлена неточность — прежний текст объединял «Постоянное хранилище» и «Хранилище резервных копий» в одно «Хранилища», хотя это два разных компонента); аналогично разнесены [`ARC_FLOW_002`](../../specifications/architecture_baseline.md#arc_flow_002)/[`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007)/[`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)/[`SEC_CTL_009`](../../specifications/system_specification.md#sec_ctl_009) и [`ARC_FLOW_004`](../../specifications/architecture_baseline.md#arc_flow_004)/[`SEC_CTL_017`](../../specifications/system_specification.md#sec_ctl_017), ранее делившие один составной атрибут. `diagram_version` схемы поднят до `1.1`.
+
+
+<a id="aud-034"></a>
+### AUD-034 — Канонический gate красный на HEAD: Bandit B314 в diagram_lint.py
+
+- **Severity/Confidence/Evidence state:** high / high / CONFIRMED
+- **Baseline:** introduced-by-change
+- **Файл:** [`diagram_lint.py:171`](../../operations/scripts/documents/diagram_lint.py)
+- **Ожидаемый контракт:** [`AGENTS.md`](../../AGENTS.md) §3 — слияние запрещено, пока общий gate не подтверждён для точного SHA; `run_suite.py full` завершается с exit 0 на допущенных к слиянию коммитах.
+- **Наблюдаемое поведение:** `run_suite.py full` завершается с exit 1 на шаге «Security audit (Bandit)». `_check_structure()` вызывает `xml.etree.ElementTree.fromstring()`; bandit 1.7.5 выдаёт B314 severity MEDIUM, а шаг запускается с `--severity-level medium`. Воспроизведено дважды, ровно один result. Остальные 14 шагов при отдельном запуске проходят. Файл добавлен 2026-08-31 коммитом `957a434` — после предыдущего аудита; с тех пор в `main` приняты PR #94 и #95. `# nosec` в репозитории отсутствует, `defusedxml` не объявлен прямой зависимостью.
+- **Воздействие и достижимость:** текущий SHA по собственному правилу репозитория не был допустим к слиянию. Падение детерминированное. Эксплуатируемость самого B314 низкая (разбираются схемы из репозитория) — severity определяется нарушением обязательного gate, а не XML-риском.
+- **Как воспроизвести:** `.venv/bin/python operations/scripts/quality/run_suite.py full` на SHA `2e69176`; изолированно — `python -m bandit -r operations/scripts src --severity-level medium -f json -q`.
+- **Почему предыдущий аудит пропустил:** находки не существовало на 2026-08-30. Пропустил не аудит, а отсутствующий серверный gate ([`AUD-007`](#aud-007)).
+- **Рекомендованное исправление:** решение владельца между двумя вариантами — объявить `defusedxml` прямой зависимостью и разбирать SVG через `defusedxml.ElementTree`, либо явно обосновать исключение в коде и коммите. Подавление ради зелёного результата без обоснования запрещено [`AGENTS.md`](../../AGENTS.md) §5.1.
+- **Как проверить исправление:** `run_suite.py full` завершается с exit 0; шаг Bandit не содержит результатов severity ≥ medium.
+- **Критерий закрытия:** зелёный `Project check` на точном SHA.
+
+<a id="aud-035"></a>
+### AUD-035 — Секрет-скан CI не покрывает git-историю
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`project_check.yml`](../../.github/workflows/project_check.yml), шаг «Scan dependencies and secrets»
+- **Ожидаемый контракт:** секрет, удалённый из рабочего дерева, остаётся в истории и должен обнаруживаться; репозиторий планирует работать с реальным токеном Telegram и ключами провайдера модели ([`SEC_CTL_005`](../../specifications/system_specification.md#sec_ctl_005), [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)).
+- **Наблюдаемое поведение:** CI выполняет только `gitleaks dir . --redact` — рабочее дерево на проверяемом SHA. Режим `gitleaks git` не запускается никогда. Прогон `gitleaks git .` тем же pinned бинарём 8.30.1 по полной истории (467 коммитов) даёт 4 срабатывания `generic-api-key` в удалённых с тех пор файлах `AUDIT_FRAMEWORK.md` и `REPOSITORY_AUDIT_SYSTEM_PROMPT.md` (2026-08-25). Все четыре проверены по содержимому: это иллюстративные примеры в блоке «❌ ПЛОХО (хардкод)», реального секрета в истории нет. Дефект — в слепоте контроля к этому классу, а не в самих четырёх строках.
+- **Воздействие и достижимость:** секрет, случайно закоммиченный и удалённый следующим коммитом, проходит CI зелёным навсегда. [`TASK_013`](../tasks/task_013_inf_008.md) и [`TASK_016`](../tasks/task_016_real_telegram.md) вводят реальные токены и файлы `.env` в рабочий контур.
+- **Как воспроизвести:** сравнить `gitleaks dir . --no-banner` (0 находок) и `gitleaks git . --no-banner` (4 находки) на полной истории; при shallow-клоне второй режим тоже слеп.
+- **Рекомендованное исправление:** добавить второй прогон `gitleaks git` и раскрытие истории в тот же job; известные срабатывания-примеры оформить через `.gitleaksignore` по fingerprint, а не ослаблением правила.
+- **Как проверить исправление:** синтетический высокоэнтропийный токен, закоммиченный и удалённый следующим коммитом в тестовой ветке, обязан уронить `Project check`.
+
+<a id="aud-036"></a>
+### AUD-036 — Строка «Состояние gate/CI» в статусе владельца не отражает состояние gate
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`human_status.py`](../../operations/scripts/status/human_status.py) (`_audit_status()`), [`project_status.md`](../../project_status.md)
+- **Ожидаемый контракт:** рекомендация [`AUD-010`](#aud-010) — владелец, читающий только [`project_status.md`](../../project_status.md), должен видеть состояние gate/CI либо явную пометку «последняя проверка недоступна».
+- **Наблюдаемое поведение:** строка называется «Состояние gate/CI», но вычисляется исключительно из числа незакрытых критических строк реестра. Входа от фактического прогона gate или CI у генератора нет. На проверяемом SHA канонический gate реально красный ([`AUD-034`](#aud-034)), и в [`project_status.md`](../../project_status.md) об этом нет ничего. Обратная асимметрия так же реальна: после закрытия [`AUD-007`](#aud-007) строка станет успокаивающей независимо от того, проходит gate или нет.
+- **Воздействие и достижимость:** заголовок обещает состояние gate/CI, а показывает производную от реестра — правдоподобный сигнал, не соответствующий источнику. Remediation [`AUD-010`](#aud-010) закрыла видимость критических находок, но не видимость gate.
+- **Как воспроизвести:** сравнить exit code `run_suite.py full` на SHA `2e69176` (1) со строкой «Состояние gate/CI» в [`project_status.md`](../../project_status.md) того же SHA.
+- **Рекомендованное исправление:** либо переименовать строку в то, чем она является, и добавить отдельную строку состояния gate с явным «последняя проверка недоступна» при отсутствии SHA-bound evidence; либо связать значение с `runtime/evidence/quality_suite.json` и его SHA.
+- **Как проверить исправление:** на SHA с красным gate [`project_status.md`](../../project_status.md) показывает красное состояние gate либо явно сообщает о недоступности проверки и не называет строку состоянием gate.
+
+<a id="aud-037"></a>
+### AUD-037 — Review date в реестре разбирается, но ничем не обеспечена
+
+- **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`run_suite.py`](../../operations/scripts/quality/run_suite.py) (`validate_audit_baseline()`)
+- **Ожидаемый контракт:** [Раздел 2](#2-допустимые-состояния) и [Раздел 5](#5-правило-обновления) вводят обязательную дату пересмотра для каждой незакрытой находки и каждого `accepted_risk`; дата, которую никто не проверяет, контролем не является ([`AGENTS.md`](../../AGENTS.md) §5.1).
+- **Наблюдаемое поведение:** `AUDIT_ROW` захватывает `review_date`, но единственная проверка — что поле не равно `—` для состояния, отличного от `resolved`. Сравнения с текущей датой нет ни в gate, ни в [`check.py`](../../operations/scripts/documents/check.py), ни в генераторе статуса. На дату аудита строки `AUD-001`…`AUD-006` имеют review date `2026-09-02`, то есть срок наступил, и ни одна проверка на это не реагирует. Owner dashboard показывает «Ближайшая дата проверки», то есть владелец информирован, но автоматического сигнала о просрочке нет.
+- **Воздействие и достижимость:** находки и принятые риски бесшумно стареют мимо собственного срока пересмотра; наступает по календарю.
+- **Как воспроизвести:** прочитать `validate_audit_baseline()` — `review_date` после разбора не используется; выполнить `run_suite.py full` после 2026-09-02: шаг валидации конфигурации проходит.
+- **Рекомендованное исправление:** сравнивать `review_date` с текущей датой и выдавать отказ либо явное предупреждение для просроченных строк. Блокирует ли просрочка gate или только громко показывается владельцу — решение владельца.
+- **Как проверить исправление:** negative test с фиксированной «сегодняшней» датой и строкой с прошедшим `review_date` проваливает проверку.
+
+<a id="aud-038"></a>
+### AUD-038 — Реестр совмещает машинно-читаемую таблицу состояния и неограниченно растущий архив карточек
+
+- **Severity/Confidence/Evidence state:** low / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [Раздел 3](#3-реестр) и [Раздел 4](#4-карточки-findings) этого файла
+- **Ожидаемый контракт:** раздел 7.1.1 [`repository_audit_system_prompt.md`](../../operations/repository_audit_system_prompt.md) — один файл не смешивает роли с разным lifecycle; у каждого типа содержимого есть правило появления, обновления и архивации.
+- **Наблюдаемое поведение:** файл совмещает компактную таблицу текущего состояния, которую разбирают канонический gate (`validate_audit_baseline()`) и owner dashboard (`_audit_status()`), и 40 полных неизменяемых карточек. [Раздел 5](#5-правило-обновления) запрещает удаление строк, правила архивации карточек нет. Файл вырос до 125 КБ и является самым крупным tracked-файлом репозитория — крупнее [`repository_audit_system_prompt.md`](../../operations/repository_audit_system_prompt.md) (114 КБ) и [`check.py`](../../operations/scripts/documents/check.py) (85 КБ). Рост линейный и ничем не ограничен, при этом карточки уже продублированы в датированных отчётах [`audit_baseline_2026_08_28.md`](audit_baseline_2026_08_28.md)…[`audit_baseline_2026_09_02.md`](audit_baseline_2026_09_02.md), неизменяемых по своему контракту.
+- **Воздействие и достижимость:** владелец и агент читают 125 КБ, чтобы получить таблицу на 40 строк; автоматика разбирает весь файл ради одного раздела. Немедленного функционального отказа нет.
+- **Как воспроизвести:** `git ls-files -z | xargs -0 du -b | sort -rn | head` — этот файл на первом месте.
+- **Рекомендованное исправление:** оставить в реестре разделы 1–3 и 5 плюс ссылку на карточку, а карточки закрытых находок переносить в соответствующий датированный `audit_baseline_*.md` либо в отдельный архивный файл. Обязательно назвать будущий источник истины для каждой карточки и сохранить якоря `#aud-nnn`, иначе сломается проверка `links`.
+- **Как проверить исправление:** якоря `#aud-nnn` продолжают резолвиться из [`project_status.md`](../../project_status.md) и датированных отчётов; `check.py --all` зелёный; размер реестра перестаёт расти линейно от числа находок.
+
+<a id="aud-039"></a>
+### AUD-039 — TASK_016 не требует подлинности входящего Telegram-канала
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** [`task_016_real_telegram.md`](../tasks/task_016_real_telegram.md) §4, §5, §7, §8
+- **Ожидаемый контракт:** [`SEC_CTL_001`](../../specifications/system_specification.md#sec_ctl_001) входит в состав [`m02`](../../milestones.md#m02), то есть обязателен на этом этапе. Раздел 7.4 [`repository_audit_system_prompt.md`](../../operations/repository_audit_system_prompt.md) требует отдельно проверять подлинность входящего канала — подпись/секрет webhook, защиту от подмены владельца на канальном уровне — отдельно от authentication внутри приложения.
+- **Наблюдаемое поведение:** owner-control контур ключуется на `subject_id`, который [`Orchestrator.handle()`](../../src/orchestration/orchestrator.py) получает от вызывающего кода, а тот извлекает из метаданных сообщения (`telegram_user_id` в [`telegram.py`](../../src/channels/telegram.py)). `verify_identity()` сравнивает эту строку с идентификатором владельца, то есть доверяет полю из внешнего сообщения. [`TASK_016`](../tasks/task_016_real_telegram.md) вводит реальный Bot API и допускает webhook, но ни план, ни проверки, ни критерии готовности не содержат пункта о секретном токене webhook, IP-allowlist Telegram или ином подтверждении происхождения update. §7 требует «отсутствие вызова модели для чужого user_id» — это отказ для другого идентификатора, а не защита от подделки владельческого. Упомянутый в §5 `allowlist` относится к [`network_policy.py`](../../src/operations/network_policy.py), то есть к egress.
+- **Воздействие и достижимость:** при реализации по написанному в режиме webhook любой, кто узнает URL endpoint, сможет отправить update с идентификатором владельца и пройти [`SEC_CTL_001`](../../specifications/system_specification.md#sec_ctl_001); аварийный выключатель остаётся единственным барьером. Сегодня код не развёрнут и уязвимости не существует — поэтому medium: дефект в карточке планируемой работы, стоимость устранения сейчас минимальна.
+- **Как воспроизвести:** `grep -in "webhook|подпис|secret.token|spoof" work/tasks/task_016_real_telegram.md` — совпадения относятся только к выбору webhook/polling и получению токена бота.
+- **Рекомендованное исправление:** дополнить [`TASK_016`](../tasks/task_016_real_telegram.md) пунктом плана и критерием готовности: при webhook — обязательный secret token и его проверка на каждом update, при polling — фиксация того, что подлинность обеспечивается исходящим соединением; добавить отрицательный TEST «поддельный update с идентификатором владельца отклонён».
+- **Как проверить исправление:** в §8 карточки присутствует критерий подлинности канала, связанный TEST содержит отрицательный сценарий подделки идентификатора владельца.
+
+<a id="aud-040"></a>
+### AUD-040 — Отсутствуют LICENSE и канал сообщений об уязвимостях
+
+- **Severity/Confidence/Evidence state:** low / medium / CONFIRMED
+- **Baseline:** pre-existing
+- **Файл:** корень репозитория; [`pyproject.toml`](../../pyproject.toml)
+- **Ожидаемый контракт:** раздел 7.7 [`repository_audit_system_prompt.md`](../../operations/repository_audit_system_prompt.md) требует наличия LICENSE в корне и оценки совместимости лицензий с моделью распространения; раздел 7.4 требует канала сообщений об уязвимостях для публичных репозиториев и репозиториев с внешними пользователями.
+- **Наблюдаемое поведение:** в корне нет ни `LICENSE`, ни `SECURITY.md`; в [`pyproject.toml`](../../pyproject.toml) нет поля лицензии. Видимость репозитория серверная и локально непроверяема (`UNAVAILABLE`), от неё зависит применимость части про уязвимости. Отсутствие LICENSE означает режим «все права защищены» по умолчанию, что для личного проекта может быть намеренным, но нигде не зафиксировано как решение. Инвентарь зависимостей при этом в хорошем состоянии: 51 пакет с точными версиями и SHA-256, pip-audit не нашёл уязвимостей, база образа закреплена digest, собственных runtime-зависимостей у [`src/`](../../src/) нет.
+- **Воздействие и достижимость:** прямого технического риска нет; влияние — на распространение и внешний вклад.
+- **Рекомендованное исправление:** решение владельца — зафиксировать намеренный режим распространения: добавить LICENSE и поле лицензии в [`pyproject.toml`](../../pyproject.toml), либо явно записать решение не публиковать лицензию. Для публичного репозитория добавить `SECURITY.md` с контактом.
+- **Как проверить исправление:** в корне присутствует LICENSE либо зафиксировано явное решение владельца об обратном; для публичного репозитория — `SECURITY.md`.
 
 ## 5. Правило обновления
 
