@@ -1395,55 +1395,107 @@ AUDIT_CARD_OPTIONAL_FIELDS = frozenset(
         "Рекомендованное исправление",
         "Как проверить исправление",
         "Критерий закрытия",
+        "Evidence state",
+    }
+)
+AUDIT_CARD_LEGACY_FIELDS = frozenset(
+    {
+        "Наблюдение",
+        "Риск",
+        "Ожидаемое состояние",
+        "Исправление",
+        "Проверка",
+        "Почему это пропустил предыдущий аудит",
+        "Воздействие",
     }
 )
 AUDIT_CARD_RESOLUTION_LABELS = frozenset({"Исправлено", "Частично исправлено", "Уточнение"})
-AUDIT_CARD_ALLOWED_FIELDS = frozenset(AUDIT_CARD_REQUIRED_FIELDS) | AUDIT_CARD_OPTIONAL_FIELDS
+AUDIT_CARD_ALLOWED_FIELDS = (
+    frozenset(AUDIT_CARD_REQUIRED_FIELDS) | AUDIT_CARD_OPTIONAL_FIELDS | AUDIT_CARD_LEGACY_FIELDS
+)
 _AUDIT_CARD_SPLIT = re.compile(r'(?=<a id="aud-\d{3}"></a>)')
 _AUDIT_CARD_ID = re.compile(r'<a id="(aud-\d{3})"></a>')
 _AUDIT_CARD_FIELD = re.compile(r"^-\s+\*\*([^*:]+?):\*\*", re.MULTILINE)
 _AUDIT_CARD_DATE_SUFFIX = re.compile(r"\s*\([^)]*\)\s*$")
+_AUDIT_REGISTER_ROW_ID = re.compile(r"^\|\s*(AUD-\d{3})\s*\|", re.MULTILINE)
+_AUDIT_CARD_ARCHIVE_PATTERNS = (
+    "audit_baseline_*.md",
+    "audit_card_archive_*.md",
+)
 
 
 def check_audit_register_cards(root: Path) -> CheckResult:
-    """Каждая карточка AUD-NNN использует один и тот же набор названий полей.
+    """Every register row has exactly one well-formed card in an archive.
 
-    Свободные названия (например, придуманный на месте `Статус`) означают,
-    что реестр расходится сам с собой карточка от карточки — эта проверка
-    ловит любое имя поля, не входящее в согласованный список (см.
-    `work/audit/audit_register.md` §4), до того как оно попадёт в главную
-    ветку.
+    The compact register owns mutable state. Dated baselines and dedicated
+    card archives own immutable card bodies. This check prevents either side
+    from drifting: unknown fields, missing cards, duplicate cards, and cards
+    without a register row are all blocking errors (AUD-038).
     """
 
     path = root / "work/audit/audit_register.md"
     if not path.is_file():
         return _result("audit_register_cards", [])
-    text = read_text(path)
+    register_ids = set(_AUDIT_REGISTER_ROW_ID.findall(read_text(path)))
     errors: list[str] = []
-    for block in _AUDIT_CARD_SPLIT.split(text)[1:]:
-        card_id_match = _AUDIT_CARD_ID.match(block)
-        if not card_id_match:
-            continue
-        card_id = card_id_match.group(1).upper()
-        fields = _AUDIT_CARD_FIELD.findall(block)
-        # Дата в скобках — часть значения ресолюшн-полей (Исправлено (2026-08-30)),
-        # а не отдельное название поля; отделяем её перед сверкой со списком.
-        normalized = [_AUDIT_CARD_DATE_SUFFIX.sub("", f).strip() for f in fields]
-        for label in normalized:
-            if label in AUDIT_CARD_ALLOWED_FIELDS or label in AUDIT_CARD_RESOLUTION_LABELS:
+    cards: dict[str, list[str]] = {}
+    archive_paths = sorted(
+        {
+            archive_path
+            for pattern in _AUDIT_CARD_ARCHIVE_PATTERNS
+            for archive_path in path.parent.glob(pattern)
+        }
+    )
+    for archive_path in archive_paths:
+        text = read_text(archive_path)
+        relative = relative_posix(archive_path, root)
+        for block in _AUDIT_CARD_SPLIT.split(text)[1:]:
+            card_id_match = _AUDIT_CARD_ID.match(block)
+            if not card_id_match:
                 continue
-            errors.append(
-                f"{card_id}: неизвестное название поля «{label}» — используйте только поля "
-                "из списка в audit_register.md §4, не изобретайте новое"
+            card_id = card_id_match.group(1).upper()
+            cards.setdefault(card_id, []).append(relative)
+            fields = _AUDIT_CARD_FIELD.findall(block)
+            # A date suffix belongs to a resolution value, not its field name.
+            normalized = [_AUDIT_CARD_DATE_SUFFIX.sub("", field).strip() for field in fields]
+            for label in normalized:
+                if label in AUDIT_CARD_ALLOWED_FIELDS or label in AUDIT_CARD_RESOLUTION_LABELS:
+                    continue
+                errors.append(
+                    f"{card_id}: неизвестное название поля «{label}» — используйте только "
+                    "поля архивной карточки, не изобретайте новое"
+                )
+            # Baselines published before the unified schema are immutable.
+            # Preserve their finite legacy labels, while every dedicated
+            # archive and current baseline must use the canonical field order.
+            strict_schema = archive_path.name.startswith("audit_card_archive_") or (
+                archive_path.name >= "audit_baseline_2026_09_02.md"
             )
-        leading = normalized[: len(AUDIT_CARD_REQUIRED_FIELDS)]
-        if tuple(leading) != AUDIT_CARD_REQUIRED_FIELDS:
+            if strict_schema:
+                leading = normalized[: len(AUDIT_CARD_REQUIRED_FIELDS)]
+                if tuple(leading) != AUDIT_CARD_REQUIRED_FIELDS:
+                    errors.append(
+                        f"{card_id}: первые три поля карточки должны быть ровно "
+                        f"{', '.join(AUDIT_CARD_REQUIRED_FIELDS)} в этом порядке; "
+                        f"найдено {leading}"
+                    )
+                if "Наблюдаемое поведение" not in normalized:
+                    errors.append(
+                        f"{card_id}: отсутствует обязательное поле «Наблюдаемое поведение»"
+                    )
+            elif not {"Наблюдение", "Наблюдаемое поведение"}.intersection(normalized):
+                errors.append(f"{card_id}: в legacy-карточке отсутствует наблюдение")
+
+    for card_id in sorted(register_ids):
+        locations = cards.get(card_id, [])
+        if not locations:
             errors.append(
-                f"{card_id}: первые три поля карточки должны быть ровно "
-                f"{', '.join(AUDIT_CARD_REQUIRED_FIELDS)} в этом порядке; найдено {leading}"
+                f"{card_id}: для строки реестра отсутствует карточка в датированном архиве"
             )
-        if "Наблюдаемое поведение" not in normalized:
-            errors.append(f"{card_id}: отсутствует обязательное поле «Наблюдаемое поведение»")
+        elif len(locations) > 1:
+            errors.append(f"{card_id}: карточка дублируется: {', '.join(locations)}")
+    for card_id in sorted(set(cards) - register_ids):
+        errors.append(f"{card_id}: архивная карточка отсутствует в реестре")
     return _result("audit_register_cards", errors)
 
 

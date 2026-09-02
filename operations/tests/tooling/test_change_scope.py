@@ -58,6 +58,7 @@ class ChangeScopeTests(unittest.TestCase):
             )
             self.assertTrue(validate_change_scope(root, ["tasks.md"]))
             self.assertEqual(validate_change_scope(root, [".github/workflows/check.yml"]), [])
+            self.assertEqual(validate_change_scope(root, [".gitleaksignore"]), [])
             self.assertTrue(validate_change_scope(root, ["src/product.py"]))
 
     def test_completed_task_is_eligible_only_when_its_card_changes(self) -> None:

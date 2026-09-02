@@ -138,11 +138,15 @@ def _audit_status(root: Path) -> str:
         record_severity == "critical" and record_state != "resolved"
         for record_severity, record_state, _ in records
     )
-    gate_text = (
+    critical_text = (
         f"**ЕСТЬ незакрытые критические замечания ({critical_open})** — "
-        "не полагайтесь на статус CI/gate без проверки карточек ниже"
+        "проект не готов к эксплуатации"
         if critical_open
         else "критических незакрытых замечаний нет"
+    )
+    project_check_text = (
+        "для текущей редакции не подтверждён в репозитории — "
+        "проверьте Project check в GitHub Actions"
     )
 
     return f"""## Контроль результатов аудита
@@ -155,7 +159,8 @@ def _audit_status(root: Path) -> str:
 | Риски приняты владельцем | **{state_counts["accepted_risk"]}** |
 | Закрыты | **{state_counts["resolved"]}** |
 | Критичность | {severity_text} |
-| Состояние gate/CI | {gate_text} |
+| Состояние критических замечаний | {critical_text} |
+| Последний подтверждённый Project check | {project_check_text} |
 | Ближайшая дата проверки | **{review_text}** |
 | Полное описание и доказательства | [`{relative_baseline}`]({relative_baseline}) |"""
 

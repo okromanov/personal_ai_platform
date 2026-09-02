@@ -5,6 +5,7 @@ import os
 import stat
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -183,6 +184,33 @@ class QualityRunnerTests(unittest.TestCase):
                 encoding="utf-8",
             )
             run_suite.validate_audit_baseline(root)
+
+    def test_audit_baseline_blocks_an_overdue_unresolved_review(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / run_suite.AUDIT_REGISTER_PATH
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "| AUD-001 | medium | open | 2026-08-27 | 2026-09-01 | "
+                "repository_owner | evidence | fix |\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(run_suite.QualityFailure, "AUD-001.*overdue"):
+                run_suite.validate_audit_baseline(root, today=date(2026, 9, 2))
+
+    def test_audit_baseline_allows_review_due_today(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / run_suite.AUDIT_REGISTER_PATH
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "| AUD-001 | medium | open | 2026-08-27 | 2026-09-02 | "
+                "repository_owner | evidence | fix |\n",
+                encoding="utf-8",
+            )
+
+            run_suite.validate_audit_baseline(root, today=date(2026, 9, 2))
 
     def test_run_step_records_combined_output_and_propagates_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

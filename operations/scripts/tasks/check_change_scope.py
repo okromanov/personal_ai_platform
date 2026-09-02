@@ -43,6 +43,7 @@ AUTHORITY_DOCUMENTS = frozenset(
 MAINTENANCE_PATH_PATTERNS = [
     ".claude/**",
     ".github/**",
+    ".gitleaksignore",
     ".gitignore",
     "AGENTS.md",
     "milestones.md",

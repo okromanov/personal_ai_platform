@@ -36,6 +36,8 @@ class TaskMessage:
 
     Attributes:
         task_id: Unique identifier for this task execution (per SYS_001)
+        runtime_task_id: Internal correlation identifier generated independently
+            from channel-controlled metadata (ADR_004)
         channel_type: Source channel (telegram, web, cli, voice)
         user_input: Normalized user input text
         metadata: Additional context (user_id, timestamp, etc.)
@@ -43,6 +45,7 @@ class TaskMessage:
     """
 
     task_id: str = field(default_factory=lambda: str(uuid4()))
+    runtime_task_id: str = field(default_factory=lambda: str(uuid4()))
     channel_type: str = field(default="unknown")
     user_input: str = field(default="")
     metadata: dict[str, Any] = field(default_factory=dict)
