@@ -2,15 +2,15 @@
 id: document_frontmatter_standard
 type: guide
 document_state: superseded
-version: 1.4
-updated: 2026-09-01
+version: 1.5
+updated: 2026-09-02
 depends_on:
   - project_rules
 ---
 
 # Стандарт frontmatter для документов (заменён)
 
-**Заменён [`change_process.md`](../change_process.md#8-стандарт-yaml-frontmatter-и-правила-создания-файлов) §8, который реально применяется и проверяется `check.py`.** Этот файл заявлял себя «единственным источником истины», конфликтуя с §8, ноль документов на него не ссылались, а перечисленные здесь типы документов (`architecture`, `infrastructure`, `operations_guide`) не совпадают с типами, которые реально проверяет `check_frontmatter_standard` (`architecture_baseline`, `infrastructure_baseline` и т.д.) — см. [`AUD-011`](../../work/audit/audit_register.md#aud-011). Единственное, чего не было в §8 — рекомендуемый порядок полей frontmatter (раздел 5 ниже) и версионная семантика (раздел 3-4) — перенесено в [`change_process.md`](../change_process.md#82-правила-формирования-и-валидации) §8.2. Остальное содержимое этого файла сохранено ниже как история, но не действует.
+**Заменён [`change_process.md`](../change_process.md#8-стандарт-yaml-frontmatter-и-правила-создания-файлов) §8, который реально применяется и проверяется `check.py`.** Этот файл заявлял себя «единственным источником истины», конфликтуя с §8, ноль документов на него не ссылались, а перечисленные здесь типы документов (`architecture`, `infrastructure`, `operations_guide`) не совпадают с типами, которые реально проверяет `check_frontmatter_standard` (`architecture_baseline`, `infrastructure_baseline` и т.д.) — см. [`AUD-011`](../../work/audit/audit_baseline_2026_08_29.md#aud-011). Единственное, чего не было в §8 — рекомендуемый порядок полей frontmatter (раздел 5 ниже) и версионная семантика (раздел 3-4) — перенесено в [`change_process.md`](../change_process.md#82-правила-формирования-и-валидации) §8.2. Остальное содержимое этого файла сохранено ниже как история, но не действует.
 
 Этот документ ранее заявлял себя единственным источником истины для структуры YAML frontmatter во всех типах документов проекта.
 

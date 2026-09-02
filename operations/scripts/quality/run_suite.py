@@ -31,9 +31,11 @@ DEFAULT_STEP_TIMEOUT_SECONDS = 300
 AUDIT_BASELINE_DIRECTORY = Path("work/audit")
 AUDIT_REGISTER_PATH = AUDIT_BASELINE_DIRECTORY / "audit_register.md"
 AUDIT_ROW = re.compile(
-    r"^\|\s*(AUD-\d{3})\s*\|\s*(critical|high|medium|low)\s*\|\s*"
-    r"(open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
-    r"(\d{4}-\d{2}-\d{2})\s*\|\s*(\d{4}-\d{2}-\d{2}|—)\s*\|\s*([^|]+?)\s*\|"
+    r"^\|\s*(?:\[(?P<linked_id>AUD-\d{3})\]\([^)]+\)|(?P<bare_id>AUD-\d{3}))\s*\|\s*"
+    r"(?P<severity>critical|high|medium|low)\s*\|\s*"
+    r"(?P<state>open|remediated_pending_verification|resolved|accepted_risk)\s*\|\s*"
+    r"(?P<first_seen>\d{4}-\d{2}-\d{2})\s*\|\s*"
+    r"(?P<review_date>\d{4}-\d{2}-\d{2}|—)\s*\|\s*(?P<owner>[^|]+?)\s*\|"
 )
 # Function parameters Vulture flags as unused (100% confidence) but that are
 # kept intentionally: evidence_ref/semantic_review_ref preserve caller
@@ -157,12 +159,16 @@ def validate_audit_baseline(root: Path, *, today: date | None = None) -> None:
     records: dict[str, tuple[str, str, str, str]] = {}
     current_date = today or date.today()
     for line_number, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
-        if not line.lstrip().startswith("| AUD-"):
+        if not re.match(r"^\|\s*(?:\[)?AUD-\d{3}", line):
             continue
         match = AUDIT_ROW.match(line)
         if match is None:
             raise QualityFailure(f"{relative_path}:{line_number}: invalid audit record")
-        finding_id, severity, state, _first_seen, review_date, owner = match.groups()
+        finding_id = match.group("linked_id") or match.group("bare_id")
+        severity = match.group("severity")
+        state = match.group("state")
+        review_date = match.group("review_date")
+        owner = match.group("owner")
         if finding_id in records:
             raise QualityFailure(f"{relative_path}:{line_number}: duplicate {finding_id}")
         owner = owner.strip().strip("`")

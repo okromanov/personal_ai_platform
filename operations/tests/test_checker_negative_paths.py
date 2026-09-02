@@ -710,7 +710,8 @@ class AuditRegisterCardFormatTests(unittest.TestCase):
         "# Реестр\n\n## 3. Реестр\n\n"
         "| ID | Severity | State | First seen | Review date | Owner | Evidence | Resolution |\n"
         "|---|---|---|---|---|---|---|---|\n"
-        "| AUD-001 | low | open | 2026-08-30 | 2026-09-30 | owner | card | fix |\n"
+        "| [AUD-001](audit_adhoc_cards.md#aud-001) | low | open | 2026-08-30 | "
+        "2026-09-30 | owner | proof | fix |\n"
     )
     ARCHIVE_HEADER = (
         "---\nid: audit_archive\ntype: audit_archive\ndocument_state: current\n"
@@ -722,7 +723,7 @@ class AuditRegisterCardFormatTests(unittest.TestCase):
         audit_dir = root / "work/audit"
         audit_dir.mkdir(parents=True)
         (audit_dir / "audit_register.md").write_text(self.REGISTER, encoding="utf-8")
-        (audit_dir / "audit_card_archive_2026_08_30.md").write_text(
+        (audit_dir / "audit_adhoc_cards.md").write_text(
             self.ARCHIVE_HEADER + card_body, encoding="utf-8"
         )
 
@@ -834,12 +835,13 @@ class AuditRegisterCardFormatTests(unittest.TestCase):
             audit_dir.mkdir(parents=True)
             (audit_dir / "audit_register.md").write_text(
                 self.REGISTER.replace(
-                    "| AUD-001 | low | open | 2026-08-30 | 2026-09-30 | owner | card | fix |\n",
+                    "| [AUD-001](audit_adhoc_cards.md#aud-001) | low | open | "
+                    "2026-08-30 | 2026-09-30 | owner | proof | fix |\n",
                     "",
                 ),
                 encoding="utf-8",
             )
-            (audit_dir / "audit_card_archive_2026_08_30.md").write_text(
+            (audit_dir / "audit_adhoc_cards.md").write_text(
                 self.ARCHIVE_HEADER
                 + '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
                 + "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
@@ -853,6 +855,96 @@ class AuditRegisterCardFormatTests(unittest.TestCase):
 
         self.assertFalse(result.ok)
         self.assertTrue(any("отсутствует в реестре" in error for error in result.errors))
+
+    def test_bare_register_id_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n",
+            )
+            register = root / "work/audit/audit_register.md"
+            register.write_text(
+                register.read_text(encoding="utf-8").replace(
+                    "[AUD-001](audit_adhoc_cards.md#aud-001)", "AUD-001"
+                ),
+                encoding="utf-8",
+            )
+
+            result = check_audit_register_cards(root)
+
+        self.assertTrue(any("ID в реестре должен быть ссылкой" in error for error in result.errors))
+
+    def test_wrong_register_id_target_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n",
+            )
+            register = root / "work/audit/audit_register.md"
+            register.write_text(
+                register.read_text(encoding="utf-8").replace(
+                    "audit_adhoc_cards.md#aud-001", "audit_baseline_2026_08_30.md#aud-001"
+                ),
+                encoding="utf-8",
+            )
+
+            result = check_audit_register_cards(root)
+
+        self.assertTrue(any("ожидалась карточка" in error for error in result.errors))
+
+    def test_card_link_in_evidence_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n",
+            )
+            register = root / "work/audit/audit_register.md"
+            register.write_text(
+                register.read_text(encoding="utf-8").replace(
+                    "| proof |", "| [card](audit_adhoc_cards.md#aud-001) |"
+                ),
+                encoding="utf-8",
+            )
+
+            result = check_audit_register_cards(root)
+
+        self.assertTrue(any("Evidence не должен" in error for error in result.errors))
+
+    def test_compatibility_index_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                '<a id="aud-001"></a>\n### AUD-001 — title\n\n'
+                "- **Severity/Confidence/Evidence state:** low / high / CONFIRMED\n"
+                "- **Baseline:** pre-existing\n"
+                "- **Файл:** x.py\n"
+                "- **Наблюдаемое поведение:** что-то.\n",
+            )
+            register = root / "work/audit/audit_register.md"
+            register.write_text(
+                register.read_text(encoding="utf-8") + "\n## 4. Индекс совместимости\n",
+                encoding="utf-8",
+            )
+
+            result = check_audit_register_cards(root)
+
+        self.assertTrue(any("индекс совместимости запрещён" in error for error in result.errors))
 
 
 class ArchitectureDiagramCheckTests(unittest.TestCase):
