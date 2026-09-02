@@ -194,6 +194,98 @@ class DiagramLintTests(unittest.TestCase):
             result = diagram_lint.lint_file(svg, root)
         self.assertEqual(result.errors, [])
 
+    def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" '
+            'viewBox="0 0 10 10" role="img" aria-labelledby="title desc">\n'
+            '  <title id="title">Title</title>\n'
+            '  <desc id="desc">Desc</desc>\n'
+            f"  <defs>{defs}<style>{style}</style></defs>\n"
+            f"{body}\n"
+            "</svg>\n"
+        )
+
+    def test_check_dead_definitions_reports_unused_class_and_marker(self) -> None:
+        """Раздел 15 стандарта: мёртвое определение — ошибка, а не косметика.
+
+        Именно этот дрейф накопился в эталонной схеме незамеченным: неиспользуемый
+        класс и маркер ничего не ломают визуально, поэтому без проверки их
+        обнаружить нечем.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._dead_definition_svg(
+                    style=".used { fill: #000; } .orphan { fill: #111; }",
+                    defs='<marker id="arrow-live"></marker><marker id="arrow-dead"></marker>',
+                    body='  <g class="used" marker-end="url(#arrow-live)"></g>',
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any(
+                ".orphan" in error and "не используются CSS-классы" in error
+                for error in result.errors
+            ),
+            result.errors,
+        )
+        self.assertTrue(
+            any(
+                "#arrow-dead" in error and "не используются маркеры" in error
+                for error in result.errors
+            ),
+            result.errors,
+        )
+        # Живые определения не должны попадать в отчёт.
+        self.assertFalse(any(".used" in error for error in result.errors), result.errors)
+        self.assertFalse(any("#arrow-live" in error for error in result.errors), result.errors)
+
+    def test_check_dead_definitions_reports_undeclared_class_and_missing_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._dead_definition_svg(
+                    style=".used { fill: #000; }",
+                    body='  <g class="used ghost" marker-end="url(#nowhere)"></g>',
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any(".ghost" in error and "необъявленные" in error for error in result.errors),
+            result.errors,
+        )
+        self.assertTrue(
+            any("#nowhere" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_check_dead_definitions_accepts_a_fully_used_stylesheet(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            svg = root / "diagram.svg"
+            svg.write_text(
+                self._dead_definition_svg(
+                    style=".a { fill: #000; } .b { marker-end: url(#arrow); }",
+                    defs='<marker id="arrow"></marker>',
+                    body='  <g class="a"></g>\n  <g class="b"></g>',
+                ),
+                encoding="utf-8",
+            )
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertEqual(
+            [error for error in result.errors if "класс" in error or "маркер" in error], []
+        )
+
     def test_default_targets_empty_without_artefacts_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

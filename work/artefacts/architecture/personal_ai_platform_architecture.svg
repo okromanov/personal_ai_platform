@@ -48,7 +48,6 @@
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
     <marker id="arrow-control" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#A1463F"/></marker>
     <marker id="arrow-support" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#7D8895"/></marker>
-    <marker id="arrow-infra" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#D6DEE7"/></marker>
     <style>
       text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
       .title { font-size: 34px; font-weight: 600; }
@@ -62,7 +61,6 @@
       .component-text { font-size: 13px; font-weight: 400; fill: #53606E; }
       .small-title { font-size: 14px; font-weight: 600; }
       .small-text { font-size: 12px; font-weight: 400; fill: #5E6875; }
-      .micro-text { font-size: 10.5px; font-weight: 400; fill: #5E6875; }
       .implementation-sub-text { font-size: 9.5px; font-weight: 400; fill: #5E6875; }
       .flow-text { font-size: 11px; font-weight: 600; fill: #315C88; }
       .control-flow-text { font-size: 11px; font-weight: 600; fill: #A1463F; }
@@ -93,7 +91,6 @@
       .implementation-pill { fill: #E8EDF2; stroke: #7D8895; stroke-width: 1.1; }
       .implementation-sub { fill: #FFFFFF; stroke: #C3CCD5; stroke-width: 0.8; }
       .implementation-link { fill: none; stroke: #7D8895; stroke-width: 1; stroke-dasharray: 3 3; stroke-linecap: round; marker-end: url(#arrow-support); }
-      .detail-panel { fill: #FAFBFC; stroke: #D7DCE2; stroke-width: 1; }
       .flow-label { fill: #FFFFFF; stroke: #D9E1E8; stroke-width: 0.9; }
       .flow-label-blue { fill: #F3F7FB; stroke: #315C88; stroke-width: 0.9; }
       .flow-label-red { fill: #FFF6F5; stroke: #A1463F; stroke-width: 0.9; }

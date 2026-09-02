@@ -2,7 +2,7 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 2.5
+version: 2.6
 updated: 2026-09-02
 depends_on: []
 ---
@@ -497,7 +497,7 @@ depends_on: []
 
 - **Severity/Confidence/Evidence state:** high / high / CONFIRMED
 - **Baseline:** introduced-by-change
-- **Файл:** [`diagram_lint.py:171`](../../operations/scripts/documents/diagram_lint.py)
+- **Файл:** [`diagram_lint.py:177`](../../operations/scripts/documents/diagram_lint.py)
 - **Ожидаемый контракт:** [`AGENTS.md`](../../AGENTS.md) §3 — слияние запрещено, пока общий gate не подтверждён для точного SHA; `run_suite.py full` завершается с exit 0 на допущенных к слиянию коммитах.
 - **Наблюдаемое поведение:** `run_suite.py full` завершается с exit 1 на шаге «Security audit (Bandit)». `_check_structure()` вызывает `xml.etree.ElementTree.fromstring()`; bandit 1.7.5 выдаёт B314 severity MEDIUM, а шаг запускается с `--severity-level medium`. Воспроизведено дважды, ровно один result. Остальные 14 шагов при отдельном запуске проходят. Файл добавлен 2026-08-31 коммитом `957a434` — после предыдущего аудита; с тех пор в `main` приняты PR #94 и #95. `# nosec` в репозитории отсутствует, `defusedxml` не объявлен прямой зависимостью.
 - **Воздействие и достижимость:** текущий SHA по собственному правилу репозитория не был допустим к слиянию. Падение детерминированное. Эксплуатируемость самого B314 низкая (разбираются схемы из репозитория) — severity определяется нарушением обязательного gate, а не XML-риском.
