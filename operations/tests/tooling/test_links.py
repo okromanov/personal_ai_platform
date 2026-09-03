@@ -17,6 +17,16 @@ from operations.scripts.documents.links import (
 
 
 class LinkTests(unittest.TestCase):
+    def test_immutable_audit_baseline_is_not_rewritten_or_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            audit = root / "work/audit"
+            audit.mkdir(parents=True)
+            (audit / "audit_baseline_2026_08_30.md").write_text(
+                "Historical reference: `missing.md`.\n", encoding="utf-8"
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
     def test_rejects_unlinked_existing_markdown_reference(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

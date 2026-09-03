@@ -131,6 +131,60 @@ class CheckerNegativePathTests(unittest.TestCase):
         self.assertIn("POSIX-команда", joined)
         self.assertIn("Windows-команда", joined)
 
+    def test_instruction_consistency_covers_inactive_playbook_and_registry_drift(self) -> None:
+        metadata = {
+            "id": "guide",
+            "type": "guide",
+            "version": "1.0",
+            "updated": "2026-09-03",
+            "document_state": "current",
+            "applicability": "normative",
+        }
+        documents = [
+            (
+                "operations/inactive.md",
+                MarkdownDocument(
+                    Path("inactive.md"),
+                    dict(metadata, id="inactive", applicability="proposed"),
+                    "AskUserQuestion",
+                    "Inactive",
+                ),
+            ),
+            (
+                "operations/quality/playbooks/tool.md",
+                MarkdownDocument(Path("tool.md"), dict(metadata, id="tool"), "Run Pylint.", "Tool"),
+            ),
+            (
+                "operations/quality/playbooks/readme.md",
+                MarkdownDocument(
+                    Path("readme.md"),
+                    dict(metadata, id="readme"),
+                    "**Version:** 1.0",
+                    "Readme",
+                ),
+            ),
+        ]
+
+        def fake_read(path: Path) -> str:
+            if path.name == "non_markdown_index.py":
+                return "проверяется и еженедельно"
+            if path.name == "record_quality_suite.py":
+                return '"command": ["python",'
+            return '{"command": "python3 -m operations.tool"}'
+
+        with (
+            patch("operations.scripts.documents.check._primary_documents", return_value=documents),
+            patch("operations.scripts.documents.check.read_text", side_effect=fake_read),
+        ):
+            result = check_instruction_consistency(Path("."))
+        joined = "\n".join(result.errors)
+        self.assertNotIn("inactive.md", joined)
+        self.assertIn("canonical gate", joined)
+        self.assertIn("front matter", joined)
+        self.assertIn("weekly workflow", joined)
+        self.assertIn("canonical launcher", joined)
+        self.assertIn("quality_registry.json", joined)
+
     def test_readability_and_discoverability_only_apply_to_active_instructions(self) -> None:
         metadata = {
             "id": "hidden_guide",
@@ -165,6 +219,80 @@ class CheckerNegativePathTests(unittest.TestCase):
         ):
             self.assertEqual(check_document_readability(Path(".")).warnings, [])
             self.assertEqual(check_document_discoverability(Path(".")).errors, [])
+
+    def test_readability_skips_exclusions_fences_and_tables(self) -> None:
+        metadata = {
+            "id": "guide",
+            "type": "guide",
+            "version": "1.0",
+            "updated": "2026-09-03",
+            "document_state": "current",
+            "applicability": "normative",
+        }
+        documents = [
+            (
+                "work/tests/test_999.md",
+                MarkdownDocument(Path("test_999.md"), metadata, "x" * 601, "Excluded"),
+            ),
+            (
+                "operations/guide.md",
+                MarkdownDocument(
+                    Path("guide.md"),
+                    metadata,
+                    "```text\n" + "x" * 601 + "\n```\n| " + "x" * 601,
+                    "Guide",
+                ),
+            ),
+        ]
+        with patch("operations.scripts.documents.check._primary_documents", return_value=documents):
+            self.assertEqual(check_document_readability(Path(".")).warnings, [])
+
+    def test_discoverability_counts_links_metadata_and_skips_exempt_documents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "operations").mkdir()
+            metadata = {
+                "type": "guide",
+                "version": "1.0",
+                "updated": "2026-09-03",
+                "document_state": "current",
+                "applicability": "normative",
+            }
+            documents = [
+                (
+                    "operations/a.md",
+                    MarkdownDocument(
+                        root / "operations/a.md",
+                        dict(metadata, id="a", depends_on=["c"]),
+                        "[B](b.md) [Web](https://example.com) [Outside](../../outside.md)",
+                        "A",
+                    ),
+                ),
+                (
+                    "operations/b.md",
+                    MarkdownDocument(root / "operations/b.md", dict(metadata, id="b"), "", "B"),
+                ),
+                (
+                    "operations/c.md",
+                    MarkdownDocument(root / "operations/c.md", dict(metadata, id="c"), "", "C"),
+                ),
+                (
+                    "work/tasks/task_999.md",
+                    MarkdownDocument(
+                        root / "work/tasks/task_999.md", dict(metadata, id="task"), "", "Task"
+                    ),
+                ),
+            ]
+            with (
+                patch(
+                    "operations.scripts.documents.check._primary_documents", return_value=documents
+                ),
+                patch(
+                    "operations.scripts.documents.check.read_text", return_value="operations/a.md"
+                ),
+            ):
+                result = check_document_discoverability(root)
+        self.assertEqual(result.errors, [])
 
     def test_traceability_rejects_gaps_unknown_edges_and_incomplete_records(self) -> None:
         records: dict[str, dict[str, Any]] = {

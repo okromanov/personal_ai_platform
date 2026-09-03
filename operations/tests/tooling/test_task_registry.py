@@ -83,6 +83,20 @@ class TaskRegistryTests(unittest.TestCase):
             self.assertIn("SYS_001", index)
             self.assertIn("TEST_001", index)
 
+    def test_next_actor_must_come_from_central_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "work/tasks").mkdir(parents=True)
+            (root / "work/tests").mkdir(parents=True)
+            self._write_task(root, "TASK_001", "planned")
+            task = root / "work/tasks/task_001_sample.md"
+            task.write_text(
+                task.read_text(encoding="utf-8").replace("next_actor: agent", "next_actor: robot"),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "next_actor должен быть одним из"):
+                collect_tasks(root)
+
     def test_duplicate_task_id_is_rejected_before_rendering(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
