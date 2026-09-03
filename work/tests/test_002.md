@@ -5,8 +5,8 @@ title: Проверка качества, доказательств и авто
 spec_state: current
 execution: automated
 automated_evidence: unit_tests
-version: 1.2
-updated: 2026-08-23
+version: 1.3
+updated: 2026-09-03
 accepts:
   - m01
 verifies:
@@ -31,7 +31,7 @@ verifies:
 ## 3. Автоматический запуск
 
 ```powershell
-py -m unittest discover -s operations\tests -p "test_*.py"
+py -3.12 -m unittest discover -s operations\tests -p "test_*.py"
 ```
 
 ## 4. Критерий успеха

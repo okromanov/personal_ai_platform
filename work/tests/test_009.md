@@ -5,8 +5,8 @@ title: "ARC_CMP_003 — Оркестрация и RuntimePort: обычный ц
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.2
-updated: 2026-08-25
+version: 1.3
+updated: 2026-09-03
 accepts:
   - m02
 traces_to:
@@ -43,13 +43,13 @@ depends_on: []
 Часть канонического прогона юнит-тестов, выполняется в `Quality skills` на каждом push/PR:
 
 ```bash
-python3 operations/scripts/quality/run_unittests.py
+python3.12 operations/scripts/quality/run_unittests.py
 ```
 
 Отдельный прогон только этого компонента:
 
 ```bash
-python3 -m unittest operations.tests.product.test_orchestration -v
+python3.12 -m unittest operations.tests.product.test_orchestration -v
 ```
 
 ## 4. Критерий успеха
@@ -69,71 +69,3 @@ python3 -m unittest operations.tests.product.test_orchestration -v
 ## 5. Состав доказательства
 
 `automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 10 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
-
-## 6. Реализованные компоненты
-
-### Компонент: Оркестрация и RuntimePort
-
-**Стабильный контракт**: `RuntimePort` (абстрактный класс)
-
-- `async execute(message: TaskMessage) → RuntimeResult`: выполнить задачу через подключённую среду
-
-**Данные**: `RuntimeResult` (`output`, `succeeded`, `error_message`), исключение `RuntimePortError` (среда недоступна)
-
-**Реализация**: `Orchestrator`
-
-- `async handle(message, *, subject_id, channel) → TaskMessage`: полный обычный цикл задачи
-- Обращается к `OwnerControl` за каждой проверкой личности и выключателя — не хранит правила владельца сам
-- Не содержит специфики канала: `subject_id` передаётся вызывающей стороной, а не читается из внутреннего формата метаданных конкретного канала
-
-**Тестовый переходный слой**: `StubRuntimePort` — детерминированная реализация `RuntimePort` для проверки цикла до выбора реальной среды агента (сравнение кандидатов остаётся `proposed` в [`ADR_006`](../../adr/adr_006_agent_environment_framework.md))
-
-## 7. Структура кода
-
-```
-src/orchestration/
-├── __init__.py — публичный API
-├── runtime_port.py — RuntimePort, RuntimePortError, RuntimeResult
-├── stub_runtime.py — StubRuntimePort (тестовый переходный слой)
-└── orchestrator.py — Orchestrator реализация
-
-operations/tests/product/
-└── test_orchestration.py — юнит-тесты, часть канонического run_unittests.py (CI/CD)
-```
-
-## 8. Соответствие требованиям
-
-| Требование | Статус | Примечание |
-|---|---|---|
-| [`SYS_001`](../../specifications/system_specification.md#sys_001): Единый жизненный цикл задачи | ✅ | `Orchestrator` доводит задачу до completed/failed/cancelled, без зависаний |
-| [`SYS_036`](../../specifications/system_specification.md#sys_036): Единый жизненный цикл при смене канала | ✅ | Цикл не зависит от конкретного канала — `subject_id` и `channel` передаются параметрами |
-| [`SYS_003`](../../specifications/system_specification.md#sys_003): Переносимая граница среды агента | ✅ | Проверка проведена с двумя независимыми реализациями `RuntimePort` |
-| [`BR_033`](../../specifications/business_requirements.md#br_033): Независимость от поставщика и агентского фреймворка | ✅ | `RuntimePort` не импортирует и не предполагает конкретный SDK |
-
-## 9. Доказательства
-
-- **Исходный код**: [`src/orchestration/`](../../src/orchestration/) — стабильный контракт, тестовый переходный слой и оркестратор
-- **Тесты**: 10 юнит-тестов в [`operations/tests/product/test_orchestration.py`](../../operations/tests/product/test_orchestration.py), часть обязательного gate `Quality skills`
-- **Отсутствие регрессий**: Запуск `check.py --all` прошёл успешно
-
-## 10. Готово когда
-
-- ✅ 10 тестов пройдено
-- ✅ Контракт `RuntimePort` определён и используется
-- ✅ `Orchestrator` реализован и обращается к `OwnerControl` на каждом запуске
-- ✅ Смена реализации `RuntimePort` подтверждена тестом без изменения контракта выше границы
-- ✅ Структура готова для подключения [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) (Шлюз моделей) внутри тестового переходного слоя или реальной среды агента
-
-## 11. Что будет дальше
-
-1. [`TASK_004`](../tasks/task_004_arc_004.md): Реализация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) (Шлюз моделей) — нормализованный доступ к LLM, который `RuntimePort` сможет вызывать вместо эхо-ответа
-2. [`TASK_005`](../tasks/task_005_arc_005.md): Реализация [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005) (Шлюз инструментов)
-3. [`TASK_006`](../tasks/task_006_arc_007.md): Реализация [`ARC_CMP_007`](../../specifications/architecture_baseline.md#arc_cmp_007) (Состояние задач) — контрольные точки и возобновление после сбоя поверх цикла, построенного здесь
-4. Сравнение кандидатов среды агента для [`ADR_006`](../../adr/adr_006_agent_environment_framework.md) остаётся отдельной, ещё не проведённой работой подэтапа 1 [`m02`](../../milestones.md#m02)
-
-## 12. Примечания для разработчика
-
-- `StubRuntimePort` — тестовый переходный слой по [`ADR_002`](../../adr/adr_002_core_runtime_boundary.md)§6, а не заготовка реальной интеграции: он не обращается к модели и не содержит специфики какого-либо SDK.
-- Реальное подключение Telegram (`TelegramChannel` → `Orchestrator`) остаётся сквозной интеграцией подэтапа 5 [`m02`](../../milestones.md#m02), а не частью этой TASK — как и [`TASK_001`](../tasks/task_001_arc_001.md)/[`TASK_002`](../tasks/task_002_arc_002.md), эта TASK строит компонент и его контракт, а не боевую проводку.
-
-Действия владельца не требуются: тест полностью автоматизирован и не требует ручного вмешательства.

@@ -2,8 +2,9 @@
 id: operations_procedure_map
 type: operations
 document_state: current
-version: 2.5
-updated: 2026-09-02
+applicability: normative
+version: 2.6
+updated: 2026-09-03
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -11,186 +12,88 @@ depends_on:
 
 # Карта операционных процедур
 
-## 1. Назначение
+## 1. Точка входа
 
-Документ является навигатором по процедурам операций. Он отвечает на вопрос: **какую процедуру выполнить в данной ситуации и в каком порядке**.
+Единственный маршрут начала работы:
 
-Каждая процедура решает одну определённую задачу. Несколько процедур объединяются в сценарии для достижения большей цели.
+1. открыть [`project_status.md`](../project_status.md);
+2. перейти в указанную TASK или этапный рубеж;
+3. выбрать процедуру из таблицы ниже;
+4. завершить изменение через PR и подтверждённый CI по [`change_process.md`](change_process.md).
 
-## 2. Процедуры по назначению
+Корневой `README` не используется. Pre-commit hook обязателен; инструкции установки находятся в [`setup_precommit.md`](setup_precommit.md).
 
-| Процедура | Назначение | Входные условия | Выходной результат |
-|---|---|---|---|
-| [`change_process.md`](change_process.md) | Как вносить изменения в репозиторий | Владелец/агент готов к изменению | Коммит в ветку или PR |
-| [`semantic_review.md`](semantic_review.md) | Проверить документы на противоречия | Редакция опубликована на SHA | Отчёт о найденных проблемах |
-| [`acceptance.md`](acceptance.md) | Принять этап и перейти в следующее состояние | Все доказательства собраны | Этап переводится в `completed` |
-| [`adr_lifecycle.md`](lifecycle/adr_lifecycle.md) | Как создаются, обновляются и архивируются ADR | Нужно принять или изменить архитектурное решение | ADR в состоянии `proposed`/`accepted`/`superseded` |
-| [`skill_lifecycle.md`](lifecycle/skill_lifecycle.md) | Как скилл проходит проверку, отработку и обкатку прежде чем попасть в закрытый внутренний хаб | Есть кандидат-скилл (внутренний или внешний), закрывающий Capability | Скилл в состоянии `candidate`/`in_review`/`hardening`/`probation`/`accepted`/`rejected`/`retired` |
-| [`tool_lifecycle.md`](lifecycle/tool_lifecycle.md) | Как новый инструмент проходит проверку, отработку и обкатку прежде чем быть зарегистрированным в `ARC_CMP_005` | Есть кандидат-инструмент (внутренний или внешний) с полномочиями на ресурсы | Инструмент в состоянии `candidate`/`in_review`/`hardening`/`probation`/`accepted`/`rejected`/`retired` |
-| [`state_machines.md`](lifecycle/state_machines.md) | Диаграммы допустимых переходов состояний (TASK, ADR, milestone) | Непонятен допустимый следующий `work_state`/`decision_state` | Подтверждённый допустимый переход |
-| [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md) | Общие для любой SVG-схемы правила: MECE, геометрия, токены, типографика, карточки, связи, легенда, метаданные, шаблонные скелеты; исполняемая проверка — `diagram_lint.py` | Нужно подготовить новую или обновить существующую SVG-схему любого профиля | Схема, прошедшая чек-лист раздела 17 и `diagram_lint.py` без ошибок |
-| [`architecture_diagram_style_guide.md`](architecture/architecture_diagram_style_guide.md) | Специфика архитектурных SVG-схем поверх [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md): профиль, метаданные, размещение в `work/artefacts/architecture/` | Нужно подготовить новую или обновить существующую архитектурную схему | Схема, прошедшая оба чек-листа (раздел 17 основы + раздел 5 этого гайда) и `diagram_lint.py` без ошибок |
-| [`process_diagram_style_guide.md`](architecture/process_diagram_style_guide.md) | Специфика процессных SVG-схем и PPTX-визуалов поверх [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md): охват (governed/ad-hoc), процессная семантика, ориентация, профиль PPTX, размещение в `work/artefacts/process/` | Нужно подготовить новую или обновить существующую процессную схему либо SVG-визуал для PPTX | Схема, прошедшая оба чек-листа (раздел 17 основы + раздел 7 этого гайда) и, для управляемого варианта, `diagram_lint.py` без ошибок |
-| [`agent_roles_and_delegation.md`](architecture/agent_roles_and_delegation.md) | Решения владельца о ролях агентов, развитии роли, субагентах и границах делегирования; заранее подготовленный дизайн без `BR_*` | Оценивается среда выполнения агента или планируется многоагентное направление на [`m07`](../milestones.md#m07) | Понимание, какие свойства среды и какие открытые вопросы влияют на решение |
-| [`family_multi_user_candidate.md`](architecture/family_multi_user_candidate.md) | Решения владельца о контроле члена семьи над своей памятью, возрастных уровнях доступа, жизненном цикле идентичности и учёте стоимости по человеку; заранее подготовленный дизайн без `BR_*` | Планируется семейный многопользовательский режим ([`BR_025`](../specifications/business_requirements.md#br_025)) на [`m07`](../milestones.md#m07) | Понимание решений владельца и открытых вопросов до формулирования требований |
-| [`threat_review_triggers.md`](policy/threat_review_triggers.md) | Какое событие означает, что угроза из модели угроз реализовалась, и что делать | Аномалия, ошибка или инцидент, потенциально связанный с [`threat_model.md`](../specifications/threat_model.md) | Решение: инцидент подтверждён/отклонён, процедура реагирования |
-| [`license_policy.md`](policy/license_policy.md) | Почему в репозитории нет корневого `LICENSE` и что это означает | Вопрос о лицензировании/распространении кода | Понимание текущего закрытого режима |
-| [`procedures/file_update_dependencies.md`](procedures/file_update_dependencies.md) | Какие производные файлы нужно обновить при правке конкретного первичного файла | Правка файла с известными зависимыми генераторами/документами | Полный список файлов для синхронной правки |
-| [`procedures/recover_stale_sensitive_action_lock.md`](procedures/recover_stale_sensitive_action_lock.md) | Как безопасно снять зависшую блокировку sensitive-action после краха процесса | `authorize_sensitive_action` стабильно возвращает `OwnerControlStateError` о блокировке | Блокировка снята после подтверждения, что держатель мёртв |
-| [`examples/sample_task_lifecycle.md`](examples/sample_task_lifecycle.md) | Полный пример карточки TASK от начала до завершения | Нужен образец при создании новой TASK | Понимание структуры и связей карточки TASK |
+## 2. Карта процедур
 
-## 3. Сценарии и порядок выполнения
+| Ситуация | Источник | Результат |
+|---|---|---|
+| Любое изменение и публикация | [`change_process.md`](change_process.md) | Проверенный PR без прямой записи в `main` |
+| Решение или замена ADR | [`adr_lifecycle.md`](lifecycle/adr_lifecycle.md) | Явное решение владельца и трассировка |
+| Переход состояния | [`state_machines.md`](lifecycle/state_machines.md) | Допустимый переход по машинному контракту |
+| Проверка смысла документов | [`semantic_review.md`](semantic_review.md) | Список противоречий или подтверждение |
+| Принятие этапа | [`acceptance.md`](acceptance.md) | SHA-bound решение владельца |
+| Зависимые файлы при правке | [`file_update_dependencies.md`](procedures/file_update_dependencies.md) | Полный связный diff |
+| Зависшая sensitive-action lock | [`recover_stale_sensitive_action_lock.md`](procedures/recover_stale_sensitive_action_lock.md) | Безопасное ручное восстановление |
+| Полный quality gate | [`readme.md`](quality/playbooks/readme.md) | Выбран канонический профиль и evidence |
+| Детальные правила документации | [`documentation_rules_detailed.md`](quality/playbooks/documentation_rules_detailed.md) | Однозначная структура и ссылки |
+| Диагностика health report | [`module_guide.md`](scripts/health_check/module_guide.md) | Воспроизводимый health snapshot |
+| Полный аудит репозитория | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) | Report, findings и self-check |
+| Архитектурная SVG-схема | [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md) → [`architecture_diagram_style_guide.md`](architecture/architecture_diagram_style_guide.md) | Проверенная схема |
+| Процессная SVG/PPTX-схема | [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md) → [`process_diagram_style_guide.md`](architecture/process_diagram_style_guide.md) | Проверенная схема |
+| Threat review | [`threat_review_triggers.md`](policy/threat_review_triggers.md) | Решение об инциденте и дальнейшее действие |
+| Лицензирование | [`license_policy.md`](policy/license_policy.md) | Понимание режима распространения |
+| Пример TASK | [`sample_task_lifecycle.md`](examples/sample_task_lifecycle.md) | Справочный пример без копирования истории |
+| Будущий Skill | [`skill_lifecycle.md`](lifecycle/skill_lifecycle.md) | Неактивное предложение до BR/TASK |
+| Будущий Tool | [`tool_lifecycle.md`](lifecycle/tool_lifecycle.md) | Неактивное предложение до BR/TASK |
+| Будущие роли агентов | [`agent_roles_and_delegation.md`](architecture/agent_roles_and_delegation.md) | Неактивное предложение |
+| Семейный режим | [`family_multi_user_candidate.md`](architecture/family_multi_user_candidate.md) | Неактивное предложение |
 
-### Сценарий A: Разработка нового этапа
+## 3. Типовые сценарии
 
-```
-1. Начало этапа
-   ├─ Прочитать milestones.md для текущего этапа
-   ├─ Собрать состав TASK для этапа
-   └─ Создать карточки work/tasks/task_XXXX.md
+### Разработка по TASK
 
-2. Цикл разработки (повторяется)
-   ├─ Открыть TASK и прочитать allowed_paths
-   ├─ Внести изменения (код, документы, тесты)
-   ├─ Выполнить change_process.md пункты 3–10
-   │  (генерация, проверки, коммит, PR)
-   ├─ Дождаться зелёного CI
-   └─ Обновить статус TASK
+1. Проверить `allowed_paths`, зависимости и критерий результата.
+2. Изменить реализацию, TEST и необходимые первичные документы.
+3. Запустить `python3.12 operations/scripts/quality/run_suite.py full`.
+4. Запустить обязательный pre-commit, открыть PR, дождаться зелёного CI.
+5. Обновить TASK только фактическим результатом и evidence.
 
-3. Завершение этапа
-   ├─ Убедиться, что все TEST прошли
-   ├─ Проверить соответствие доказательств
-   ├─ Провести semantic_review.md
-   └─ Выполнить acceptance.md
-```
+### Служебная правка
 
-### Сценарий B: Правка документов или автоматизации
+1. Не создавать TASK.
+2. Обновить версию и дату изменённых первичных документов.
+3. Выполнить полный gate и тот же PR-маршрут.
 
-```
-1. Определить тип правки
-   ├─ Если правка в authority_document (project_rules, AGENTS, change_process):
-   │  ├─ Обновить версию (minor: 1.0 → 1.1)
-   │  ├─ Обновить поле updated
-   │  └─ Выполнить change_process.md через PR (всегда PR для authority)
-   │
-   └─ Если правка в другом документе:
-      ├─ Проверить, есть ли связанные TASK
-      └─ Выполнить change_process.md пункты 3–10
+### Ошибка CI
 
-2. Локальная проверка
-   └─ Запустить operations/scripts/quality/run_suite.py full
+1. Привязать сбой к job, шагу и SHA.
+2. Воспроизвести тот же профиль локально, если среда доступна.
+3. Исправить причину или явно зафиксировать недоступность; не ослаблять проверку.
+4. Отправить новый коммит в тот же PR и дождаться результата.
 
-3. Опубликовать
-   ├─ Создать PR с описанием (если нужен)
-   └─ Дождаться CI и слияния
-```
+### Завершение этапа
 
-### Сценарий C: Обработка отказа CI
+1. Подтвердить все terminal-outcome TASK и TEST.
+2. Провести [`semantic_review.md`](semantic_review.md).
+3. Выполнить [`acceptance.md`](acceptance.md) только на проверенном SHA.
 
-```
-1. Определить тип ошибки
-   ├─ Структурная ошибка (check.py)?
-   │  └─ Запустить check.py и исправить
-   │
-   ├─ Ошибка юнит-теста?
-   │  ├─ Запустить локально: python3.12 -m unittest
-   │  └─ Исправить код или тест
-   │
-   └─ Ошибка семантики документов?
-      └─ Запустить semantic_review.md вручную
+## 4. Быстрый выбор
 
-2. Исправить
-   ├─ Внести правку
-   ├─ Запустить полный локальный прогон
-   └─ Пушить новый коммит в ту же ветку
-
-3. Убедиться, что CI зеленеет
-   └─ Слить PR после успеха
-```
-
-### Сценарий D: Прямая запись в main (редко, по приказу владельца)
-
-```
-Предусловие: владелец явно назвал TASK и состав файлов
-
-1. Локальная проверка
-   ├─ Запустить operations/scripts/quality/run_suite.py full
-   └─ Убедиться, что рабочая разница понятна
-
-2. Проверить удалённый main
-   └─ git fetch origin && git log -3 origin/main
-
-3. Пушить
-   ├─ git push origin HEAD:main (не --force!)
-   └─ Убедиться, что коммит прошёл
-
-4. Дождаться CI и проверить
-   └─ Если ошибка — следовать Сценарию C
-```
-
-
-## 4. Иерархия вызовов: когда вызывается какая процедура
-
-```
-Точка входа: project_status.md (действие владельца)
-       ↓
-ПРОДОЛЖАЙ m01 / ПРОДОЛЖАЙ TASK_XXX
-       ↓
-AGENTS.md раздел 2 (с чего начинать)
-       ↓
-Выполнить цикл работы:
-  ├─ change_process.md (как внести изменение)
-  │   ├─ generate.py (пересобрать производные)
-  │   └─ check.py (полная валидация)
-  │
-  ├─ semantic_review.md (если нужна смысловая проверка)
-  └─ acceptance.md (если завершается этап)
-```
-
-## 5. Когда NOT выполнять процедуру
-
-| Процедура | Когда НЕ нужна |
+| Нужно | Команда или маршрут |
 |---|---|
-| semantic_review.md | Для служебных правок и промежуточных коммитов внутри TASK |
-| acceptance.md | Если этап ещё не готов (не пройдены все доказательства) |
-| agent_decision_tree.md | Если решение ясно из change_process.md |
-| pre_commit_hook | Если разработчик предпочитает локальные проверки |
+| Проверить документацию | `python3.12 operations/scripts/documents/check.py --all` |
+| Пересобрать производные файлы | `python3.12 operations/scripts/documents/generate.py --all` |
+| Выполнить полный gate | `python3.12 operations/scripts/quality/run_suite.py full` |
+| Проверить только быстрые инварианты | `python3.12 operations/scripts/documents/check.py --fast` |
+| Добавить требование | requirement wizard → apply requirements → generate → full gate |
+| Принять этап | semantic review → acceptance → отдельный PR |
 
-## 6. Таблица быстрого выбора
+## 5. Частые ошибки
 
-Чтобы найти нужную процедуру: найти свою ситуацию в левой колонке, выполнить процедуры в правой:
-
-| Что я хочу сделать | Процедуры в порядке |
-|---|---|
-| Начать новую TASK | change_process.md § 2 (ветка) → change_process.md § 3–10 |
-| Заметил ошибку в документе | change_process.md § 3–10 |
-| Закончил работу по TASK | change_process.md § 9–10 → дождаться CI |
-| Готов принять этап | semantic_review.md → acceptance.md |
-| Планирую следующий инкремент | stage_planning_wizard.py (собрать план) → requirement_wizard.py (добавлять BR) |
-| Хочу добавить одно требование | requirement_wizard.py → apply_requirements.py → generate.py --all → check.py --all |
-| CI красный, не знаю почему | Проверить check.py вывод → исправить → change_process.md § 3–10 |
-| Хочу быстро проверить всё локально | operations/scripts/quality/run_suite.py full |
-| Нужно правку в authority document | change_process.md § 2 (обновить версию) → change_process.md § 3–10 (всегда PR) |
-
-## 7. Частые ошибки агента (проверить перед коммитом)
-
-Каждый пункт уже ловится `check.py --all` или `run_unittests.py`, но агенты регулярно
-наступают на них заново — стоят здесь явным списком, чтобы не тратить цикл на CI:
-
-- **README где угодно в репозитории запрещён** (любой регистр, любое расширение, любой
-  каталог) — см. [`AGENTS.md`](../AGENTS.md) §1. Онбординг для агента — этот документ, не README.
-- **`allowed_paths` в TASK** — только реальные файлы поставки: не каталог целиком без
-  необходимости, не тестовые артефакты (`operations/tests/product/*`), не заранее угаданное
-  имя. Имя файла TASK совпадает с его собственным путём в `allowed_paths`
-  (`work/tasks/task_NNN_xxx.md`), а не с придуманным вариантом.
-- **`updated:` во фронтматтере** обязан совпадать с датой фактического последнего изменения
-  файла по git-истории — иначе падает проверка честности метаданных.
-- **Не редактировать вручную** [`project_status.md`](../project_status.md): он регенерируется
-  `python operations/scripts/documents/generate.py --all` из зарегистрированного шаблона;
-  ручная правка разойдётся с renderer и провалит drift-check в CI. TASK, TEST, аудит и
-  итоговые отчёты создаются отдельными явными командами, а не общей регенерацией.
-- **Пути — только `lower_snake_case`** (кроме [`AGENTS.md`](../AGENTS.md) и dot-файлов).
-- **Ссылки на элементы трассируемости** — каждое упоминание `BR_XXX`/`SYS_XXX`/`ARC_CMP_XXX`/
-  `TASK_XXX`/`TEST_XXX`/`mXX` и т. д. в тексте TASK/TEST оформляется код-спаном со ссылкой на исходный документ, а не голым
-  текстом. Правило — в [`operations/templates/task_template.md`](templates/task_template.md) и
-  [`operations/templates/test_template.md`](templates/test_template.md).
+- Редактировать [`project_status.md`](../project_status.md) вручную вместо генерации.
+- Записывать напрямую в `main` или считать локальный успех серверным evidence.
+- Копировать общие правила в TASK/TEST вместо ссылки на источник.
+- Добавлять служебные, audit или governance-файлы в продуктовую TASK.
+- Менять защищённую структуру без разрешённой миграции checker/tests и экземпляров.
+- Использовать неканонический Python launcher вместо значения из [`document_contracts.json`](document_contracts.json).
+- Оставлять существующий документ недоступным из этой карты или другого действующего источника.

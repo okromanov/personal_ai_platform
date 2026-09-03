@@ -384,8 +384,8 @@ def apply_wizard_result(root: Path, wizard_result: dict) -> list[str]:
     print("\n" + "=" * 60)
     print("🎯 СЛЕДУЮЩИЕ ШАГИ:")
     print("=" * 60)
-    print("1. Запустить: python operations/scripts/documents/generate.py --all")
-    print("2. Проверить: python operations/scripts/documents/check.py --all")
+    print("1. Запустить: python3.12 operations/scripts/documents/generate.py --all")
+    print("2. Проверить: python3.12 operations/scripts/documents/check.py --all")
     print("3. Откомитить и пушить на GitHub")
     print("=" * 60)
     return [*spec_changes, *test_task_changes, "milestones.md"]
@@ -397,4 +397,4 @@ if __name__ == "__main__":
     # Здесь должен быть результат от wizard
     # В реальном использовании это будет вызываться из AGENTS.md
     print("❌ Используйте этот скрипт через requirement_wizard.py")
-    print("   Запустите: python operations/scripts/requirements/requirement_wizard.py")
+    print("   Запустите: python3.12 operations/scripts/requirements/requirement_wizard.py")

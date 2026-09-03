@@ -12,6 +12,7 @@ from operations.scripts.common.status_types import (
     TasksReport,
     TestRef,
 )
+from operations.scripts.documents.contracts import NEXT_ACTORS
 from operations.scripts.documents.metadata import (
     load_document,
     metadata_list,
@@ -161,6 +162,10 @@ def collect_tasks(root: Path) -> TasksReport:
         require_unique_identifier(task_paths, task_id, relative, label="TASK ID")
         if "next_actor" not in doc.metadata or "owner_action" not in doc.metadata:
             raise ValueError(f"{relative}: TASK требует next_actor и owner_action")
+        raw_actor = doc.metadata.get("next_actor")
+        next_actor = "none" if raw_actor is None else str(raw_actor).strip().lower()
+        if next_actor not in NEXT_ACTORS:
+            raise ValueError(f"{relative}: next_actor должен быть одним из {sorted(NEXT_ACTORS)}")
         if "owner_action_required" in doc.metadata:
             raise ValueError(
                 f"{relative}: owner_action_required устарело; используйте owner_action"
@@ -199,7 +204,7 @@ def collect_tasks(root: Path) -> TasksReport:
                 ],
                 "blocker": blocker,
                 "tests": tests.get(task_id, []),
-                "next_actor": str(doc.metadata.get("next_actor", "none")).strip().lower(),
+                "next_actor": next_actor,
                 "owner_action": owner_action,
                 "owner_followups": owner_followups,
                 "checklist": checklist,

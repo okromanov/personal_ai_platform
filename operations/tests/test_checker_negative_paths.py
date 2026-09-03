@@ -17,7 +17,10 @@ from operations.scripts.documents.check import (
     check_authority_graph,
     check_automation_policy,
     check_business_requirements_coverage,
+    check_document_discoverability,
     check_document_policy,
+    check_document_readability,
+    check_instruction_consistency,
     check_markdown_section_order,
     check_metadata,
     check_secrets,
@@ -50,6 +53,118 @@ class CheckerNegativePathTests(unittest.TestCase):
             result = check_metadata(Path("."))
         self.assertIn("универсальное поле 'status'", "\n".join(result.errors))
         self.assertIn("Дублирующий document id", "\n".join(result.errors))
+
+    def test_metadata_rejects_invalid_applicability_and_active_superseded_doc(self) -> None:
+        documents = [
+            (
+                "one.md",
+                MarkdownDocument(
+                    Path("one.md"),
+                    {
+                        "id": "DOC_001",
+                        "type": "guide",
+                        "version": "1.0",
+                        "updated": "2026-09-03",
+                        "document_state": "superseded",
+                        "applicability": "normative",
+                    },
+                    "",
+                    "One",
+                ),
+            ),
+            (
+                "two.md",
+                MarkdownDocument(
+                    Path("two.md"),
+                    {
+                        "id": "DOC_002",
+                        "type": "guide",
+                        "version": "1.0",
+                        "updated": "2026-09-03",
+                        "document_state": "current",
+                        "applicability": "sometimes",
+                    },
+                    "",
+                    "Two",
+                ),
+            ),
+        ]
+        with (
+            patch("operations.scripts.documents.check._primary_documents", return_value=documents),
+            patch("operations.scripts.documents.check._known_reference_ids", return_value=set()),
+        ):
+            result = check_metadata(Path("."))
+        joined = "\n".join(result.errors)
+        self.assertIn("неизвестный applicability 'sometimes'", joined)
+        self.assertIn("superseded-документ должен иметь applicability=historical", joined)
+
+    def test_instruction_consistency_rejects_known_drift_and_launchers(self) -> None:
+        document = MarkdownDocument(
+            Path("guide.md"),
+            {
+                "id": "guide",
+                "type": "guide",
+                "version": "1.0",
+                "updated": "2026-09-03",
+                "document_state": "current",
+                "applicability": "normative",
+            },
+            "AskUserQuestion\npython3 -m operations.example\npy operations\\tool.py\n",
+            "Guide",
+        )
+
+        def fake_read(path: Path) -> str:
+            if path.name == "record_quality_suite.py":
+                return '"command": ["python3.12",'
+            return "{}"
+
+        with (
+            patch(
+                "operations.scripts.documents.check._primary_documents",
+                return_value=[("operations/guide.md", document)],
+            ),
+            patch("operations.scripts.documents.check.read_text", side_effect=fake_read),
+        ):
+            result = check_instruction_consistency(Path("."))
+        joined = "\n".join(result.errors)
+        self.assertIn("AskUserQuestion", joined)
+        self.assertIn("POSIX-команда", joined)
+        self.assertIn("Windows-команда", joined)
+
+    def test_readability_and_discoverability_only_apply_to_active_instructions(self) -> None:
+        metadata = {
+            "id": "hidden_guide",
+            "type": "guide",
+            "version": "1.0",
+            "updated": "2026-09-03",
+            "document_state": "current",
+            "applicability": "normative",
+        }
+        active = MarkdownDocument(Path("hidden.md"), metadata, "x" * 601, "Hidden")
+        with (
+            patch(
+                "operations.scripts.documents.check._primary_documents",
+                return_value=[("operations/hidden.md", active)],
+            ),
+            patch("operations.scripts.documents.check.read_text", return_value="{}"),
+        ):
+            readability = check_document_readability(Path("."))
+            discoverability = check_document_discoverability(Path("."))
+        self.assertTrue(readability.warnings)
+        self.assertIn("недоступен из навигации", "\n".join(discoverability.errors))
+
+        proposed = MarkdownDocument(
+            Path("hidden.md"), dict(metadata, applicability="proposed"), "x" * 601, "Hidden"
+        )
+        with (
+            patch(
+                "operations.scripts.documents.check._primary_documents",
+                return_value=[("operations/hidden.md", proposed)],
+            ),
+            patch("operations.scripts.documents.check.read_text", return_value="{}"),
+        ):
+            self.assertEqual(check_document_readability(Path(".")).warnings, [])
+            self.assertEqual(check_document_discoverability(Path(".")).errors, [])
 
     def test_traceability_rejects_gaps_unknown_edges_and_incomplete_records(self) -> None:
         records: dict[str, dict[str, Any]] = {
@@ -108,7 +223,7 @@ class CheckerNegativePathTests(unittest.TestCase):
             "id": "TASK_001",
             "path": "work/tasks/task_001.md",
             "body": "### Владельцу\n50%",
-            "next_actor": "agent",
+            "next_actor": "robot",
             "owner_action": "approve",
             "work_state": "completed",
             "checklist": [],
@@ -137,6 +252,7 @@ class CheckerNegativePathTests(unittest.TestCase):
         joined = "\n".join(result.errors)
         for fragment in (
             "owner_action задано",
+            "next_actor должен быть одним из",
             "дословно присутствовать",
             "должна иметь next_actor=none",
             "одного следующего исполнителя",
@@ -384,6 +500,7 @@ class CheckerNegativePathTests(unittest.TestCase):
             "неизвестный milestone",
         ):
             self.assertIn(fragment, joined)
+        self.assertIn("разделы TEST должны быть ровно", joined)
 
     def test_document_and_requirement_policies_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

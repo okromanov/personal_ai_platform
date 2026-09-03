@@ -5,8 +5,8 @@ title: Проверка модели документов и трассиров�
 spec_state: current
 execution: automated
 automated_evidence: project_checks
-version: 1.3
-updated: 2026-08-24
+version: 1.4
+updated: 2026-09-03
 accepts:
   - m01
 ---
@@ -29,8 +29,8 @@ accepts:
 ## 3. Автоматический запуск
 
 ```powershell
-py operations\scripts\documents\generate.py --all
-py operations\scripts\documents\check.py --all
+py -3.12 operations\scripts\documents\generate.py --all
+py -3.12 operations\scripts\documents\check.py --all
 ```
 
 ## 4. Критерий успеха

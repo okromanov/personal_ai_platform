@@ -5,7 +5,7 @@ Auto-increment file version when content changes.
 Triggered by pre-commit hook when file metadata (updated field) changes.
 Increments version: 1.0 → 1.1 → 1.2 → 2.0 → 2.1, etc.
 
-Usage: python3 operations/scripts/versioning/increment_file_version.py <file_path>
+Usage: python3.12 operations/scripts/versioning/increment_file_version.py <file_path>
 """
 
 import re

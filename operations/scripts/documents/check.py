@@ -21,6 +21,14 @@ from operations.scripts.common.project import (
     relative_posix,
     require_supported_python,
 )
+from operations.scripts.documents.contracts import (
+    APPLICABILITY_VALUES,
+    DEFAULT_APPLICABILITY,
+    NEXT_ACTORS,
+    POSIX_PYTHON,
+    TEST_EXECUTIONS,
+    WINDOWS_PYTHON,
+)
 from operations.scripts.documents.diagram_lint import default_targets, lint_file
 from operations.scripts.documents.index import is_primary_markdown
 from operations.scripts.documents.links import check_markdown_links
@@ -66,7 +74,6 @@ REFERENCE_KEYS = (
 )
 TEST_FILE_PATTERN = re.compile(r"^test_\d{3}\.md$")
 TEST_ID_PATTERN = re.compile(r"^TEST_\d{3}$")
-TEST_EXECUTIONS = {"automated", "manual"}
 FAMILY_WIDTH = {
     "BR": 3,
     "SYS": 3,
@@ -200,6 +207,7 @@ def check_structure(root: Path) -> CheckResult:
         "specifications/infrastructure_baseline.md",
         "project_status.md",
         "operations/template_registry.json",
+        "operations/document_contracts.json",
         "operations/acceptance.md",
         "operations/semantic_review.md",
         "AGENTS.md",
@@ -352,6 +360,13 @@ def check_metadata(root: Path) -> CheckResult:
         state = str(doc.metadata.get(expected_field, "")).strip().lower()
         if state and state not in STATE_VALUES[expected_field]:
             errors.append(f"{relative}: неизвестный {expected_field} '{state}'")
+        applicability = (
+            str(doc.metadata.get("applicability", DEFAULT_APPLICABILITY)).strip().lower()
+        )
+        if applicability not in APPLICABILITY_VALUES:
+            errors.append(f"{relative}: неизвестный applicability '{applicability}'")
+        if state == "superseded" and applicability != "historical":
+            errors.append(f"{relative}: superseded-документ должен иметь applicability=historical")
 
     known = _known_reference_ids(root, identifiers)
     for relative, doc in documents:
@@ -657,6 +672,155 @@ def check_document_policy(root: Path) -> CheckResult:
             f"вне файла найдены {misplaced_requirements}"
         )
     return _result("document_policy", errors, warnings)
+
+
+def _is_executable_normative_document(relative: str, doc: Any) -> bool:
+    state_field = expected_state_field(relative)
+    state = str(doc.metadata.get(state_field, "")).strip().lower()
+    applicability = str(doc.metadata.get("applicability", DEFAULT_APPLICABILITY)).strip().lower()
+    return applicability == "normative" and state not in {
+        "superseded",
+        "proposed",
+        "rejected",
+        "completed",
+        "cancelled",
+    }
+
+
+def check_instruction_consistency(root: Path) -> CheckResult:
+    """Reject known instruction drift instead of relying on another prose audit."""
+    errors: list[str] = []
+    forbidden: tuple[tuple[re.Pattern[str], str], ...] = (
+        (re.compile(r"\bspec_state:\s*draft\b", re.IGNORECASE), "несуществующий spec_state=draft"),
+        (re.compile(r"\bAskUserQuestion\b"), "непереносимое имя интерфейса AskUserQuestion"),
+        (
+            re.compile(r"остальн\w*\s+\d+\s+структурн", re.IGNORECASE),
+            "захардкоженное число проверок",
+        ),
+        (
+            re.compile(r"детальн\w*\s+дерев\w*\s+решен\w*\s+для\s+кажд", re.IGNORECASE),
+            "ложное описание procedure_map",
+        ),
+    )
+    for relative, doc in _primary_documents(root):
+        if not _is_executable_normative_document(relative, doc):
+            continue
+        for pattern, message in forbidden:
+            if pattern.search(doc.body):
+                errors.append(f"{relative}: {message}")
+        if relative.startswith("operations/quality/playbooks/"):
+            if re.search(r"\b(?:pylint|radon|duplicate-code)\b", doc.body, re.IGNORECASE):
+                errors.append(f"{relative}: заявлен инструмент, которого нет в canonical gate")
+        if relative == "operations/quality/playbooks/readme.md" and re.search(
+            r"(?mi)^\*\*(?:Version|Updated):", doc.body
+        ):
+            errors.append(f"{relative}: версия и дата должны быть только во front matter")
+        for line_number, line in enumerate(doc.body.splitlines(), start=1):
+            stripped = line.strip()
+            if re.match(r"^(?:python|python3)(?:\s|$)", stripped):
+                errors.append(
+                    f"{relative}:{line_number}: POSIX-команда должна использовать '{POSIX_PYTHON}'"
+                )
+            if re.match(r"^py(?:\s|$)", stripped) and not stripped.startswith(f"{WINDOWS_PYTHON} "):
+                errors.append(
+                    f"{relative}:{line_number}: Windows-команда должна использовать "
+                    f"'{WINDOWS_PYTHON}'"
+                )
+
+    indexed = read_text(root / "operations/scripts/documents/non_markdown_index.py")
+    if "и еженедельно" in indexed:
+        errors.append(
+            "operations/scripts/documents/non_markdown_index.py: заявлен ненастроенный weekly workflow"
+        )
+    evidence_writer = read_text(root / "operations/scripts/quality/record_quality_suite.py")
+    if f'"command": ["{POSIX_PYTHON}",' not in evidence_writer:
+        errors.append(
+            "operations/scripts/quality/record_quality_suite.py: evidence должен "
+            f"фиксировать canonical launcher '{POSIX_PYTHON}'"
+        )
+    registry = read_text(root / "operations/quality_registry.json")
+    if "python3 -m operations" in registry:
+        errors.append(
+            f"operations/quality_registry.json: команда должна использовать '{POSIX_PYTHON}'"
+        )
+    return _result("instruction_consistency", errors)
+
+
+def check_document_readability(root: Path) -> CheckResult:
+    """Flag unreadable prose in documents that currently instruct an actor."""
+    warnings: list[str] = []
+    excluded_prefixes = (
+        "operations/templates/",
+        "specifications/",
+        "work/audit/",
+        "work/tests/",
+    )
+    excluded_files = {"project_status.md", "milestones.md"}
+    for relative, doc in _primary_documents(root):
+        if relative in excluded_files or relative.startswith(excluded_prefixes):
+            continue
+        if not _is_executable_normative_document(relative, doc):
+            continue
+        fenced = False
+        for line_number, line in enumerate(doc.body.splitlines(), start=1):
+            if line.strip().startswith("```"):
+                fenced = not fenced
+                continue
+            if fenced or line.startswith(("|", "<!--")):
+                continue
+            if len(line) > 600:
+                warnings.append(
+                    f"{relative}:{line_number}: строка длиннее 600 символов; разделите инструкцию"
+                )
+    return _result("document_readability", [], warnings)
+
+
+def check_document_discoverability(root: Path) -> CheckResult:
+    """Every active operational document must be reachable from another document."""
+    errors: list[str] = []
+    documents = {relative: doc for relative, doc in _primary_documents(root)}
+    identifiers = {
+        str(doc.metadata.get("id", "")).strip().lower(): relative
+        for relative, doc in documents.items()
+        if str(doc.metadata.get("id", "")).strip()
+    }
+    incoming = {relative: 0 for relative in documents}
+    link_pattern = re.compile(r"\[[^]]*\]\(([^)]+)\)")
+    for relative, doc in documents.items():
+        source = root / relative
+        for raw_target in link_pattern.findall(doc.body):
+            target = raw_target.strip().split(maxsplit=1)[0].strip("<>")
+            if not target or target.startswith(("http://", "https://", "mailto:", "#")):
+                continue
+            resolved = (source.parent / target.split("#", 1)[0]).resolve()
+            try:
+                target_relative = relative_posix(resolved, root)
+            except ValueError:
+                continue
+            if target_relative in incoming and target_relative != relative:
+                incoming[target_relative] += 1
+        for key in REFERENCE_KEYS:
+            for reference in metadata_list(doc.metadata, key):
+                referenced_path = identifiers.get(reference.strip().lower())
+                if referenced_path and referenced_path != relative:
+                    incoming[referenced_path] += 1
+
+    registry_text = read_text(root / "operations/template_registry.json")
+    exempt_files = {"AGENTS.md", "project_rules.md", "milestones.md", "project_status.md"}
+    exempt_prefixes = (
+        "adr/",
+        "specifications/",
+        "work/",
+        "operations/templates/",
+    )
+    for relative, doc in documents.items():
+        if relative in exempt_files or relative.startswith(exempt_prefixes):
+            continue
+        if not _is_executable_normative_document(relative, doc):
+            continue
+        if incoming[relative] == 0 and relative not in registry_text:
+            errors.append(f"{relative}: активный документ недоступен из навигации")
+    return _result("document_discoverability", errors)
 
 
 MILESTONE_HEADING_PATTERN = re.compile(r"(?m)^##\s+(m\d{2})\s+—\s+.+$", re.IGNORECASE)
@@ -973,6 +1137,11 @@ def check_tasks(root: Path) -> CheckResult:
         work_state = str(task["work_state"])
         next_actor = str(task.get("next_actor", "none"))
         owner_action = str(task.get("owner_action", "none"))
+        if next_actor not in NEXT_ACTORS:
+            errors.append(
+                f"{identifier}: next_actor должен быть одним из {sorted(NEXT_ACTORS)}, "
+                f"получено '{next_actor}'"
+            )
         if work_state in {"completed", "cancelled"} and next_actor != "none":
             invalid_terminal_actor = True
         errors.extend(_task_test_plan_item_errors(identifier, task.get("checklist", [])))
@@ -1150,6 +1319,22 @@ def check_test_specs(root: Path) -> CheckResult:
                 errors.append(
                     f"{relative}: manual TEST не может требовать от владельца Git, PowerShell или внутренние скрипты"
                 )
+        headings = [
+            match.group(1).strip()
+            for match in re.finditer(r"(?m)^##\s+(?:\d+\.\s*)?(.+?)\s*$", doc.body)
+        ]
+        expected_headings = [
+            "Назначение",
+            "Что проверяется",
+            "Автоматический запуск" if execution == "automated" else "Действия владельца",
+            "Критерий успеха",
+            "Состав доказательства",
+        ]
+        if headings != expected_headings:
+            errors.append(
+                f"{relative}: разделы TEST должны быть ровно {expected_headings}, "
+                f"получено {headings}"
+            )
         for target in verifies:
             if target not in records:
                 errors.append(
@@ -1811,6 +1996,9 @@ FAST_CHECK_NAMES = (
     "markdown_section_order",
     "metadata",
     "frontmatter_standard",
+    "instruction_consistency",
+    "document_readability",
+    "document_discoverability",
     "links",
     "secrets",
 )
@@ -1822,6 +2010,9 @@ def run_all_checks(root: Path, fast: bool = False) -> list[CheckResult]:
         ("markdown_section_order", check_markdown_section_order),
         ("metadata", check_metadata),
         ("frontmatter_standard", check_frontmatter_standard),
+        ("instruction_consistency", check_instruction_consistency),
+        ("document_readability", check_document_readability),
+        ("document_discoverability", check_document_discoverability),
         ("traceability", check_traceability),
         ("adr_decision_tasks", check_adr_decision_tasks),
         ("full_traceability", check_full_traceability),

@@ -5,8 +5,8 @@ title: "ARC_CMP_009 — Эксплуатационные функции: раб�
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.0
-updated: 2026-08-25
+version: 1.1
+updated: 2026-09-03
 accepts:
   - m02
 traces_to:
@@ -42,13 +42,13 @@ depends_on:
 Часть канонического прогона юнит-тестов, выполняется в `Quality skills` на каждом push/PR:
 
 ```bash
-python3 operations/scripts/quality/run_unittests.py
+python3.12 operations/scripts/quality/run_unittests.py
 ```
 
 Отдельный прогон только этого компонента:
 
 ```bash
-python3 -m unittest operations.tests.product.test_operations_state -v
+python3.12 -m unittest operations.tests.product.test_operations_state -v
 ```
 
 ## 4. Критерий успеха
@@ -68,56 +68,3 @@ python3 -m unittest operations.tests.product.test_operations_state -v
 ## 5. Состав доказательства
 
 `automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 12 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
-
-## 6. Реализованные компоненты
-
-### Компонент: Эксплуатационные функции
-
-**Данные**: `DependencyStatus` (`name`, `healthy`, `detail`), `HealthReport` (`dependencies`, `healthy`, `unhealthy_dependencies`), `ScheduledIntent` (`intent_id`, `capability_name`, `task_id`)
-
-**Реализация**: `HealthAggregator` — регистрирует именованные проверки (`HealthCheck`) и собирает их в один отчёт, изолируя исключение одной проверки от остальных. `SchedulerState` — регистрирует намерения, хранит переключатель паузы и вычисляет `runnable_intents(store)`, сверяясь с [`TaskLifecycleStore`](../../src/task_state/base.py) ([`TASK_006`](../tasks/task_006_arc_007.md)) на предмет отменённых задач.
-
-## 7. Структура кода
-
-```
-src/operations/
-├── __init__.py — публичный API
-├── health.py — DependencyStatus, HealthReport, HealthAggregator
-└── scheduler_state.py — ScheduledIntent, SchedulerState
-
-operations/tests/product/
-└── test_operations_state.py — юнит-тесты, часть канонического run_unittests.py (CI/CD)
-```
-
-## 8. Соответствие требованиям
-
-| Требование | Статус | Примечание |
-|---|---|---|
-| [`SYS_024`](../../specifications/system_specification.md#sys_024): Наблюдаемость, версия и стоимость | ✅ | `HealthAggregator` локализует типовой сбой до конкретной зависимости; физический сбор метрик и стоимости — [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007) ([`TASK_012`](../tasks/task_012_inf_007.md)) |
-| [`SYS_027`](../../specifications/system_specification.md#sys_027): Переносимое развёртывание | ➖ | Контролируемый переход между версиями и физическое развёртывание — [`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008) ([`TASK_013`](../tasks/task_013_inf_008.md)); эта TASK не дублирует физическую инфраструктуру |
-| [`SYS_013`](../../specifications/system_specification.md#sys_013): Плановые и регулярные задачи | ➖ | Вне очереди [`m02`](../../milestones.md#m02) (подэтап [`m05`](../../milestones.md#m05)); `SchedulerState` даёт только логическую форму намерения, без таймера и исполнения |
-| [`SEC_CTL_017`](../../specifications/system_specification.md#sec_ctl_017): Безопасное расписание | ➖ | `ScheduledIntent` хранит намерение и ссылку на возможность, а не разрешение (форма готова); повторная проверка личности/правил перед запуском — ответственность самого исполнения расписания, ещё не реализованного |
-
-## 9. Доказательства
-
-- **Исходный код**: [`src/operations/`](../../src/operations/) — агрегатор работоспособности и логическое состояние планировщика
-- **Тесты**: 12 юнит-тестов в [`operations/tests/product/test_operations_state.py`](../../operations/tests/product/test_operations_state.py), часть обязательного gate `Quality skills`
-- **Отсутствие регрессий**: Запуск `check.py --all` прошёл успешно
-
-## 10. Готово когда
-
-- ✅ 12 тестов пройдено
-- ✅ `HealthAggregator` локализует сбой до конкретной зависимости
-- ✅ `SchedulerState` согласован с состоянием задач ([`TaskLifecycleStore`](../../src/task_state/base.py))
-- ✅ Пауза — ограниченное действие восстановления, подтверждено тестом
-
-## 11. Что будет дальше
-
-Этим завершается блок архитектурных компонентов, охваченных текущей очередью TASK. [`TASK_008`](../tasks/task_008_inf_001.md) начинает блок инфраструктурных компонентов с Вычислительной среды выполнения ([`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)).
-
-## 12. Примечания для разработчика
-
-- `SchedulerState` не запускает ничего сама: `runnable_intents()` только вычисляет, что можно было бы запустить сейчас. Реальный таймер, повторная проверка личности/аварийного выключателя перед запуском и вызов [`ToolGateway`](../tasks/task_005_arc_005.md) остаются отдельной, ещё не начатой работой подэтапа [`m05`](../../milestones.md#m05) ([`SYS_013`](../../specifications/system_specification.md#sys_013)).
-- `HealthAggregator` не собирает и не хранит никаких метрик сам — вызывающая сторона регистрирует произвольные проверки; хранение и визуализация метрик во времени — [`INF_CMP_007`](../../specifications/infrastructure_baseline.md#inf_cmp_007).
-
-Действия владельца не требуются: тест полностью автоматизирован и не требует ручного вмешательства.

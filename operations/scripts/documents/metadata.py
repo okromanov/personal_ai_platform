@@ -6,14 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from operations.scripts.common.project import read_text
-
-STATE_FIELDS = ("document_state", "decision_state", "work_state", "spec_state")
-STATE_VALUES = {
-    "document_state": {"current", "superseded"},
-    "decision_state": {"proposed", "accepted", "rejected", "superseded"},
-    "work_state": {"planned", "in-progress", "blocked", "completed", "cancelled"},
-    "spec_state": {"current", "superseded"},
-}
+from operations.scripts.documents.contracts import STATE_FIELDS as STATE_FIELDS
+from operations.scripts.documents.contracts import STATE_VALUES as STATE_VALUES
 
 
 @dataclass(frozen=True)

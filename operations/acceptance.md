@@ -2,8 +2,8 @@
 id: owner_acceptance_procedure
 type: operations
 document_state: current
-version: 1.4
-updated: 2026-08-30
+version: 1.5
+updated: 2026-09-03
 depends_on: []
 ---
 
@@ -40,7 +40,7 @@ depends_on: []
 
 ```powershell
 # Любой этап, включая m01, после ready-for-semantic-review
-py operations\scripts\acceptance\apply.py --milestone mXX --owner-confirmation "ПРИНИМАЮ mXX" --evidence runtime\evidence\latest.json --semantic-review runtime\evidence\mXX_semantic_review.json --evidence-repository owner/repo --evidence-workflow "Project check" --evidence-run-id 123 --evidence-run-url https://github.com/owner/repo/actions/runs/123 --evidence-event-sha <40-char-sha> --evidence-artifact-id 456 --evidence-artifact-digest <sha256>
+py -3.12 operations\scripts\acceptance\apply.py --milestone mXX --owner-confirmation "ПРИНИМАЮ mXX" --evidence runtime\evidence\latest.json --semantic-review runtime\evidence\mXX_semantic_review.json --evidence-repository owner/repo --evidence-workflow "Project check" --evidence-run-id 123 --evidence-run-url https://github.com/owner/repo/actions/runs/123 --evidence-event-sha <40-char-sha> --evidence-artifact-id 456 --evidence-artifact-digest <sha256>
 ```
 
 Скрипт обязан:
@@ -96,7 +96,9 @@ py operations\scripts\acceptance\apply.py --milestone mXX --owner-confirmation "
 
 После успешного слияния коммита принятия этапа в `main` система готова к планированию следующего этапа.
 
-Единственный итоговый материал для владельца, который создаётся и обновляется автоматически для каждого этапа, — `work/acceptance/m0X_final_report.md` (например, [`work/acceptance/m01_final_report.md`](../work/acceptance/m01_final_report.md)). Его создаёт `init_milestone.py` при переходе `planned → in-progress` и пересобирает `update_completion_report.py` после принятия (см. шаг 2 выше), всегда из зарегистрированного шаблона. Дополнительная запись сверх того, что уже описывают эта процедура и [`operations/semantic_review.md`](semantic_review.md), создаётся только при наличии уникального содержания и хранится рядом с доказательствами принятия в [`work/acceptance/`](../work/acceptance/).
+Единственный итоговый материал для владельца, который создаётся и обновляется автоматически для каждого этапа, — `work/acceptance/m0X_final_report.md` (например, [`work/acceptance/m01_final_report.md`](../work/acceptance/m01_final_report.md)).
+Его создаёт `init_milestone.py` при переходе `planned → in-progress` и пересобирает `update_completion_report.py` после принятия (см. шаг 2 выше), всегда из зарегистрированного шаблона.
+Дополнительная запись сверх того, что уже описывают эта процедура и [`operations/semantic_review.md`](semantic_review.md), создаётся только при наличии уникального содержания и хранится рядом с доказательствами принятия в [`work/acceptance/`](../work/acceptance/).
 
 **Важно:** Этапы [`m02`](../milestones.md#m02)–[`m06`](../milestones.md#m06) составляют V1. После [`m06`](../milestones.md#m06) завершается версия 1 и начинается планирование V2.
 

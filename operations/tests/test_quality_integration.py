@@ -61,6 +61,7 @@ class QualityIntegrationTests(unittest.TestCase):
         ):
             self.assertIn(provenance_argument, workflow)
         self.assertIn("run_suite.py full", workflow)
+        self.assertIn("python3.12 operations/scripts/quality/run_suite.py full", workflow)
         self.assertIn("check_coverage.py", runner)
         self.assertIn("actionlint", workflow)
         self.assertIn("shellcheck", workflow)
@@ -125,6 +126,10 @@ class QualityIntegrationTests(unittest.TestCase):
             )
             self.assertEqual(record["result"], "passed")
             self.assertEqual(record["git_sha"], "a" * 40)
+            self.assertEqual(
+                record["command"],
+                ["python3.12", "operations/scripts/quality/run_suite.py", "full"],
+            )
             artifacts = cast(list[dict[str, object]], record["artifacts"])
             self.assertEqual(artifacts[0]["path"], "ruff.txt")
             self.assertEqual(artifacts[1]["bytes"], 0)
@@ -146,6 +151,53 @@ class QualityIntegrationTests(unittest.TestCase):
         self.assertIn("set -euo pipefail", helper)
         self.assertNotIn("failed (see output above)", helper)
         self.assertNotIn("exit 0", helper)
+
+    def test_dashboard_regeneration_only_bumps_an_unchanged_staged_version(self) -> None:
+        helper = ROOT / "operations/hooks/pre_commit_regenerate_dashboards.sh"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "test@example.com"], cwd=root, check=True
+            )
+            subprocess.run(["git", "config", "user.name", "Test"], cwd=root, check=True)
+
+            scripts = root / "operations" / "scripts"
+            (scripts / "documents").mkdir(parents=True)
+            (scripts / "versioning").mkdir(parents=True)
+            (scripts / "documents" / "template_contracts.py").write_text("", encoding="utf-8")
+            (scripts / "documents" / "generate.py").write_text("", encoding="utf-8")
+            (scripts / "versioning" / "increment_file_version.py").write_text(
+                "from pathlib import Path\n"
+                "import sys\n"
+                "Path('increment.called').write_text(' '.join(sys.argv[1:]), encoding='utf-8')\n",
+                encoding="utf-8",
+            )
+
+            document = root / "document.md"
+            document.write_text("---\nversion: 1.0\n---\n# Initial\n", encoding="utf-8")
+            (root / "project_status.md").write_text("# Status\n", encoding="utf-8")
+            subprocess.run(["git", "add", "document.md", "project_status.md"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "initial"], cwd=root, check=True)
+
+            # A semantic version already chosen by the author must survive unchanged.
+            document.write_text("---\nversion: 1.1\n---\n# Changed\n", encoding="utf-8")
+            subprocess.run(["git", "add", "document.md"], cwd=root, check=True)
+            completed = subprocess.run(
+                [_bash_executable(), str(helper)], cwd=root, capture_output=True, text=True
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertFalse((root / "increment.called").exists())
+            self.assertIn("version: 1.1", document.read_text(encoding="utf-8"))
+
+            subprocess.run(["git", "commit", "-qm", "manual bump"], cwd=root, check=True)
+            document.write_text("---\nversion: 1.1\n---\n# More content\n", encoding="utf-8")
+            subprocess.run(["git", "add", "document.md"], cwd=root, check=True)
+            completed = subprocess.run(
+                [_bash_executable(), str(helper)], cwd=root, capture_output=True, text=True
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual((root / "increment.called").read_text(encoding="utf-8"), "document.md")
 
     def test_dashboard_regeneration_propagates_generator_failure(self) -> None:
         helper = ROOT / "operations/hooks/pre_commit_regenerate_dashboards.sh"

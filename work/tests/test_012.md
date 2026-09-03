@@ -5,8 +5,8 @@ title: "ARC_CMP_007 — Состояние задач: контрольные т
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.0
-updated: 2026-08-25
+version: 1.1
+updated: 2026-09-03
 accepts:
   - m02
 traces_to:
@@ -43,13 +43,13 @@ depends_on:
 Часть канонического прогона юнит-тестов, выполняется в `Quality skills` на каждом push/PR:
 
 ```bash
-python3 operations/scripts/quality/run_unittests.py
+python3.12 operations/scripts/quality/run_unittests.py
 ```
 
 Отдельный прогон только этого компонента:
 
 ```bash
-python3 -m unittest operations.tests.product.test_task_state -v
+python3.12 -m unittest operations.tests.product.test_task_state -v
 ```
 
 ## 4. Критерий успеха
@@ -73,67 +73,3 @@ python3 -m unittest operations.tests.product.test_task_state -v
 ## 5. Состав доказательства
 
 `automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 13 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
-
-## 6. Реализованные компоненты
-
-### Компонент: Состояние задач
-
-**Стабильный контракт**: `TaskLifecycleStore` (абстрактный класс)
-
-- `save_task(message)` / `load_task(task_id)`: хранение и извлечение самой задачи
-- `get_state(task_id) → TaskLifecycleState`: текущее состояние исполнения
-- `checkpoint(task_id, step, data)`: запись контрольной точки
-- `increment_retry(task_id) → int`: увеличение счётчика повторов
-- `cancel(task_id)`: пометка отмены (идемпотентна)
-- `has_executed(action_id) → bool` / `mark_executed(action_id)`: защита от дублей
-
-**Данные**: `Checkpoint` (`step`, `data`), `TaskLifecycleState` (`checkpoint`, `retry_count`, `cancelled`), исключение `TaskLifecycleError` (хранилище недоступно)
-
-**Эталонная реализация**: `InMemoryTaskLifecycleStore` — минимальная рабочая реализация для [`m02`](../../milestones.md#m02) поверх памяти процесса; не переживает перезапуск — физическое постоянное хранилище ([`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005), [`TASK_011`](../tasks/task_011_inf_005.md)) подключится к тому же контракту позже без его изменения.
-
-## 7. Структура кода
-
-```
-src/task_state/
-├── __init__.py — публичный API
-├── base.py — TaskLifecycleStore, TaskLifecycleError, Checkpoint, TaskLifecycleState
-└── store.py — InMemoryTaskLifecycleStore (эталонная реализация)
-
-operations/tests/product/
-└── test_task_state.py — юнит-тесты, часть канонического run_unittests.py (CI/CD)
-```
-
-## 8. Соответствие требованиям
-
-| Требование | Статус | Примечание |
-|---|---|---|
-| [`SYS_001`](../../specifications/system_specification.md#sys_001): Единый жизненный цикл задачи | ✅ | Контрольная точка и флаг отмены хранятся отдельно от состояния конкретной среды агента |
-| [`SYS_036`](../../specifications/system_specification.md#sys_036): Единый жизненный цикл при смене канала | ✅ | Хранение ключуется по `task_id`, не зависит от канала-источника |
-| [`SYS_013`](../../specifications/system_specification.md#sys_013): Плановые и регулярные задачи | ➖ | Хранилище готово для планировщика ([`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009), [`TASK_007`](../tasks/task_007_arc_009.md)); сам планировщик — отдельная TASK |
-| [`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008): Контроль чувствительного внешнего действия | ✅ | Защита от дублей (`has_executed`/`mark_executed`) подтверждена тестом |
-| [`SEC_CTL_017`](../../specifications/system_specification.md#sec_ctl_017): Безопасное расписание | ➖ | Хранит намерение и контрольную точку, а не разрешение — повторная проверка личности/правил перед запуском остаётся ответственностью планировщика ([`TASK_007`](../tasks/task_007_arc_009.md)) |
-
-## 9. Доказательства
-
-- **Исходный код**: [`src/task_state/`](../../src/task_state/) — стабильный контракт и эталонная реализация
-- **Тесты**: 13 юнит-тестов в [`operations/tests/product/test_task_state.py`](../../operations/tests/product/test_task_state.py), часть обязательного gate `Quality skills`
-- **Отсутствие регрессий**: Запуск `check.py --all` прошёл успешно
-
-## 10. Готово когда
-
-- ✅ 13 тестов пройдено
-- ✅ Контракт `TaskLifecycleStore` определён и используется
-- ✅ Защита от дублей подтверждена тестом
-- ✅ Отмена и повтор не искажают друг друга и контрольную точку
-
-## 11. Что будет дальше
-
-1. [`TASK_007`](../tasks/task_007_arc_009.md): Реализация [`ARC_CMP_009`](../../specifications/architecture_baseline.md#arc_cmp_009) (Эксплуатационные функции) — планировщик и работоспособность, опирающиеся на состояние отдельных задач из этого компонента
-2. Физическое постоянное хранилище для этого контракта ([`INF_CMP_005`](../../specifications/infrastructure_baseline.md#inf_cmp_005)) остаётся отдельной, ещё не проведённой работой [`TASK_011`](../tasks/task_011_inf_005.md)
-
-## 12. Примечания для разработчика
-
-- `InMemoryTaskLifecycleStore` — рабочая реализация для [`m02`](../../milestones.md#m02), а не тестовая заглушка: контракт полностью реализован, просто не переживает перезапуск процесса. Это отличает её от `StubModelGateway`/`StubRuntimePort`, которые стоят на месте ещё не выбранного поставщика/среды.
-- `Orchestrator` ([`TASK_003`](../tasks/task_003_arc_003.md)) пока не вызывает этот контракт — подключение контрольных точек к циклу выполнения задачи остаётся отдельной работой, а не частью этой TASK.
-
-Действия владельца не требуются: тест полностью автоматизирован и не требует ручного вмешательства.

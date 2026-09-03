@@ -2,9 +2,9 @@
 id: file_update_dependencies
 type: procedure_reference
 document_state: current
-version: 1.5
+version: 1.6
 created: 2026-08-23
-updated: 2026-08-28
+updated: 2026-09-03
 ---
 
 # Матрица зависимостей обновления файлов
@@ -13,7 +13,8 @@ updated: 2026-08-28
 
 ## Правило: ссылки на трассируемые ID
 
-Любой генератор, который выводит ссылку на трассируемый ID (BR/SYS/THR/SEC_CTL/ARC_CMP/ARC_FLOW/INF_REQ/INF_CMP/INF_FLOW/ADR/TASK/TEST/этап), обязан оформлять её как markdown-ссылку, если этот ID разрешается через `collect_traceable_elements()` (`operations/scripts/documents/traceability.py`) — обычные обратные кавычки `` `ID` `` без ссылки для разрешимого ID запрещены. Не найденный в реестре ID (например, ещё не описанный) остаётся текстом в кавычках, а не выдумывается. Эталонные реализации: `_link()`/`_requirement_links()` в `update_completion_report.py` и `_linked_ids()` в `operations/scripts/tasks/generate.py`.
+Любой генератор, который выводит ссылку на трассируемый ID (BR/SYS/THR/SEC_CTL/ARC_CMP/ARC_FLOW/INF_REQ/INF_CMP/INF_FLOW/ADR/TASK/TEST/этап), обязан оформлять её как markdown-ссылку, если этот ID разрешается через `collect_traceable_elements()` (`operations/scripts/documents/traceability.py`) — обычные обратные кавычки `` `ID` `` без ссылки для разрешимого ID запрещены. Не найденный в реестре ID (например, ещё не описанный) остаётся текстом в кавычках, а не выдумывается. Эталонные реализации:
+`_link()`/`_requirement_links()` в `update_completion_report.py` и `_linked_ids()` в `operations/scripts/tasks/generate.py`.
 
 ## Когда milestone переходит из planned → in-progress
 
@@ -81,13 +82,13 @@ updated: 2026-08-28
 
 ```bash
 # Валидировать все зависимости
-python3.13 operations/scripts/documents/check.py --all
+python3.12 operations/scripts/documents/check.py --all
 
 # Проверить дрифт зарегистрированного owner status
 python3.12 operations/scripts/documents/generate.py --all && git status
 
 # Проверить completion_state соответствие work_state
-python3 -c "
+python3.12 -c "
 from pathlib import Path
 from operations.scripts.status.generate_project_status import collect_milestones
 

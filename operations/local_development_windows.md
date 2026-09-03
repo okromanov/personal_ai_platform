@@ -2,8 +2,8 @@
 id: operations_local_development_windows
 type: operations_guide
 document_state: current
-version: 1.1
-updated: 2026-08-24
+version: 1.2
+updated: 2026-09-03
 traces_to:
   - ADR_001
 ---
@@ -46,7 +46,7 @@ Write-Host "root: $ProjectRoot"
 Write-Host "branch: $((git branch --show-current).Trim())"
 git status --short
 git log -1 --oneline
-py --version
+py -3.12 --version
 git --version
 ```
 
@@ -57,7 +57,7 @@ git --version
 Полная локальная проверка проекта:
 
 ```powershell
-py operations\scripts\quality\run_suite.py full
+py -3.12 operations\scripts\quality\run_suite.py full
 ```
 
 Эта же последовательность выполняется в [`.github/workflows/project_check.yml`](../.github/workflows/project_check.yml) для запроса на слияние. Процесс имеет только право чтения и не получает рабочие секреты.
@@ -65,19 +65,19 @@ py operations\scripts\quality\run_suite.py full
 Отдельная генерация производных файлов:
 
 ```powershell
-py operations\scripts\documents\generate.py --all
+py -3.12 operations\scripts\documents\generate.py --all
 ```
 
 Проверка документации и правил управления:
 
 ```powershell
-py operations\scripts\documents\check.py --all
+py -3.12 operations\scripts\documents\check.py --all
 ```
 
 Автоматические технические тесты:
 
 ```powershell
-py operations\scripts\quality\run_unittests.py --verbose
+py -3.12 operations\scripts\quality\run_unittests.py --verbose
 ```
 
 Локальный прогон является диагностикой и не создаёт принимаемое серверное доказательство. Канонический bundle создаёт только GitHub Actions с обязательными `server_source` и точным event SHA.
@@ -85,8 +85,8 @@ py operations\scripts\quality\run_unittests.py --verbose
 Проверка готовности и атомарный старт подготовленного этапа:
 
 ```powershell
-py operations\scripts\milestones\start.py --milestone mXX --dry-run
-py operations\scripts\milestones\start.py --milestone mXX --apply
+py -3.12 operations\scripts\milestones\start.py --milestone mXX --dry-run
+py -3.12 operations\scripts\milestones\start.py --milestone mXX --apply
 ```
 
 ## 5. Принятие владельцем
@@ -96,7 +96,7 @@ py operations\scripts\milestones\start.py --milestone mXX --apply
 Создаётся отдельная ветка от точного SHA доказательства. Нужные файлы помещаются локально в `runtime/evidence/`.
 
 ```powershell
-py operations\scripts\acceptance\apply.py --milestone mXX --owner-confirmation "ПРИНИМАЮ mXX" --evidence runtime\evidence\latest.json --semantic-review runtime\evidence\mXX_semantic_review.json --evidence-repository owner/repo --evidence-workflow "Project check" --evidence-run-id 123 --evidence-run-url https://github.com/owner/repo/actions/runs/123 --evidence-event-sha <40-char-sha> --evidence-artifact-id 456 --evidence-artifact-digest <sha256>
+py -3.12 operations\scripts\acceptance\apply.py --milestone mXX --owner-confirmation "ПРИНИМАЮ mXX" --evidence runtime\evidence\latest.json --semantic-review runtime\evidence\mXX_semantic_review.json --evidence-repository owner/repo --evidence-workflow "Project check" --evidence-run-id 123 --evidence-run-url https://github.com/owner/repo/actions/runs/123 --evidence-event-sha <40-char-sha> --evidence-artifact-id 456 --evidence-artifact-digest <sha256>
 ```
 
 Скрипт только готовит разницу. После него нужно проверить `git diff`, выполнить полную проверку проекта и открыть обычный запрос на слияние. Прямой переход состояния в `main` запрещён.

@@ -58,7 +58,7 @@ def build_record(
         "git_sha": normalized_sha,
         "checked_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "environment": {"runner": "github-actions", "os": "linux"},
-        "command": ["python3", "operations/scripts/quality/run_suite.py", "full"],
+        "command": ["python3.12", "operations/scripts/quality/run_suite.py", "full"],
         "exit_code": 0,
         "artifacts": checked,
         "server_source": server_source,

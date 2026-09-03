@@ -12,9 +12,9 @@ a real profile and replace stub-specific expectations before its output can
 be used as model-quality evidence.
 
 Usage:
-    python3 -m operations.scripts.eval.run_eval_suite
-    python3 -m operations.scripts.eval.run_eval_suite --profile stub
-    python3 -m operations.scripts.eval.run_eval_suite --cases path/to/other_cases.json
+    python3.12 -m operations.scripts.eval.run_eval_suite
+    python3.12 -m operations.scripts.eval.run_eval_suite --profile stub
+    python3.12 -m operations.scripts.eval.run_eval_suite --cases path/to/other_cases.json
 """
 
 from __future__ import annotations

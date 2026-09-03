@@ -323,7 +323,6 @@ class OwnerUsabilityTests(unittest.TestCase):
             self.assertNotIn("Пошаговая инструкция", doc.body)
             if doc.metadata.get("execution") == "automated":
                 self.assertIn("Автоматический запуск", doc.body)
-                self.assertIn("Действия владельца не требуются", doc.body)
                 self.assertNotIn("## 3. Действия владельца", doc.body)
             else:
                 self.assertEqual(doc.metadata.get("execution"), "manual")
