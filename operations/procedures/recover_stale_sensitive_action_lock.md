@@ -4,7 +4,7 @@ type: procedure_reference
 document_state: current
 version: 1.2
 created: 2026-08-29
-updated: 2026-09-03
+updated: 2026-09-04
 ---
 
 # Восстановление после зависшей блокировки sensitive-action

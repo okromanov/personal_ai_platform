@@ -4,7 +4,7 @@ type: agent_instruction
 document_state: current
 applicability: normative
 version: 4.0
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - project_rules
   - project_milestones

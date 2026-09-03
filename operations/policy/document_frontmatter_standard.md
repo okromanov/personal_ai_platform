@@ -4,7 +4,7 @@ type: guide
 document_state: superseded
 applicability: historical
 version: 1.6
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - project_rules
 ---

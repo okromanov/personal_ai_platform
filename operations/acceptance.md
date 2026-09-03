@@ -3,7 +3,7 @@ id: owner_acceptance_procedure
 type: operations
 document_state: current
 version: 1.5
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on: []
 ---
 

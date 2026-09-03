@@ -3,7 +3,7 @@ id: setup_precommit
 type: guide
 document_state: current
 version: 1.5
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - operations_change_process
   - coding_agent_instruction

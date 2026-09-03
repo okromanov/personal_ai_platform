@@ -4,7 +4,7 @@ type: documentation
 version: 1.5
 document_state: current
 applicability: normative
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - quality_playbooks_readme
 ---
