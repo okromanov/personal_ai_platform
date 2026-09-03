@@ -13,6 +13,15 @@ from unittest.mock import patch
 from operations.scripts.quality import run_suite
 from operations.scripts.quality.run_unittests import run_tests
 
+# Проверка просроченных сроков пересмотра сравнивает дату из реестра с
+# «сегодня». Тесты ниже проверяют не даты, а дубликаты ID и запрет resolved
+# при открытой critical-находке, и их фикстуры несут фиксированную дату
+# пересмотра. Без закреплённых часов эта дата однажды становится прошедшей,
+# и проверка просрочки срабатывает первой, маскируя то, что тест утверждает.
+# Ровно это и произошло 2026-09-03. Часы закреплены на дату, для которой
+# фикстуры писались; выделенные тесты просрочки ниже задают её явно сами.
+_PINNED_TODAY = date(2026, 9, 2)
+
 
 class QualityRunnerTests(unittest.TestCase):
     def test_canonical_unittest_runner_rejects_skips(self) -> None:
@@ -142,7 +151,7 @@ class QualityRunnerTests(unittest.TestCase):
                 encoding="utf-8",
             )
             with self.assertRaisesRegex(run_suite.QualityFailure, "requires owner"):
-                run_suite.validate_audit_baseline(root)
+                run_suite.validate_audit_baseline(root, today=_PINNED_TODAY)
 
             row = (
                 "| AUD-001 | medium | open | 2026-08-27 | 2026-09-02 | "
@@ -150,7 +159,7 @@ class QualityRunnerTests(unittest.TestCase):
             )
             path.write_text(row + row, encoding="utf-8")
             with self.assertRaisesRegex(run_suite.QualityFailure, "duplicate AUD-001"):
-                run_suite.validate_audit_baseline(root)
+                run_suite.validate_audit_baseline(root, today=_PINNED_TODAY)
 
             script = root / "operations/scripts/a.py"
             script.parent.mkdir(parents=True)
@@ -175,7 +184,7 @@ class QualityRunnerTests(unittest.TestCase):
                 encoding="utf-8",
             )
             with self.assertRaisesRegex(run_suite.QualityFailure, "AUD-002.*resolved"):
-                run_suite.validate_audit_baseline(root)
+                run_suite.validate_audit_baseline(root, today=_PINNED_TODAY)
 
             path.write_text(
                 "| AUD-001 | critical | open | 2026-08-27 | 2026-09-02 | "
@@ -184,7 +193,7 @@ class QualityRunnerTests(unittest.TestCase):
                 "2026-09-02 | repository_owner | evidence | fix |\n",
                 encoding="utf-8",
             )
-            run_suite.validate_audit_baseline(root)
+            run_suite.validate_audit_baseline(root, today=_PINNED_TODAY)
 
     def test_audit_baseline_blocks_an_overdue_unresolved_review(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
