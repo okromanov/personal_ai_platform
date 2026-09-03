@@ -2,8 +2,9 @@
 id: operations_agent_roles_and_delegation
 type: operations
 document_state: current
-version: 1.0
-updated: 2026-09-01
+applicability: proposed
+version: 1.1
+updated: 2026-09-03
 depends_on:
   - operations_change_process
   - architecture_baseline

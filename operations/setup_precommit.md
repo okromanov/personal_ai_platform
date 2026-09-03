@@ -2,8 +2,8 @@
 id: setup_precommit
 type: guide
 document_state: current
-version: 1.4
-updated: 2026-08-28
+version: 1.5
+updated: 2026-09-03
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -70,7 +70,7 @@ The server `full` profile adds formatting, mypy, aggregate/per-module/diff cover
 
 - Runs after the suite passes (`operations/hooks/pre_commit_regenerate_dashboards.sh`) and fails closed.
 - Validates [`operations/template_registry.json`](template_registry.json) before regeneration.
-- Triggers on any staged Markdown file, bumps versions of those files, regenerates only [`project_status.md`](../project_status.md) from its registered template and re-stages it if changed.
+- Triggers on any staged Markdown file. It bumps only documents whose staged version still equals the version in `HEAD`, then regenerates [`project_status.md`](../project_status.md) from its registered template and re-stages it if changed.
 - TASK cards, acceptance reports, audit history and runtime reports are created only by their separate explicit commands; the dashboard hook has no such side effects.
 
 ## Python Version Requirements
@@ -78,8 +78,8 @@ The server `full` profile adds formatting, mypy, aggregate/per-module/diff cover
 The hook requires Python 3.12 or newer and will automatically detect:
 
 1. Python 3.14, 3.13, or 3.12 (in that order)
-2. Generic `python3` command
-3. Generic `python` command
+2. Generic `python3` command, but only when it resolves to Python 3.12+
+3. Generic `python` command, but only when it resolves to Python 3.12+
 
 If none are found, the hook fails with an error.
 
@@ -90,7 +90,7 @@ If none are found, the hook fails with an error.
 Ensure Python 3.12+ is installed and available in your PATH:
 
 ```bash
-python3 --version
+python3.12 --version
 ```
 
 ### Hook fails on documentation check
@@ -98,13 +98,13 @@ python3 --version
 Run the documentation check manually to see detailed errors:
 
 ```bash
-python3 operations/scripts/documents/check.py --fast
+python3.12 operations/scripts/documents/check.py --fast
 ```
 
 For full validation:
 
 ```bash
-python3 operations/scripts/documents/check.py --all
+python3.12 operations/scripts/documents/check.py --all
 ```
 
 ### Hook fails on authority document versions

@@ -184,6 +184,9 @@ def _resolve_document_reference(root: Path, source: Path, reference: str) -> Pat
 
 
 def _check_clickable_document_references(root: Path, path: Path, text: str) -> list[str]:
+    relative_path = relative_posix(path, root)
+    if _IMMUTABLE_AUDIT_BASELINE.fullmatch(relative_path):
+        return []
     errors: list[str] = []
     in_fence = False
     fence_marker = ""
@@ -210,8 +213,21 @@ def _check_clickable_document_references(root: Path, path: Path, text: str) -> l
                 continue
             if _reference_exists(root, path, reference):
                 errors.append(
-                    f"{relative_posix(path, root)}:{line_number}: "
+                    f"{relative_path}:{line_number}: "
                     f"ссылка на существующий документ должна быть кликабельной: {reference}"
+                )
+            elif reference.lower().split("#", 1)[0].endswith(".md") and not (
+                reference.replace("\\", "/").startswith("runtime/")
+                or relative_path.startswith("operations/templates/")
+                or re.search(
+                    r"(?:xxx|mxx|m0x|00x|yyyy|mm|dd|path/to|<|>)",
+                    reference,
+                    re.IGNORECASE,
+                )
+            ):
+                errors.append(
+                    f"{relative_path}:{line_number}: упомянут несуществующий Markdown-файл: "
+                    f"{reference}"
                 )
     return errors
 
@@ -517,6 +533,8 @@ def check_markdown_links(root: Path) -> list[str]:
         is_immutable_baseline = bool(
             _IMMUTABLE_AUDIT_BASELINE.fullmatch(relative_posix(path, root))
         )
+        if is_immutable_baseline:
+            continue
         for raw_target in [] if is_immutable_baseline else LINK_PATTERN.findall(text):
             target = raw_target.strip().split(maxsplit=1)[0].strip("<>")
             if not target or target.startswith(("http://", "https://", "mailto:")):

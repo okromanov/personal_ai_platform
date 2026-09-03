@@ -9,7 +9,7 @@ not merely slow. See operations/procedures/recover_stale_sensitive_action_lock.m
 for the full runbook.
 
 Usage:
-    python3 -m operations.scripts.owner_control.recover_lock <state_dir> \\
+    python3.12 -m operations.scripts.owner_control.recover_lock <state_dir> \\
         --confirm "REMOVE STALE OWNER CONTROL LOCK"
 """
 

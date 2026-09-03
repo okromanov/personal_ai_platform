@@ -5,8 +5,8 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 2.0
-updated: 2026-08-29
+version: 2.1
+updated: 2026-09-03
 accepts:
   - m02
 traces_to:
@@ -45,13 +45,13 @@ depends_on: []
 Часть канонического прогона юнит-тестов, выполняется в `Quality skills` на каждом push/PR:
 
 ```bash
-python3 operations/scripts/quality/run_unittests.py
+python3.12 operations/scripts/quality/run_unittests.py
 ```
 
 Отдельный прогон только этого компонента:
 
 ```bash
-python3 -m unittest operations.tests.product.test_channels -v
+python3.12 -m unittest operations.tests.product.test_channels -v
 ```
 
 ## 4. Критерий успеха
@@ -71,88 +71,3 @@ python3 -m unittest operations.tests.product.test_channels -v
 ## 5. Состав доказательства
 
 `automated_evidence: quality_suite`. Каждый запуск верификационного скрипта создаёт доказательство выполнения всех 17 модульных тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
-
-## 6. Реализованные компоненты
-
-### Компонент: Каналы
-
-**Стабильный контракт**: `Channel` (абстрактный класс)
-
-- `async receive() → TaskMessage`: Получить нормализованное сообщение
-- `async send(response: str, task_id: str)`: Отправить ответ
-- `async send_status(status: TaskState, task_id: str)`: Отправить статус
-
-**Данные**: `TaskMessage`
-
-- `task_id`: Уникальный идентификатор выполнения (UUID)
-- `channel_type`: Тип канала (telegram, web, cli, voice)
-- `user_input`: Нормализованный текст ввода
-- `state`: TaskState (pending, running, completed, failed, cancelled)
-- `metadata`: Контекст (user_id, chat_id, timestamp и т.д.)
-- `created_at`, `completed_at`, `error_message`: Метаданные жизненного цикла
-
-**Реализация**: `TelegramChannel` для Telegram
-
-- Поддерживает очередь сообщений (для тестирования и интеграции)
-- Нормализует Telegram обновления в TaskMessage
-- Хранит ответы для проверки
-- Методы inject_message и reset для тестирования
-
-## 7. Структура кода
-
-```
-src/
-├── __init__.py
-└── channels/
-    ├── __init__.py — публичный API
-    ├── base.py — Channel, TaskMessage, TaskState, ChannelError
-    └── telegram.py — TelegramChannel реализация
-
-operations/tests/product/
-├── __init__.py
-└── test_channels.py — юнит-тесты, часть канонического run_unittests.py (CI/CD)
-```
-
-## 8. Соответствие требованиям
-
-| Требование | Статус | Примечание |
-|---|---|---|
-| [`SYS_001`](../../specifications/system_specification.md#sys_001): Жизненный цикл задачи | ✅ | Реализовано с TaskState и наблюдаемыми переходами |
-| [`SYS_005`](../../specifications/system_specification.md#sys_005): Веб-интерфейс | 🔄 | Архитектура готова, реализация на m02.step5 |
-| [`SYS_006`](../../specifications/system_specification.md#sys_006): Админский интерфейс | 🔄 | Архитектура готова, реализация на m02.step6 |
-| [`SYS_007`](../../specifications/system_specification.md#sys_007): Голосовой канал | 🔄 | Архитектура готова, реализация на m03+ |
-
-## 9. Доказательства
-
-- **Исходный код**: [`src/channels/`](../../src/channels/) — стабильный контракт и Telegram реализация
-- **Тесты**: 17 юнит-тестов в [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`
-- **Отсутствие регрессий**: Запуск `check.py --all` прошел успешно
-
-## 10. Готово когда
-
-- ✅ 17 тестов пройдено
-- ✅ Архитектура Channel определена и используется
-- ✅ TelegramChannel реализован для базового сценария
-- ✅ TaskMessage нормализует ввод с метаданными
-- ✅ Наблюдаемое состояние отслеживается
-- ✅ Структура готова для интеграции в [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) (Оркестрация)
-
-## 11. Что будет дальше
-
-1. [`TASK_002`](../tasks/task_002_arc_002.md): Реализация [`ARC_CMP_002`](../../specifications/architecture_baseline.md#arc_cmp_002) (Контроль владельца)
-2. [`TASK_003`](../tasks/task_003_arc_003.md): Реализация [`ARC_CMP_003`](../../specifications/architecture_baseline.md#arc_cmp_003) (Оркестрация и RuntimePort)
-3. [`TASK_004`](../tasks/task_004_arc_004.md): Реализация [`ARC_CMP_004`](../../specifications/architecture_baseline.md#arc_cmp_004) (Шлюз моделей)
-4. Затем интеграция: Telegram → Каналы → Контроль → Оркестрация → Модель
-
-## 12. Примечания для разработчика
-
-- Telegram интеграция упрощена для [`m02`](../../milestones.md#m02): используется очередь вместо реального Bot API
-- Production реализация будет использовать `python-telegram-bot` и webhook/polling
-- Контракт Channel стабилен и позволяет заменять реализацию без изменения остального кода
-- Стабильность по [`SYS_003`](../../specifications/system_specification.md#sys_003): замена TelegramChannel на MockChannel или WebChannel не требует изменений выше уровня Channel
-
-## 13. История версий
-
-- **v1.0** (2026-08-22): Начальная реализация [`ARC_CMP_001`](../../specifications/architecture_baseline.md#arc_cmp_001) с поддержкой Telegram
-
-Действия владельца не требуются: тест полностью автоматизирован и не требует ручного вмешательства.

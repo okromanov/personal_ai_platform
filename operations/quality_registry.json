@@ -63,7 +63,7 @@
       ]
     },
     "m02_development": {
-      "note": "m02_security_tests/m02_e2e_tests/m02_infrastructure_tests are registered in evidence_catalog but deliberately absent from required_evidence below: they cover TASK_014-017 (real runtime/model/Telegram/e2e), still planned. Add them here once those TASKs land, not before. Separately (AUD-020): operations/scripts/eval/run_eval_suite.py is a golden-case eval harness for the model gateway, runnable today (python3 -m operations.scripts.eval.run_eval_suite) but not yet registered as a formal evidence type here -- doing so needs a real CI evidence-record writer conforming to validate_evidence_record()'s test_evidence schema (git_sha/environment/command/artifacts), not built yet. Wire it in once that writer exists, ideally alongside TASK_015's real ModelGateway.",
+      "note": "m02_security_tests/m02_e2e_tests/m02_infrastructure_tests are registered in evidence_catalog but deliberately absent from required_evidence below: they cover TASK_014-017 (real runtime/model/Telegram/e2e), still planned. Add them here once those TASKs land, not before. Separately (AUD-020): operations/scripts/eval/run_eval_suite.py is a golden-case eval harness for the model gateway, runnable today (python3.12 -m operations.scripts.eval.run_eval_suite) but not yet registered as a formal evidence type here -- doing so needs a real CI evidence-record writer conforming to validate_evidence_record()'s test_evidence schema (git_sha/environment/command/artifacts), not built yet. Wire it in once that writer exists, ideally alongside TASK_015's real ModelGateway.",
       "milestones": [
         "m02"
       ],

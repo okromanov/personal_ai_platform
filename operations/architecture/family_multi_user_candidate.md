@@ -2,8 +2,9 @@
 id: operations_family_multi_user_candidate
 type: operations
 document_state: current
-version: 1.0
-updated: 2026-09-02
+applicability: proposed
+version: 1.1
+updated: 2026-09-03
 depends_on:
   - operations_change_process
   - business_requirements

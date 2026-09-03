@@ -17,6 +17,16 @@ from operations.scripts.documents.links import (
 
 
 class LinkTests(unittest.TestCase):
+    def test_immutable_audit_baseline_is_not_rewritten_or_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            audit = root / "work/audit"
+            audit.mkdir(parents=True)
+            (audit / "audit_baseline_2026_08_30.md").write_text(
+                "Historical reference: `missing.md`.\n", encoding="utf-8"
+            )
+            self.assertEqual(check_markdown_links(root), [])
+
     def test_rejects_unlinked_existing_markdown_reference(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -48,7 +58,12 @@ class LinkTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            self.assertEqual(check_markdown_links(root), [])
+            self.assertTrue(
+                any(
+                    "упомянут несуществующий Markdown-файл" in error
+                    for error in check_markdown_links(root)
+                )
+            )
             self.assertIsNone(
                 _resolve_document_reference(
                     root,
@@ -56,6 +71,17 @@ class LinkTests(unittest.TestCase):
                     "REPOSITORY_AUDIT_SYSTEM_PROMPT.md",
                 )
             )
+
+    def test_rejects_nonexistent_markdown_reference_but_allows_template_placeholder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "source.md").write_text(
+                "Ошибка: `missing.md`. Шаблон: `task_xxx.md`.\n",
+                encoding="utf-8",
+            )
+            errors = check_markdown_links(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("missing.md", errors[0])
 
     def test_rejects_link_from_document_to_itself(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -2,8 +2,8 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 2.8
-updated: 2026-09-02
+version: 2.9
+updated: 2026-09-03
 depends_on: []
 ---
 
@@ -66,6 +66,3 @@ depends_on: []
 | [AUD-038](audit_baseline_2026_09_02.md#aud-038) | low | resolved | 2026-09-02 | — | repository_owner | [`check.py`](../../operations/scripts/documents/check.py), [`links.py`](../../operations/scripts/documents/links.py), [`test_checker_negative_paths.py`](../../operations/tests/test_checker_negative_paths.py), [`test_links.py`](../../operations/tests/tooling/test_links.py) | ID каждой строки ведёт прямо к единственной канонической карточке; датированные аудиты неизменяемы, а карточки разовых ситуаций накапливаются в [`audit_adhoc_cards.md`](audit_adhoc_cards.md). Checker блокирует missing, duplicate, orphan, неверную ID-ссылку и ссылку на карточку в Evidence. |
 | [AUD-039](audit_baseline_2026_09_02.md#aud-039) | medium | resolved | 2026-09-02 | — | repository_owner | [`task_016_real_telegram.md`](../tasks/task_016_real_telegram.md), [`TEST_020`](../tests/test_020.md), [`test_security_extended.py`](../../operations/tests/test_security_extended.py) | План требует secret token на каждом webhook update либо исходящий polling без ingress; linked TEST фиксирует отрицательный spoofed-owner-id сценарий. |
 | [AUD-040](audit_baseline_2026_09_02.md#aud-040) | low | resolved | 2026-09-02 | — | repository_owner | [`pyproject.toml`](../../pyproject.toml), [`license_policy.md`](../../operations/policy/license_policy.md) | Подтверждён текущий private-режим репозитория; политика явно сохраняет all-rights-reserved без LICENSE и требует LICENSE, dependency review и security channel до публичного распространения. |
-## 4. Правило обновления
-
-Переход `AUD-001`…`AUD-040` в `resolved` выполнен отдельным служебным PR после двух успешных SHA-bound проверок: [Project check #708](https://github.com/okromanov/personal_ai_platform/actions/runs/33626612856) на remediation SHA `1e1a0d569f793bac40f7dd7265fba2a7741dc047` и [Project check #709](https://github.com/okromanov/personal_ai_platform/actions/runs/33626840810) на merge SHA `72a1888297e185367bc9f44d05d878cc2f9c48ed`. Для будущих `accepted_risk` обязательно сохраняются явное решение владельца, ответственный, срок пересмотра и компенсирующий контроль. Удаление строк запрещено: закрытая finding остаётся историей реестра, а не удаляется.

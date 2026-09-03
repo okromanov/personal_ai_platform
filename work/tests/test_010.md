@@ -5,8 +5,8 @@ title: "ARC_CMP_004 — Шлюз моделей: нормализованный 
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.0
-updated: 2026-08-25
+version: 1.1
+updated: 2026-09-03
 accepts:
   - m02
 traces_to:
@@ -41,13 +41,13 @@ depends_on:
 Часть канонического прогона юнит-тестов, выполняется в `Quality skills` на каждом push/PR:
 
 ```bash
-python3 operations/scripts/quality/run_unittests.py
+python3.12 operations/scripts/quality/run_unittests.py
 ```
 
 Отдельный прогон только этого компонента:
 
 ```bash
-python3 -m unittest operations.tests.product.test_model_gateway -v
+python3.12 -m unittest operations.tests.product.test_model_gateway -v
 ```
 
 ## 4. Критерий успеха
@@ -69,63 +69,3 @@ python3 -m unittest operations.tests.product.test_model_gateway -v
 ## 5. Состав доказательства
 
 `automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 11 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
-
-## 6. Реализованные компоненты
-
-### Компонент: Шлюз моделей
-
-**Стабильный контракт**: `ModelGateway` (абстрактный класс)
-
-- `async complete(request: ModelRequest) → ModelResponse`: выполнить один вызов модели
-
-**Данные**: `ModelRequest` (`prompt`, `timeout_seconds`), `ModelResponse` (`text`, `succeeded`, `error_message`, `usage`), `ModelUsage` (`input_tokens`, `output_tokens`), исключение `ModelGatewayError` (поставщик недоступен)
-
-**Тестовый переходный слой**: `StubModelGateway` — детерминированная реализация `ModelGateway` для проверки контракта и цикла задачи до выбора реального поставщика (сравнение кандидатов остаётся `proposed` в [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md))
-
-**Интеграция с оркестрацией**: `ModelBackedRuntimePort` — реализация `RuntimePort` ([`TASK_003`](../tasks/task_003_arc_003.md)), исполняющая задачу через `ModelGateway`; доказывает, что граница `RuntimePort` совместима со шлюзом моделей без изменений выше границы.
-
-## 7. Структура кода
-
-```
-src/models/
-├── __init__.py — публичный API
-├── base.py — ModelGateway, ModelGatewayError, ModelRequest, ModelResponse, ModelUsage
-├── stub_gateway.py — StubModelGateway (тестовый переходный слой)
-└── runtime_adapter.py — ModelBackedRuntimePort (адаптер к RuntimePort)
-
-operations/tests/product/
-└── test_model_gateway.py — юнит-тесты, часть канонического run_unittests.py (CI/CD)
-```
-
-## 8. Соответствие требованиям
-
-| Требование | Статус | Примечание |
-|---|---|---|
-| [`SYS_004`](../../specifications/system_specification.md#sys_004): Нормализованный интерфейс поставщика моделей | ✅ | Запрос, ответ, ошибка, таймаут и показатели использования нормализованы одним контрактом |
-| [`BR_034`](../../specifications/business_requirements.md#br_034): Адаптивный выбор модели | ✅ | Контракт не зависит от конкретного поставщика; смена реализации не меняет `Orchestrator` |
-| [`SEC_CTL_015`](../../specifications/system_specification.md#sec_ctl_015): Допуск данных к модели и поставщику | ➖ | Реального поставщика ещё нет — допуск данных проверяется на уровне вызывающей стороны до вызова контракта; предметно проверяется, когда появится реальный поставщик ([`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)) |
-
-## 9. Доказательства
-
-- **Исходный код**: [`src/models/`](../../src/models/) — стабильный контракт, тестовый переходный слой и адаптер к `RuntimePort`
-- **Тесты**: 11 юнит-тестов в [`operations/tests/product/test_model_gateway.py`](../../operations/tests/product/test_model_gateway.py), часть обязательного gate `Quality skills`
-- **Отсутствие регрессий**: Запуск `check.py --all` прошёл успешно
-
-## 10. Готово когда
-
-- ✅ 11 тестов пройдено
-- ✅ Контракт `ModelGateway` определён и используется
-- ✅ `ModelBackedRuntimePort` подтверждает совместимость с границей `RuntimePort` без изменения `Orchestrator`
-- ✅ Полный цикл задачи через шлюз моделей проверен end-to-end
-
-## 11. Что будет дальше
-
-1. [`TASK_005`](../tasks/task_005_arc_005.md): Реализация [`ARC_CMP_005`](../../specifications/architecture_baseline.md#arc_cmp_005) (Шлюз инструментов) — второй внешний контракт, нужный оркестратору для полного цикла выполнения задачи
-2. Сравнение кандидатов поставщика модели для [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) остаётся отдельной, ещё не проведённой работой подэтапа 4 [`m02`](../../milestones.md#m02)
-
-## 12. Примечания для разработчика
-
-- `StubModelGateway` — тестовый переходный слой по [`ADR_003`](../../adr/adr_003_model_provider_interface.md), а не заготовка реальной интеграции: он не обращается к сети и не содержит специфики какого-либо SDK поставщика.
-- Реальное подключение поставщика (например, Anthropic Claude по [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md)) остаётся отдельной работой подэтапа 4 [`m02`](../../milestones.md#m02): она требует явного сравнительного evidence и решения владельца о переходе [`ADR_005`](../../adr/adr_005_first_model_provider_selection.md) в `accepted`, а также хранилища секретов ([`INF_CMP_003`](../../specifications/infrastructure_baseline.md#inf_cmp_003), [`TASK_010`](../tasks/task_010_inf_003.md)) для API-ключа поставщика — этой TASK она не входит, как `StubRuntimePort` не была заготовкой реальной среды агента в [`TASK_003`](../tasks/task_003_arc_003.md).
-
-Действия владельца не требуются: тест полностью автоматизирован и не требует ручного вмешательства.

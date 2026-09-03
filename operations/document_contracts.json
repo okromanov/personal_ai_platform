@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "states": {
+    "document_state": ["current", "superseded"],
+    "decision_state": ["proposed", "accepted", "rejected", "superseded"],
+    "work_state": ["planned", "in-progress", "blocked", "completed", "cancelled"],
+    "spec_state": ["current", "superseded"]
+  },
+  "task": {
+    "next_actor": ["agent", "owner", "automation", "none"]
+  },
+  "test": {
+    "execution": ["automated", "manual"]
+  },
+  "document": {
+    "applicability": ["normative", "reference", "proposed", "historical"],
+    "default_applicability": "normative"
+  },
+  "runtime": {
+    "posix_python": "python3.12",
+    "windows_python": "py -3.12"
+  }
+}

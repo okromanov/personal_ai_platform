@@ -15,7 +15,7 @@ NO_DESCRIPTION = "—"
 # NO_DESCRIPTION rather than guessing.
 DESCRIPTIONS: dict[str, str] = {
     ".github/workflows/project_check.yml": (
-        "CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и еженедельно."
+        "CI-пайплайн GitHub Actions: полная проверка репозитория на каждый push, PR и при ручном запуске."
     ),
     ".gitignore": "Список путей и масок, исключённых из git.",
     "operations/hooks/pre_commit_hook.sh": (

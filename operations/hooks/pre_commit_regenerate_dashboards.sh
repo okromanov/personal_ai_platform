@@ -34,12 +34,24 @@ PYTHON="$(find_python)"
 # nothing to version-bump or re-add, so exclude them (git diff --cached lists
 # them too).
 modified_md=()
+version_bump_md=()
 while IFS= read -r path; do
-    [ -f "$path" ] && modified_md+=("$path")
+    if [ -f "$path" ]; then
+        modified_md+=("$path")
+        # A manually updated version is already the intended semantic bump.
+        # Only unchanged versions need the hook's automatic increment.
+        if git cat-file -e "HEAD:$path" 2>/dev/null; then
+            head_version="$(git show "HEAD:$path" | sed -n '/^---$/,/^---$/s/^version:[[:space:]]*//p' | head -n 1)"
+            staged_version="$(git show ":$path" | sed -n '/^---$/,/^---$/s/^version:[[:space:]]*//p' | head -n 1)"
+            if [ "$head_version" = "$staged_version" ]; then
+                version_bump_md+=("$path")
+            fi
+        fi
+    fi
 done < <(git diff --cached --name-only -- '*.md' 2>/dev/null)
-if [ "${#modified_md[@]}" -gt 0 ]; then
-    "$PYTHON" operations/scripts/versioning/increment_file_version.py "${modified_md[@]}"
-    git add "${modified_md[@]}"
+if [ "${#version_bump_md[@]}" -gt 0 ]; then
+    "$PYTHON" operations/scripts/versioning/increment_file_version.py "${version_bump_md[@]}"
+    git add "${version_bump_md[@]}"
 fi
 
 # Regenerate the owner dashboard whenever a staged Markdown document changed.

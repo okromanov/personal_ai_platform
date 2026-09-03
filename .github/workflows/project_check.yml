@@ -169,7 +169,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 --version
-          python3 -m pip install --disable-pip-version-check --require-hashes \
+          python3.12 -m pip install --disable-pip-version-check --require-hashes \
             -r operations/quality/requirements_dev.txt
 
       - name: Fetch default branch and full history
@@ -225,7 +225,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip_audit \
+          python3.12 -m pip_audit \
             --cache-dir "$RUNNER_TEMP/pip-audit-cache" \
             --requirement operations/quality/requirements_dev.txt \
             --format json \
@@ -247,7 +247,7 @@ jobs:
           if [ -z "$coverage_base" ]; then
             coverage_base="$(git rev-parse HEAD^)"
           fi
-          python3 operations/scripts/quality/run_suite.py full --coverage-base "$coverage_base"
+          python3.12 operations/scripts/quality/run_suite.py full --coverage-base "$coverage_base"
 
       - name: Build and verify the immutable runtime image
         shell: bash
@@ -284,7 +284,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 operations/scripts/quality/record_quality_suite.py \
+          python3.12 operations/scripts/quality/record_quality_suite.py \
             --git-sha "$GITHUB_SHA" \
             --repository "$GITHUB_REPOSITORY" \
             --workflow "$GITHUB_WORKFLOW" \
@@ -314,7 +314,7 @@ jobs:
             --artifact runtime/container_image_digest.txt \
             --artifact runtime/container_health.json \
             --artifact runtime/container_sbom.spdx.json
-          python3 operations/scripts/evidence/generate_bundle.py \
+          python3.12 operations/scripts/evidence/generate_bundle.py \
             --check-summary runtime/check_summary.json \
             --test-returncode 0 \
             --test-output "$(cat runtime/test_output.txt)" \

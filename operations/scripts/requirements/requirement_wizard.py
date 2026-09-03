@@ -353,4 +353,4 @@ if __name__ == "__main__":
     print(f"✅ TEST документов: {result['summary']['test_count']}")
     print(f"✅ TASK документов: {result['summary']['task_count']}")
     print("\n💾 Результат сохранён в памяти агента и готов к применению.")
-    print("   Используйте: python operations/scripts/requirements/apply_requirements.py")
+    print("   Используйте: python3.12 operations/scripts/requirements/apply_requirements.py")

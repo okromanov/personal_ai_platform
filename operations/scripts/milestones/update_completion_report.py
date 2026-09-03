@@ -10,7 +10,7 @@ and how much calendar time elapsed. "Известные ограничения" 
 judgment: they stay as placeholders until filled in by hand, and once
 filled in are preserved verbatim across every later regeneration.
 
-Usage: python3 operations/scripts/milestones/update_completion_report.py m01
+Usage: python3.12 operations/scripts/milestones/update_completion_report.py m01
 """
 
 from __future__ import annotations
@@ -406,7 +406,7 @@ def update_completion_report(milestone_id: str, root: Path | None = None) -> boo
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(
-            "Usage: python3 operations/scripts/milestones/update_completion_report.py <milestone_id>"
+            "Usage: python3.12 operations/scripts/milestones/update_completion_report.py <milestone_id>"
         )
         sys.exit(1)
 

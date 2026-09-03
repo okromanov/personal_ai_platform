@@ -4,7 +4,7 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.8
+version: 2.9
 updated: 2026-09-03
 next_actor: agent
 owner_action: none
@@ -33,11 +33,13 @@ implements:
 
 ## 2. Результат
 
-Выбранная площадка размещения, зафиксированная в [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), согласованная с ней стратегия runtime-секретов из [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) и механизм развёртывания с явной привязкой к версии (Git SHA или тег), контрольной проверкой после развёртывания и управляемым откатом. Замыкает цепочку инфраструктурных компонентов: среда ([`TASK_008`](task_008_inf_001.md)) → сеть ([`TASK_009`](task_009_inf_002.md)) → секреты ([`TASK_010`](task_010_inf_003.md)) → хранилище ([`TASK_011`](task_011_inf_005.md)) → наблюдаемость ([`TASK_012`](task_012_inf_007.md)) → развёртывание (эта TASK).
+Выбранная площадка размещения, зафиксированная в [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), согласованная с ней стратегия runtime-секретов из [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) и механизм развёртывания с явной привязкой к версии (Git SHA или тег), контрольной проверкой после развёртывания и управляемым откатом. Замыкает цепочку инфраструктурных компонентов: среда ([`TASK_008`](task_008_inf_001.md)) → сеть ([`TASK_009`](task_009_inf_002.md)) → секреты
+([`TASK_010`](task_010_inf_003.md)) → хранилище ([`TASK_011`](task_011_inf_005.md)) → наблюдаемость ([`TASK_012`](task_012_inf_007.md)) → развёртывание (эта TASK).
 
 ## 3. Где мы сейчас
 
-[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются Hetzner и DigitalOcean (сценарий A) для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), Selectel оценивается отдельно как резервный сценарий B, и совместимая стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: окончательное решение по сценарию A будет принято после единой scorecard, проверки доступной владельцу оплаты и практического deployment победителя; сценарий B остаётся в бэклоге до завершения сценария A и создания резервной копии. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
+[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются Hetzner и DigitalOcean (сценарий A) для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), Selectel оценивается отдельно как резервный сценарий B, и совместимая стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: окончательное решение по сценарию A будет принято после единой scorecard, проверки доступной
+владельцу оплаты и практического deployment победителя; сценарий B остаётся в бэклоге до завершения сценария A и создания резервной копии. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
 
 ## 4. Что делать сейчас
 
