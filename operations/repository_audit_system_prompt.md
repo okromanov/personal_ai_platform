@@ -4,7 +4,7 @@ type: audit_prompt
 document_state: current
 applicability: reference
 version: 5.0
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - project_rules
   - coding_agent_instruction

@@ -4,7 +4,7 @@ type: operations
 document_state: current
 applicability: normative
 version: 2.6
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - operations_change_process
   - coding_agent_instruction

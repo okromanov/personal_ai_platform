@@ -6,7 +6,7 @@ spec_state: current
 execution: automated
 automated_evidence: project_checks
 version: 1.4
-updated: 2026-09-03
+updated: 2026-09-04
 accepts:
   - m01
 ---

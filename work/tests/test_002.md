@@ -6,7 +6,7 @@ spec_state: current
 execution: automated
 automated_evidence: unit_tests
 version: 1.3
-updated: 2026-09-03
+updated: 2026-09-04
 accepts:
   - m01
 verifies:

@@ -4,7 +4,7 @@ type: guide
 document_state: current
 applicability: normative
 version: 1.4
-updated: 2026-09-03
+updated: 2026-09-04
 ---
 
 # Полный code-quality gate

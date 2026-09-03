@@ -4,7 +4,7 @@ type: operations
 document_state: current
 applicability: proposed
 version: 1.1
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - operations_change_process
   - architecture_baseline

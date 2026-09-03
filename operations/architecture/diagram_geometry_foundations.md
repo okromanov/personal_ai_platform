@@ -4,7 +4,7 @@ type: guide
 document_state: current
 applicability: reference
 version: 1.8
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on:
   - project_rules
   - operations_change_process

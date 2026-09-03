@@ -3,7 +3,7 @@ id: project_rules
 type: project_rules
 document_state: current
 version: 1.6
-updated: 2026-09-03
+updated: 2026-09-04
 depends_on: []
 ---
 
