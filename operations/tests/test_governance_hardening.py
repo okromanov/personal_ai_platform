@@ -445,7 +445,9 @@ jobs:
             )
             errors = check_automation_policy(root).errors
             self.assertTrue(any("отсутствует ограничение" in error for error in errors), errors)
-            self.assertTrue(any("pull_request_target запрещён" in error for error in errors), errors)
+            self.assertTrue(
+                any("pull_request_target запрещён" in error for error in errors), errors
+            )
 
     def test_workflow_block_scalar_break_is_detected(self) -> None:
         """Продолжение многострочного скрипта на нулевом отступе молча закрывает
