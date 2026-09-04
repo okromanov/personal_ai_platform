@@ -712,6 +712,12 @@ def check_instruction_consistency(root: Path) -> CheckResult:
         for pattern, message in forbidden:
             if pattern.search(doc.body):
                 errors.append(f"{relative}: {message}")
+        if relative == "AGENTS.md" and not re.search(
+            r"после\s+успешного\s+слияния\s+удалить\s+соответствующую\s+рабочую\s+ветку",
+            doc.body,
+            re.IGNORECASE,
+        ):
+            errors.append("AGENTS.md: после merge требуется удалять рабочую ветку")
         if relative.startswith("operations/quality/playbooks/"):
             if re.search(r"\b(?:pylint|radon|duplicate-code)\b", doc.body, re.IGNORECASE):
                 errors.append(f"{relative}: заявлен инструмент, которого нет в canonical gate")

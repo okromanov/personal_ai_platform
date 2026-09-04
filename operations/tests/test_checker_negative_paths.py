@@ -187,6 +187,36 @@ class CheckerNegativePathTests(unittest.TestCase):
         self.assertIn("canonical launcher", joined)
         self.assertIn("quality_registry.json", joined)
 
+    def test_instruction_consistency_requires_branch_cleanup_after_merge(self) -> None:
+        document = MarkdownDocument(
+            Path("AGENTS.md"),
+            {
+                "id": "coding_agent_instruction",
+                "type": "agent_instruction",
+                "version": "4.2",
+                "updated": "2026-09-04",
+                "document_state": "current",
+                "applicability": "normative",
+            },
+            "Открыть PR, дождаться серверной проверки и слить.",
+            "Инструкция агенту разработки",
+        )
+
+        def fake_read(path: Path) -> str:
+            if path.name == "record_quality_suite.py":
+                return '"command": ["python3.12",'
+            return "{}"
+
+        with (
+            patch(
+                "operations.scripts.documents.check._primary_documents",
+                return_value=[("AGENTS.md", document)],
+            ),
+            patch("operations.scripts.documents.check.read_text", side_effect=fake_read),
+        ):
+            result = check_instruction_consistency(Path("."))
+        self.assertIn("после merge требуется удалять рабочую ветку", "\n".join(result.errors))
+
     def test_readability_and_discoverability_only_apply_to_active_instructions(self) -> None:
         metadata = {
             "id": "hidden_guide",

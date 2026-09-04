@@ -3,7 +3,7 @@ id: coding_agent_instruction
 type: agent_instruction
 document_state: current
 applicability: normative
-version: 4.1
+version: 4.2
 updated: 2026-09-04
 depends_on:
   - project_rules
@@ -50,6 +50,7 @@ depends_on:
 
 8. Убедиться, что повторная генерация ничего не меняет и diff понятен.
 9. Открыть PR, дождаться серверной проверки точного SHA и только затем сливать.
+10. После успешного слияния удалить соответствующую рабочую ветку; завершённые рабочие ветки не сохранять.
 
 Карта процедур и частых ситуаций находится в [`procedure_map.md`](operations/procedure_map.md).
 
