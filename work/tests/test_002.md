@@ -5,7 +5,7 @@ title: Проверка качества, доказательств и авто
 spec_state: current
 execution: automated
 automated_evidence: unit_tests
-version: 1.3
+version: 1.4
 updated: 2026-09-04
 accepts:
   - m01
@@ -13,7 +13,6 @@ verifies:
   - SEC_CTL_018
 ---
 
-<a id="test_002"></a>
 # TEST_002 — Проверка качества, доказательств и автоматизации принятия
 
 Автоматическая проверка. Действия владельца не требуются.

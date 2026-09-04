@@ -5,8 +5,8 @@ title: Контракты среды агента и поставщика мод
 spec_state: current
 execution: automated
 automated_evidence: m02_contract_tests
-version: 1.3
-updated: 2026-08-24
+version: 1.4
+updated: 2026-09-04
 accepts:
   - m02
 verifies:
@@ -15,7 +15,6 @@ verifies:
   - SYS_027
 ---
 
-<a id="test_003"></a>
 # TEST_003 — Контракты среды агента и поставщика модели
 
 Автоматическая проверка. Действия владельца не требуются.

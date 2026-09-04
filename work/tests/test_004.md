@@ -5,8 +5,8 @@ title: Контроль владельца и аварийное отключе�
 spec_state: current
 execution: automated
 automated_evidence: m02_security_tests
-version: 1.3
-updated: 2026-08-24
+version: 1.4
+updated: 2026-09-04
 accepts:
   - m02
 verifies:
@@ -21,7 +21,6 @@ verifies:
   - SEC_CTL_020
 ---
 
-<a id="test_004"></a>
 # TEST_004 — Контроль владельца и аварийное отключение
 
 Автоматическая негативная проверка. Действия владельца не требуются.

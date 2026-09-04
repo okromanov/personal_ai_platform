@@ -15,8 +15,14 @@ from operations.scripts.documents.traceability import (
     collect_traceable_elements,
 )
 
-# TASK_*/TEST_*/ADR_* are conventionally linked to the whole file, without an
-# anchor — none of them carry an <a id="..."> heading anchor of their own.
+# TASK_*/TEST_*/ADR_* are linked to the whole card file rather than to a
+# section inside it, so this checker does not demand an anchor for them.
+#
+# That is a rule about the *link*, not a claim about the file: every adr/*.md
+# does carry its own <a id="adr_NNN"></a>, and milestones.md links ADR_001
+# through it. TASK and TEST cards carry none. Six TEST cards used to, left
+# over from an earlier convention — unreferenced, absent from the registered
+# template, and inconsistent with their fourteen siblings; removed 2026-09-04.
 _WHOLE_FILE_FAMILIES = {"TASK", "TEST", "ADR"}
 
 _BARE_ID_ERROR = re.compile(

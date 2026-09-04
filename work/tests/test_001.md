@@ -5,13 +5,12 @@ title: Проверка модели документов и трассиров�
 spec_state: current
 execution: automated
 automated_evidence: project_checks
-version: 1.4
+version: 1.5
 updated: 2026-09-04
 accepts:
   - m01
 ---
 
-<a id="test_001"></a>
 # TEST_001 — Проверка модели документов и трассировки
 
 Автоматическая проверка. Действия владельца не требуются.
