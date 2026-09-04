@@ -3,7 +3,7 @@ id: coding_agent_instruction
 type: agent_instruction
 document_state: current
 applicability: normative
-version: 4.0
+version: 4.1
 updated: 2026-09-04
 depends_on:
   - project_rules
@@ -25,7 +25,7 @@ depends_on:
 ## 2. С чего начинать
 
 1. Прочитать [`project_status.md`](project_status.md) и открыть указанную там TASK либо этапный рубеж.
-2. Прочитать только нужные для работы части [`project_rules.md`](project_rules.md), спецификаций и процедур.
+2. Полностью, от начала до конца, прочитать [`project_rules.md`](project_rules.md), все Markdown-документы в [`specifications/`](specifications/) и все Markdown-документы в [`operations/`](operations/). Выборочное чтение отдельных разделов вместо полного чтения запрещено.
 3. Проверить `ls -la .git/hooks/pre-commit`.
 4. Если hook отсутствует, установить его по [`setup_precommit.md`](operations/setup_precommit.md) до первой содержательной правки.
 5. Убедиться, что рабочее дерево и база ветки понятны; не продолжать поверх неидентифицированных изменений.
