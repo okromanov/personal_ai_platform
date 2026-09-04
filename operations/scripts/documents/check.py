@@ -1535,26 +1535,43 @@ def check_automation_policy(root: Path) -> CheckResult:
     for workflow_path in workflow_paths:
         workflow_name = workflow_path.name
         workflow_text = read_text(workflow_path)
+        is_branch_cleanup = workflow_name == "delete_merged_branches.yml"
         errors.extend(_block_scalar_errors(workflow_name, workflow_text))
         permission_match = re.search(
             r"(?m)^permissions:\s*$\n(?P<body>(?:[ \t]+[^\n]*\n)*)",
             workflow_text,
         )
         permission_body = permission_match.group("body") if permission_match else ""
-        if not re.search(r"(?m)^[ \t]+contents:\s*read\s*$", permission_body):
+        required_contents = "write" if is_branch_cleanup else "read"
+        if not re.search(rf"(?m)^[ \t]+contents:\s*{required_contents}\s*$", permission_body):
             errors.append(
-                f"{workflow_name}: persistent workflow должен явно ограничивать repository permission до contents: read"
+                f"{workflow_name}: persistent workflow должен явно ограничивать repository permission до contents: {required_contents}"
             )
-        if "contents: write" in workflow_text.lower():
+        if "contents: write" in workflow_text.lower() and not is_branch_cleanup:
             errors.append(f"{workflow_name}: persistent workflow не может иметь contents: write")
         # Штатная автоматизация остаётся читающей целиком, а не только по contents.
         # Иначе полномочия расширяются молча, добавлением одной строки в permissions.
         for scope, value in re.findall(r"(?m)^[ \t]+([a-z-]+):\s*([a-z]+)\s*$", permission_body):
-            if value not in ALLOWED_WORKFLOW_PERMISSIONS:
+            cleanup_write = is_branch_cleanup and scope == "contents" and value == "write"
+            if value not in ALLOWED_WORKFLOW_PERMISSIONS and not cleanup_write:
                 errors.append(
                     f"{workflow_name}: разрешение '{scope}: {value}' расширяет полномочия автоматизации; "
                     f"допустимы только {sorted(ALLOWED_WORKFLOW_PERMISSIONS)} (operations/change_process.md, раздел 5)"
                 )
+        if is_branch_cleanup:
+            cleanup_guards = {
+                "pull_request с типом closed": "types:\n      - closed",
+                "только успешный merge": "github.event.pull_request.merged == true",
+                "только ветка того же репозитория": (
+                    "github.event.pull_request.head.repo.full_name == github.repository"
+                ),
+                "только ветки codex/*": 'name.startswith("codex/")',
+            }
+            for guard, marker in cleanup_guards.items():
+                if marker not in workflow_text:
+                    errors.append(f"{workflow_name}: отсутствует ограничение '{guard}'")
+            if "pull_request_target" in workflow_text:
+                errors.append(f"{workflow_name}: pull_request_target запрещён для удаления веток")
         for token in ["git push", "git commit"]:
             if token in workflow_text.lower():
                 errors.append(

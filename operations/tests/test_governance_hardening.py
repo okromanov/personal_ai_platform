@@ -395,6 +395,60 @@ class GovernanceHardeningTests(unittest.TestCase):
             errors = check_automation_policy(root).errors
             self.assertFalse(any("расширяет полномочия" in error for error in errors), errors)
 
+    def test_automation_policy_accepts_narrow_merged_branch_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_minimal_automation_fixture(root, with_push_trigger=True)
+            (root / ".github/workflows/delete_merged_branches.yml").write_text(
+                """\
+name: Delete merged branches
+on:
+  pull_request:
+    types:
+      - closed
+permissions:
+  contents: write
+  pull-requests: read
+jobs:
+  cleanup:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - run: |-
+          if name.startswith(\"codex/\"):
+              delete(name)
+""",
+                encoding="utf-8",
+            )
+            errors = check_automation_policy(root).errors
+            self.assertFalse(any("delete_merged_branches.yml" in error for error in errors), errors)
+
+    def test_automation_policy_rejects_broadened_branch_cleanup(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_minimal_automation_fixture(root, with_push_trigger=True)
+            (root / ".github/workflows/delete_merged_branches.yml").write_text(
+                """\
+name: Unsafe branch cleanup
+on:
+  pull_request_target:
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps: []
+""",
+                encoding="utf-8",
+            )
+            errors = check_automation_policy(root).errors
+            self.assertTrue(any("отсутствует ограничение" in error for error in errors), errors)
+            self.assertTrue(
+                any("pull_request_target запрещён" in error for error in errors), errors
+            )
+
     def test_workflow_block_scalar_break_is_detected(self) -> None:
         """Продолжение многострочного скрипта на нулевом отступе молча закрывает
         блок YAML и ломает рабочий процесс целиком."""
