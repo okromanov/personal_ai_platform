@@ -109,7 +109,8 @@ class CheckerNegativePathTests(unittest.TestCase):
                 "document_state": "current",
                 "applicability": "normative",
             },
-            "AskUserQuestion\npython3 -m operations.example\npy operations\\tool.py\n",
+            "AskUserQuestion\nПрочитать только нужные части.\n"
+            "python3 -m operations.example\npy operations\\tool.py\n",
             "Guide",
         )
 
@@ -128,6 +129,7 @@ class CheckerNegativePathTests(unittest.TestCase):
             result = check_instruction_consistency(Path("."))
         joined = "\n".join(result.errors)
         self.assertIn("AskUserQuestion", joined)
+        self.assertIn("выборочным чтением", joined)
         self.assertIn("POSIX-команда", joined)
         self.assertIn("Windows-команда", joined)
 

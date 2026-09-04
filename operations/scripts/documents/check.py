@@ -694,6 +694,10 @@ def check_instruction_consistency(root: Path) -> CheckResult:
         (re.compile(r"\bspec_state:\s*draft\b", re.IGNORECASE), "несуществующий spec_state=draft"),
         (re.compile(r"\bAskUserQuestion\b"), "непереносимое имя интерфейса AskUserQuestion"),
         (
+            re.compile(r"прочитать\s+только\s+нужн", re.IGNORECASE),
+            "обязательные правила нельзя ограничивать выборочным чтением",
+        ),
+        (
             re.compile(r"остальн\w*\s+\d+\s+структурн", re.IGNORECASE),
             "захардкоженное число проверок",
         ),
