@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import stat
+import subprocess
 import tempfile
 import unittest
 from datetime import date
@@ -298,6 +299,9 @@ class QualityRunnerTests(unittest.TestCase):
                 patch.object(run_suite, "validate_configuration_files"),
                 patch.object(run_suite, "validate_python_permissions"),
                 patch.object(run_suite, "run_step", side_effect=record),
+                # Этот тест про маршрутизацию --coverage-base; база управления
+                # вычисляется из git, которого во временном каталоге нет.
+                patch.object(run_suite, "resolve_governance_base", return_value="gov-sha"),
             ):
                 run_suite.run_full(root, "python", "base-sha")
             names = [name for name, _, _ in calls]
@@ -311,10 +315,18 @@ class QualityRunnerTests(unittest.TestCase):
                 patch.object(run_suite, "validate_configuration_files"),
                 patch.object(run_suite, "validate_python_permissions"),
                 patch.object(run_suite, "run_step", side_effect=record),
+                patch.object(run_suite, "resolve_governance_base", return_value="gov-sha"),
             ):
                 run_suite.run_full(root, "python", None)
             coverage = next(command for name, command, _ in calls if name == "Coverage policy")
             self.assertEqual(coverage[-1], "--skip-diff")
+            # Контроли управления выполняются и когда базы покрытия нет.
+            scope = next(
+                command
+                for name, command, _ in calls
+                if name == "Change scope and immutable audit history"
+            )
+            self.assertEqual(scope[-4:], ["--base", "gov-sha", "--head", "HEAD"])
 
     def test_main_routes_profiles_and_reports_failures(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -337,3 +349,77 @@ class QualityRunnerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GovernanceBaseTests(unittest.TestCase):
+    """Контроли управления не должны выключаться отсутствием аргумента.
+
+    До этого «Change scope and immutable audit history» выполнялся только
+    `if base:`, а базу передавал единственный флаг `--coverage-base`, которого
+    нет ни в AGENTS.md, ни в pre_push_hook.sh. Границы TASK, честность даты
+    `updated` и неизменяемость baseline аудита проверялись поэтому только в CI.
+    """
+
+    def _repo(self, tmp: str, commits: int = 2) -> Path:
+        root = Path(tmp)
+
+        def run(*args: str) -> None:
+            subprocess.run(args, cwd=root, check=True, capture_output=True)
+
+        run("git", "init", "-q")
+        run("git", "config", "user.email", "t@example.com")
+        run("git", "config", "user.name", "t")
+        for index in range(commits):
+            (root / f"f{index}.txt").write_text(str(index), encoding="utf-8")
+            run("git", "add", "-A")
+            run("git", "commit", "-qm", f"c{index}")
+        return root
+
+    def test_falls_back_to_head_parent_without_origin_main(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp)
+            resolved = run_suite.resolve_governance_base(root)
+            parent = subprocess.run(
+                ["git", "rev-parse", "HEAD^"], cwd=root, capture_output=True, text=True, check=True
+            ).stdout.strip()
+            self.assertEqual(resolved, parent)
+
+    def test_explicit_base_wins(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, commits=3)
+            head = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=True
+            ).stdout.strip()
+            self.assertEqual(run_suite.resolve_governance_base(root, "HEAD"), head)
+
+    def test_unresolvable_base_fails_instead_of_skipping(self) -> None:
+        # Единственный коммит: HEAD^ не существует, origin/main нет. Раньше в
+        # такой ситуации шаг просто не выполнялся.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, commits=1)
+            with self.assertRaises(run_suite.QualityFailure) as raised:
+                run_suite.resolve_governance_base(root)
+            self.assertIn("пропускать эти проверки нельзя", str(raised.exception))
+
+    def test_full_profile_always_runs_the_governance_step(self) -> None:
+        executed: list[str] = []
+
+        def fake_step(root, name, command, artifact=None):  # noqa: ANN001
+            executed.append(name)
+            if name != "Change scope and immutable audit history":
+                return
+            raise run_suite.QualityFailure("stop after the step under test")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp)
+            with (
+                patch.object(run_suite, "run_step", fake_step),
+                # Не предмет этого теста: во временном репозитории нет ни
+                # pyproject.toml, ни манифестов зависимостей.
+                patch.object(run_suite, "validate_configuration_files"),
+                patch.object(run_suite, "validate_python_permissions"),
+            ):
+                with self.assertRaises(run_suite.QualityFailure):
+                    # base=None — ровно то, как зовут профиль AGENTS.md и hook.
+                    run_suite.run_full(root, "python3", None)
+        self.assertEqual(executed, ["Change scope and immutable audit history"])

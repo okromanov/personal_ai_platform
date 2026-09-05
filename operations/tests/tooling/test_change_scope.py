@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
 from operations.scripts.common.project import run_command
 from operations.scripts.tasks.check_change_scope import (
+    GATE_MACHINERY_PATTERNS,
+    _matches,
     changed_paths_between,
     validate_audit_history,
     validate_change_scope,
     validate_document_metadata,
+    validate_gate_machinery_isolation,
 )
 
 
@@ -213,6 +217,59 @@ class DocumentMetadataHonestyTests(unittest.TestCase):
         changed = changed_paths_between(root, "origin/main", "HEAD")
         errors = validate_document_metadata(root, "origin/main", "HEAD", changed)
         self.assertIsInstance(errors, list)
+
+
+class GateMachineryIsolationTests(unittest.TestCase):
+    """Код, который обеспечивает соблюдение правил, не правится заодно.
+
+    `operations/**` и `.github/**` выведены из-под границ TASK через
+    MAINTENANCE_PATH_PATTERNS, и обоснование «правку видно через смену
+    версии» к .py и .yml неприменимо — поля `version` у них нет. Ослабление
+    gate внутри продуктового PR иначе проходит незамеченным.
+    """
+
+    def test_machinery_mixed_with_product_delivery_is_rejected(self) -> None:
+        errors = validate_gate_machinery_isolation(
+            ["src/channels/telegram.py", "operations/scripts/quality/run_suite.py"]
+        )
+        self.assertEqual(len(errors), 1)
+        self.assertIn("разделите на два запроса", errors[0])
+
+    def test_machinery_alone_passes(self) -> None:
+        self.assertEqual(
+            validate_gate_machinery_isolation(
+                ["operations/scripts/documents/check.py", ".github/workflows/project_check.yml"]
+            ),
+            [],
+        )
+
+    def test_product_alone_passes(self) -> None:
+        self.assertEqual(validate_gate_machinery_isolation(["src/a.py", "adr/adr_010_x.md"]), [])
+
+    def test_documentation_next_to_machinery_is_not_product_delivery(self) -> None:
+        # Документы operations/** не являются поставкой и не запускают правило.
+        self.assertEqual(
+            validate_gate_machinery_isolation(
+                ["operations/change_process.md", "operations/hooks/pre_push_hook.sh"]
+            ),
+            [],
+        )
+
+    def test_every_gate_machinery_pattern_matches_a_real_tracked_file(self) -> None:
+        # Шаблон, которому ничего не соответствует, защищает пустоту.
+        tracked = subprocess.run(
+            ["git", "ls-files"],
+            cwd=Path(__file__).resolve().parents[3],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.split()
+        for pattern in GATE_MACHINERY_PATTERNS:
+            with self.subTest(pattern=pattern):
+                self.assertTrue(
+                    any(_matches(path, [pattern]) for path in tracked),
+                    f"{pattern} не покрывает ни одного файла",
+                )
 
 
 if __name__ == "__main__":

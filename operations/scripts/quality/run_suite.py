@@ -236,6 +236,48 @@ def validate_python_permissions(root: Path) -> None:
         raise QualityFailure("Python files must not be executable: " + ", ".join(executable))
 
 
+def resolve_governance_base(root: Path, explicit: str | None = None) -> str:
+    """Ревизия, относительно которой проверяются контроли управления.
+
+    Это не то же самое, что база diff-покрытия, хотя раньше обе роли играл
+    один флаг `--coverage-base`. Из-за этого шаг «Change scope and immutable
+    audit history» — границы TASK, честность даты `updated`, обязательная
+    смена версии authority-документа и неизменяемость baseline аудита —
+    выполнялся только когда флаг передали. Ни AGENTS.md, ни pre_push_hook.sh
+    его не передают, поэтому весь этот контур жил только в CI.
+
+    Пропуск проверки из-за отсутствующего аргумента — это fail-open, поэтому
+    база вычисляется здесь сама, а невозможность её вычислить — ошибка, а не
+    основание пропустить шаг.
+    """
+    candidates = [explicit] if explicit else []
+    merge_base = subprocess.run(
+        ["git", "merge-base", "origin/main", "HEAD"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if merge_base.returncode == 0 and merge_base.stdout.strip():
+        candidates.append(merge_base.stdout.strip())
+    candidates.append("HEAD^")
+    for candidate in candidates:
+        resolved = subprocess.run(
+            ["git", "rev-parse", "--verify", f"{candidate}^{{commit}}"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if resolved.returncode == 0 and resolved.stdout.strip():
+            return resolved.stdout.strip()
+    raise QualityFailure(
+        "Не удалось определить базу для проверок управления "
+        "(ни origin/main, ни HEAD^). Укажите её явно через --governance-base; "
+        "пропускать эти проверки нельзя."
+    )
+
+
 def run_step(
     root: Path,
     name: str,
@@ -320,23 +362,28 @@ def run_fast(root: Path, python: str) -> None:
     )
 
 
-def run_full(root: Path, python: str, base: str | None) -> None:
+def run_full(
+    root: Path,
+    python: str,
+    base: str | None,
+    governance_base: str | None = None,
+) -> None:
     validate_configuration_files(root)
     validate_python_permissions(root)
     (root / "runtime").mkdir(exist_ok=True)
-    if base:
-        run_step(
-            root,
-            "Change scope and immutable audit history",
-            [
-                python,
-                "operations/scripts/tasks/check_change_scope.py",
-                "--base",
-                base,
-                "--head",
-                "HEAD",
-            ],
-        )
+    # Безусловно: этот шаг несёт контроли управления, а не покрытие.
+    run_step(
+        root,
+        "Change scope and immutable audit history",
+        [
+            python,
+            "operations/scripts/tasks/check_change_scope.py",
+            "--base",
+            resolve_governance_base(root, governance_base),
+            "--head",
+            "HEAD",
+        ],
+    )
     run_step(
         root,
         "Regenerate derived documents",
@@ -476,13 +523,21 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Canonical repository quality suite")
     parser.add_argument("profile", choices=("fast", "full"))
     parser.add_argument("--coverage-base", help="Git revision used for changed-line coverage")
+    parser.add_argument(
+        "--governance-base",
+        help=(
+            "Git revision for the change-scope, document-metadata and audit-history "
+            "checks. Determined automatically when omitted; unlike --coverage-base it "
+            "cannot be skipped."
+        ),
+    )
     args = parser.parse_args()
     root = find_project_root(Path.cwd())
     try:
         if args.profile == "fast":
             run_fast(root, sys.executable)
         else:
-            run_full(root, sys.executable, args.coverage_base)
+            run_full(root, sys.executable, args.coverage_base, args.governance_base)
     except QualityFailure as exc:
         print(f"ERROR: {exc}")
         return 1

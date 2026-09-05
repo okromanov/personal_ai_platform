@@ -9,6 +9,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypedDict, cast
 
+# PyYAML поставляется без PEP 561-маркера; стабы живут в отдельном пакете
+# types-PyYAML, а расширять набор зависимостей ради разбора одного workflow
+# — решение владельца, а не следствие этой правки (AGENTS.md §6).
+import yaml  # type: ignore[import-untyped]
+
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
@@ -1496,6 +1501,90 @@ def _block_scalar_errors(workflow_name: str, text: str) -> list[str]:
     return errors
 
 
+_CLEANUP_WRITE_CALL = re.compile(r'request\(\s*"(?P<method>[A-Z]+)"\s*,\s*(?P<target>[^)]*)\)')
+# Единственное обращение, меняющее репозиторий, которое разрешено workflow
+# очистки веток. Всё остальное с его токеном `contents: write` запрещено.
+_CLEANUP_ALLOWED_DELETE = 'f"/repos/{repository}/git/refs/{encoded_ref}"'
+
+
+def _branch_cleanup_errors(workflow_name: str, workflow_text: str) -> list[str]:
+    """Ограничения workflow, которому выдан `contents: write`.
+
+    Раньше это была проверка присутствия четырёх подстрок. Она подтверждала,
+    что строки написаны, но ничего не говорила о том, что workflow делает:
+    добавленный `PUT /repos/{repo}/contents/...` при всех сохранённых гардах
+    проходил её без единой ошибки. Теперь `on`, `permissions` и условие job
+    читаются как YAML — то есть проверяются фактические значения, — а
+    обращения к API сверяются с белым списком.
+    """
+    errors: list[str] = []
+    try:
+        document = yaml.safe_load(workflow_text)
+    except yaml.YAMLError as exc:
+        return [f"{workflow_name}: не удалось разобрать YAML: {exc}"]
+    if not isinstance(document, dict):
+        return [f"{workflow_name}: workflow не является YAML-объектом"]
+
+    # PyYAML разбирает голое `on:` как булево True (норма YAML 1.1).
+    triggers = document.get("on", document.get(True))
+    if not isinstance(triggers, dict) or set(triggers) != {"pull_request"}:
+        errors.append(
+            f"{workflow_name}: единственный допустимый триггер — pull_request, "
+            f"получено {sorted(triggers) if isinstance(triggers, dict) else triggers!r}"
+        )
+    else:
+        types = triggers["pull_request"]
+        types = types.get("types") if isinstance(types, dict) else None
+        if types != ["closed"]:
+            errors.append(f"{workflow_name}: pull_request обязан ограничиваться types: [closed]")
+
+    permissions = document.get("permissions")
+    if permissions != {"contents": "write", "pull-requests": "read"}:
+        errors.append(
+            f"{workflow_name}: допустимы ровно contents: write и pull-requests: read, "
+            f"получено {permissions!r}"
+        )
+
+    jobs = document.get("jobs")
+    if not isinstance(jobs, dict) or len(jobs) != 1:
+        errors.append(f"{workflow_name}: допускается ровно один job")
+        jobs = jobs if isinstance(jobs, dict) else {}
+    for job_name, job in jobs.items():
+        condition = str(job.get("if", "")) if isinstance(job, dict) else ""
+        for guard in (
+            "github.event.pull_request.merged == true",
+            "github.event.pull_request.head.repo.full_name == github.repository",
+        ):
+            if guard not in condition:
+                errors.append(f"{workflow_name}: job '{job_name}' не ограничен условием '{guard}'")
+
+    # Раньше здесь требовался префикс codex/*. По решению владельца удаляются
+    # ветки любого имени, поэтому границу держит не имя, а два свойства самой
+    # ветки: она не является веткой по умолчанию и не защищена. Условие
+    # «есть слитый pull request» проверяется отдельно ниже — без него удалять
+    # нельзя ничего.
+    for guard, marker in (
+        ("ветка по умолчанию исключена", "name == default_branch"),
+        ("защищённая ветка исключена", 'branch.get("protected")'),
+        ("удаляется только ветка со слитым pull request", 'pull.get("merged_at")'),
+    ):
+        if marker not in workflow_text:
+            errors.append(f"{workflow_name}: отсутствует ограничение — {guard}")
+
+    for match in _CLEANUP_WRITE_CALL.finditer(workflow_text):
+        method = match.group("method")
+        target = match.group("target").strip()
+        if method == "GET":
+            continue
+        if method == "DELETE" and target == _CLEANUP_ALLOWED_DELETE:
+            continue
+        errors.append(
+            f"{workflow_name}: обращение {method} {target} не входит в белый список; "
+            "workflow с contents: write может только читать и удалять ref ветки codex/*"
+        )
+    return errors
+
+
 def check_automation_policy(root: Path) -> CheckResult:
     errors: list[str] = []
     project_workflow = read_text(root / ".github/workflows/project_check.yml")
@@ -1559,19 +1648,7 @@ def check_automation_policy(root: Path) -> CheckResult:
                     f"допустимы только {sorted(ALLOWED_WORKFLOW_PERMISSIONS)} (operations/change_process.md, раздел 5)"
                 )
         if is_branch_cleanup:
-            cleanup_guards = {
-                "pull_request с типом closed": "types:\n      - closed",
-                "только успешный merge": "github.event.pull_request.merged == true",
-                "только ветка того же репозитория": (
-                    "github.event.pull_request.head.repo.full_name == github.repository"
-                ),
-                "только ветки codex/*": 'name.startswith("codex/")',
-            }
-            for guard, marker in cleanup_guards.items():
-                if marker not in workflow_text:
-                    errors.append(f"{workflow_name}: отсутствует ограничение '{guard}'")
-            if "pull_request_target" in workflow_text:
-                errors.append(f"{workflow_name}: pull_request_target запрещён для удаления веток")
+            errors.extend(_branch_cleanup_errors(workflow_name, workflow_text))
         for token in ["git push", "git commit"]:
             if token in workflow_text.lower():
                 errors.append(
