@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   cleanup:
-    name: Delete merged codex branches
+    name: Delete merged branches
     if: >-
       github.event.pull_request.merged == true &&
       github.event.pull_request.head.repo.full_name == github.repository
@@ -64,9 +64,13 @@ jobs:
                   break
               page += 1
 
+          # Удаляются ветки любого префикса, а не только codex/*. Границу
+          # держат два условия ниже, а не имя ветки: это не ветка по умолчанию,
+          # и GitHub подтверждает для неё слитый pull request. Защищённая ветка
+          # без слитого PR под это не подпадает.
           for branch in branches:
               name = branch["name"]
-              if name == default_branch or not name.startswith("codex/"):
+              if name == default_branch or branch.get("protected"):
                   continue
               head = quote(f"{owner}:{name}", safe="")
               pulls = request(

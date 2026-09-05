@@ -1558,8 +1558,18 @@ def _branch_cleanup_errors(workflow_name: str, workflow_text: str) -> list[str]:
             if guard not in condition:
                 errors.append(f"{workflow_name}: job '{job_name}' не ограничен условием '{guard}'")
 
-    if 'name.startswith("codex/")' not in workflow_text:
-        errors.append(f"{workflow_name}: удаление ограничивается только ветками codex/*")
+    # Раньше здесь требовался префикс codex/*. По решению владельца удаляются
+    # ветки любого имени, поэтому границу держит не имя, а два свойства самой
+    # ветки: она не является веткой по умолчанию и не защищена. Условие
+    # «есть слитый pull request» проверяется отдельно ниже — без него удалять
+    # нельзя ничего.
+    for guard, marker in (
+        ("ветка по умолчанию исключена", "name == default_branch"),
+        ("защищённая ветка исключена", 'branch.get("protected")'),
+        ("удаляется только ветка со слитым pull request", 'pull.get("merged_at")'),
+    ):
+        if marker not in workflow_text:
+            errors.append(f"{workflow_name}: отсутствует ограничение — {guard}")
 
     for match in _CLEANUP_WRITE_CALL.finditer(workflow_text):
         method = match.group("method")

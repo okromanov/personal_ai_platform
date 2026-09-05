@@ -1368,7 +1368,9 @@ jobs:
         run: |
           batch = request("GET", f"/repos/{repository}/branches")
           for branch in branches:
-              if not name.startswith("codex/"):
+              if name == default_branch or branch.get("protected"):
+                  continue
+              if not any(pull.get("merged_at") for pull in pulls):
                   continue
               request("DELETE", f"/repos/{repository}/git/refs/{encoded_ref}")
 """
@@ -1415,10 +1417,22 @@ jobs:
         errors = self._errors("on: [\n")
         self.assertTrue(any("не удалось разобрать YAML" in error for error in errors), errors)
 
-    def test_codex_prefix_restriction_must_remain(self) -> None:
-        mutated = self.WORKFLOW.replace('name.startswith("codex/")', "True", 1)
-        errors = self._errors(mutated)
-        self.assertTrue(any("codex/*" in error for error in errors), errors)
+    def test_each_branch_boundary_must_remain(self) -> None:
+        """Границу держит не имя ветки, а её свойства и доказанный merge.
+
+        Владелец решил удалять слитые ветки любого префикса, поэтому проверка
+        префикса `codex/*` снята. Взамен обязаны остаться три ограничения: не
+        трогать ветку по умолчанию, не трогать защищённую ветку и удалять
+        только ту, для которой GitHub подтверждает слитый pull request.
+        """
+        for marker, replacement, expected in (
+            ("name == default_branch", "False", "ветка по умолчанию"),
+            ('branch.get("protected")', "False", "защищённая ветка"),
+            ('pull.get("merged_at")', "True", "слитым pull request"),
+        ):
+            with self.subTest(marker=marker):
+                errors = self._errors(self.WORKFLOW.replace(marker, replacement, 1))
+                self.assertTrue(any(expected in error for error in errors), errors)
 
 
 if __name__ == "__main__":

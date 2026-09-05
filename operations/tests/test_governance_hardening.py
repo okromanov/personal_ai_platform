@@ -417,8 +417,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |-
-          if name.startswith(\"codex/\"):
-              delete(name)
+          if name == default_branch or branch.get(\"protected\"):
+              continue
+          if not any(pull.get(\"merged_at\") for pull in pulls):
+              continue
+          delete(name)
 """,
                 encoding="utf-8",
             )
@@ -451,7 +454,8 @@ jobs:
                 any("единственный допустимый триггер" in error for error in errors), errors
             )
             self.assertTrue(any("merged == true" in error for error in errors), errors)
-            self.assertTrue(any("codex/*" in error for error in errors), errors)
+            self.assertTrue(any("ветка по умолчанию" in error for error in errors), errors)
+            self.assertTrue(any("слитым pull request" in error for error in errors), errors)
 
     def test_workflow_block_scalar_break_is_detected(self) -> None:
         """Продолжение многострочного скрипта на нулевом отступе молча закрывает
