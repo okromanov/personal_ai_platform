@@ -166,6 +166,43 @@ def _git_head(root: Path) -> str:
     return result.stdout.strip()
 
 
+def _commit_authors(root: Path, sha: str) -> set[str]:
+    """Авторы коммитов, приведших к проверяемому SHA (до 200 последних)."""
+    result = run_command(["git", "log", "--format=%ae%n%an", "-n", "200", sha], cwd=root)
+    if not result.ok:
+        return set()
+    return {line.strip().lower() for line in result.stdout.splitlines() if line.strip()}
+
+
+def validate_reviewer_independence(root: Path, data: dict[str, object], sha: str) -> None:
+    """Сверить заявленную независимость проверки с авторством коммитов.
+
+    `review_context: fresh-session` подтверждается только тем, что кто-то это
+    написал. Здесь декларация связывается с наблюдаемым фактом: проверяющий не
+    должен входить в число авторов проверяемого диапазона.
+
+    В проекте одного владельца это условие невыполнимо — он и автор изменений,
+    и единственный проверяющий. Поэтому предусмотрен явный режим
+    `reviewer_is_author_acknowledged`, который не выдаёт совпадение за
+    независимость, а фиксирует его в записи. Запрещено именно молчаливое
+    совпадение: контроль, который можно обойти не заметив, контролем не является.
+    """
+    reviewer = str(data.get("reviewer", "")).strip().lower()
+    if not reviewer:
+        return
+    authors = _commit_authors(root, sha)
+    if reviewer not in authors:
+        return
+    if data.get("reviewer_is_author_acknowledged") is True:
+        return
+    raise ValueError(
+        f"Semantic review: reviewer '{reviewer}' входит в число авторов проверяемого "
+        "диапазона, а review_context заявляет независимость. Либо проверку выполняет "
+        "кто-то другой, либо запись обязана содержать "
+        "reviewer_is_author_acknowledged: true"
+    )
+
+
 def _git_branch(root: Path) -> str:
     result = run_command(["git", "branch", "--show-current"], cwd=root)
     if not result.ok:
@@ -328,6 +365,7 @@ def validate_semantic_review(root: Path, path: Path, milestone_id: str) -> dict[
         raise ValueError(
             "Semantic review должен быть выполнен в fresh-session или independent-reviewer"
         )
+    validate_reviewer_independence(root, data, actual_sha)
     if data.get("lifecycle_tested") is not True:
         raise ValueError("Semantic review должен подтверждать полный lifecycle_tested")
     if milestone_id.lower() == "m01":

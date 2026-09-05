@@ -8,6 +8,7 @@ from typing import Any
 from unittest.mock import patch
 
 from operations.scripts.documents.check import (
+    _branch_cleanup_errors,
     _known_reference_ids,
     _task_test_plan_item_errors,
     check_acceptance_adr_transitions,
@@ -1332,6 +1333,92 @@ class SecretScanTests(unittest.TestCase):
     def test_unscanned_suffix_is_skipped(self) -> None:
         payload = "gh" + "p_" + "0123456789abcdefghij"
         self.assertEqual(self._scan("blob.bin", payload), [])
+
+
+class BranchCleanupWorkflowTests(unittest.TestCase):
+    """Единственный workflow с `contents: write` проверяется по смыслу.
+
+    Раньше его ограничения проверялись присутствием четырёх подстрок: добавленный
+    `PUT /repos/{repo}/contents/...` при всех сохранённых гардах проходил проверку
+    без единой ошибки. Теперь `on`, `permissions` и условие job читаются как YAML,
+    то есть проверяются фактические значения, а обращения к API сверяются с
+    белым списком.
+    """
+
+    WORKFLOW = """name: Delete merged branches
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete
+        shell: python
+        run: |
+          batch = request("GET", f"/repos/{repository}/branches")
+          for branch in branches:
+              if not name.startswith("codex/"):
+                  continue
+              request("DELETE", f"/repos/{repository}/git/refs/{encoded_ref}")
+"""
+
+    def _errors(self, text: str) -> list[str]:
+        return _branch_cleanup_errors("delete_merged_branches.yml", text)
+
+    def test_reference_shape_passes(self) -> None:
+        self.assertEqual(self._errors(self.WORKFLOW), [])
+
+    def test_write_call_outside_the_allowlist_is_rejected(self) -> None:
+        mutated = self.WORKFLOW.replace(
+            '          batch = request("GET"',
+            '          request("PUT", f"/repos/{repository}/contents/x.md")\n'
+            '          batch = request("GET"',
+            1,
+        )
+        errors = self._errors(mutated)
+        self.assertTrue(any("не входит в белый список" in error for error in errors), errors)
+
+    def test_merged_guard_is_read_from_the_job_condition(self) -> None:
+        mutated = self.WORKFLOW.replace("github.event.pull_request.merged == true", "true", 1)
+        errors = self._errors(mutated)
+        self.assertTrue(any("merged == true" in error for error in errors), errors)
+
+    def test_extra_trigger_is_rejected(self) -> None:
+        mutated = self.WORKFLOW.replace(
+            "on:\n  pull_request:", "on:\n  workflow_dispatch:\n  pull_request:", 1
+        )
+        errors = self._errors(mutated)
+        self.assertTrue(any("единственный допустимый триггер" in error for error in errors), errors)
+
+    def test_widened_permissions_are_rejected(self) -> None:
+        mutated = self.WORKFLOW.replace("  pull-requests: read", "  pull-requests: write", 1)
+        errors = self._errors(mutated)
+        self.assertTrue(any("допустимы ровно" in error for error in errors), errors)
+
+    def test_second_job_is_rejected(self) -> None:
+        mutated = self.WORKFLOW + "  extra:\n    runs-on: ubuntu-latest\n"
+        errors = self._errors(mutated)
+        self.assertTrue(any("ровно один job" in error for error in errors), errors)
+
+    def test_unparseable_yaml_fails_closed(self) -> None:
+        errors = self._errors("on: [\n")
+        self.assertTrue(any("не удалось разобрать YAML" in error for error in errors), errors)
+
+    def test_codex_prefix_restriction_must_remain(self) -> None:
+        mutated = self.WORKFLOW.replace('name.startswith("codex/")', "True", 1)
+        errors = self._errors(mutated)
+        self.assertTrue(any("codex/*" in error for error in errors), errors)
 
 
 if __name__ == "__main__":

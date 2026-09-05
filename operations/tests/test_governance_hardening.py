@@ -444,10 +444,14 @@ jobs:
                 encoding="utf-8",
             )
             errors = check_automation_policy(root).errors
-            self.assertTrue(any("отсутствует ограничение" in error for error in errors), errors)
+            # Ограничения читаются из разобранного YAML, а не ищутся подстрокой,
+            # поэтому расширенный workflow отвергается по существу: чужой триггер,
+            # снятые условия job и снятое ограничение на префикс ветки.
             self.assertTrue(
-                any("pull_request_target запрещён" in error for error in errors), errors
+                any("единственный допустимый триггер" in error for error in errors), errors
             )
+            self.assertTrue(any("merged == true" in error for error in errors), errors)
+            self.assertTrue(any("codex/*" in error for error in errors), errors)
 
     def test_workflow_block_scalar_break_is_detected(self) -> None:
         """Продолжение многострочного скрипта на нулевом отступе молча закрывает

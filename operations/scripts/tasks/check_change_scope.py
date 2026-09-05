@@ -64,6 +64,48 @@ MAINTENANCE_PATH_PATTERNS = [
 ]
 
 
+# Машинерия, которая исполняет сам gate. Она выведена из-под границ TASK
+# вместе со всем `operations/**`, и обоснование для authority-документов —
+# «правку видно через обязательную смену версии» — к ней не относится: у
+# .py и .yml нет поля `version`. Поэтому у неё отдельный контур: её нельзя
+# менять в одном changeset с продуктовой поставкой, иначе ослабление
+# проверки уезжает внутрь продуктового PR, где на него не смотрят.
+GATE_MACHINERY_PATTERNS = [
+    ".github/workflows/**",
+    "operations/hooks/**",
+    "operations/scripts/documents/**",
+    "operations/scripts/quality/**",
+    "operations/scripts/tasks/check_change_scope.py",
+]
+
+# Продуктовая поставка — то, что вообще покрывается границами TASK.
+PRODUCT_PATH_PATTERNS = [
+    "adr/**",
+    "dockerfile",
+    ".dockerignore",
+    "src/**",
+]
+
+
+def validate_gate_machinery_isolation(changed_paths: list[str]) -> list[str]:
+    """Правка gate-машинерии не смешивается с продуктовой поставкой.
+
+    Тот же приём, что уже принят в operations/change_process.md для принципов
+    и принятия этапа: отдельный запрос на слияние. Здесь он распространён на
+    код, который обеспечивает соблюдение правил.
+    """
+    normalized = sorted({_normalize(path) for path in changed_paths if path.strip()})
+    machinery = [path for path in normalized if _matches(path, GATE_MACHINERY_PATTERNS)]
+    product = [path for path in normalized if _matches(path, PRODUCT_PATH_PATTERNS)]
+    if not machinery or not product:
+        return []
+    return [
+        "изменение машинерии качества смешано с продуктовой поставкой в одном changeset; "
+        "разделите на два запроса на слияние. "
+        f"машинерия: {', '.join(machinery[:5])}; поставка: {', '.join(product[:5])}"
+    ]
+
+
 def _normalize(path: str) -> str:
     normalized = path.replace("\\", "/")
     while normalized.startswith("./"):
@@ -416,6 +458,7 @@ def main() -> int:
     errors = validate_change_scope(root, changed, base=args.base, head=args.head)
     errors.extend(validate_document_metadata(root, args.base, args.head, changed))
     errors.extend(validate_audit_history(root, args.base, args.head))
+    errors.extend(validate_gate_machinery_isolation(changed))
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

@@ -35,6 +35,10 @@ if ! "$PYTHON" -m ruff --version >/dev/null 2>&1; then
 fi
 
 echo "  [2/2] Canonical full quality suite"
+# Без аргументов: run_suite.py сам вычисляет базу для контролей управления
+# (границы TASK, честность дат, неизменяемость baseline аудита) и падает,
+# если вычислить её не смог. Раньше этот шаг выполнялся только при явном
+# --coverage-base, которого здесь не было, поэтому весь контур жил в CI.
 "$PYTHON" operations/scripts/quality/run_suite.py full
 
 echo "Pre-push validation passed."

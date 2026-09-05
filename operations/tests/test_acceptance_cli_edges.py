@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -272,6 +274,81 @@ class AcceptanceCliTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(SystemExit, "--semantic-review"):
                     apply.main()
+
+
+class ReviewerIndependenceTests(unittest.TestCase):
+    """Заявленная независимость смысловой проверки сверяется с авторством.
+
+    `review_context: fresh-session` подтверждается только тем, что кто-то это
+    написал. Проверка связывает декларацию с наблюдаемым фактом: проверяющий не
+    входит в число авторов проверяемого диапазона. Для проекта одного владельца
+    предусмотрен явный режим — он фиксирует отсутствие независимости, а не
+    выдаёт совпадение за независимость.
+    """
+
+    def _repo(self, tmp: str, author_email: str) -> Path:
+        root = Path(tmp)
+        # Авторство задаётся через окружение, а не только через git config:
+        # внутри `git commit` (например, в pre-commit hook) git экспортирует
+        # GIT_AUTHOR_*/GIT_COMMITTER_*, и они перебивают локальный конфиг —
+        # коммит во временном репозитории получил бы внешнего автора, и тест
+        # проходил бы или падал в зависимости от способа запуска.
+        env = dict(os.environ)
+        env.update(
+            {
+                "GIT_AUTHOR_NAME": "Author",
+                "GIT_AUTHOR_EMAIL": author_email,
+                "GIT_COMMITTER_NAME": "Author",
+                "GIT_COMMITTER_EMAIL": author_email,
+            }
+        )
+
+        def run(*args: str) -> None:
+            subprocess.run(args, cwd=root, check=True, capture_output=True, env=env)
+
+        run("git", "init", "-q")
+        run("git", "config", "user.email", author_email)
+        run("git", "config", "user.name", "Author")
+        (root / "f.txt").write_text("x", encoding="utf-8")
+        run("git", "add", "-A")
+        run("git", "commit", "-qm", "c")
+        return root
+
+    def test_reviewer_who_authored_the_range_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, "author@example.com")
+            with self.assertRaises(ValueError) as raised:
+                apply.validate_reviewer_independence(
+                    root, {"reviewer": "author@example.com"}, "HEAD"
+                )
+            self.assertIn("reviewer_is_author_acknowledged", str(raised.exception))
+
+    def test_acknowledged_single_owner_mode_is_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, "author@example.com")
+            apply.validate_reviewer_independence(
+                root,
+                {"reviewer": "author@example.com", "reviewer_is_author_acknowledged": True},
+                "HEAD",
+            )
+
+    def test_independent_reviewer_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, "author@example.com")
+            apply.validate_reviewer_independence(root, {"reviewer": "someone@example.com"}, "HEAD")
+
+    def test_reviewer_name_also_counts_not_only_email(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, "author@example.com")
+            with self.assertRaises(ValueError):
+                apply.validate_reviewer_independence(root, {"reviewer": "Author"}, "HEAD")
+
+    def test_missing_reviewer_is_left_to_the_field_check(self) -> None:
+        # Пустой reviewer отклоняется отдельной проверкой формы записи;
+        # здесь он не должен приводить к ложному совпадению с автором.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._repo(tmp, "author@example.com")
+            apply.validate_reviewer_independence(root, {}, "HEAD")
 
 
 if __name__ == "__main__":

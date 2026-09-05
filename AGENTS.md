@@ -3,8 +3,8 @@ id: coding_agent_instruction
 type: agent_instruction
 document_state: current
 applicability: normative
-version: 4.4
-updated: 2026-09-04
+version: 4.5
+updated: 2026-09-05
 depends_on:
   - project_rules
   - project_milestones
@@ -47,6 +47,12 @@ depends_on:
    python3.12 operations/scripts/quality/run_suite.py full
    bash operations/hooks/pre_commit_hook.sh
    ```
+
+   Профиль `full` сам вычисляет базу для контролей управления — границы TASK,
+   честность даты `updated`, обязательная смена версии authority-документа,
+   неизменяемость baseline аудита — и падает, если вычислить её не смог.
+   Отдельный аргумент для этого не нужен; `--coverage-base` относится только к
+   покрытию изменённых строк.
 
    `python3.12` здесь — нижняя граница из [`document_contracts.json`](operations/document_contracts.json) (`runtime.posix_python`) и [`ADR_001`](adr/adr_001_language_and_runtime.md) («Python 3.12+»), а не точная версия. Сами hook'и берут первый доступный из `python3.14 python3.13 python3.12`, поэтому на машине без ровно 3.12 команда выше падает там, где hook работает — подставить свой интерпретатор ≥ 3.12.
 
