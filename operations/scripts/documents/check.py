@@ -189,6 +189,7 @@ def check_structure(root: Path) -> CheckResult:
     required_dirs = [
         ".github/workflows",
         "adr",
+        "candidates",
         "specifications",
         "operations",
         "operations/templates",
