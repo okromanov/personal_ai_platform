@@ -474,13 +474,18 @@ class DirectoryReferenceTests(unittest.TestCase):
     should have been caught by all along."""
 
     def test_rejects_unlinked_known_directory_reference(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / "adr").mkdir()
-            (root / "adr" / "adr_001.md").write_text("# ADR_001\n", encoding="utf-8")
-            (root / "source.md").write_text("Решения хранятся в `adr/`.\n", encoding="utf-8")
-            errors = check_markdown_links(root)
-            self.assertTrue(any("должна быть кликабельной: adr/" in error for error in errors))
+        for directory in ("adr", "candidates"):
+            with self.subTest(directory=directory), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / directory).mkdir()
+                (root / directory / "document.md").write_text("# Document\n", encoding="utf-8")
+                (root / "source.md").write_text(
+                    f"Решения хранятся в `{directory}/`.\n", encoding="utf-8"
+                )
+                errors = check_markdown_links(root)
+                self.assertTrue(
+                    any(f"должна быть кликабельной: {directory}/" in error for error in errors)
+                )
 
     def test_accepts_clickable_known_directory_reference(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
