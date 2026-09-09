@@ -68,6 +68,22 @@ class ObservabilityTests(unittest.TestCase):
                 measurements={"detail": "user message"},  # type: ignore[dict-item]
             )
 
+    def test_validated_measurements_are_detached_and_immutable(self) -> None:
+        measurements: dict[str, object] = {"event_code": 1001}
+        event = ObservationEvent(
+            kind=ObservationKind.TECHNICAL_EVENT,
+            component="network_policy",
+            measurements=measurements,  # type: ignore[arg-type]
+        )
+        measurements["event_code"] = "SYNTHETIC_PRIVATE_TEXT"
+
+        store = self._store()
+        store.append(event)
+
+        self.assertEqual(store.list_events()[0].measurements, {"event_code": 1001})
+        with self.assertRaises(TypeError):
+            event.measurements["event_code"] = 2002  # type: ignore[index]
+
     def test_negative_usage_is_rejected(self) -> None:
         collector = ObservabilityCollector(self._store())
         with self.assertRaises(ValueError):

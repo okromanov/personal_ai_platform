@@ -5,8 +5,8 @@ title: Корреляция структурированных событий з
 component: ARC_CMP_007
 delivery_role: component
 work_state: planned
-version: 1.3
-updated: 2026-09-03
+version: 1.4
+updated: 2026-09-09
 depends_on:
   - TASK_017
 next_actor: agent
@@ -19,6 +19,8 @@ allowed_paths:
   - src/models/base.py
   - src/models/runtime_adapter.py
   - src/observability/__init__.py
+  - src/observability/collector.py
+  - src/observability/sqlite_store.py
   - src/observability/task_events.py
   - src/orchestration/orchestrator.py
   - src/operations/scheduler_state.py
@@ -27,6 +29,7 @@ allowed_paths:
   - src/tools/base.py
   - src/tools/registry.py
   - operations/tests/product/test_model_gateway.py
+  - operations/tests/product/test_observability.py
   - operations/tests/product/test_persistent_task_state.py
   - operations/tests/product/test_task_events.py
   - operations/tests/product/test_tool_gateway.py

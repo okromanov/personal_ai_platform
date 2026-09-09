@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
+from types import MappingProxyType
 from typing import Mapping, Protocol
 
 
@@ -65,6 +66,7 @@ class TaskEvent:
             _technical_identifier(name, "attribute name")
             if not isinstance(value, (int, float, bool)):
                 raise TypeError("event attributes may contain only numbers or booleans")
+        object.__setattr__(self, "attributes", MappingProxyType(dict(self.attributes)))
         for field_name, trace_value in (
             ("trace_id", self.trace_id),
             ("span_id", self.span_id),

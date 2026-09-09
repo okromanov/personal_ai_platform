@@ -150,6 +150,24 @@ class TaskEventSchemaTests(unittest.TestCase):
                 attributes={"detail": "user content"},  # type: ignore[dict-item]
             )
 
+    def test_validated_attributes_are_detached_and_immutable(self) -> None:
+        attributes: dict[str, object] = {"retry_count": 1}
+        event = TaskEvent(
+            runtime_task_id="runtime_1",
+            event_type=TaskEventType.RETRY,
+            component="task_state",
+            operation="increment_retry",
+            result=TaskEventResult.RECORDED,
+            attributes=attributes,  # type: ignore[arg-type]
+        )
+        sink = InMemoryTaskEventSink()
+        sink.append(event)
+        attributes["retry_count"] = "SYNTHETIC_PRIVATE_TEXT"
+
+        self.assertEqual(sink.list_events()[0].attributes, {"retry_count": 1})
+        with self.assertRaises(TypeError):
+            event.attributes["retry_count"] = 2  # type: ignore[index]
+
 
 if __name__ == "__main__":
     unittest.main()

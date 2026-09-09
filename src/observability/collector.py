@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
+from types import MappingProxyType
 from typing import Mapping, Protocol
 
 from src.operations.health import HealthReport
@@ -39,6 +40,7 @@ class ObservationEvent:
                 raise ValueError("measurement names must be technical identifiers")
             if not isinstance(value, (int, float, bool)):
                 raise TypeError("measurements may contain only numbers or booleans")
+        object.__setattr__(self, "measurements", MappingProxyType(dict(self.measurements)))
 
 
 @dataclass(frozen=True)

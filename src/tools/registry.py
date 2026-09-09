@@ -82,6 +82,11 @@ class ToolGatewayImpl(ToolGateway):
 
     async def call(self, tool_call: ToolCall) -> ToolResult:
         try:
+            tool_call = tool_call.snapshot()
+        except ValueError as exc:
+            return self._denied(str(exc))
+
+        try:
             self._owner_control.verify_identity(tool_call.subject_id)
             self._owner_control.check_emergency_stop()
         except OwnerControlError as exc:
