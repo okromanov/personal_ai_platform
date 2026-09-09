@@ -111,6 +111,21 @@ class ToolGatewayReadTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(result.succeeded)
         self.assertEqual(handler.calls, [])
 
+    async def test_non_json_params_are_denied_before_handler(self) -> None:
+        gate, tmp = _gate()
+        self.addCleanup(tmp.cleanup)
+        handler = RecordingHandler()
+        gateway = ToolGatewayImpl(
+            gate,
+            [_capability(handler=handler, params=frozenset({"value"}))],
+        )
+
+        result = await gateway.call(_call(params={"value": object()}))
+
+        self.assertFalse(result.succeeded)
+        self.assertEqual(result.error_message, "tool call params must be JSON-serializable")
+        self.assertEqual(handler.calls, [])
+
 
 class ToolGatewaySensitiveActionTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
