@@ -173,6 +173,7 @@ class ChangeScopeTests(unittest.TestCase):
                     [
                         "operations/change_process.md",
                         "AGENTS.md",
+                        "candidates/future_capability.md",
                         "operations/tool.py",
                         "work/tasks/old.md",
                         "pyproject.toml",
