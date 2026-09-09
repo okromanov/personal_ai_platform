@@ -2,14 +2,14 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 2.3
-updated: 2026-09-02
+version: 2.4
+updated: 2026-09-09
 depends_on:
   - business_requirements
   - architecture_baseline
   - infrastructure_baseline
-  - operations_skill_lifecycle
-  - operations_tool_lifecycle
+  - candidate_skill_lifecycle
+  - candidate_tool_lifecycle
 ---
 
 # Этапы развития personal_ai_platform
@@ -187,9 +187,9 @@ V1 — первый регулярно используемый персонал
 
 1. Проанализировать реальное использование функций и неиспользуемые возможности.
 2. Провести структурированную оценку качества с владельцем.
-3. Пересмотреть актуальный рынок моделей, сред агентов, площадок размещения и ключевых инструментов, где это может изменить решения. Если на этом шаге расширяемость новыми возможностями признана приоритетом, учесть заранее подготовленный процессный черновик в [`operations/lifecycle/skill_lifecycle.md`](operations/lifecycle/skill_lifecycle.md) и [`operations/lifecycle/tool_lifecycle.md`](operations/lifecycle/tool_lifecycle.md) при формулировании нового `BR_*` и последующем ADR.
-4. Рассмотреть многоагентное направление (роли, развитие роли, субагенты, наблюдаемость взаимодействия): решения владельца и открытый вопрос о том, что именно накапливает роль, собраны в [`operations/architecture/agent_roles_and_delegation.md`](operations/architecture/agent_roles_and_delegation.md). Направление не имеет `BR_*` намеренно — они формулируются здесь, если владелец подтверждает приоритет.
-5. Рассмотреть семейный многопользовательский режим ([`BR_025`](specifications/business_requirements.md#br_025)): решения владельца о контроле члена семьи над своей памятью, возрастных уровнях доступа, жизненном цикле идентичности члена семьи и учёте стоимости по человеку собраны в [`operations/architecture/family_multi_user_candidate.md`](operations/architecture/family_multi_user_candidate.md).
+3. Пересмотреть актуальный рынок моделей, сред агентов, площадок размещения и ключевых инструментов, где это может изменить решения. Если на этом шаге расширяемость новыми возможностями признана приоритетом, учесть заранее подготовленные кандидатные спецификации [`skill_lifecycle.md`](candidates/skill_lifecycle.md) и [`tool_lifecycle.md`](candidates/tool_lifecycle.md) при формулировании нового `BR_*` и последующем ADR.
+4. Рассмотреть многоагентное направление (роли, развитие роли, субагенты, наблюдаемость взаимодействия): решения владельца и открытый вопрос о том, что именно накапливает роль, собраны в [`agent_roles_and_delegation.md`](candidates/agent_roles_and_delegation.md). Направление не имеет `BR_*` намеренно — они формулируются здесь, если владелец подтверждает приоритет.
+5. Рассмотреть семейный многопользовательский режим ([`BR_025`](specifications/business_requirements.md#br_025)): решения владельца о контроле члена семьи над своей памятью, возрастных уровнях доступа, жизненном цикле идентичности члена семьи и учёте стоимости по человеку собраны в [`family_multi_user_candidate.md`](candidates/family_multi_user_candidate.md).
 6. Оценить архитектурные боли, стоимость сопровождения и накопившиеся риски.
 7. Определить приоритет следующего набора бизнес-требований и только после этого создать новые этапы.
 

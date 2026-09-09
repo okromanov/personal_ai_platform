@@ -1,10 +1,10 @@
 ---
-id: operations_skill_lifecycle
-type: operations
+id: candidate_skill_lifecycle
+type: candidate_specification
 document_state: current
 applicability: proposed
-version: 1.3
-updated: 2026-09-04
+version: 1.4
+updated: 2026-09-09
 depends_on:
   - operations_change_process
   - state_machines
@@ -18,7 +18,7 @@ depends_on:
 
 Это предложение, а не действующая часть поставки. Оно применяется только после отдельного бизнес-требования, регистрации типа Skill и активной TASK.
 
-Общая последовательность состояний, переходы и правила отката определены в [`state_machines.md`](state_machines.md). Здесь описаны только риски и доказательства, специфичные для Skill.
+Общая последовательность состояний, переходы и правила отката определены в [`state_machines.md`](../operations/lifecycle/state_machines.md). Здесь описаны только риски и доказательства, специфичные для Skill.
 
 ## 2. Объект
 

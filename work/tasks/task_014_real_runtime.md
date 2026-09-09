@@ -5,14 +5,15 @@ title: Реальная среда агента для ARC_CMP_003
 component: ARC_CMP_003
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.6
-updated: 2026-08-31
+version: 1.7
+updated: 2026-09-09
 next_actor: agent
 owner_action: none
 depends_on:
   - TASK_013
 allowed_paths:
   - work/tasks/task_014_real_runtime.md
+  - adr/adr_006_agent_environment_framework.md
 traces_to:
   - m02
 decides:

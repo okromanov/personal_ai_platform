@@ -3,8 +3,8 @@ id: operations_procedure_map
 type: operations
 document_state: current
 applicability: normative
-version: 2.6
-updated: 2026-09-04
+version: 2.7
+updated: 2026-09-09
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -43,10 +43,6 @@ depends_on:
 | Threat review | [`threat_review_triggers.md`](policy/threat_review_triggers.md) | Решение об инциденте и дальнейшее действие |
 | Лицензирование | [`license_policy.md`](policy/license_policy.md) | Понимание режима распространения |
 | Пример TASK | [`sample_task_lifecycle.md`](examples/sample_task_lifecycle.md) | Справочный пример без копирования истории |
-| Будущий Skill | [`skill_lifecycle.md`](lifecycle/skill_lifecycle.md) | Неактивное предложение до BR/TASK |
-| Будущий Tool | [`tool_lifecycle.md`](lifecycle/tool_lifecycle.md) | Неактивное предложение до BR/TASK |
-| Будущие роли агентов | [`agent_roles_and_delegation.md`](architecture/agent_roles_and_delegation.md) | Неактивное предложение |
-| Семейный режим | [`family_multi_user_candidate.md`](architecture/family_multi_user_candidate.md) | Неактивное предложение |
 
 ## 3. Типовые сценарии
 
