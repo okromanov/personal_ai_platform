@@ -46,6 +46,7 @@ MAINTENANCE_PATH_PATTERNS = [
     ".gitleaksignore",
     ".gitignore",
     "AGENTS.md",
+    "candidates/**",
     "milestones.md",
     "operations/**",
     "project_rules.md",
