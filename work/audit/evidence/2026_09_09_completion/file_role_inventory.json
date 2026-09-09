@@ -1,0 +1,3209 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "tree_sha": "4e1be816540227038b38769d47688467e7acee76",
+  "tracked_file_count": 319,
+  "method": "each tracked file; content review plus role/placement/link inventory",
+  "exceptions": [
+    {
+      "paths": [
+        "candidates/.gitkeep",
+        "work/acceptance/.gitkeep",
+        "work/tasks/.gitkeep"
+      ],
+      "classification": "redundant_placeholder",
+      "impact": "none; retained to avoid unrelated cleanup during the audit"
+    }
+  ],
+  "files": [
+    {
+      "path": ".dockerignore",
+      "role": "build_security_or_quality_configuration",
+      "size_bytes": 251,
+      "sha256": "9de3dbd660d0820cbdfee4851b901b8b10966353de5acaa1fae14aab30598e3e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "role": "repository_support",
+      "size_bytes": 1397,
+      "sha256": "d56a4533acaa42c221734556dd52fafd2bec689f1356735b91c7821eb431c60c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": ".github/workflows/delete_merged_branches.yml",
+      "role": "delivery_automation",
+      "size_bytes": 3207,
+      "sha256": "fdfa08c1e3c1856f071e9ab48d1204261380850f9571950899160b4a7272146e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": ".github/workflows/project_check.yml",
+      "role": "delivery_automation",
+      "size_bytes": 16163,
+      "sha256": "bf6b221478c8e21d68face120cc54a87621b85ff759c26ae15ca8d17b6dcf69e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": ".gitignore",
+      "role": "build_security_or_quality_configuration",
+      "size_bytes": 577,
+      "sha256": "65ff2ea84756e005a5206c420599f12567a689e41b39d0088300ad1d5484ee15",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": ".gitleaksignore",
+      "role": "build_security_or_quality_configuration",
+      "size_bytes": 365,
+      "sha256": "5a12a9cad9dbf392f646409f4e372f8417bc9a1e6e2112cd51d53035774e51b9",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "AGENTS.md",
+      "role": "repository_authority_or_owner_entrypoint",
+      "size_bytes": 14213,
+      "sha256": "3ddb3713e8b71f3febf737e6bd1679167b08229fd1361c9fb9832b2c100e65bb",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 24,
+      "resolvable_local_markdown_links": 24
+    },
+    {
+      "path": "adr/adr_001_language_and_runtime.md",
+      "role": "architecture_decision",
+      "size_bytes": 2542,
+      "sha256": "fba6c389adb95a1c9908758c192478e97f5818d070f754b9a73c59a25be1d08c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "adr/adr_002_core_runtime_boundary.md",
+      "role": "architecture_decision",
+      "size_bytes": 3244,
+      "sha256": "73d50556f6f8e56dba1f5817cac3660606854afe3a551ee3d8648ad0478aa9fa",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "adr/adr_003_model_provider_interface.md",
+      "role": "architecture_decision",
+      "size_bytes": 2473,
+      "sha256": "33039c13c91a852654ff65fe4373b9fb44439d039dbac8b651c2654be3865430",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "adr/adr_004_task_events_and_logging.md",
+      "role": "architecture_decision",
+      "size_bytes": 3221,
+      "sha256": "126912474b89ce59998ed0b16ddf95e7f2a0dbbd49e6a275c6303155fff05ea8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "adr/adr_005_first_model_provider_selection.md",
+      "role": "architecture_decision",
+      "size_bytes": 9759,
+      "sha256": "9648854ba1923909edf1f0bd80a674d6022cd709e77143df74f94261547d0433",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 10,
+      "resolvable_local_markdown_links": 10
+    },
+    {
+      "path": "adr/adr_006_agent_environment_framework.md",
+      "role": "architecture_decision",
+      "size_bytes": 18136,
+      "sha256": "c8e03d0a95bacae5b88387d0a6314c64bcfb604917e34950966da86a17623be8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 23,
+      "resolvable_local_markdown_links": 23
+    },
+    {
+      "path": "adr/adr_007_cloud_provider_selection.md",
+      "role": "architecture_decision",
+      "size_bytes": 14474,
+      "sha256": "10c638d4409571f3f28d71685570f9b11675a25a6a6920fc10596965259d35cf",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 23,
+      "resolvable_local_markdown_links": 23
+    },
+    {
+      "path": "adr/adr_008_data_storage_schema.md",
+      "role": "architecture_decision",
+      "size_bytes": 13971,
+      "sha256": "778296cb9dfb885d8040addac4b504e41f97ba0208255b3ac8ba6c3a388e25ad",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 31,
+      "resolvable_local_markdown_links": 31
+    },
+    {
+      "path": "adr/adr_009_secret_management_strategy.md",
+      "role": "architecture_decision",
+      "size_bytes": 13840,
+      "sha256": "122a01dd89c83734a24a18c233e23467531fb01235d7c2b7e8dad9ec6e3c88df",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 28,
+      "resolvable_local_markdown_links": 28
+    },
+    {
+      "path": "candidates/.gitkeep",
+      "role": "proposed_product_design",
+      "size_bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "candidates/agent_roles_and_delegation.md",
+      "role": "proposed_product_design",
+      "size_bytes": 15935,
+      "sha256": "4f18a4daad5019e9d6d32c0b947af40a5198b3eede3598aaf9f31042e79d5ba2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 20,
+      "resolvable_local_markdown_links": 20
+    },
+    {
+      "path": "candidates/family_multi_user_candidate.md",
+      "role": "proposed_product_design",
+      "size_bytes": 9872,
+      "sha256": "6ffb224bf3a6fcf30c3656f37b67a09f051ffaf576b3d1b6c23c18998f622c86",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 23,
+      "resolvable_local_markdown_links": 23
+    },
+    {
+      "path": "candidates/skill_lifecycle.md",
+      "role": "proposed_product_design",
+      "size_bytes": 4737,
+      "sha256": "102524d43feb5686c10f68f4e94251e226cda8af49fb2bd4b59dcc5bdf4bb607",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "candidates/tool_lifecycle.md",
+      "role": "proposed_product_design",
+      "size_bytes": 4952,
+      "sha256": "10198618d41bed56d4d6171920b62fc5b2f69e6f263701027353ca838d46709d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "dockerfile",
+      "role": "build_security_or_quality_configuration",
+      "size_bytes": 2010,
+      "sha256": "142a84265c358214d1a4a9516b047e62d7cbc591e2548fdf4ecbb0778f6c9dcb",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "milestones.md",
+      "role": "repository_authority_or_owner_entrypoint",
+      "size_bytes": 38727,
+      "sha256": "5307f4eaf60564354734cbf3b31897c37dd12517709ef9b4162807c0df478991",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 182,
+      "resolvable_local_markdown_links": 182
+    },
+    {
+      "path": "operations/__init__.py",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/acceptance.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 14408,
+      "sha256": "a03cc816c578aa6a020070a26d3748a07e3032f9d447bd25c1d0467540b623bf",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 22,
+      "resolvable_local_markdown_links": 22
+    },
+    {
+      "path": "operations/architecture/architecture_diagram_style_guide.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 5310,
+      "sha256": "d8cd6f11f2a9d6beac0cc1d403ad7cf1f62510071a35880163c6a0677820e42c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 12,
+      "resolvable_local_markdown_links": 12
+    },
+    {
+      "path": "operations/architecture/diagram_geometry_foundations.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 72157,
+      "sha256": "59c5ed59eda582e3b5f32943ad0e38ac6dc0e7632f95f1caeb58fd8bb10ff124",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 21,
+      "resolvable_local_markdown_links": 21
+    },
+    {
+      "path": "operations/architecture/process_diagram_style_guide.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 15718,
+      "sha256": "062678e1953ba0d4f3afe92d199f23a615a6ffb7e3171e4f254782f9f7f08daa",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 16,
+      "resolvable_local_markdown_links": 16
+    },
+    {
+      "path": "operations/architecture/templates/architecture_diagram_template.svg",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 6323,
+      "sha256": "ae7335c046f1b44fb1641e80ad0f5ee5d271e80d2a2e0215da507f7042aabf3e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/architecture/templates/process_diagram_template.svg",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 7196,
+      "sha256": "826110f5da5782a172f87be02c980ce6caf53e6114a37ae6bb200121f9255392",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/change_process.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 40343,
+      "sha256": "d1d220f11d75887271a2194b1d1825e675a8ffeb24324b352be588c10a03d57f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 24,
+      "resolvable_local_markdown_links": 24
+    },
+    {
+      "path": "operations/document_contracts.json",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 653,
+      "sha256": "0e6453560a617bbb5decd98753eb2da3903acb581a0791b25b01c8a4fefebfb2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/eval/golden_cases.json",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 2409,
+      "sha256": "eb6b4d2ab75c5d093aca92da8ee140accdf58fb00e6611c97acc8a0aa8b6d4a7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/examples/sample_task_lifecycle.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 5828,
+      "sha256": "584c15de4e72c369c252c36654d8c74669b37d0d2601f59ff7b0f23c1f7109bd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 7,
+      "resolvable_local_markdown_links": 7
+    },
+    {
+      "path": "operations/hooks/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/hooks/pre_commit_hook.sh",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2955,
+      "sha256": "90adf08eb6db5bc40fcd9dd91c91846159cb01d31fa3deded6ebff7298c12c62",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/hooks/pre_commit_regenerate_dashboards.sh",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 3056,
+      "sha256": "adc1419ac9f0c60fbb600f25431ce6813a48fdaffcc29b039755e0e1f0e80f4e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/hooks/pre_push_hook.sh",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1936,
+      "sha256": "7ead6506c72f0cffe5d98457c194b4e81047d366aa4096bf37a75ec3dbb69de1",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/lifecycle/adr_lifecycle.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 18685,
+      "sha256": "ad7b150559f240dd1e48d10b5416a3e11a3f80e03a5f520c947ac944be0e3047",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 9,
+      "resolvable_local_markdown_links": 9
+    },
+    {
+      "path": "operations/lifecycle/state_machines.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 14338,
+      "sha256": "e11a0f24f9d463ba73dde19bc6eb6c578a24fa646036a829f470a9853676857f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 6,
+      "resolvable_local_markdown_links": 6
+    },
+    {
+      "path": "operations/local_development_windows.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 6151,
+      "sha256": "544cf193141fba24bd73dcfbd1807b84c02d82160029caba5324d0fd62482267",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 10,
+      "resolvable_local_markdown_links": 10
+    },
+    {
+      "path": "operations/policy/document_frontmatter_standard.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 1232,
+      "sha256": "87efc28d7ac1bb8cc930e0e30e15e8548f1f514650550b99412ec2f7b1c79d31",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 4,
+      "resolvable_local_markdown_links": 4
+    },
+    {
+      "path": "operations/policy/license_policy.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 2552,
+      "sha256": "0b62d62fcdfa7e3c4f3784e2277d89bdb5607cb61ce423914a3b2ffe7a37a7ff",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 2,
+      "resolvable_local_markdown_links": 2
+    },
+    {
+      "path": "operations/policy/threat_review_triggers.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 17850,
+      "sha256": "61ea72a5cdf6f24c98699a8010a4203753a3afc9e5c08789a1fac22bc6bc5c79",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 32,
+      "resolvable_local_markdown_links": 32
+    },
+    {
+      "path": "operations/procedure_map.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 7144,
+      "sha256": "1f96d27fea246aef1fd6ba2a99bf9c64b1e35fa5d2b60a9db08357cb131b19cc",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 25,
+      "resolvable_local_markdown_links": 25
+    },
+    {
+      "path": "operations/procedures/file_update_dependencies.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 8597,
+      "sha256": "5306af5bc9cec4592252b0cc80ef576cbe437bb8f2cb714fb743e82e88a7813c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 4,
+      "resolvable_local_markdown_links": 4
+    },
+    {
+      "path": "operations/procedures/recover_stale_sensitive_action_lock.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 3967,
+      "sha256": "ba0cb641691161efa1bc74589c4205bfb771c7a8398a39f60bd1a5a6b8b42673",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 4,
+      "resolvable_local_markdown_links": 4
+    },
+    {
+      "path": "operations/project_config.json",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 131,
+      "sha256": "7781ac8eb09bf7fb2acb0a087ffc2e792ef209dd3455ab863002ba1168a24dc6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality/playbooks/code_quality_check.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 1051,
+      "sha256": "d198f88f1911b928a44c45f585095ca10a8fb5a2bac319abf248081faef7a428",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/playbooks/dead_code_audit.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 1293,
+      "sha256": "2c2cfeeaf2b752898387d9bd543d568309dccff78dff83190d8a3a7d49113017",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality/playbooks/documentation_audit.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 1311,
+      "sha256": "c5400d8612b736c9fd651257852431a672460b0063a03c073f5775f7dd6bd589",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/playbooks/documentation_rules_detailed.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 2189,
+      "sha256": "e869e0924a0568c31d6932da1303e224cd993792a126dc90785027586ec1a8fe",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 5,
+      "resolvable_local_markdown_links": 5
+    },
+    {
+      "path": "operations/quality/playbooks/integration_tests.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 992,
+      "sha256": "12ea2a3b31aba9d5bd3134c32ef81c868c8bf891776561a46c3bca60ebad39b9",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality/playbooks/pre_commit_validation.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 996,
+      "sha256": "0fd69f46ea0db74fbfb293c159857a66a137e5d326c467a41e9d91d617716c51",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/playbooks/pre_push_validation.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 938,
+      "sha256": "fe0685542e4da4e00ec88275ee65de20f86a07061c042a51f8d2a23ec7c8442b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality/playbooks/python_lint_check.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 852,
+      "sha256": "6c4a8a36e10194c413290df6cc10fbcc35a8d026bc6ec527959a64c525e5b68a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/playbooks/python_type_check.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 771,
+      "sha256": "439bcdeccaeaaafb50a1a4629699e470b9b65ae86083f39026bdc57d7b0aa5e1",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/playbooks/readme.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 2920,
+      "sha256": "ff2aa63736a60ee912b6ee0147b70f3813b5307108935f0c13c096f555c0c9b4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 34,
+      "resolvable_local_markdown_links": 34
+    },
+    {
+      "path": "operations/quality/playbooks/security_audit.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 1188,
+      "sha256": "ecd88aa2bb8d7c02a435b8de7674220d9170f7b5bb4741c03b9e9fd7c7ceab11",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/playbooks/unit_tests.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 973,
+      "sha256": "2166f07aca4750f7a2f296b7830f8578c54edd8d3da059339ca6ad3aaff2722a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/quality/requirements_dev.in",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 391,
+      "sha256": "00e551cc94bcef89d5d4bf58da9d7fb6bde113e25dbdf89a02444ebadbce1926",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality/requirements_dev.txt",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 82357,
+      "sha256": "e43e45e5a61d3941527cc0eb460a425276aeb6c67b598af3499b0fae55fe57ec",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality_baseline.json",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 197,
+      "sha256": "9edd0eff95db083a42073842c35013968a3cebb14567c10628843235ef971b6b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/quality_registry.json",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 2897,
+      "sha256": "85ea7cc240c6061a543e70631e00ea60f83d82fa581855321e8614a144dc45ac",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/repository_audit_system_prompt.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 164061,
+      "sha256": "f7d0f4f60e2d80e4cfdfdb36e02599f62e1f5744ac59850b7fc2983f7f12ccce",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 12,
+      "resolvable_local_markdown_links": 12
+    },
+    {
+      "path": "operations/scripts/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/acceptance/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/acceptance/apply.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 31894,
+      "sha256": "c13c44a41599840c1811f206023dccc44017e5375d834dea85dd4eaea6ba8003",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/common/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/common/project.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 10926,
+      "sha256": "74f3b832883aa4f71b30757c8e2856d54270de200e45b468b97dd5345e701d10",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/common/status_types.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2282,
+      "sha256": "cec106344edb3771d0879edfc77c1905cf4e18e4c955d4c6e52119a7bab50d57",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/auto_generate_tasks.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 12676,
+      "sha256": "98c4b84a86d94862f0b5c06433336dbd0a17b83c4fb631f1db369b338308fc83",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/check.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 106635,
+      "sha256": "d5c9fbf6b9029ba4f74d1c02fb51d26b7341b1fd2c61019c730b5baffeeba1b5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/contracts.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 837,
+      "sha256": "5327caa2fd3f2ca21dc621a77d24e252b1725ea8301225a8bd124d0b378d73fd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/diagram_geometry_lint.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 8056,
+      "sha256": "f928e7a13f640db427bb610eae1df75d196a1e740d899ed4cd47d1a236e6ffbd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/diagram_lint.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 23009,
+      "sha256": "bee712184b62241e15afc4502125280cdcca1f74308c354245d6378684ff2f8c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/diagram_render_lint.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 15188,
+      "sha256": "50d7c8f184f2c3111a7d9f268f5bdf381ddf9be70ac552182191b780aac82596",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/generate.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1940,
+      "sha256": "0e4f214d2fa761a6c0424562d1b1173846e5f774f01cdd2bd74844219489e602",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/index.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2668,
+      "sha256": "0c35a1bddd21696457dc1ad7224c095a159b13462d868e83e8c8d823fc08c29d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/links.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 40336,
+      "sha256": "a6e6d5cee5f4d3f45c302b37011bbdb0fe107895e952e5b51cdd1516540dcdae",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/metadata.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 5545,
+      "sha256": "8637175a361bb74f0f066687496a0ddf402d0724ed79061d72123e5d5a506955",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/non_markdown_index.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 22299,
+      "sha256": "bf04e596383f76bd842e3ccd70620cd5ac85f70f34c038d3942f2671465e3ccb",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/repository_tree.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1137,
+      "sha256": "46ba20f0b0baa10c17875becc7bc4ecd2f2159b62e4252c1cd557e2a37e8ce58",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/template_contracts.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 9345,
+      "sha256": "486685cd0d486f1f261ff61ff6064ea41a7c9cfa56dd74b43b974eaa64c1a5ae",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/test_catalog.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 75060,
+      "sha256": "192c3644227f8623ff64d8ff950aedc7638a268741848b9fcd1b76b84a64ba4e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/documents/traceability.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 10271,
+      "sha256": "32691ecbe8c54e7d4dac243b3e6d1484257c6d358abf610257d0b50a9f1861de",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/eval/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/eval/run_eval_suite.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 8556,
+      "sha256": "a1ed2d3cae31d657b969f918946002b40abb07f112d422c672453db8fbd1f38d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/evidence/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/evidence/generate_bundle.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2903,
+      "sha256": "95b896d0a0e1eccf56650fea39df752f159144f51c603e4d53feb4b30089901f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/evidence/record.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 4809,
+      "sha256": "ba03e4a42c3633e61f8a559f595869ed9bb9d7b1193d4fda3d733c7b92643599",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/github/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/github/post_pr_comment.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 3725,
+      "sha256": "e0817ee18b7a21c9babb864555ba37685281ee3c689a5fe8281ef04af85be95a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/health_check/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/health_check/generate.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 5277,
+      "sha256": "4427d42289e335c0c8cd572bf19e9ed432d61dc29ede122922e439afeb037430",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/health_check/metrics.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 13977,
+      "sha256": "71e14b727ce8f7cd570b71edb01652526756216995ecf44a96f46ccef5688e05",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/health_check/module_guide.md",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2974,
+      "sha256": "dcbeed5dc30f8faa547d727461b42fb59deec2b76ff83046c79743c4c02ae639",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 3,
+      "resolvable_local_markdown_links": 3
+    },
+    {
+      "path": "operations/scripts/health_check/reporter.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 7722,
+      "sha256": "7d07a21fe866b8da19e62b9f21671284c73a24b54db63158e3646ef611f60324",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/milestones/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 49,
+      "sha256": "7381d405b48a5c7195b4aa85c3636622479c442421b383301d48e48dac397d57",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/milestones/init_milestone.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2893,
+      "sha256": "2ff34a3996aadfdb2aff01d422e9d22d1cc16c2a8ef4dc3552474fafc96d78fb",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/milestones/start.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 5328,
+      "sha256": "f5fe283c2961b280c157c653e46baa0a30c16fe44eb9df0085b7cfe3d141cda6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/milestones/update_completion_report.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 17456,
+      "sha256": "3925578bcfc3c46759dfd1ec3d13348dda3a990191f3e47a9df4398e6abc0c32",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/owner_control/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/owner_control/recover_lock.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1721,
+      "sha256": "6ff0b768eea09b9921231f53feaad586a98e2e0e15299c2c333040f7434e58f2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/action_practicality.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 3537,
+      "sha256": "25b73aa2b2bc062cbaf28bfc92e5fbecf91789e17d2b4d39355fd43c0de7ea9c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/check_coverage.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 6404,
+      "sha256": "e54a3c8f58d20a679ac56b636de1c5f85c9ad51d6d7ac566ce63e4b5439f17ae",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/code_analyzer.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 5587,
+      "sha256": "f0acfb2246b0484ab352b385a82b41a0517270cfa96e6c6d319226ec6aeddbec",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/paths_validation.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 4810,
+      "sha256": "c873b45aa83b8484e275e625bbec8d57ebf0d658160a9abd923cdf2ebc27870f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/record_quality_suite.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 3950,
+      "sha256": "6c59763d16e0f36ef61c8de3dada20a290687254b9bfcb219cceb77eed22825c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/registry.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 20248,
+      "sha256": "1a880059d4767b4c91a162a5ec31972aeda6a92058ce40ce944d19bdac27f1cc",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/run_mypy_baseline.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2499,
+      "sha256": "f17d6334a421785c433468e364ba7a4b042635d711d55996b325417ad5cdc176",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/run_suite.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 20982,
+      "sha256": "e16ca40572faeeb2ee79b20c4fddc267ff54c62d199b6a4110e511afa1d2315a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/run_unittests.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1984,
+      "sha256": "c0b4923a0972333437938a531f832f01e7e751396c3835fd6c115a9e584abc1e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/scope.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 235,
+      "sha256": "c7f8c769b865e9dc15ec24f1295eab501a7ae1bc076c0dcf8c33a253eddfe8f2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/quality/test_coverage.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 3728,
+      "sha256": "984887c683d4333afec868f71117ccce2cc148bce32ad8b6b138559e060ccea7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/requirements/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/requirements/apply_requirements.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 17713,
+      "sha256": "647369a8ebf6535f2d315ae3d18a58bbc482911a34671c32f3390e189f72607b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/requirements/prompting.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1292,
+      "sha256": "7d3d6b440697e07d89d2d1d2a441befa11033b3774787acdc291feed4ed7f006",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/requirements/requirement_wizard.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 14780,
+      "sha256": "af82154f0da9be9f706f904efe0624f19c19149379a091b195a318b02038e5fc",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/requirements/stage_planning_wizard.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 14049,
+      "sha256": "d2033d7bf7c1c83b24db4688f502074b936b93a358b9fa320b585418a0c19ed8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/status/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/status/generate_project_status.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 34223,
+      "sha256": "035023099df607782cc5a9b4cb355fcaa9dc92a4be284ac5b2fd3c0f2fe367bc",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/status/human_status.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 16980,
+      "sha256": "328a6d61120f13604ff3e264a8d76b1a12316e94abadb58ca9e38000a09e5ff3",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/status/technical_status.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 1316,
+      "sha256": "1687f198d4d0f1098d61c92e4474541981d19fb912e0944c3e8d9db3085a9d7e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/tasks/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/tasks/check_change_scope.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 21430,
+      "sha256": "bc30ed0debade40ae3ea84338dc5d2ba3b7dc7f404b47d2177d2bece6a21e44a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/tasks/generate.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 16850,
+      "sha256": "09e3ef83fb01711b3eae37c2c24a3f7ea4ca02ea472c599792e8c7d28069f90b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/tasks/semantics.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 4761,
+      "sha256": "c90a70b28d75476d72fdac265825074b61c2277da156f1fb54f28faccc88a58a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/traceability/__init__.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/traceability/adr_task_coverage.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 5304,
+      "sha256": "15fe90bb0ac9d574ea3b6492f778cefdd75cb7307e038a8b53528c0c93d2e054",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/traceability/auto_link.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 4945,
+      "sha256": "8c64522d5f2994135849089a6c4102be3557b1deb9463efdaa75cff44fca4ff8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/traceability/full_traceability.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 4972,
+      "sha256": "67feed80bef9bee131b4d57cf1245c76a931c5b22536fb9b7bbded196468d357",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/traceability/relations.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 436,
+      "sha256": "2a3d7bc648e08876a097d6e4c9ac213b0f7606a54a617c0b79fbaf12ea00d294",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/traceability/semantic_consistency.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 3421,
+      "sha256": "a521f89df558ba09e05ed6dac3a9c4ed83104d92e209cb3ab59da332a3c147f6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/scripts/versioning/increment_file_version.py",
+      "role": "quality_or_governance_implementation",
+      "size_bytes": 2848,
+      "sha256": "31293562d7ee519c642b3f5b39e9c2bfc8e57b29852d8128260b3bb4634099f9",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/semantic_review.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 19517,
+      "sha256": "a2b820ae4fd7b8fca44607358b5cb0a8c376a0f361f55506b8009bcaf33450c0",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 21,
+      "resolvable_local_markdown_links": 21
+    },
+    {
+      "path": "operations/setup_precommit.md",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 4322,
+      "sha256": "3f6640be5acd1d351bb602d1c2081cda14f4a755529fdb3d8cff18f4ebfb787d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 10,
+      "resolvable_local_markdown_links": 10
+    },
+    {
+      "path": "operations/template_registry.json",
+      "role": "operational_contract_or_guide",
+      "size_bytes": 5347,
+      "sha256": "251b873e73f7a97e2bb37e536716940bb7788d3b8e3168fb1c8a0577e3371f29",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/templates/adr_template.md",
+      "role": "document_template",
+      "size_bytes": 842,
+      "sha256": "cf5813a9f068d09c1d348fbc4bdbb76ba40364a331dbef903f646d9d4e9c53e6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/architecture_component_template.md",
+      "role": "document_template",
+      "size_bytes": 515,
+      "sha256": "774063ce82fdca00622b80447a0f03228bafbe670a17883c4586c9f135bd2e9a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/templates/business_requirement_template.md",
+      "role": "document_template",
+      "size_bytes": 475,
+      "sha256": "a2fbb73082ede26356dbb34f32727c6cb41a21daef784f78f840505d3039c097",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/generated_files_template.md",
+      "role": "document_template",
+      "size_bytes": 3178,
+      "sha256": "19fd82915c6fa2dd72c70d4016af3f3a0285a831fbace63bd0adf6638c75490d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 2,
+      "resolvable_local_markdown_links": 2
+    },
+    {
+      "path": "operations/templates/health_check_report_template.md",
+      "role": "document_template",
+      "size_bytes": 1875,
+      "sha256": "1aeefb2c29a7d420adfd08bd60be593cc03c90f79461d72c3a0c8d750985f4c7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/templates/infrastructure_component_template.md",
+      "role": "document_template",
+      "size_bytes": 589,
+      "sha256": "0314e8abf09dc71349bb234a88f8cb2955f2a15c7ba2af24cb56bf2d39febcfe",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/infrastructure_flow_template.md",
+      "role": "document_template",
+      "size_bytes": 586,
+      "sha256": "c193a554725b7729d8c5981f02b00dcf30c11a718db9c57f32fdb5604d2396c4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/infrastructure_requirement_template.md",
+      "role": "document_template",
+      "size_bytes": 755,
+      "sha256": "6ed43e48556187fe95260912ed37df5821fc87421156cd3f7b8fc68ce1c456a6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/milestone_completion_report_template.md",
+      "role": "document_template",
+      "size_bytes": 1017,
+      "sha256": "774c6d2b97c46043f9d6a6fbd9af81fc46d13f830220bfb2a17a2125ec7f2e06",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/templates/milestone_template.md",
+      "role": "document_template",
+      "size_bytes": 4006,
+      "sha256": "5b45ed3e9faa4dd06b14b4c0851e9f5298c8ff84f89bddfef54a0b766cfa2a20",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/project_status_template.md",
+      "role": "document_template",
+      "size_bytes": 2368,
+      "sha256": "0c89ecdaf443f04fee954b4956cf8d81deeae1cf1bc4f03ac3a82ca67be0b87a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/repository_audit_result_template.md",
+      "role": "document_template",
+      "size_bytes": 2566,
+      "sha256": "46a047da83ea70678af3c4b3296a7d0055039ac2bdf36baef47337d20c030e2e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 3,
+      "resolvable_local_markdown_links": 3
+    },
+    {
+      "path": "operations/templates/security_control_template.md",
+      "role": "document_template",
+      "size_bytes": 846,
+      "sha256": "f76bf4be09adcaef964d6300cc75fa56f65e19e6aef3a9828a8184e46f157e68",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/system_requirement_template.md",
+      "role": "document_template",
+      "size_bytes": 801,
+      "sha256": "ebf103ea0333fc8d69cdff1459b278c1a0520b3a2c41f70a7fd17540060edf0a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/templates/task_template.md",
+      "role": "document_template",
+      "size_bytes": 11624,
+      "sha256": "43e873b7ef4562d0368eac7285ad19a2dffe690cf9ed465f1210c3db01c4515c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 10,
+      "resolvable_local_markdown_links": 10
+    },
+    {
+      "path": "operations/templates/test_template.md",
+      "role": "document_template",
+      "size_bytes": 3504,
+      "sha256": "3191b3b9a03ad519aac7890997b1048e9506c489d6bb8ef384c653d4b12851ba",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 3,
+      "resolvable_local_markdown_links": 3
+    },
+    {
+      "path": "operations/templates/threat_template.md",
+      "role": "document_template",
+      "size_bytes": 986,
+      "sha256": "9646f5dcfa2baa3323749aa3483a92a6e2b3f86f5edf95637f92115d77933dfe",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "operations/tests/__init__.py",
+      "role": "quality_test",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/integration/__init__.py",
+      "role": "quality_test",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/integration/test_quality_pipeline.py",
+      "role": "quality_test",
+      "size_bytes": 2680,
+      "sha256": "750ae408b226e1d7abf2fbc768943e6737bf175a912f6fedfc5ebe970e411cb3",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/performance/__init__.py",
+      "role": "quality_test",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/performance/test_critical_paths.py",
+      "role": "quality_test",
+      "size_bytes": 4936,
+      "sha256": "a945726e0bf1d0e897efe9582f7038bfffba06d77df64e568af7e4ac23af4eb8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/__init__.py",
+      "role": "quality_test",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_channels.py",
+      "role": "quality_test",
+      "size_bytes": 6294,
+      "sha256": "5a69c82d838b0f01581f2487a476d0adf899e5e5baafa62699a4bc5eea8a1ee7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_compute_environment.py",
+      "role": "quality_test",
+      "size_bytes": 4401,
+      "sha256": "b1d98c4dcfeae724ccacb396ae51df851ed0a3b3e56d09d5b6dac6a2040909dd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_model_gateway.py",
+      "role": "quality_test",
+      "size_bytes": 5773,
+      "sha256": "4f24726420555fa97ecb7fb060fb7ddcccb2ca7f374971f9b59454992fa4dcc0",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_network_policy.py",
+      "role": "quality_test",
+      "size_bytes": 3517,
+      "sha256": "9a1e3126dc8385a115965f0714b7e72f01f919e23a8bc5ed2316e27b93fd0d50",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_observability.py",
+      "role": "quality_test",
+      "size_bytes": 3658,
+      "sha256": "3fadf260d0c1e0da4bced4a9a5655f714252b28e82150e602a7e7bb0c081d782",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_operations_state.py",
+      "role": "quality_test",
+      "size_bytes": 6245,
+      "sha256": "b737bc007534a36194db64342ee1b5ea75da49939992162b6a4dd74739d038d8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_orchestration.py",
+      "role": "quality_test",
+      "size_bytes": 8389,
+      "sha256": "82e4476a1827a9b440919e6c42319b372cae2eb525e8a5ede48f04088fb972ee",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_owner_control.py",
+      "role": "quality_test",
+      "size_bytes": 14238,
+      "sha256": "9575348103253f0381f8bbd7ac8bd0f6da7b3f55dbbf568166e4bdc90cf8ffd4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_persistent_task_state.py",
+      "role": "quality_test",
+      "size_bytes": 6838,
+      "sha256": "e3a0e8a1bf07120969a7843452b51431fb49749522960f9352c9748f886b41c2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_secrets.py",
+      "role": "quality_test",
+      "size_bytes": 1952,
+      "sha256": "b381e83e0760cf7fd109b31ce441c95d2faa335b8aecec8a0385d4d4910f80e5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_task_events.py",
+      "role": "quality_test",
+      "size_bytes": 5691,
+      "sha256": "c387326d32edcaab339d9fd11ba9d8c77f505311e8d814e7f2c96db955220ac9",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_task_state.py",
+      "role": "quality_test",
+      "size_bytes": 4567,
+      "sha256": "5ea48f691404a9e94044470cce9d76ea9a232e570ddfe48025ad845bcf813f7c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/product/test_tool_gateway.py",
+      "role": "quality_test",
+      "size_bytes": 12125,
+      "sha256": "99a8ad7c8955c138a07f6a82a142a35b993052f960ff53e45d717d2a0bb8534f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/stress/__init__.py",
+      "role": "quality_test",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/stress/test_scalability.py",
+      "role": "quality_test",
+      "size_bytes": 7662,
+      "sha256": "4434539fbd90c04044164119edd4cef99b6edcccba4233409855e0d4a202e7fa",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_acceptance.py",
+      "role": "quality_test",
+      "size_bytes": 6903,
+      "sha256": "e4eec46bbef6cc8f0d9e7163b34c73f2bfe4ee23dc830343a01f53902024054b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_acceptance_cli_edges.py",
+      "role": "quality_test",
+      "size_bytes": 16996,
+      "sha256": "4e84c77a9ea761d99335453790d3f4573b1edd4597a9994e57f871b85b3b0317",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_acceptance_transition.py",
+      "role": "quality_test",
+      "size_bytes": 34604,
+      "sha256": "faff33f5d8dc05545109f8a94cac04cfe3eca4cf94dcb630b6c464cf0bd4e324",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_boundary_cases.py",
+      "role": "quality_test",
+      "size_bytes": 8876,
+      "sha256": "271d7d2fae671107eaf731fcae9349b718593a99526b425007b12ab8691696f9",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_checker_negative_paths.py",
+      "role": "quality_test",
+      "size_bytes": 65540,
+      "sha256": "62fa64e62a350ba135f803bea8f4327403248ab7371546bff0e2c74f6890aa7e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_concurrency.py",
+      "role": "quality_test",
+      "size_bytes": 4993,
+      "sha256": "5690648ffba65ef794309079902af5fed2521c65124168e67d609df67e1583ee",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_durability.py",
+      "role": "quality_test",
+      "size_bytes": 11557,
+      "sha256": "d2467473fc80bba893cba71d51fda93b72974b8397aae4b7d0bc7225eefdf525",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_generation_safety.py",
+      "role": "quality_test",
+      "size_bytes": 4169,
+      "sha256": "d0000ed71f069f7a72729f519c5c91934980dca87d9ef14ed11f49aae1798c69",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_governance_hardening.py",
+      "role": "quality_test",
+      "size_bytes": 24576,
+      "sha256": "34337800e1225463f70d4bc342334772ae6080b98934504e33f2ab0a26f6c553",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_lifecycle_matrix.py",
+      "role": "quality_test",
+      "size_bytes": 10087,
+      "sha256": "c93b5b1a45544de9736abe98e148b6a7451f53938a26415618e57f50c1895ddc",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_owner_usability.py",
+      "role": "quality_test",
+      "size_bytes": 17783,
+      "sha256": "3838260a9394f36467aaa6b926a070f075f226afbf51792aac914dc65129dfb8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_quality_integration.py",
+      "role": "quality_test",
+      "size_bytes": 15769,
+      "sha256": "272b74c12b3ab5e262746325ab5c44f339f4d2282bb4671cb2e4aa0dd6d43cb7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_scope_coverage.py",
+      "role": "quality_test",
+      "size_bytes": 6605,
+      "sha256": "ee0c3a96451b81a41c71ed0691f5b45480097d197574b3266142724d5c8464e8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/test_security_extended.py",
+      "role": "quality_test",
+      "size_bytes": 9225,
+      "sha256": "13bf0f472ccea29f6a7571f077b0fa71c389d2507f571ba7f95e2374ac8b146a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/__init__.py",
+      "role": "quality_test",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_adr_task_coverage.py",
+      "role": "quality_test",
+      "size_bytes": 4763,
+      "sha256": "3be1599e33b5e5b76becc16c294cd01b50677c70c1feedad3d316a9feca59da2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_auxiliary_quality_tools.py",
+      "role": "quality_test",
+      "size_bytes": 17126,
+      "sha256": "e2b2d1e546ef9c6b261ae387238bd8eacf07fbf2df3606922b1f170780a11327",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_change_scope.py",
+      "role": "quality_test",
+      "size_bytes": 12695,
+      "sha256": "bcd01f6f3b920a09cdba925f0e1934a0807fb24b540a37485060c4fc6072f209",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_check_delegation.py",
+      "role": "quality_test",
+      "size_bytes": 6720,
+      "sha256": "868817d89ba2f75366fa3ed8644237baeff11a7e1c2ac089e9e11186e506ff39",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_check_generated.py",
+      "role": "quality_test",
+      "size_bytes": 3625,
+      "sha256": "ef28494304d59586df0a4785b7b3527f9b5eba1f69dbbf8d736a4aae3b47dd17",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_code_analyzer.py",
+      "role": "quality_test",
+      "size_bytes": 3254,
+      "sha256": "a68f651d66850a986131705cbd447000c4040492e2d40a983d79d076244fbadc",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_coverage_policy.py",
+      "role": "quality_test",
+      "size_bytes": 5139,
+      "sha256": "590123660994480478e2f333392b9f5c1818329fcc274993ae5fa39cd8c1d791",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_diagram_lint.py",
+      "role": "quality_test",
+      "size_bytes": 29923,
+      "sha256": "b48a911e97efeb59396b0f5be41626ece31c44112ecf1fd6c68e92391afa5c68",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_diagram_render_lint.py",
+      "role": "quality_test",
+      "size_bytes": 17087,
+      "sha256": "1d97e50cc6a9e1499472acb564b44254f0608df370a5be5304bef63dfcb6f6c5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_eval_suite.py",
+      "role": "quality_test",
+      "size_bytes": 8141,
+      "sha256": "6a1664193e95dcea392df5136704070885a27767fc21cc1276dac0b8d97f84dd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_evidence_record.py",
+      "role": "quality_test",
+      "size_bytes": 8343,
+      "sha256": "c545268376cb29da07fdc2e6889fd80dfb1cf0eb0a5eb0ee5e55f5a057766904",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_frontmatter_standard.py",
+      "role": "quality_test",
+      "size_bytes": 6655,
+      "sha256": "020843cdc738509cc873bd090562a4f409c98563395be2b210c5541b2b3c40e5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_full_traceability.py",
+      "role": "quality_test",
+      "size_bytes": 4537,
+      "sha256": "65227a6eb3aac49e7fabc8fca66f4ba071b54d0f31dc8427596781f5875b6b03",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_health_check.py",
+      "role": "quality_test",
+      "size_bytes": 23200,
+      "sha256": "bad0c6c2c17450813d6290c3d46992a966cafbcbcc96d1b5bbd4d91acb41b2b7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_links.py",
+      "role": "quality_test",
+      "size_bytes": 24631,
+      "sha256": "f24aed868c0af6b09cda91051cd189c605ea0ed3a7f62eebc5939c37912fa63f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_markdown_index.py",
+      "role": "quality_test",
+      "size_bytes": 1638,
+      "sha256": "1d406a81e4204fda8c481851afbb68fbbcf38ab460c381d7b3c1484092146f14",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_metadata_parsing.py",
+      "role": "quality_test",
+      "size_bytes": 1396,
+      "sha256": "b086d171171ee4c60afbf95abc569c2c846dc6219b8bd06038cb0ebc16609210",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_milestone_lifecycle.py",
+      "role": "quality_test",
+      "size_bytes": 8755,
+      "sha256": "e50e870dcfca962fda70d1fc953c6a5214c5d5009b3356744a60d75439958eb4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_milestone_start_and_task_semantics.py",
+      "role": "quality_test",
+      "size_bytes": 9928,
+      "sha256": "47b76783e0f5816ab04e6ba122fe04c3796a7a54cd3bd9ce72dc3b95134795ac",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_non_markdown_index.py",
+      "role": "quality_test",
+      "size_bytes": 4169,
+      "sha256": "8d6580f2a993ae483f46456587eb3be2bf267d17145ef290e6839391eac73b7a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_project_common.py",
+      "role": "quality_test",
+      "size_bytes": 1866,
+      "sha256": "b6c7088729a07c38879266d4292f6ff70b4c2e69a7e57a4522f8f1000b583e99",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_quality_baseline.py",
+      "role": "quality_test",
+      "size_bytes": 3907,
+      "sha256": "98d18a253bca0e0b1da8850ca3d15076cb8cbdea83ca0da8ab8c5294f3745bed",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_quality_registry.py",
+      "role": "quality_test",
+      "size_bytes": 13123,
+      "sha256": "e557ae84b275e2cf75226349d06d78f3e875084d611c46360a527b0f9bc1864d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_quality_runner.py",
+      "role": "quality_test",
+      "size_bytes": 21332,
+      "sha256": "d3115cf1a7c4a3b74addf904dcf70c75dd954910c49714f23117d0cae3931e76",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_recover_lock_cli.py",
+      "role": "quality_test",
+      "size_bytes": 2498,
+      "sha256": "e5121bd56694aeec0a26a6abb0f8e83addc4608c592863086226291a16f520b1",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_requirement_tooling.py",
+      "role": "quality_test",
+      "size_bytes": 13073,
+      "sha256": "d812bfb82f5a9684d7683a5ea088cd1dd26e11711777d945610f9bcaab98123c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_semantic_consistency.py",
+      "role": "quality_test",
+      "size_bytes": 2549,
+      "sha256": "21aebcfdbce63f8702f25071c63b7f6b0f1d8bd7d79509f6ae32272f9764fb26",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_task_registry.py",
+      "role": "quality_test",
+      "size_bytes": 7316,
+      "sha256": "7bd2b1119cbf1e5f4207a7b5a3cd5a4b758da2a8454fd0489d09e7b2d6164dfa",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_template_contracts.py",
+      "role": "quality_test",
+      "size_bytes": 7081,
+      "sha256": "9e43e6861996ddceed4af2ed03eb5dfbe7ffa3c08823b832d33944fceea3f041",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_test_catalog.py",
+      "role": "quality_test",
+      "size_bytes": 2651,
+      "sha256": "899ec16542722d3852c432c94d3e6ad3a1350c79ecfc2b8feb6d6bf68bf4b4b1",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_traceability.py",
+      "role": "quality_test",
+      "size_bytes": 6103,
+      "sha256": "e57769cf1f19ca56ed2eb3a0f4eb5025a81c0aaa700f351bbbc3a4490f7c56bd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "operations/tests/tooling/test_versioning.py",
+      "role": "quality_test",
+      "size_bytes": 3383,
+      "sha256": "ba5c3bc2851f5fee4e98238e9fb6bd2b4631aba9898f7b38a982f5c201439ec2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "project_rules.md",
+      "role": "repository_authority_or_owner_entrypoint",
+      "size_bytes": 20886,
+      "sha256": "e00ddf1cf7bb5dca787b6e5e0b998c00f591b317a85cba0baeafa7d31755390e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 24,
+      "resolvable_local_markdown_links": 24
+    },
+    {
+      "path": "project_status.md",
+      "role": "repository_authority_or_owner_entrypoint",
+      "size_bytes": 8737,
+      "sha256": "6d56b5674eb0a08a3fa1c214a673fda848e4a4a3b9ac0a16d4bbe2b80d346661",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 63,
+      "resolvable_local_markdown_links": 63
+    },
+    {
+      "path": "pyproject.toml",
+      "role": "build_security_or_quality_configuration",
+      "size_bytes": 883,
+      "sha256": "e5712c56a8bef6859d34073363c1721aa92270661879c4a85f1f1800b442be75",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "specifications/architecture_baseline.md",
+      "role": "normative_specification",
+      "size_bytes": 26531,
+      "sha256": "025a9a9e25ded77a9dcdd5b67fd35fe65400d14a6a1d0e2dcb1aba04901df6c7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 79,
+      "resolvable_local_markdown_links": 79
+    },
+    {
+      "path": "specifications/business_requirements.md",
+      "role": "normative_specification",
+      "size_bytes": 19701,
+      "sha256": "73cd7d3c5e165d75e49e04c47db1a07b56fe95cf47a291c519f8d4b1eb25c8c8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "specifications/infrastructure_baseline.md",
+      "role": "normative_specification",
+      "size_bytes": 15927,
+      "sha256": "40c7922c1b9893caa5d29ecdd82e16508c7de904436b1ab91776deff52595115",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 35,
+      "resolvable_local_markdown_links": 35
+    },
+    {
+      "path": "specifications/system_specification.md",
+      "role": "normative_specification",
+      "size_bytes": 57732,
+      "sha256": "2a1952d2292c827858e4c3943ebf41a8b0274e44ba938ff353a1049018631ecb",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 77,
+      "resolvable_local_markdown_links": 77
+    },
+    {
+      "path": "specifications/threat_model.md",
+      "role": "normative_specification",
+      "size_bytes": 22893,
+      "sha256": "46c5b05acb12989a7038ab319caea7a4a6091814dced19336c862c18fd964f63",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 24,
+      "resolvable_local_markdown_links": 24
+    },
+    {
+      "path": "src/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 176,
+      "sha256": "d1f6a75a58503c60cfa723525d0fd414220bb7656d2726f71efe8c4bb17bfaf3",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/channels/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 470,
+      "sha256": "8fe927115749fbaf2e709aea8a87b8ea657cd5156556230526ca8ea1e55f7d30",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/channels/base.py",
+      "role": "product_implementation",
+      "size_bytes": 4259,
+      "sha256": "713b744b3e8dd71af48afbba1b7f1f439e952f3dba8a9abd41f3e6f8c194ebc8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/channels/telegram.py",
+      "role": "product_implementation",
+      "size_bytes": 4344,
+      "sha256": "f37d93079b18f0651ba5d5f701a1e091173e93dee5fbbb3c6f0091d68f143234",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/models/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 880,
+      "sha256": "773088837252749b6c22770ee6d16e62d0cfed18f57a57de745c913a899f4263",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/models/base.py",
+      "role": "product_implementation",
+      "size_bytes": 3172,
+      "sha256": "d6681c2d1bca69858747fa4e6c7be9f61cf5b4c98986ca272649e95494c338f7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/models/runtime_adapter.py",
+      "role": "product_implementation",
+      "size_bytes": 3053,
+      "sha256": "978537cfd304aca47bbb4dc9340c2689c32f29e513ac9fad337da1391f124d26",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/models/stub_gateway.py",
+      "role": "product_implementation",
+      "size_bytes": 2407,
+      "sha256": "f0cb98b9060806f83c2a8e9cbe533593818ac6b6ffc851ccf29f26e47e30c4b0",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/observability/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 969,
+      "sha256": "801e119db507474ea7ff4ccc8a556585b72dd845db706a89e6c86bb8f9d234b3",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/observability/collector.py",
+      "role": "product_implementation",
+      "size_bytes": 4365,
+      "sha256": "0e5f4809afbe33224afc02d1eacf0c456ee57d9498ef42bbf2b282dba14987fa",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/observability/sqlite_store.py",
+      "role": "product_implementation",
+      "size_bytes": 3391,
+      "sha256": "60fb440258c731d11de615fda4a7bb703b25c072c3ae72958b4ef08ccd6e5bfd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/observability/task_events.py",
+      "role": "product_implementation",
+      "size_bytes": 3754,
+      "sha256": "c76ed52f80029359c023432169e067d03aa4710d7d5848d0aa3846fd0e6e84a3",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/operations/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 890,
+      "sha256": "d74f3ccc1431a12f8473d2b551985eea63e715963cccb045840ba5387e369457",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/operations/health.py",
+      "role": "product_implementation",
+      "size_bytes": 2664,
+      "sha256": "a32e900e1a8df518fbc866dbb2b2bc8f7784070412fe13b75d845ae0097ffb97",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/operations/health_check.py",
+      "role": "product_implementation",
+      "size_bytes": 1576,
+      "sha256": "b62e25e1621ca0e6b8c927d28210ea64ca4f48b0bb78a36f3e8bcbd0b81a3b94",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/operations/network_policy.py",
+      "role": "product_implementation",
+      "size_bytes": 4035,
+      "sha256": "e77cfc7c243ec00af887a78eaad7dbe242d2496628e1d673a4dc385c7bf162e7",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/operations/scheduler_state.py",
+      "role": "product_implementation",
+      "size_bytes": 2919,
+      "sha256": "986a4df69b429aba67287063d99fc811daf6f99e89ff7dfb6763221c1cbe62e2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/orchestration/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 619,
+      "sha256": "49fb3fb1b90331ea49eb74fc31a31dd1127ea3e2078fd4aef96362800f37bcff",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/orchestration/orchestrator.py",
+      "role": "product_implementation",
+      "size_bytes": 6363,
+      "sha256": "cc238f572ed9e2bb214e78b5f28c1b0536f26f8a5d83d550ccb472193c8e108b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/orchestration/runtime_port.py",
+      "role": "product_implementation",
+      "size_bytes": 2106,
+      "sha256": "02e0d359a8117d608ea185441f5279d7b086912cbf185f806af7d2d2e0c083ab",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/orchestration/stub_runtime.py",
+      "role": "product_implementation",
+      "size_bytes": 2291,
+      "sha256": "c7ae6ff502cbd5a636a941ec13137eb01a09de8f0457f4ebd6111592483c2501",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/owner_control/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 1220,
+      "sha256": "281e281f156273bb961b806004abfc509c27c17989d6686aed013af4e5ffe524",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/owner_control/base.py",
+      "role": "product_implementation",
+      "size_bytes": 5872,
+      "sha256": "53d6aec8529b9351163edada197d498006a5ea41b18a6eb457014ee947adb454",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/owner_control/control.py",
+      "role": "product_implementation",
+      "size_bytes": 10269,
+      "sha256": "57affb313a2622789d9d9f90e58a56cd2162b63d707ef38ce9ea4361893b2f9c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/owner_control/emergency_switch.py",
+      "role": "product_implementation",
+      "size_bytes": 1933,
+      "sha256": "8e188e1f54c04fe55c1d436e9c63f9bf1af11bd3659c9b16118b808146520539",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/owner_control/state_io.py",
+      "role": "product_implementation",
+      "size_bytes": 2056,
+      "sha256": "89ab10fc52051c341111ca585f0fce1be2fdebe3d259938f3e7a35ecbfc7700f",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/secrets/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 224,
+      "sha256": "c4a6ddbaa13188861232e2a30bee776aaea2cda2ccc57161adaa384c0d716f2a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/secrets/base.py",
+      "role": "product_implementation",
+      "size_bytes": 432,
+      "sha256": "78a97ab0fdbd39346f2755ebe8946d9138f14d90aa3b31fb6e2d26f648ca05fb",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/secrets/env_provider.py",
+      "role": "product_implementation",
+      "size_bytes": 970,
+      "sha256": "9218e4d4fff649e50fc892f4fec7882d28064d27c17fd9aaae8bd1f92979920a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/task_state/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 882,
+      "sha256": "df007c8956e860e4fba04134dc34a9e7ba87debcf91edd41ede0e49d490f450e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/task_state/base.py",
+      "role": "product_implementation",
+      "size_bytes": 3319,
+      "sha256": "bb80e47a22dd8a8fbe846e838001bf7bea088adb89a4659f95bef3e99e0d0706",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/task_state/sqlite_store.py",
+      "role": "product_implementation",
+      "size_bytes": 10647,
+      "sha256": "f05dd51172809878c99c4052c61b8b7b5a845e7bd4328efba35022081b49c823",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/task_state/store.py",
+      "role": "product_implementation",
+      "size_bytes": 3485,
+      "sha256": "de2ff3f4cc5ec6af4d01fdce1aa2042f8328d6b7b9e9d9212101402ebb1eca12",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/tools/__init__.py",
+      "role": "product_implementation",
+      "size_bytes": 878,
+      "sha256": "a949a5260f837f59a5b397667176f234149e25fe3e3027058e99f8df28962d7c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/tools/base.py",
+      "role": "product_implementation",
+      "size_bytes": 3561,
+      "sha256": "b9cc31fabe794c6edb58c4a9ea5c541ddfa7550da06dd7412b61c6a3d6d9ec8e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "src/tools/registry.py",
+      "role": "product_implementation",
+      "size_bytes": 7467,
+      "sha256": "4b8165ee278476a711482d81da46c9180b60e1a6a60e9ddb0156faccc84fbee4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "work/acceptance/.gitkeep",
+      "role": "acceptance_evidence",
+      "size_bytes": 60,
+      "sha256": "3dc32f55341ea3c84c24372e2cbe6e6ce3de059a6bced7f6ed3c866c72195177",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "work/acceptance/m01.json",
+      "role": "acceptance_evidence",
+      "size_bytes": 2618,
+      "sha256": "d501d18482ae1eab87288caefae5fa2810128076f3d10481802602464221ba94",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "work/acceptance/m01_final_report.md",
+      "role": "acceptance_evidence",
+      "size_bytes": 4569,
+      "sha256": "8fcf8e5f8cd8bce5cb6dcefaa3412ac6729666b4aa6b334d4e4c550a3ab55bb4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 13,
+      "resolvable_local_markdown_links": 13
+    },
+    {
+      "path": "work/artefacts/architecture/personal_ai_platform_architecture.svg",
+      "role": "repository_support",
+      "size_bytes": 37626,
+      "sha256": "409280dad90b6120d6a012ae29cd0d31d69a9a8c892c1fd2d420b0fec06a06d5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "work/audit/audit_adhoc_cards.md",
+      "role": "audit_record",
+      "size_bytes": 25185,
+      "sha256": "4955c2df7c5ce6a7ec21caf36481bed36cf2e3d434f32413e2c8603fdc536020",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 59,
+      "resolvable_local_markdown_links": 59
+    },
+    {
+      "path": "work/audit/audit_baseline_2026_08_28.md",
+      "role": "audit_record",
+      "size_bytes": 14623,
+      "sha256": "47967b16027c0708d97b1208ef8fd77869ec8e734edab5d3fdc04b288e7c2f4b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 20,
+      "resolvable_local_markdown_links": 20
+    },
+    {
+      "path": "work/audit/audit_baseline_2026_08_29.md",
+      "role": "audit_record",
+      "size_bytes": 51076,
+      "sha256": "486fd2a67a1ba9bebe61d19183deec773f5df81df6d78d9ef0cb38dfa036f6b6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 122,
+      "resolvable_local_markdown_links": 108
+    },
+    {
+      "path": "work/audit/audit_baseline_2026_08_30.md",
+      "role": "audit_record",
+      "size_bytes": 18244,
+      "sha256": "0a997887771b62b86b9efc6db4b881be8a01e81524c3812596f204ca0229b9f5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 53,
+      "resolvable_local_markdown_links": 50
+    },
+    {
+      "path": "work/audit/audit_baseline_2026_09_02.md",
+      "role": "audit_record",
+      "size_bytes": 57514,
+      "sha256": "00353ffd73c4fbf809d4d0744efb923e03fa8fe4a6f5db55df5b6fa02fddb89e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 126,
+      "resolvable_local_markdown_links": 126
+    },
+    {
+      "path": "work/audit/audit_baseline_2026_09_09.md",
+      "role": "audit_record",
+      "size_bytes": 31845,
+      "sha256": "1900cd149d1381d54fc350ef3fe9adc2ef6fd28725976b3ac954be2a5b12474a",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 16,
+      "resolvable_local_markdown_links": 12
+    },
+    {
+      "path": "work/audit/audit_register.md",
+      "role": "audit_record",
+      "size_bytes": 27189,
+      "sha256": "5fc8b8c291f761c87e29e03f30f33e51939571b4a91bbdcbcce6ec579aa128c4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 170,
+      "resolvable_local_markdown_links": 167
+    },
+    {
+      "path": "work/tasks/.gitkeep",
+      "role": "delivery_task",
+      "size_bytes": 72,
+      "sha256": "2444dc2eed0e8480feb65d1718c07b155ac4c980f39edcc0163bc90bc74be9f0",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "work/tasks/task_001_arc_001.md",
+      "role": "delivery_task",
+      "size_bytes": 6542,
+      "sha256": "5037fbebd120467afaf00286422d91f9e2e8f2851db45d5f664bdda4826a8546",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 18,
+      "resolvable_local_markdown_links": 18
+    },
+    {
+      "path": "work/tasks/task_002_arc_002.md",
+      "role": "delivery_task",
+      "size_bytes": 9073,
+      "sha256": "c5e7acd3f89f1f947a800979ee3479f56ed693af1eb165009839f6edd853b34c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 24,
+      "resolvable_local_markdown_links": 24
+    },
+    {
+      "path": "work/tasks/task_003_arc_003.md",
+      "role": "delivery_task",
+      "size_bytes": 8463,
+      "sha256": "669fa454cb9a42dbf9d2152214f9961d56ef5f7f0085be35b69bb212402b0455",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 29,
+      "resolvable_local_markdown_links": 29
+    },
+    {
+      "path": "work/tasks/task_004_arc_004.md",
+      "role": "delivery_task",
+      "size_bytes": 7559,
+      "sha256": "f60f7bf4b8f13fb3615c0e416d0a5966f440a099abc3c1e474df437232f9d6d5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 25,
+      "resolvable_local_markdown_links": 25
+    },
+    {
+      "path": "work/tasks/task_005_arc_005.md",
+      "role": "delivery_task",
+      "size_bytes": 7647,
+      "sha256": "33a7e518d97b01b9e2203b90ae70f1098cfeddfaea7be264e52a9844a3e05e79",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 24,
+      "resolvable_local_markdown_links": 24
+    },
+    {
+      "path": "work/tasks/task_006_arc_007.md",
+      "role": "delivery_task",
+      "size_bytes": 6707,
+      "sha256": "1db03aaecf2c8ac025c526b0da281e686658dbff4cdd6730517ceac9f925ff22",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 18,
+      "resolvable_local_markdown_links": 18
+    },
+    {
+      "path": "work/tasks/task_007_arc_009.md",
+      "role": "delivery_task",
+      "size_bytes": 8771,
+      "sha256": "70c85f1ea1a246cbdf8a04bc1255e677224989ddb889fba8def0975de16a6b93",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 37,
+      "resolvable_local_markdown_links": 37
+    },
+    {
+      "path": "work/tasks/task_008_inf_001.md",
+      "role": "delivery_task",
+      "size_bytes": 10190,
+      "sha256": "77c14e45f6032a0ac7f545dbd82b9edae19fa250bd2ad1496cd1abbadfb85d2e",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 30,
+      "resolvable_local_markdown_links": 30
+    },
+    {
+      "path": "work/tasks/task_009_inf_002.md",
+      "role": "delivery_task",
+      "size_bytes": 6498,
+      "sha256": "adb44d2b7f50fb2179ce4ed26c3fa783953a4e0a105de4f91310b70579d658a1",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 22,
+      "resolvable_local_markdown_links": 22
+    },
+    {
+      "path": "work/tasks/task_010_inf_003.md",
+      "role": "delivery_task",
+      "size_bytes": 4772,
+      "sha256": "ddb6a298add6bc83f09d0531c11c3aee346e6fc6f72edca207cefd3b4fc0a519",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 13,
+      "resolvable_local_markdown_links": 13
+    },
+    {
+      "path": "work/tasks/task_011_inf_005.md",
+      "role": "delivery_task",
+      "size_bytes": 5626,
+      "sha256": "0ae09e3f75a0296f3852ff12da121c025c1f85e6a406ee5a6721bfdfe9c55239",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 15,
+      "resolvable_local_markdown_links": 15
+    },
+    {
+      "path": "work/tasks/task_012_inf_007.md",
+      "role": "delivery_task",
+      "size_bytes": 6093,
+      "sha256": "acd2b93e778f0bf67273619283c7fc301987987f7028f8fb484ecdeda15ff161",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 16,
+      "resolvable_local_markdown_links": 16
+    },
+    {
+      "path": "work/tasks/task_013_inf_008.md",
+      "role": "delivery_task",
+      "size_bytes": 8182,
+      "sha256": "a2747d50bc7d3737b11592be2ce37c16e8147943fd02ac4452f778f2a57f4c80",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 21,
+      "resolvable_local_markdown_links": 21
+    },
+    {
+      "path": "work/tasks/task_014_real_runtime.md",
+      "role": "delivery_task",
+      "size_bytes": 4105,
+      "sha256": "fb8203be79ce791c6b03800530e43b0f049b60f14e1cc3e5ca76395b2a4c0a5b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 8,
+      "resolvable_local_markdown_links": 8
+    },
+    {
+      "path": "work/tasks/task_015_real_model_provider.md",
+      "role": "delivery_task",
+      "size_bytes": 4740,
+      "sha256": "790d95fbd7209581ccb161ddff37b496a5f142d76206b475c163f8daa095578c",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 8,
+      "resolvable_local_markdown_links": 8
+    },
+    {
+      "path": "work/tasks/task_016_real_telegram.md",
+      "role": "delivery_task",
+      "size_bytes": 4742,
+      "sha256": "54e02444ce2a0495b2aa8cfd5beae4b0896f07b9377564884647c350de23eb29",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 3,
+      "resolvable_local_markdown_links": 3
+    },
+    {
+      "path": "work/tasks/task_017_m02_live_e2e.md",
+      "role": "delivery_task",
+      "size_bytes": 4087,
+      "sha256": "aeb56581771b5852eec37f733b54122b9ca94e1356146cf513b82feef62806a5",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 2,
+      "resolvable_local_markdown_links": 2
+    },
+    {
+      "path": "work/tasks/task_018_runtime_task_events.md",
+      "role": "delivery_task",
+      "size_bytes": 5998,
+      "sha256": "e4a1feb5074baab8f91c5ba1638bc81f9f36a5bf1a1ad52b3d7b8d8c85f36f45",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 12,
+      "resolvable_local_markdown_links": 12
+    },
+    {
+      "path": "work/tests/test_001.md",
+      "role": "test_specification",
+      "size_bytes": 2804,
+      "sha256": "acb17830720124bbba5f127b0fa4e4f9de18a92131d215751dd71c97508131d2",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "work/tests/test_002.md",
+      "role": "test_specification",
+      "size_bytes": 2854,
+      "sha256": "490557b1263b89c70d47f87e9147a920e4e1b03007f65ebcd56ca2c713b8711b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 0,
+      "resolvable_local_markdown_links": 0
+    },
+    {
+      "path": "work/tests/test_003.md",
+      "role": "test_specification",
+      "size_bytes": 2187,
+      "sha256": "790b0fb11cf0017dffb1649b89dbe1afd3502f4ff4379ab710c77c78c36ed272",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "work/tests/test_004.md",
+      "role": "test_specification",
+      "size_bytes": 2367,
+      "sha256": "4b5d4fe12f35dfceb534a6a3d3c0f4a235b02cd32ddb942c242915d28e4ebb50",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 1,
+      "resolvable_local_markdown_links": 1
+    },
+    {
+      "path": "work/tests/test_005.md",
+      "role": "test_specification",
+      "size_bytes": 2917,
+      "sha256": "536c2d3931f2b64eca1dfeaa518e239f59882605f79de3f66a97e6bd73bef893",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 3,
+      "resolvable_local_markdown_links": 3
+    },
+    {
+      "path": "work/tests/test_006.md",
+      "role": "test_specification",
+      "size_bytes": 2973,
+      "sha256": "7a3ef45780494338e9b83fd530944c6996fcd1161ada4eed79a4ed33b8997da9",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 2,
+      "resolvable_local_markdown_links": 2
+    },
+    {
+      "path": "work/tests/test_007.md",
+      "role": "test_specification",
+      "size_bytes": 3954,
+      "sha256": "a5dfaca3502dc05e974cf4675b143b8d1efeb10572c1b3ac4bd893cc56db1e07",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 6,
+      "resolvable_local_markdown_links": 6
+    },
+    {
+      "path": "work/tests/test_008.md",
+      "role": "test_specification",
+      "size_bytes": 5744,
+      "sha256": "f03443661615e0f336d08043449e88727bee4511aee7747bbbc7d11f111e4263",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 8,
+      "resolvable_local_markdown_links": 8
+    },
+    {
+      "path": "work/tests/test_009.md",
+      "role": "test_specification",
+      "size_bytes": 5724,
+      "sha256": "2faa562bbcbd8c5839aa755945744566d45d43eea9272a66e9e38ef66584b1d1",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 7,
+      "resolvable_local_markdown_links": 7
+    },
+    {
+      "path": "work/tests/test_010.md",
+      "role": "test_specification",
+      "size_bytes": 5880,
+      "sha256": "5ed185c06cfbdc7086eaf9877470b72366f75eaccdd10219a44c0fc5adae1a78",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 7,
+      "resolvable_local_markdown_links": 7
+    },
+    {
+      "path": "work/tests/test_011.md",
+      "role": "test_specification",
+      "size_bytes": 6568,
+      "sha256": "b511b2d4ffb8f7b9ec80fe733b5d5d9f2c5ea3205dc84878e0a6693862ae19d8",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 7,
+      "resolvable_local_markdown_links": 7
+    },
+    {
+      "path": "work/tests/test_012.md",
+      "role": "test_specification",
+      "size_bytes": 5686,
+      "sha256": "f7eee2aae4ac1c411e63c174616bb1fc5c780bc0ad853b3595cf6cb1e4eb880d",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 2,
+      "resolvable_local_markdown_links": 2
+    },
+    {
+      "path": "work/tests/test_013.md",
+      "role": "test_specification",
+      "size_bytes": 5247,
+      "sha256": "89f2735a59736a79718222c032779e34def8c31ef164a9d6b362c66b3b4b16d6",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 4,
+      "resolvable_local_markdown_links": 4
+    },
+    {
+      "path": "work/tests/test_014.md",
+      "role": "test_specification",
+      "size_bytes": 4172,
+      "sha256": "04f285f529731fb1b226b62ac607cdc26386a716bbdd268ecf7b1e166ff8b7f4",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 5,
+      "resolvable_local_markdown_links": 5
+    },
+    {
+      "path": "work/tests/test_015.md",
+      "role": "test_specification",
+      "size_bytes": 3956,
+      "sha256": "35e9c729d60f1a2250ff8ad0a707f3a41edd8718354abeac5ed890b4120cf179",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 5,
+      "resolvable_local_markdown_links": 5
+    },
+    {
+      "path": "work/tests/test_016.md",
+      "role": "test_specification",
+      "size_bytes": 2378,
+      "sha256": "9880b2893645f4467d49c7b5894bbf204c3bd153c0aeaad746ee26c1f19f1d50",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 6,
+      "resolvable_local_markdown_links": 6
+    },
+    {
+      "path": "work/tests/test_017.md",
+      "role": "test_specification",
+      "size_bytes": 2403,
+      "sha256": "c9c0f79d2838ef8931eaf12f58628364570432418a4aa57ee79e14a9a8356228",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 4,
+      "resolvable_local_markdown_links": 4
+    },
+    {
+      "path": "work/tests/test_018.md",
+      "role": "test_specification",
+      "size_bytes": 2961,
+      "sha256": "3e578ab733222eb239813055fd6793923b5a11957b7251dffc22cda2482bcabd",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 5,
+      "resolvable_local_markdown_links": 5
+    },
+    {
+      "path": "work/tests/test_019.md",
+      "role": "test_specification",
+      "size_bytes": 2640,
+      "sha256": "24dec0056c989c14907e380d72b1626a0b9f1c8005abd9b436ecb6522560483b",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 5,
+      "resolvable_local_markdown_links": 5
+    },
+    {
+      "path": "work/tests/test_020.md",
+      "role": "test_specification",
+      "size_bytes": 2795,
+      "sha256": "2f7a51a9cbe7708766f7c435833c6be3906c0f4e66428b08c27a5e3b6d8f5302",
+      "semantic_review": "reviewed",
+      "placement": "consistent",
+      "local_or_external_markdown_links": 4,
+      "resolvable_local_markdown_links": 4
+    }
+  ]
+}

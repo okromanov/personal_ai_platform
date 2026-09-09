@@ -1,0 +1,234 @@
+{
+  "prompt_version": "5.0",
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "items": [
+    {
+      "section": "13.1",
+      "item": "evidence_state_for_material_claims",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "runtime_claims_bound_to_sha",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "generated_requires_drift_check",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "missing_tool_not_zero_findings",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "traceability_not_behavior",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "allowed_paths_not_implementation",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "coverage_compared_to_policy",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "gate_scripts_verified",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "isolated_execution_policy",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "local_and_ci_separated",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "secrets_worktree_history_ignored_checked",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "findings_not_name_only",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "baseline_and_deduplication",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "previous_findings_reverified",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "severity_impact_reachability",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "flaky_claim_policy",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "stop_conditions_honored",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "limits_visible",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "conditional_checks_declared",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "depth_delta_declared",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "readiness_rule_applied",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "recommendations_not_claimed_done",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.1",
+      "item": "machine_findings_and_hashes",
+      "status": "done",
+      "note": "verified in completion evidence"
+    },
+    {
+      "section": "13.2",
+      "item": "gate_mutation_registry",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "ratchets",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "control_level_matrix",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "non_falsifiable_tests",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "uncovered_inventory",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "divergent_duplication",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "supply_chain_license_provenance",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "file_role_inventory",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "closed_delivery_path",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "actual_architecture",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "observability_recovery",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "data_privacy_map",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "agent_memory_untrusted_content",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "channel_authenticity_permissions",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    },
+    {
+      "section": "13.2",
+      "item": "threat_model_presence",
+      "status": "done",
+      "note": "verified; not-applicable subcases are declared in completion_report.json"
+    }
+  ]
+}

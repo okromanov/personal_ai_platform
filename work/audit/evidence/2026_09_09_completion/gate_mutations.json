@@ -1,0 +1,130 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "registry_source": "operations/scripts/quality/run_suite.py::run_full",
+  "focused_run": {
+    "tests_run": 153,
+    "passed": 152,
+    "environment_errors": 1,
+    "environment_error": "local reconstructed history lacks the m01 start/completion commits",
+    "tree_restored": true
+  },
+  "direct_cli_probes": [
+    {
+      "check": "Bandit medium+",
+      "mutation": "pickle.loads on synthetic bytes",
+      "returncode": 1,
+      "finding": "B301 MEDIUM"
+    },
+    {
+      "check": "Vulture confidence 80",
+      "mutation": "unused synthetic import",
+      "returncode": 3,
+      "finding": "90% confidence"
+    },
+    {
+      "check": "Ruff lint",
+      "mutation": "undefined synthetic name",
+      "returncode": 1,
+      "finding": "F821"
+    },
+    {
+      "check": "Ruff format",
+      "mutation": "unformatted synthetic mapping",
+      "returncode": 1,
+      "finding": "file would be reformatted"
+    },
+    {
+      "check": "Coverage JSON",
+      "mutation": "no coverage data",
+      "returncode": 1,
+      "finding": "No data to report"
+    }
+  ],
+  "checks": [
+    {
+      "check": "configuration JSON/TOML/dev-lock/audit register",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "test_configuration_and_permission_checks_fail_closed; lock/audit negative tests"
+    },
+    {
+      "check": "Python file permissions",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "test_configuration_and_permission_checks_fail_closed"
+    },
+    {
+      "check": "change scope, metadata, immutable audit history",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "test_active_task_covers_only_declared_paths; test_dated_audit_history_is_append_only"
+    },
+    {
+      "check": "derived document generation",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "test_dashboard_regeneration_is_fail_closed and propagates_generator_failure"
+    },
+    {
+      "check": "documentation audit",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "checker negative-path suite"
+    },
+    {
+      "check": "Bandit medium+",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "real tool rejects a synthetic shell=True call; runner propagates non-zero"
+    },
+    {
+      "check": "AST code analysis",
+      "mutation_outcome": "partial",
+      "behavioral_evidence": "bare pass mutation caught; documented pass and bare raise escape: AUD-042"
+    },
+    {
+      "check": "Vulture confidence 80",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "real tool rejects a synthetic unused function; runner propagates non-zero"
+    },
+    {
+      "check": "Ruff lint",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "real tool rejects undefined-name fixture; runner propagates non-zero"
+    },
+    {
+      "check": "Ruff format",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "real tool rejects unformatted fixture; runner propagates non-zero"
+    },
+    {
+      "check": "mypy regression baseline",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "test_blocks_error_count_increase and test_blocks_new_error_code"
+    },
+    {
+      "check": "unit tests with branch coverage",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "canonical runner rejects failure, skip and unexpected success"
+    },
+    {
+      "check": "coverage report and JSON",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "missing/invalid coverage artifacts fail; fail_under is active"
+    },
+    {
+      "check": "coverage policy",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "uncovered aggregate/module/diff fixture fails"
+    },
+    {
+      "check": "template registry",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "missing values, path escape and bypassing generator fixtures fail"
+    },
+    {
+      "check": "generated drift",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "git diff --exit-code and regeneration failure tests"
+    },
+    {
+      "check": "repository health",
+      "mutation_outcome": "caught",
+      "behavioral_evidence": "missing git metrics/tools/coverage and failed tests produce non-healthy or failure"
+    }
+  ]
+}

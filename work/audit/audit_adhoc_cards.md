@@ -2,8 +2,8 @@
 id: audit_adhoc_cards
 type: audit_archive
 document_state: current
-version: 1.1
-updated: 2026-09-02
+version: 1.2
+updated: 2026-09-09
 depends_on:
   - audit_register
 ---
@@ -91,3 +91,18 @@ depends_on:
 - **Рекомендованное исправление:** откатить парсинг `data-spec-id` в `diagram_lint.py` к строго одному ID на атрибут; в схеме заменить узлы с несколькими ID на структуру, где каждый ID помечен отдельным элементом (например, `<tspan>` внутри общего `<text>`, если узлы физически совмещены на одной строке — по аналогии с уже существующими пятью отдельными чипами потоков размещения).
 - **Как проверить исправление:** `python operations/scripts/documents/diagram_lint.py work/artefacts/architecture/personal_ai_platform_architecture.svg` — 0 ошибок при строгом одиночном парсинге; `grep -c "data-spec-id=\"[A-Z_0-9]* [A-Z_0-9]" work/artefacts/architecture/personal_ai_platform_architecture.svg` — 0 совпадений (ни одного составного атрибута).
 - **Исправлено (2026-09-01):** `diagram_lint.py` вернулся к строгому одному ID на `data-spec-id`; новый тест `test_check_ids_rejects_a_compressed_multi_id_attribute` фиксирует это как регрессионный барьер. В схеме [`INF_CMP_001`](../../specifications/infrastructure_baseline.md#inf_cmp_001)–[`INF_CMP_008`](../../specifications/infrastructure_baseline.md#inf_cmp_008) переведены на восемь отдельных `<tspan data-spec-id="...">` внутри одной строки описания (заодно исправлена неточность — прежний текст объединял «Постоянное хранилище» и «Хранилище резервных копий» в одно «Хранилища», хотя это два разных компонента); аналогично разнесены [`ARC_FLOW_002`](../../specifications/architecture_baseline.md#arc_flow_002)/[`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007)/[`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)/[`SEC_CTL_009`](../../specifications/system_specification.md#sec_ctl_009) и [`ARC_FLOW_004`](../../specifications/architecture_baseline.md#arc_flow_004)/[`SEC_CTL_017`](../../specifications/system_specification.md#sec_ctl_017), ранее делившие один составной атрибут. `diagram_version` схемы поднят до `1.1`.
+
+<a id="aud-044"></a>
+### AUD-044 — Пороги coverage можно ослабить без сигнала gate
+
+- **Severity/Confidence/Evidence state:** medium / high / CONFIRMED
+- **Baseline:** pre-existing на проверяемом SHA `3006ad603e57d9acc3bb3cd50455c04223904d14`; момент появления не устанавливался.
+- **Файл:** [`pyproject.toml`](../../pyproject.toml), [`check_change_scope.py`](../../operations/scripts/tasks/check_change_scope.py), [`check_coverage.py`](../../operations/scripts/quality/check_coverage.py), [`ratchets.json`](evidence/2026_09_09_completion/ratchets.json)
+- **Ожидаемый контракт:** [`repository_audit_system_prompt.md`](../../operations/repository_audit_system_prompt.md) §4.2.7 требует проверить каждый baseline, budget и allowlist и фиксировать отсутствие механизма, не позволяющего незаметно расширить допуск. Coverage policy должна оставаться измеримой гарантией, а не значением, которое тот же changeset может свободно обнулить.
+- **Наблюдаемое поведение:** в изолированной копии все coverage-пороги в [`pyproject.toml`](../../pyproject.toml) изменены с `75/90/85` на `0`: `coverage.report.fail_under`, aggregate `overall`, diff `diff` и пять поимённых модулей. Настоящий [`check_change_scope.py`](../../operations/scripts/tasks/check_change_scope.py) завершился с кодом 0. Выбранные 62 теста policy, health, scope и governance также завершились с кодом 0; два штатных skip внутри временных health-fixtures не использованы как доказательство успеха канонического runner. То есть controls проверяют применение текущих значений, но не запрещают их снижение.
+- **Воздействие и достижимость:** автор изменения с правом записи в репозиторий может провести отдельный maintenance PR, после которого общий, diff- и критический module coverage фактически перестанут блокировать регрессии. Runtime-компрометация и обход остальных CI-шагов не заявлены; поэтому severity `medium`.
+- **Как воспроизвести:** в чистой копии создать baseline commit, заменить `fail_under = 75`, `overall = 75`, `diff = 90` и все пять `= 85` на нули, создать второй commit и запустить `check_change_scope.py --base <baseline> --head <head>` и policy-focused tests. Оба запуска возвращают 0; точный итог записан в [`ratchets.json`](evidence/2026_09_09_completion/ratchets.json).
+- **Почему предыдущий аудит пропустил:** первоначальная серия проверяла пять функциональных no-op мутаций и прямо оставляла полный ratchet/mutation sweep незавершённым; сами пороги сравнивались с coverage, но их изменение относительно base не проверялось.
+- **Рекомендованное исправление:** добавить в обязательный governance-шаг сравнение policy между base и head: `fail_under`, `overall`, `diff` и каждый существующий named-module floor не могут уменьшаться, а защищённый список модулей — сокращаться без отдельной явной записи исключения, связанной с owner-approved governance change.
+- **Как проверить исправление:** повторить описанную мутацию; `run_suite.py full` обязан упасть на шаге governance до тестов. Повышение порога и добавление защищённого модуля должны проходить. Добавить negative tests для снижения каждого вида порога и удаления named-module entry.
+- **Критерий закрытия:** мутационная проба на точном remediation SHA поймана новым поведенческим тестом; полный Project check этого SHA зелёный, а строка реестра обновлена на `resolved`.

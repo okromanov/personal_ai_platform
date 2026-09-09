@@ -1,0 +1,48 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "operations_markdown": {
+    "count": 48,
+    "review": "complete from start to end",
+    "conflicting_current_procedure_sources": []
+  },
+  "duplication": [
+    {
+      "case": "document_frontmatter_standard.md",
+      "classification": "cannot silently diverge",
+      "reason": "historical/superseded page delegates to current machine and process sources"
+    },
+    {
+      "case": "state definitions in dated audit reports",
+      "classification": "historical immutable evidence",
+      "reason": "dated baselines intentionally preserve point-in-time wording and do not control current state"
+    }
+  ],
+  "closed_delivery_path": {
+    "active_milestone": "m02",
+    "status": "in-progress",
+    "implemented_components": "owner control, adapters, local task state, observability and quality/governance harness",
+    "terminal_outcomes": "real runtime, model provider, Telegram and live E2E remain explicitly planned in TASK_014–TASK_017",
+    "assessment": "no planned item was credited as delivered behavior"
+  },
+  "actual_architecture": {
+    "shape": "modular monolith",
+    "boundaries": ["channels", "models", "runtime", "tools", "owner_control", "task_state", "observability"],
+    "replaceability": "protocol/ABC boundaries exist; real adapters are not yet implemented",
+    "scale_tradeoff": "single-owner local-first design is simple for current scope; distributed scaling and family multi-user remain candidates"
+  },
+  "observability_and_recovery": {
+    "observability": "structured technical events and SQLite/local sinks",
+    "recovery": "atomic owner state, holder metadata, checkpoint/retry state and stale-lock runbook",
+    "restore_drill": "not applicable: no production deployment or backup target exists; no restore success is claimed"
+  },
+  "privacy": {
+    "fixtures": "synthetic identifiers and sentinel strings; no real PII found",
+    "implemented_egress": [],
+    "retention": "local stores have no timed retention/deletion implementation; this remains future delivery work",
+    "finding": "AUD-041 permits post-validation mutation of privacy-bounded mappings"
+  },
+  "threat_model": {
+    "present": true,
+    "sources": ["specifications/system_specification.md", "operations/policy/threat_review_triggers.md"]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "findings": [
+    {
+      "id": "AUD-041",
+      "severity": "high",
+      "evidence_state": "CONFIRMED",
+      "baseline": "pre-existing",
+      "state": "open",
+      "observation": "caller-owned mappings survive authorization or schema validation and are consumed later after mutation; reproduced for ToolCall.params, ObservationEvent.measurements and TaskEvent.attributes",
+      "impact": "authorized values and privacy-bounded telemetry can diverge from values executed or retained",
+      "remediation": "deep immutable snapshot before validation and consume exactly that snapshot",
+      "verification": "async/nested mutation regression tests plus full gate and exact-SHA CI"
+    },
+    {
+      "id": "AUD-042",
+      "severity": "medium",
+      "evidence_state": "CONFIRMED",
+      "baseline": "pre-existing",
+      "state": "open",
+      "observation": "AST detector misses docstring plus pass and bare raise NotImplementedError",
+      "impact": "documented implementation stubs can pass the blocking AST step",
+      "remediation": "strip an initial docstring and recognize Name and Call forms",
+      "verification": "CLI negative tests for every form plus implemented-function control"
+    },
+    {
+      "id": "AUD-043",
+      "severity": "low",
+      "evidence_state": "CONFIRMED",
+      "baseline": "pre-existing",
+      "state": "resolved",
+      "observation": "proposed product documents now reside in candidates and are linked from future milestones",
+      "impact": "previous placement ambiguity removed",
+      "remediation": "completed in 5db151c0821fa04af0596ce81510b090f38933fb",
+      "verification": "current paths, inbound milestone links, documentation gate and exact-SHA CI"
+    },
+    {
+      "id": "AUD-044",
+      "severity": "medium",
+      "evidence_state": "CONFIRMED",
+      "baseline": "pre-existing",
+      "state": "open",
+      "observation": "all aggregate, diff, named-module and coverage.py floors can be lowered to zero in pyproject.toml while change-scope and selected policy tests remain green",
+      "impact": "a quality-policy change can silently remove the principal coverage guarantees",
+      "remediation": "add a base/head non-decreasing ratchet or an explicit separately reviewed exception record",
+      "verification": "repeat the weakening probe; the gate must fail before tests execute"
+    }
+  ]
+}
