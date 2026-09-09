@@ -21,6 +21,7 @@ def is_primary_markdown(relative: str) -> bool:
     return relative.startswith(
         (
             "adr/",
+            "candidates/",
             "specifications/",
             "operations/",
             "work/tasks/",

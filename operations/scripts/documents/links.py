@@ -79,6 +79,7 @@ MARKDOWN_PATH_PATTERN = re.compile(
 # named by convention, not meant to be clicked into.
 KNOWN_DOCUMENT_DIRECTORIES = (
     "adr/",
+    "candidates/",
     "specifications/",
     "work/tasks/",
     "work/tests/",

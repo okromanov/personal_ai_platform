@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 from operations.scripts.documents.check import (
     _branch_cleanup_errors,
+    _document_ids,
     _known_reference_ids,
     _task_test_plan_item_errors,
     check_acceptance_adr_transitions,
@@ -34,6 +35,23 @@ from operations.scripts.documents.metadata import MarkdownDocument
 
 
 class CheckerNegativePathTests(unittest.TestCase):
+    def test_candidate_documents_participate_in_authority_graph(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            candidate_dir = root / "candidates"
+            candidate_dir.mkdir()
+            (candidate_dir / "future_capability.md").write_text(
+                "---\nid: candidate_future_capability\ntype: candidate_specification\n"
+                "document_state: current\napplicability: proposed\nversion: 1.0\n---\n\n"
+                "# Future capability\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(
+                _document_ids(root)["candidate_future_capability"],
+                "candidates/future_capability.md",
+            )
+
     def test_metadata_rejects_status_and_duplicate_identifiers(self) -> None:
         metadata: dict[str, Any] = {
             "id": "DOC_001",

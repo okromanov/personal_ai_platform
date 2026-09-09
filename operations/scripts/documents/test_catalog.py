@@ -35,6 +35,9 @@ def _humanize(method_name: str) -> str:
 # name (English) below, so a newly added test is never left without a row —
 # just without a Russian one until this registry is extended.
 RU_DESCRIPTIONS: dict[str, str] = {
+    "operations/tests/test_checker_negative_paths.py|test_candidate_documents_participate_in_authority_graph": (
+        "Кандидатные документы участвуют в графе нормативных зависимостей и разрешают ссылки по document id."
+    ),
     "operations/tests/test_acceptance.py|test_foundation_evidence_targets_machine_path_scope_when_product_scope_is_empty": (
         "Для этапа без объявленного продуктового состава evidence-цели сводятся к области путей автоматики."
     ),
