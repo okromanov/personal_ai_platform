@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import tempfile
 import unittest
 from pathlib import Path
@@ -110,6 +111,21 @@ class ToolGatewayReadTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(result.succeeded)
         self.assertEqual(handler.calls, [])
 
+    async def test_non_json_params_are_denied_before_handler(self) -> None:
+        gate, tmp = _gate()
+        self.addCleanup(tmp.cleanup)
+        handler = RecordingHandler()
+        gateway = ToolGatewayImpl(
+            gate,
+            [_capability(handler=handler, params=frozenset({"value"}))],
+        )
+
+        result = await gateway.call(_call(params={"value": object()}))
+
+        self.assertFalse(result.succeeded)
+        self.assertEqual(result.error_message, "tool call params must be JSON-serializable")
+        self.assertEqual(handler.calls, [])
+
 
 class ToolGatewaySensitiveActionTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
@@ -158,6 +174,55 @@ class ToolGatewaySensitiveActionTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result.succeeded)
         self.assertEqual(result.output, "sent")
         self.assertEqual(len(self.handler.calls), 1)
+
+    async def test_dispatch_uses_the_exact_deep_snapshot_that_was_authorized(self) -> None:
+        started = asyncio.Event()
+        resume = asyncio.Event()
+        observed: list[object] = []
+
+        async def delayed_handler(call: ToolCall) -> str:
+            started.set()
+            await resume.wait()
+            observed.append(call.params["subject"])
+            return "sent"
+
+        gateway = ToolGatewayImpl(
+            self.gate,
+            [
+                _capability(
+                    name="send_email",
+                    effect_class=ActionClass.WRITE_EXTERNAL,
+                    handler=delayed_handler,
+                    resources=frozenset({"a@example.com"}),
+                    params=frozenset({"subject"}),
+                )
+            ],
+        )
+        subject = {"label": "APPROVED"}
+        params: dict[str, object] = {"subject": subject}
+        first = _call(
+            action_id="send-snapshot",
+            capability_name="send_email",
+            resource="a@example.com",
+            params=params,
+        )
+        self.assertFalse((await gateway.call(first)).succeeded)
+
+        confirmed = _call(
+            action_id="send-snapshot",
+            capability_name="send_email",
+            resource="a@example.com",
+            params=params,
+            confirmed=True,
+        )
+        execution = asyncio.create_task(gateway.call(confirmed))
+        await asyncio.wait_for(started.wait(), timeout=2)
+        subject["label"] = "NOT_APPROVED"
+        resume.set()
+        result = await asyncio.wait_for(execution, timeout=2)
+
+        self.assertTrue(result.succeeded)
+        self.assertEqual(observed, [{"label": "APPROVED"}])
 
     async def test_confirmation_cannot_be_reused_for_another_resource(self) -> None:
         await self.gateway.call(

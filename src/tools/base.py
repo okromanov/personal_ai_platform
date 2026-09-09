@@ -8,8 +8,9 @@ protocol is only a way to connect a tool, never a source of authorization
 creates a permission or weakens the effect-class check on its own.
 """
 
+import json
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 
@@ -46,6 +47,23 @@ class ToolCall:
     network_target: str | None = None
     confirmed: bool = False
     runtime_task_id: str | None = None
+
+    def snapshot(self) -> "ToolCall":
+        """Return an independent JSON snapshot for authorization and dispatch."""
+        try:
+            params = json.loads(
+                json.dumps(
+                    self.params,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError("tool call params must be JSON-serializable") from exc
+        if not isinstance(params, dict):
+            raise ValueError("tool call params must be a JSON object")
+        return replace(self, params=params)
 
 
 @dataclass(frozen=True)
