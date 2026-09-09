@@ -56,9 +56,18 @@ class StubDetector(ast.NodeVisitor):
                 }
             )
 
-        # Check if function body is just pass or raise NotImplementedError
-        if len(node.body) == 1:
-            stmt = node.body[0]
+        # A docstring is metadata, not an implementation.  Ignore it before
+        # deciding whether the executable body is only a stub marker.
+        body = node.body
+        if body and isinstance(body[0], ast.Expr):
+            value = body[0].value
+            if isinstance(value, ast.Constant) and isinstance(value.value, str):
+                body = body[1:]
+
+        # Check if executable body is just pass or either spelling of
+        # raise NotImplementedError.
+        if len(body) == 1:
+            stmt = body[0]
             if isinstance(stmt, ast.Pass):
                 self.stubs.append(
                     {
@@ -68,18 +77,26 @@ class StubDetector(ast.NodeVisitor):
                         "severity": "high",
                     }
                 )
-            elif isinstance(stmt, ast.Raise):
-                if isinstance(stmt.exc, ast.Call):
-                    if isinstance(stmt.exc.func, ast.Name):
-                        if stmt.exc.func.id == "NotImplementedError":
-                            self.stubs.append(
-                                {
-                                    "type": "not_implemented",
-                                    "function": node.name,
-                                    "line": node.lineno,
-                                    "severity": "high",
-                                }
-                            )
+            elif isinstance(stmt, ast.Raise) and self._raises_not_implemented(stmt):
+                self.stubs.append(
+                    {
+                        "type": "not_implemented",
+                        "function": node.name,
+                        "line": node.lineno,
+                        "severity": "high",
+                    }
+                )
+
+    @staticmethod
+    def _raises_not_implemented(stmt: ast.Raise) -> bool:
+        exception = stmt.exc
+        if isinstance(exception, ast.Name):
+            return exception.id == "NotImplementedError"
+        return (
+            isinstance(exception, ast.Call)
+            and isinstance(exception.func, ast.Name)
+            and exception.func.id == "NotImplementedError"
+        )
 
     def visit_With(self, node: ast.With) -> None:
         """Check for context managers that just have pass."""

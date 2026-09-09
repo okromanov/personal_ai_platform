@@ -12,9 +12,38 @@ from operations.scripts.tasks.check_change_scope import (
     changed_paths_between,
     validate_audit_history,
     validate_change_scope,
+    validate_coverage_policy_ratchet,
     validate_document_metadata,
     validate_gate_machinery_isolation,
 )
+
+
+def _coverage_policy(
+    *,
+    fail_under: int = 75,
+    overall: int = 75,
+    diff: int = 90,
+    modules: dict[str, int] | None = None,
+) -> str:
+    module_values = modules if modules is not None else {"operations/scripts/critical.py": 85}
+    module_lines = "\n".join(f'"{name}" = {floor}' for name, floor in module_values.items())
+    return f"""[tool.coverage.report]
+fail_under = {fail_under}
+
+[tool.personal_ai_platform.coverage]
+overall = {overall}
+diff = {diff}
+
+[tool.personal_ai_platform.coverage.modules]
+{module_lines}
+"""
+
+
+def _commit_policy(root: Path, text: str, message: str) -> str:
+    (root / "pyproject.toml").write_text(text, encoding="utf-8")
+    assert run_command(["git", "add", "pyproject.toml"], cwd=root).ok
+    assert run_command(["git", "commit", "-qm", message], cwd=root).ok
+    return run_command(["git", "rev-parse", "HEAD"], cwd=root).stdout.strip()
 
 
 def _task(*, task_id: str, state: str, path: str, allowed: list[str]) -> str:
@@ -271,6 +300,66 @@ class GateMachineryIsolationTests(unittest.TestCase):
                     any(_matches(path, [pattern]) for path in tracked),
                     f"{pattern} не покрывает ни одного файла",
                 )
+
+
+class CoveragePolicyRatchetTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.assertTrue(run_command(["git", "init", "-q"], cwd=self.root).ok)
+        self.assertTrue(run_command(["git", "config", "user.name", "Test"], cwd=self.root).ok)
+        self.assertTrue(
+            run_command(["git", "config", "user.email", "test@example.invalid"], cwd=self.root).ok
+        )
+        self.base = _commit_policy(self.root, _coverage_policy(), "base")
+
+    def _errors(self, policy: str) -> list[str]:
+        head = _commit_policy(self.root, policy, "change")
+        return validate_coverage_policy_ratchet(self.root, self.base, head)
+
+    def test_fail_under_cannot_decrease(self) -> None:
+        errors = self._errors(_coverage_policy(fail_under=0))
+        self.assertTrue(any("tool.coverage.report.fail_under" in error for error in errors))
+
+    def test_overall_floor_cannot_decrease(self) -> None:
+        errors = self._errors(_coverage_policy(overall=0))
+        self.assertTrue(any("coverage.overall" in error for error in errors))
+
+    def test_diff_floor_cannot_decrease(self) -> None:
+        errors = self._errors(_coverage_policy(diff=0))
+        self.assertTrue(any("coverage.diff" in error for error in errors))
+
+    def test_named_module_floor_cannot_decrease(self) -> None:
+        errors = self._errors(_coverage_policy(modules={"operations/scripts/critical.py": 0}))
+        self.assertTrue(any("critical.py" in error and "снижен" in error for error in errors))
+
+    def test_protected_module_cannot_be_removed(self) -> None:
+        errors = self._errors(_coverage_policy(modules={}))
+        self.assertTrue(any("удалён защищённый модуль" in error for error in errors))
+
+    def test_higher_floors_and_added_modules_pass(self) -> None:
+        errors = self._errors(
+            _coverage_policy(
+                fail_under=76,
+                overall=76,
+                diff=91,
+                modules={
+                    "operations/scripts/critical.py": 86,
+                    "operations/scripts/new.py": 85,
+                },
+            )
+        )
+        self.assertEqual(errors, [])
+
+    def test_incomplete_policy_fails_closed(self) -> None:
+        errors = self._errors("[tool.coverage.report]\nfail_under = 75\n")
+        self.assertTrue(any("coverage policy" in error and "неполна" in error for error in errors))
+
+    def test_non_numeric_floor_fails_closed(self) -> None:
+        policy = _coverage_policy().replace("overall = 75", "overall = true")
+        errors = self._errors(policy)
+        self.assertTrue(any("coverage.overall должен быть числом" in error for error in errors))
 
 
 if __name__ == "__main__":
