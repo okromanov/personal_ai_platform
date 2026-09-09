@@ -2,8 +2,8 @@
 id: project_rules
 type: project_rules
 document_state: current
-version: 1.6
-updated: 2026-09-04
+version: 1.7
+updated: 2026-09-09
 depends_on: []
 ---
 
@@ -49,6 +49,7 @@ depends_on: []
 | [`specifications/system_specification.md`](specifications/system_specification.md) | Какое проверяемое поведение и какие технические меры безопасности обязательны? |
 | [`specifications/architecture_baseline.md`](specifications/architecture_baseline.md) | Из каких устойчивых логических частей состоит система и как они взаимодействуют? |
 | [`specifications/infrastructure_baseline.md`](specifications/infrastructure_baseline.md) | Какие устойчивые физические и эксплуатационные свойства должна обеспечить среда? |
+| [`candidates/`](candidates/) | Какие будущие продуктовые направления уже содержат решения владельца, но ещё не стали обязательствами поставки? |
 | [`adr/`](adr/) | Какой конкретный технический вариант фактически выбран и почему? |
 | [`milestones.md`](milestones.md) | Что делаем когда и каким набором доказательств принимаем этап? |
 | [`project_status.md`](project_status.md) и карточки [`work/tasks/`](work/tasks/) | Какую конкретную работу по поставке продукта выполняем сейчас? |
@@ -56,6 +57,11 @@ depends_on: []
 | [`operations/`](operations/) | Как выполняется повторяемая техническая процедура? |
 | [`work/audit/`](work/audit/) | Какие результаты независимых аудитов получены и как менялось состояние findings? |
 | [`work/acceptance/`](work/acceptance/) | Чем подтверждено завершение этапов? |
+
+[`candidates/`](candidates/) — единственный каталог для продуктовых документов с `applicability: proposed`.
+Такой документ обязан иметь входящую ссылку из конкретного будущего этапа [`milestones.md`](milestones.md): это и есть момент, когда кандидат будет поднят на пересмотр.
+При наступлении этапа решения переносятся в нормативные BR/SYS/SEC/ARC/INF и при необходимости ADR/TASK; оставлять кандидат незамеченным или превращать его в обязательство только ссылкой запрещено.
+Каталог [`operations/architecture/`](operations/architecture/) предназначен только для руководств, шаблонов и общих оснований создания диаграмм.
 
 Один и тот же смысл не должен иметь два равноправных источника истины. Документ нижнего уровня ссылается на более устойчивое требование или решение вместо копирования его текста.
 

@@ -2,14 +2,14 @@
 id: project_milestones
 type: roadmap
 document_state: current
-version: 2.3
-updated: 2026-09-02
+version: 2.4
+updated: 2026-09-09
 depends_on:
   - business_requirements
   - architecture_baseline
   - infrastructure_baseline
-  - operations_skill_lifecycle
-  - operations_tool_lifecycle
+  - candidate_skill_lifecycle
+  - candidate_tool_lifecycle
 ---
 
 # Этапы развития personal_ai_platform
@@ -164,63 +164,12 @@ V1 — первый регулярно используемый персонал
 
 - work_state: `planned`
 - результат: объединённый контур V1 пригоден для регулярного использования и восстанавливается после типовых отказов без ослабления контроля владельца.
-- состав: [`BR_001`](specifications/business_requirements.md#br_001), [`BR_002`](specifications/business_requirements.md#br_002), [`BR_003`](specifications/business_requirements.md#br_003), [`BR_004`](specifications/business_requirements.md#br_004), [`BR_005`](specifications/business_requirements.md#br_005), [`BR_006`](specifications/business_requirements.md#br_006), [`BR_010`](specifications/business_requirements.md#br_010), [`BR_011`](specifications/business_requirements.md#br_011), [`BR_012`](specifications/business_requirements.md#br_012), [`BR_013`](specifications/business_requirements.md#br_013), [`BR_022`](specifications/business_requirements.md#br_022), [`BR_023`](specifications/business_requirements.md#br_023), [`BR_024`](specifications/business_requirements.md#br_024), [`BR_026`](specifications/business_requirements.md#br_026), [`BR_027`](specifications/business_requirements.md#br_027), [`BR_028`](specifications/business_requirements.md#br_028), [`BR_033`](specifications/business_requirements.md#br_033), [`BR_036`](specifications/business_requirements.md#br_036), [`SYS_025`](specifications/system_specification.md#sys_025), [`SYS_026`](specifications/system_specification.md#sys_026), [`SYS_027`](specifications/system_specification.md#sys_027), [`SEC_CTL_011`](specifications/system_specification.md#sec_ctl_011), [`SEC_CTL_012`](specifications/system_specification.md#sec_ctl_012), [`SEC_CTL_013`](specifications/system_specification.md#sec_ctl_013), [`SEC_CTL_014`](specifications/system_specification.md#sec_ctl_014), [`SEC_CTL_015`](specifications/system_specification.md#sec_ctl_015), [`SEC_CTL_016`](specifications/system_specification.md#sec_ctl_016), [`INF_REQ_009`](specifications/infrastructure_baseline.md#inf_req_009), [`INF_REQ_010`](specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](specifications/infrastructure_baseline.md#inf_req_011), [`INF_REQ_012`](specifications/infrastructure_baseline.md#inf_req_012), [`INF_REQ_013`](specifications/infrastructure_baseline.md#inf_req_013), [`INF_REQ_014`](specifications/infrastructure_baseline.md#inf_req_014).
-- ADR этого этапа: [`ADR_007`](adr/adr_007_cloud_provider_selection.md#adr_007).
-
-### Подэтапы
-
-1. Повторить накопленные сквозные и отрицательные проверки в объединённой среде.
-2. Проверить резервный путь модели или поставщика, ограничения и понятные ошибки.
-3. Выполнить полное резервное копирование и восстановление в чистой среде.
-4. Проверить наблюдаемость, видимость стоимости, контроль работы, перезапуск и откат.
-5. Средство оценки принятия подтверждает полный обязательный набор доказательств на текущем Git SHA.
-6. Владелец принимает результат командой `ПРИНИМАЮ m06`.
-
-<a id="m07"></a>
-## m07 — Оценка эксплуатации и планирование следующего цикла
-
-- work_state: `planned`
-- результат: после фактической эксплуатации V1 собраны данные о пользе, качестве, стоимости, проблемах и технологических ограничениях. На их основе сформирован новый приоритетный план.
-- ADR этого этапа: нет.
-
-### Подэтапы
-
-1. Проанализировать реальное использование функций и неиспользуемые возможности.
-2. Провести структурированную оценку качества с владельцем.
-3. Пересмотреть актуальный рынок моделей, сред агентов, площадок размещения и ключевых инструментов, где это может изменить решения. Если на этом шаге расширяемость новыми возможностями признана приоритетом, учесть заранее подготовленный процессный черновик в [`operations/lifecycle/skill_lifecycle.md`](operations/lifecycle/skill_lifecycle.md) и [`operations/lifecycle/tool_lifecycle.md`](operations/lifecycle/tool_lifecycle.md) при формулировании нового `BR_*` и последующем ADR.
-4. Рассмотреть многоагентное направление (роли, развитие роли, субагенты, наблюдаемость взаимодействия): решения владельца и открытый вопрос о том, что именно накапливает роль, собраны в [`operations/architecture/agent_roles_and_delegation.md`](operations/architecture/agent_roles_and_delegation.md). Направление не имеет `BR_*` намеренно — они формулируются здесь, если владелец подтверждает приоритет.
-5. Рассмотреть семейный многопользовательский режим ([`BR_025`](specifications/business_requirements.md#br_025)): решения владельца о контроле члена семьи над своей памятью, возрастных уровнях доступа, жизненном цикле идентичности члена семьи и учёте стоимости по человеку собраны в [`operations/architecture/family_multi_user_candidate.md`](operations/architecture/family_multi_user_candidate.md).
-6. Оценить архитектурные боли, стоимость сопровождения и накопившиеся риски.
-7. Определить приоритет следующего набора бизнес-требований и только после этого создать новые этапы.
-
-## 3. Кандидатные направления после V1
-
-Перечисленные ниже бизнес-требования не входят в критерии приёмки V1. Они должны быть явно рассмотрены на [`m07`](#m07) при планировании следующего цикла. Список является разностью между полным каталогом [`BR_001–BR_039`](specifications/business_requirements.md) и обязательным составом V1.
-
-| BR | Бизнес-требование | Приоритет | Кандидатное направление |
-|---|---|---|---|
-| [`BR_007`](specifications/business_requirements.md#br_007) | Голосовое взаимодействие | `important` | Голосовой интерфейс |
-| [`BR_008`](specifications/business_requirements.md#br_008) | Веб-интерфейс | `important` | Веб-интерфейс и управление |
-| [`BR_009`](specifications/business_requirements.md#br_009) | Командная строка | `important` | Администрирование и диагностика |
-| [`BR_014`](specifications/business_requirements.md#br_014) | Работа с закрытым корпоративным контекстом | `important` | Корпоративный контекст и рабочие интеграции |
-| [`BR_015`](specifications/business_requirements.md#br_015) | Почта, календарь и встречи | `important` | Почта, календарь, встречи и внешние действия |
-| [`BR_016`](specifications/business_requirements.md#br_016) | Создание презентации целиком | `important` | Воспроизводимое создание презентаций |
-| [`BR_017`](specifications/business_requirements.md#br_017) | Быстрая проверка презентации | `important` | Воспроизводимое создание презентаций |
-| [`BR_018`](specifications/business_requirements.md#br_018) | Редактируемый PPTX и стили | `important` | Воспроизводимое создание презентаций |
-| [`BR_019`](specifications/business_requirements.md#br_019) | Подготовка и репетиция выступления | `important` | Подготовка выступлений и репетиция |
-| [`BR_020`](specifications/business_requirements.md#br_020) | Работа с документами и таблицами | `important` | Расширенная работа с DOCX/XLSX и другими офисными форматами |
-| [`BR_021`](specifications/business_requirements.md#br_021) | Анализ данных и выполнение кода | `important` | Анализ данных, вычисления и безопасное выполнение кода |
-| [`BR_025`](specifications/business_requirements.md#br_025) | Семейный многопользовательский режим | `important` | Семейный многопользовательский режим |
-| [`BR_029`](specifications/business_requirements.md#br_029) | Цели и партнёр по развитию | `important` | Долгосрочные цели и персональное развитие |
-| [`BR_030`](specifications/business_requirements.md#br_030) | Здоровье и тренировки | `exploratory` | Здоровье, восстановление и тренировки |
-| [`BR_031`](specifications/business_requirements.md#br_031) | Питание и готовка | `exploratory` | Питание, рецепты и покупки |
-| [`BR_032`](specifications/business_requirements.md#br_032) | Семейный досуг и путешествия | `exploratory` | Семейный досуг и путешествия |
-| [`BR_034`](specifications/business_requirements.md#br_034) | Адаптивный выбор модели | `important` | Динамический выбор моделей и поставщиков |
-| [`BR_035`](specifications/business_requirements.md#br_035) | Контролируемое обновление системы | `important` | Обновления, совместимость и откат |
-| [`BR_037`](specifications/business_requirements.md#br_037) | Обратная связь о качестве продукта | `important` | Оценка полезности и качества по фактической эксплуатации |
-| [`BR_038`](specifications/business_requirements.md#br_038) | Переносимое развёртывание | `important` | Перенос в другую среду и локальный контур |
-| [`BR_039`](specifications/business_requirements.md#br_039) | Локальный резервный контур | `important` | Домашняя инфраструктура и локальная модель как резерв и контур для чувствительных данных |
-
-Некоторые требования могут получить частичную техническую основу уже в V1 как сквозные свойства или подготовительные механизмы. Это не делает соответствующий BR обязательным критерием приёмки V1, пока он явно не добавлен в состав продукта раздела 2.
-
-До завершения [`m07`](#m07) эти направления остаются кандидатами, а не принятыми этапами. У них нет фиксированного порядка, срока или собственного состояния.
+- состав: [`BR_001`](specifications/business_requirements.md#br_001), [`BR_002`](specifications/business_requirements.md#br_002), [`BR_003`](specifications/business_requirements.md#br_003), [`BR_004`](specifications/business_requirements.md#br_004), [`BR_005`](specifications/business_requirements.md#br_005), [`BR_006`](specifications/business_requirements.md#br_006), [`BR_010`](specifications/business_requirements.md#br_010), [`BR_011`](specifications/business_requirements.md#br_011), [`BR_012`](specifications/business_requirements.md#br_012), [`BR_013`](specifications/business_requirements.md#br_013), [`BR_022`](specifications/business_requirements.md#br_022), [`BR_023`](specifications/business_requirements.md#br_023), [`BR_024`](specifications/business_requirements.mv�_6����k�w��}��-�-]�]�����]-�����-����m���-����}]�2ࠣ2���	-��Mm�򢣢	�]]B�]]]�M��M��m���-���-]]��-R�]M=��-���	]���]M=��-���R-�����]����]]]�B����=]-�ࠣB���	�]-�}--��-¢��
+M������R�-������]�}�]��]���6���WFVB�6�6V��VB�&V�V7FVB�ࠣR���
+�M�-]����R�-����򢣢	]��=���-���]]"�M�-]�������]�-]"�-���-���-�2���]]]�B�-�����M�}]�]�=���-��RM��m]��=��-�����-]�-��-��M�-]��ࠢ22��	���]��-�����Rm]��] ��222
+m]����	�������R}-]�]��R}M}��� �D4������VB �(i"���&�w&W72�=]�"�}��-2��(i"6���WFVB�=]�"}-]����-2�-R��-]���������R}-��"�"]�]������-�2(	B��66WF�6R��B�� ��222
+m]���#�	}M}��}�����-� �� �D4������VB �(i"���&�w&W72�=]�"�}��-2��(i"&��6�VB���=m]�}-����-�(i"���&�w&W72�}-����-�}]�]���(i"6���WFVB��-}-]�]��� ��222
+m]���3�����-��E"��}�]�Р� �E%��66WFVB�]�]��R�������-␢(i"7WW'6VFVB���-�R]�]��R}�]����-�R�E%��� ��222
+m]���C�
+-]"��}�]�Р� �DU5E��7W'&V�B��]�M���-]"��(i"7WW'6VFVB���-��-]"�DU5E��c"��=}�R�����]R�� ��22��	����m�}�]����m�����]�����	M��=M=��R6�����F��������}=]-��M����]M�--]����-à��FW�@�6�F�FFR(i"���&Wf�Wr(i"�&FV��r(i"&�&F���(i"66WFVB(i"&WF�&V@� ��	M�66WFVF��M�M"��m]"�]]�-�"&V�V7FVF�	�r&WF�&VF�&V�V7FVF����=�-�}--�]#���-�]��R�����--���R�]M��m]��R�}M"��-=�-]��"6�F�FFV࠭	���R=��-���]]]�M�#�������&Wf�Wv����]�mM]��R��}�}]��R�}-����-��-�M]�]b�}-]-������&FV��v�������M�m��-�����-]���������=m�-��=�]��S���&�&F����-]��}M����-����-����]�]����=��}]���-�"��-]]Ӱ��66WFVF���}-]����RWf�FV�6R�-���-��-�}���24��]��2-]�����&WF�&VF���=-�}m���-���}]���-�-��R�������}���-�}-���}-����-���-]]��࠭
+�]m�M�}��R����M��}-]��--�R��--���-�}M]âM��6��������]�M�-�"�6�����ƖfV7�6�R��F҂������6�F�FFW2�6�����ƖfV7�6�R��B��M��F���(	B"�F����ƖfV7�6�R��F҂������6�F�FFW2�F����ƖfV7�6�R��B��

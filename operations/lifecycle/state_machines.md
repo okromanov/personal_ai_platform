@@ -3,8 +3,8 @@ id: state_machines
 type: guide
 document_state: current
 applicability: reference
-version: 1.3
-updated: 2026-09-04
+version: 1.4
+updated: 2026-09-09
 depends_on:
   - project_rules
 ---
@@ -295,4 +295,4 @@ candidate → in_review → hardening → probation → accepted → retired
 - `accepted`: обязательные evidence относятся к точному SHA/хэшу версии;
 - `retired`: маршрутизация отключена, активные полномочия отозваны, зависимости проверены.
 
-Специфичные риски и доказательства не повторяются здесь: для Skill они находятся в [`skill_lifecycle.md`](skill_lifecycle.md), для Tool — в [`tool_lifecycle.md`](tool_lifecycle.md).
+Специфичные риски и доказательства не повторяются здесь: для Skill они находятся в [`skill_lifecycle.md`](../../candidates/skill_lifecycle.md), для Tool — в [`tool_lifecycle.md`](../../candidates/tool_lifecycle.md).

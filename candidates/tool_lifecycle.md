@@ -1,10 +1,10 @@
 ---
-id: operations_tool_lifecycle
-type: operations
+id: candidate_tool_lifecycle
+type: candidate_specification
 document_state: current
 applicability: proposed
-version: 1.1
-updated: 2026-09-04
+version: 1.2
+updated: 2026-09-09
 depends_on:
   - operations_change_process
   - state_machines
@@ -18,7 +18,7 @@ depends_on:
 
 Это предложение, а не действующая часть поставки. Оно применяется после отдельного бизнес-требования, регистрации типа Tool и активной TASK.
 
-Общие состояния и переходы определены в [`state_machines.md`](state_machines.md). Этот документ добавляет только проверки полномочий и внешних эффектов Tool.
+Общие состояния и переходы определены в [`state_machines.md`](../operations/lifecycle/state_machines.md). Этот документ добавляет только проверки полномочий и внешних эффектов Tool.
 
 ## 2. Объект
 

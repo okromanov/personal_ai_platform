@@ -3,8 +3,8 @@ id: coding_agent_instruction
 type: agent_instruction
 document_state: current
 applicability: normative
-version: 4.5
-updated: 2026-09-05
+version: 4.6
+updated: 2026-09-09
 depends_on:
   - project_rules
   - project_milestones
@@ -18,7 +18,7 @@ depends_on:
 
 - Единственная точка входа владельца и агента — [`project_status.md`](project_status.md). Корневой `README` запрещён.
 - При конфликте источников сначала проверяется соответствие принципам [`project_rules.md`](project_rules.md) раздел 1, затем — направление нормативной зависимости оттуда же, раздел 3: `BR → THR → SYS/SEC → ARC → INF → ADR`. Нижний документ исправляется по верхнему; изменение верхнего принимает владелец явно.
-- Документы с `applicability: proposed` не являются требованиями текущей поставки, пока активная TASK или решение владельца явно их не активирует.
+- Все продуктовые документы с `applicability: proposed` хранятся только в [`candidates/`](candidates/), а не среди нормативных спецификаций или операционных процедур. Каждый из них должен быть связан из конкретного будущего этапа в [`milestones.md`](milestones.md). На этом этапе кандидат пересматривается и либо переносится в нормативные BR/SYS/SEC/ARC/INF и связанные ADR/TASK, либо явно остаётся кандидатом, либо отклоняется; до этого он не является требованием поставки.
 - `applicability` и допустимые состояния определяет [`document_contracts.json`](operations/document_contracts.json).
 - Незнакомые изменения пользователя нельзя удалять, перезаписывать или включать в свой diff без необходимости.
 
