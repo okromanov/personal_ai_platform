@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "report_type": "audit_remediation_verification",
+  "audit_baseline": "work/audit/audit_baseline_2026_09_09.md",
+  "recorded_on": "2026-09-09",
+  "procedure_state": "complete",
+  "independence": {
+    "state": "same_auditor_remediation",
+    "independent_verification": false,
+    "required_follow_up": "The next independent repository audit must reverify AUD-041, AUD-042 and AUD-044 from behavior and exact-SHA evidence rather than relying on this remediation self-assessment."
+  },
+  "findings": [
+    {
+      "id": "AUD-041",
+      "status": "resolved",
+      "implementation_pr": "https://github.com/okromanov/personal_ai_platform/pull/124",
+      "validated_head_sha": "efbb19bc58ad887407c60a10016530549a97f844",
+      "merged_sha": "3873737cca3df374c4939d3a04a934be085043cc",
+      "project_check": "https://github.com/okromanov/personal_ai_platform/actions/runs/34393042293",
+      "project_check_conclusion": "success",
+      "verification": [
+        "authorization and dispatch use one detached deep JSON snapshot",
+        "validated observation measurements are detached and immutable",
+        "validated task-event attributes are detached and immutable",
+        "non-JSON tool parameters fail closed before handler dispatch"
+      ],
+      "superseded_failed_run": {
+        "url": "https://github.com/okromanov/personal_ai_platform/actions/runs/34392468635",
+        "reason": "changed-line coverage was 72.22%; an additional fail-closed regression test raised the validated revision above the 90% diff floor"
+      }
+    },
+    {
+      "id": "AUD-042",
+      "status": "resolved",
+      "implementation_pr": "https://github.com/okromanov/personal_ai_platform/pull/125",
+      "validated_head_sha": "bd6f943c5977cfb17ed8684243abf83e639b5193",
+      "merged_sha": "bf33375e2eb15131853e600e17dab2f78a1a92fc",
+      "project_check": "https://github.com/okromanov/personal_ai_platform/actions/runs/34393673162",
+      "project_check_conclusion": "success",
+      "verification": [
+        "documented pass-only functions are high-severity stubs",
+        "bare and called NotImplementedError raises are high-severity stubs",
+        "the canonical CLI returns a failing status for the previously missed forms"
+      ]
+    },
+    {
+      "id": "AUD-044",
+      "status": "resolved",
+      "implementation_pr": "https://github.com/okromanov/personal_ai_platform/pull/125",
+      "validated_head_sha": "bd6f943c5977cfb17ed8684243abf83e639b5193",
+      "merged_sha": "bf33375e2eb15131853e600e17dab2f78a1a92fc",
+      "project_check": "https://github.com/okromanov/personal_ai_platform/actions/runs/34393673162",
+      "project_check_conclusion": "success",
+      "changed_line_coverage": "61/66 = 92.42%",
+      "verification": [
+        "lowering fail_under is rejected",
+        "lowering overall coverage is rejected",
+        "lowering diff coverage is rejected",
+        "lowering an existing named-module floor is rejected",
+        "removing an existing named-module entry is rejected",
+        "raising floors and adding a module are accepted",
+        "invalid or incomplete coverage policy fails closed"
+      ]
+    }
+  ]
+}
