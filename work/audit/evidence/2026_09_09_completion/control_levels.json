@@ -1,0 +1,39 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "source": "run_suite.py, pre_commit_hook.sh, pre_push_hook.sh, project_check.yml",
+  "levels": {
+    "pre_commit_fast": [
+      "JSON/TOML/dev-lock/audit register",
+      "Python permissions and syntax",
+      "fast documentation checks",
+      "Ruff lint",
+      "unit tests",
+      "generation and generated drift"
+    ],
+    "pre_push_full": [
+      "governance scope and immutable audit history",
+      "generation and full documentation audit",
+      "Bandit medium+",
+      "AST and Vulture",
+      "Ruff lint and format",
+      "mypy baseline",
+      "unit tests with branch coverage",
+      "aggregate/named coverage policy without diff unless base is explicitly supplied",
+      "template registry, generated drift and health"
+    ],
+    "ci_project_check": [
+      "full profile with governance base and diff-coverage base",
+      "gitleaks directory and full history",
+      "pip-audit against the complete lock",
+      "actionlint and shellcheck",
+      "container build/run/health",
+      "SPDX SBOM and SHA-bound evidence artifacts"
+    ]
+  },
+  "differences": [
+    "pre-commit does not run Bandit, AST, Vulture, format, mypy, coverage or health",
+    "pre-push invokes full without --coverage-base, so diff coverage is skipped there; CI supplies a base",
+    "pre-commit mutates versions, links and generated status after its first fast check and then reruns fast, but does not run the full profile after mutation",
+    "secret history, dependency, workflow/shell, container and SBOM checks are CI-only"
+  ]
+}

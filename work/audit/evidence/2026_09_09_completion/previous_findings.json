@@ -1,0 +1,480 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "evaluated_ids": "AUD-001..AUD-043",
+  "overdue_open_reviews": [],
+  "records": [
+    {
+      "id": "AUD-001",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "single project_check workflow; write-capable health workflow absent",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-002",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "pre-commit propagates generator failure and reruns fast checks",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-003",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "container base uses a digest; CI build, health and SBOM steps present",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-004",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "directory fsync path and behavioral mutation assertions are present",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-005",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "runner timeout is bounded and timeout propagation test passes",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-006",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "register schema and unresolved owner/review validation pass negative tests",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-007",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "Actions execution is restored; exact current main and publication CI are successful",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-008",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "mypy baseline is zero and report renderer paths agree",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-009",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "ADR_001–ADR_004 are accepted and acceptance transition checks reject false claims",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-010",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "owner status separates audit state, task role and CI evidence",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-011",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "superseded frontmatter page delegates to current machine and process sources",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-012",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "delivery_role contract and terminal-outcome negative checks are active",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-013",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "holder metadata, live-PID refusal and manual stale-lock recovery remain present",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-014",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "procedure map covers every current operational procedure category",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-015",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "unexpected exceptions in reference collection are propagated by behavioral tests",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-016",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "Telegram receive timeout behavior is covered without wall-clock delay",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-017",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "all interpreter names are shimmed; skip and unexpected-success are fatal",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-018",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "TEST_007 count, registry phasing and generated tracking are internally consistent",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-019",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "corrupt JSON and unknown SQLite task state are rejected",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-020",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "eval contract distinguishes stub plumbing from future SHA-bound real profiles",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-021",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "active proposed ADRs have one TASK decision owner; planned deferral is bounded",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-022",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "status links, CI triggers, formatting and type checks are current",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-023",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "secret directories and Docker exclusions have negative policy tests",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-024",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "runtime_task_id and privacy-bounded task event schema are implemented and tested",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-025",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "ADR lifecycle separates comparison, decision and acceptance; planned exception is explicit",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-026",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "unfinished product TASK paths exclude governance and audit paths",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-027",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "non-stub eval profiles require an exact SHA and fail on degraded execution",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-028",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "current ADR_006/ADR_007 retain the owner-resolved combined alternatives",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-029",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "duplicate is correctly linked to resolved AUD-024; no independent open action remains",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-030",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "ADR and code both use ModelGateway; stale ModelProvider name is absent",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-031",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "skip allowlist is absent; any skip still makes the canonical runner fail",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-032",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "read_text has bounded PermissionError retry and the test no longer suppresses it",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-033",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "diagram lint requires one data-spec-id and SVG nodes use separate identifiers",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-034",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "defusedxml parses SVG and hostile entity input is rejected",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-035",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "CI scans both tree and full history; gitleaks exceptions are exact fingerprints",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-036",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "dashboard distinguishes open findings from missing SHA-bound CI evidence",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-037",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "overdue unresolved review dates fail the gate; due-today boundary passes",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-038",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "register/card bidirectional uniqueness and immutable baseline rules pass negative tests",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-039",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "planned live Telegram ingress requires a secret or outbound polling and spoof test",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-040",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "repository is private and publication policy requires a separate license review",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-041",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "open",
+      "note": "REGRESSION CONFIRMED open: mutable ToolCall, ObservationEvent and TaskEvent mappings remain",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-042",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "open",
+      "note": "REGRESSION CONFIRMED open: documented pass and bare NotImplementedError still escape AST gate",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    },
+    {
+      "id": "AUD-043",
+      "evaluation": "CONFIRMED",
+      "current_register_state": "resolved",
+      "note": "resolution CONFIRMED: proposed designs are in candidates and linked from the milestone",
+      "evidence": [
+        "current source/configuration inspection",
+        "focused behavioral gate tests",
+        "exact-SHA Project check for 3006ad603e57d9acc3bb3cd50455c04223904d14"
+      ]
+    }
+  ]
+}

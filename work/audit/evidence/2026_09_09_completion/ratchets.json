@@ -1,0 +1,53 @@
+{
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "controls": [
+    {
+      "control": "mypy error budget",
+      "value": 0,
+      "ratchet": "committed exact-value tests plus per-file/error-code comparison",
+      "state": "present"
+    },
+    {
+      "control": "gitleaks allowlist",
+      "value": "four exact fingerprints",
+      "ratchet": "exact-count and fingerprint-shape behavioral tests",
+      "state": "present"
+    },
+    {
+      "control": "unresolved audit review date",
+      "value": "not overdue",
+      "ratchet": "date validation blocks full gate",
+      "state": "present"
+    },
+    {
+      "control": "step timeout",
+      "value": 300,
+      "ratchet": "runner test proves timeout remains finite and blocking",
+      "state": "present"
+    },
+    {
+      "control": "Bandit minimum severity",
+      "value": "medium",
+      "ratchet": "full-profile command-shape test",
+      "state": "present"
+    },
+    {
+      "control": "Vulture confidence and ignored names",
+      "value": "80; evidence_ref, semantic_review_ref, arch_count",
+      "ratchet": "hardcoded runner value and profile-shape test; manual review of each ignore rationale",
+      "state": "present_but_review_dependent"
+    },
+    {
+      "control": "coverage aggregate/diff/named floors",
+      "value": "75/90/five modules at 85",
+      "ratchet": "none against lowering policy values",
+      "state": "missing",
+      "finding": "AUD-044"
+    }
+  ],
+  "coverage_weakening_probe": {
+    "mutation": "fail_under, overall, diff and all named module floors lowered to zero",
+    "change_scope_exit_code": 0,
+    "selected_policy_tests_exit_code": 0
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "prompt_version": "5.0",
+  "mode": "FULL_REPOSITORY",
+  "head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14",
+  "tree_sha": "4e1be816540227038b38769d47688467e7acee76",
+  "scope": "all 319 tracked files at the audited tree; full repository contracts, code, security/data, tests, traceability and delivery system",
+  "execution_policy": "temporary copy, synthetic data, timeouts, no production credentials, no live external product calls",
+  "planned_commands": [
+    "python3 operations/scripts/quality/run_suite.py full --coverage-base <base>",
+    "bash operations/hooks/pre_commit_hook.sh",
+    "focused behavioral negative and mutation probes",
+    "GitHub Project check on the publication SHA"
+  ],
+  "method_completion": "COMPLETE",
+  "readiness": "NOT_READY",
+  "artifacts": [
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/completion_report.json",
+      "sha256": "4996cd17968b9bba3b0c64deec05d91e4fffc9db10df35f34e8dbd9636d79c7f"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/control_levels.json",
+      "sha256": "246ebb5396635e0e802b5e1fca4165e2fd5b50e08b03194a5345b4d49c160197"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/coverage_inventory.json",
+      "sha256": "ad9b76f841ea0335f57afa330e7fe5f753662e91b0561664c62e06f1fd8c79c8"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/file_role_inventory.json",
+      "sha256": "f8b7d4f538a416e228115f203e5ac78bb1ca4ddb87b83383323e9331d06a0811"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/findings.json",
+      "sha256": "39adff9f5db4a6bf4becfef102d90ce63b35eaaf784d870f81db9aefba6d2a98"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/gate_mutations.json",
+      "sha256": "0c5de7e8936c52ad577835c9068fca53f89582ab794cd546d3f839444130f0c3"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/previous_findings.json",
+      "sha256": "a1cdeea502079a07ebf5841aee626b152d44c783dcca0953c2b73a926fc4431c"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/ratchets.json",
+      "sha256": "5942ad8c01496f2da9e467fa2b506be87b51ed1873b613ae85561f57512f822e"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/self_check.json",
+      "sha256": "afbc175317e5be2b3b84fb2ad3e0ef4f80be9f409827d883fe52adaf8a5156b3"
+    },
+    {
+      "path": "work/audit/evidence/2026_09_09_completion/semantic_inventory.json",
+      "sha256": "85a01746658a8e2cff835f0bbf0eea70f1317f3ed4a93fe5f162bdcf91fe1c71"
+    }
+  ]
+}
