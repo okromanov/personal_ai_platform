@@ -2,9 +2,9 @@
 id: file_update_dependencies
 type: procedure_reference
 document_state: current
-version: 1.6
+version: 1.7
 created: 2026-08-23
-updated: 2026-09-04
+updated: 2026-09-10
 ---
 
 # Матрица зависимостей обновления файлов
@@ -35,11 +35,11 @@ updated: 2026-09-04
 ## Зависимости по типам файлов
 
 ### work/acceptance/m0X_final_report.md
-- **Зависит от:** milestones.md (work_state), work/tasks/* и work/tests/* этапа, состав требований этапа (`scope` в milestones.md), git-история изменений файлов между стартом и принятием этапа
+- **Зависит от:** milestones.md (work_state), work/tasks/* и work/tests/* этапа, состав требований этапа (`scope` в milestones.md), git-история изменений файлов между стартом и принятием этапа; для завершённого этапа SHA, даты и исходные списки путей запечатываются во frontmatter как `history_*` snapshot
 - **Влияет на:** ничего не читает его содержимое автоматически — файл предназначен для владельца/агента, читающего репозиторий
 - **Поля синхронизации:**
   - completion_state: должна соответствовать work_state
-  - Содержимое разделов 1–5: пересчитывается целиком при каждом запуске update_completion_report.py, вручную не редактируется
+  - Содержимое разделов 1–5: пересчитывается целиком при каждом запуске update_completion_report.py; при недоступной истории используются только полные валидные `history_*` факты из существующего отчёта, а в полном checkout они обязательно сверяются с Git
   - updated: должна быть текущей датой при изменении
 
 Файлы owner_checklist.md и semantic_review.md не создаются автоматически для каждого этапа: они пишутся вручную только когда этапу нужна запись сверх того, что уже описывают [`operations/acceptance.md`](../acceptance.md) и [`operations/semantic_review.md`](../semantic_review.md).

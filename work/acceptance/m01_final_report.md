@@ -2,10 +2,39 @@
 id: m01_final_report
 type: milestone_completion_report
 completion_state: completed
-version: 1.0
+version: 1.1
 created: 2026-08-22
-updated: 2026-08-30
+updated: 2026-09-10
 milestone: m01
+history_start_sha: '8ab57a17bce968cd1d709fc9d40224aee1c99717'
+history_start_date: 2026-08-22
+history_completion_sha: '496eaaf3e98250adddc246fa0cffa8282d5fc6ce'
+history_completion_date: 2026-08-22
+history_added_paths:
+  - work/acceptance/m01.json
+  - work/m01/semantic_review.json
+  - work/tasks/task_0001_arc_001.md
+  - work/tasks/task_0002_arc_002.md
+  - work/tasks/task_0003_arc_003.md
+  - work/tasks/task_0004_arc_004.md
+  - work/tasks/task_0005_arc_005.md
+  - work/tasks/task_0006_arc_007.md
+  - work/tasks/task_0007_arc_009.md
+  - work/tasks/task_0008_inf_001.md
+  - work/tasks/task_0009_inf_002.md
+  - work/tasks/task_0010_inf_003.md
+  - work/tasks/task_0011_inf_005.md
+  - work/tasks/task_0012_inf_007.md
+  - work/tasks/task_0013_inf_008.md
+history_modified_paths:
+  - .github/workflows/project_check.yml
+  - generated/document_index.md
+  - generated/repository_structure.md
+  - generated/traceability_matrix.md
+  - milestones.md
+  - operations/quality_registry.json
+  - project_status.md
+  - tasks.md
 ---
 
 # M01 — Итоговый отчёт
