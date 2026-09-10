@@ -87,6 +87,10 @@ class ArchitectureVisualizationTriggerTests(unittest.TestCase):
             self.assertEqual(review.completed_tasks, ("TASK_001",))
             self.assertFalse(review.redraw_required)
             self.assertEqual(review.errors, ())
+            self.assertIn("перерисовка не требуется", review.summary())
+
+            no_transition = review_task_architecture_visualization(root, base, base, [])
+            self.assertEqual(no_transition.completed_tasks, ())
 
     def test_changed_visual_section_requires_real_svg_redraw(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -105,6 +109,7 @@ class ArchitectureVisualizationTriggerTests(unittest.TestCase):
 
             self.assertEqual(missing.affected_ids, ("ARC_CMP_001",))
             self.assertTrue(any("не обновлён" in error for error in missing.errors))
+            self.assertIn("требуется перерисовка", missing.summary())
 
             svg = root / ARCHITECTURE_SVG
             svg.write_text(
@@ -135,9 +140,8 @@ class ArchitectureVisualizationTriggerTests(unittest.TestCase):
             svg = root / ARCHITECTURE_SVG
             svg.write_text(
                 svg.read_text(encoding="utf-8")
-                .replace("diagram_version: 1.0", "diagram_version: 1.1")
                 .replace("architecture_baseline.md@1.0", "architecture_baseline.md@1.1")
-                .replace("Версия 1.0", "Версия 1.1"),
+                .replace("2026-09-10T00:00:00", "2026-09-10T01:00:00"),
                 encoding="utf-8",
             )
             head = self._commit(root, "metadata only")
@@ -154,3 +158,4 @@ class ArchitectureVisualizationTriggerTests(unittest.TestCase):
             )
 
             self.assertTrue(any("только метаданные" in error for error in review.errors))
+            self.assertTrue(any("diagram_version" in error for error in review.errors))
