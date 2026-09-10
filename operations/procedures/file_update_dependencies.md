@@ -32,14 +32,21 @@ updated: 2026-09-10
 | milestones.md | work_state | Меняется на `completed` | владелец вручную | check.py: milestones |
 | project_status.md | Прогресс | Обновляется | автомат (generate.py) | check.py: generated |
 
+## Когда TASK переходит в completed
+
+| Файл | Условие | Действие | Кто/Как | Проверка |
+|---|---|---|---|---|
+| `work/artefacts/architecture/personal_ai_platform_architecture.svg` | Изменился отображаемый раздел `ARC_*`, `INF_*` или `SEC_CTL_*` | Содержательно перерисовывается, повышается `diagram_version`, синхронизируются `source` и `generated_at` | агент по первичным спецификациям | `check_architecture_visualization.py` через полный gate и `diagram_lint.py` |
+| тот же SVG | Отображаемые архитектурные инварианты не изменились | Не изменяется; gate печатает решение «перерисовка не требуется» | автоматическая проверка base/head | `check_architecture_visualization.py` |
+
 ## Зависимости по типам файлов
 
 ### work/acceptance/m0X_final_report.md
-- **Зависит от:** milestones.md (work_state), work/tasks/* и work/tests/* этапа, состав требований этапа (`scope` в milestones.md), git-история изменений файлов между стартом и принятием этапа; для завершённого этапа SHA, даты и исходные списки путей запечатываются во frontmatter как `history_*` snapshot
+- **Зависит от:** milestones.md (work_state), work/tasks/* и work/tests/* этапа, состав требований этапа (`scope` в milestones.md), git-история изменений файлов между стартом и принятием этапа
 - **Влияет на:** ничего не читает его содержимое автоматически — файл предназначен для владельца/агента, читающего репозиторий
 - **Поля синхронизации:**
   - completion_state: должна соответствовать work_state
-  - Содержимое разделов 1–5: пересчитывается целиком при каждом запуске update_completion_report.py; при недоступной истории используются только полные валидные `history_*` факты из существующего отчёта, а в полном checkout они обязательно сверяются с Git
+  - Содержимое разделов 1–5: пересчитывается целиком при каждом запуске update_completion_report.py, вручную не редактируется
   - updated: должна быть текущей датой при изменении
 
 Файлы owner_checklist.md и semantic_review.md не создаются автоматически для каждого этапа: они пишутся вручную только когда этапу нужна запись сверх того, что уже описывают [`operations/acceptance.md`](../acceptance.md) и [`operations/semantic_review.md`](../semantic_review.md).

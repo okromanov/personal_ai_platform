@@ -20,6 +20,9 @@ from operations.scripts.common.project import (
 from operations.scripts.documents.index import is_primary_markdown
 from operations.scripts.quality.registry import DERIVED_PATH_PATTERNS, validate_server_source
 from operations.scripts.status.generate_project_status import collect_milestones
+from operations.scripts.tasks.check_architecture_visualization import (
+    review_task_architecture_visualization,
+)
 from operations.scripts.tasks.generate import TERMINAL_STATES, collect_tasks
 
 UPDATED_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -79,6 +82,7 @@ GATE_MACHINERY_PATTERNS = [
     "operations/scripts/documents/**",
     "operations/scripts/quality/**",
     "operations/scripts/tasks/check_change_scope.py",
+    "operations/scripts/tasks/check_architecture_visualization.py",
 ]
 
 # Продуктовая поставка — то, что вообще покрывается границами TASK.
@@ -525,6 +529,12 @@ def main() -> int:
     errors.extend(validate_audit_history(root, args.base, args.head))
     errors.extend(validate_gate_machinery_isolation(changed))
     errors.extend(validate_coverage_policy_ratchet(root, args.base, args.head))
+    architecture_review = review_task_architecture_visualization(
+        root, args.base, args.head, changed
+    )
+    errors.extend(architecture_review.errors)
+    if architecture_review.completed_tasks:
+        print(architecture_review.summary())
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

@@ -2,8 +2,8 @@
 id: operations_architecture_diagram_style_guide
 type: guide
 document_state: current
-version: 4.0
-updated: 2026-09-02
+version: 4.1
+updated: 2026-09-10
 depends_on:
   - project_rules
   - architecture_baseline
@@ -45,3 +45,4 @@ depends_on:
 1. Схема не смешивает архитектурный профиль с процессным (раздел 2) — варианты исхода показаны портами/контрактами, не ромбом решения.
 2. Каждый `id` в метаданных сверен построчно с текстом соответствующего раздела [`architecture_baseline.md`](../../specifications/architecture_baseline.md)/[`system_specification.md`](../../specifications/system_specification.md)/[`infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md), включая заданный спецификацией порядок/цепочку зависимостей.
 3. Файл размещён в `work/artefacts/architecture/` (раздел 4).
+4. При завершении TASK пройдена автоматическая проверка влияния результата; если она перечисляет затронутые ID, изменено графическое тело схемы и увеличен `diagram_version`, а не только метаданные.
