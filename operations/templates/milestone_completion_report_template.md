@@ -2,8 +2,8 @@
 id: template_milestone_completion_report
 type: document_template
 document_state: current
-version: 1.0
-updated: 2026-08-28
+version: 1.1
+updated: 2026-09-10
 depends_on: []
 ---
 
@@ -14,10 +14,11 @@ depends_on: []
 id: {{milestone_id}}_final_report
 type: milestone_completion_report
 completion_state: {{completion_state}}
-version: 1.0
+version: 1.1
 created: {{created}}
 updated: {{updated}}
 milestone: {{milestone_id}}
+{{history_snapshot}}
 ---
 
 # {{milestone_label}} — Итоговый отчёт

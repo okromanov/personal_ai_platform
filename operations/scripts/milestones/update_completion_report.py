@@ -18,6 +18,7 @@ from __future__ import annotations
 import posixpath
 import re
 import sys
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
@@ -26,6 +27,7 @@ if __package__ in {None, ""}:
 
 from operations.scripts.common.project import run_command
 from operations.scripts.common.status_types import MilestoneItem, TaskItem
+from operations.scripts.documents.metadata import parse_front_matter
 from operations.scripts.documents.template_contracts import (
     assert_registered_output,
     render_contract,
@@ -36,6 +38,27 @@ from operations.scripts.tasks.generate import collect_tasks
 
 RESULT_SECTION = re.compile(r"(?ms)^##\s+(?:\d+\.\s*)?Результат\s*$\n(.*?)(?=^##\s|\Z)")
 EXCLUDED_DIFF_PREFIXES = ("runtime/",)
+_SHA1 = re.compile(r"[0-9a-f]{40}")
+
+
+@dataclass(frozen=True)
+class HistorySnapshot:
+    start_sha: str
+    start_date: str
+    completion_sha: str
+    completion_date: str
+    added_paths: tuple[str, ...]
+    modified_paths: tuple[str, ...]
+
+
+_HISTORY_FIELDS = {
+    "history_start_sha",
+    "history_start_date",
+    "history_completion_sha",
+    "history_completion_date",
+    "history_added_paths",
+    "history_modified_paths",
+}
 
 
 def _link(target_path: str) -> str:
@@ -182,6 +205,122 @@ def _git_file_changes(root: Path, base_sha: str, head_sha: str) -> tuple[list[st
     return sorted(added), sorted(modified)
 
 
+def _validate_history_date(value: object, field: str) -> str:
+    text = str(value)
+    try:
+        parsed = date.fromisoformat(text)
+    except ValueError as exc:
+        raise ValueError(f"Некорректный {field} в history snapshot: {text}") from exc
+    if parsed.isoformat() != text:
+        raise ValueError(f"Некорректный {field} в history snapshot: {text}")
+    return text
+
+
+def _validate_history_paths(value: object, field: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or any(not isinstance(path, str) for path in value):
+        raise ValueError(f"{field} в history snapshot должен быть списком путей")
+    paths = tuple(value)
+    if list(paths) != sorted(set(paths)):
+        raise ValueError(f"{field} в history snapshot должен быть отсортирован без дублей")
+    for path in paths:
+        parts = path.split("/")
+        if (
+            not path
+            or path != path.strip()
+            or "\n" in path
+            or "\r" in path
+            or "\\" in path
+            or path.startswith("/")
+            or ".." in parts
+            or posixpath.normpath(path) != path
+        ):
+            raise ValueError(f"Некорректный путь в {field}: {path!r}")
+        if path.startswith(EXCLUDED_DIFF_PREFIXES):
+            raise ValueError(f"Исключённый путь не должен входить в {field}: {path}")
+    return paths
+
+
+def _existing_history_snapshot(root: Path, milestone_id: str) -> HistorySnapshot | None:
+    path = root / "work" / "acceptance" / f"{milestone_id}_final_report.md"
+    if not path.is_file():
+        return None
+    metadata, _ = parse_front_matter(path.read_text(encoding="utf-8"))
+    present = _HISTORY_FIELDS.intersection(metadata)
+    if not present:
+        return None
+    if present != _HISTORY_FIELDS:
+        missing = ", ".join(sorted(_HISTORY_FIELDS - present))
+        raise ValueError(f"Неполный history snapshot {milestone_id}: отсутствуют {missing}")
+
+    start_sha = str(metadata["history_start_sha"])
+    completion_sha = str(metadata["history_completion_sha"])
+    if not _SHA1.fullmatch(start_sha):
+        raise ValueError(f"Некорректный history_start_sha: {start_sha}")
+    if not _SHA1.fullmatch(completion_sha):
+        raise ValueError(f"Некорректный history_completion_sha: {completion_sha}")
+    return HistorySnapshot(
+        start_sha=start_sha,
+        start_date=_validate_history_date(metadata["history_start_date"], "history_start_date"),
+        completion_sha=completion_sha,
+        completion_date=_validate_history_date(
+            metadata["history_completion_date"], "history_completion_date"
+        ),
+        added_paths=_validate_history_paths(metadata["history_added_paths"], "history_added_paths"),
+        modified_paths=_validate_history_paths(
+            metadata["history_modified_paths"], "history_modified_paths"
+        ),
+    )
+
+
+def _history_snapshot(root: Path, milestone_id: str) -> HistorySnapshot:
+    """Return milestone history, with a sealed-report fallback for truncated clones.
+
+    Full history remains authoritative: when it is available, any committed
+    snapshot must match the freshly computed facts exactly. A shallow or
+    reconstructed checkout may use the complete validated snapshot already
+    embedded in the report, but never guesses from its graft boundary.
+    """
+    existing = _existing_history_snapshot(root, milestone_id)
+    start = _milestone_start(root, milestone_id)
+    completion = _milestone_completion_commit(root, milestone_id)
+    if start is not None and completion is not None:
+        added, modified = _git_file_changes(root, start[0], completion[0])
+        computed = HistorySnapshot(
+            start_sha=start[0],
+            start_date=start[1],
+            completion_sha=completion[0],
+            completion_date=completion[1],
+            added_paths=tuple(added),
+            modified_paths=tuple(modified),
+        )
+        if existing is not None and existing != computed:
+            raise ValueError(
+                f"{milestone_id}: history snapshot расходится с полной локальной историей Git"
+            )
+        return computed
+    if existing is not None:
+        return existing
+    raise ValueError(
+        f"{milestone_id}: work_state завершено, но локальная история Git не содержит "
+        "коммит начала или завершения этапа (мелкий чекаут?) и в отчёте нет полного "
+        "history snapshot. Нужен полный git fetch."
+    )
+
+
+def _render_history_snapshot(snapshot: HistorySnapshot) -> str:
+    lines = [
+        f"history_start_sha: '{snapshot.start_sha}'",
+        f"history_start_date: {snapshot.start_date}",
+        f"history_completion_sha: '{snapshot.completion_sha}'",
+        f"history_completion_date: {snapshot.completion_date}",
+        "history_added_paths:",
+        *(f"  - {path}" for path in snapshot.added_paths),
+        "history_modified_paths:",
+        *(f"  - {path}" for path in snapshot.modified_paths),
+    ]
+    return "\n".join(lines)
+
+
 def _milestone_tasks(tasks: list[TaskItem], milestone_id: str) -> list[TaskItem]:
     return [
         task
@@ -265,18 +404,13 @@ def render_final_report(root: Path, milestone_id: str) -> str:
     else:
         all_tasks_done_text = "нет"
 
-    completion = _milestone_completion_commit(root, milestone_id) if completed else None
-    if completed and (start is None or completion is None):
-        raise ValueError(
-            f"{milestone_id}: work_state завершено, но локальная история Git не содержит "
-            "коммит начала или завершения этапа (мелкий чекаут?). Нужен полный git fetch, "
-            "иначе отчёт будет молча неверным."
-        )
-    if completed and start is not None and completion is not None:
-        end_sha, end_date = completion
-        added, modified = _git_file_changes(root, start[0], end_sha)
-        time_line = _time_span(start_date, end_date)
-        completion_date = end_date
+    snapshot = _history_snapshot(root, milestone_id) if completed else None
+    if snapshot is not None:
+        start_date = snapshot.start_date
+        added = list(snapshot.added_paths)
+        modified = list(snapshot.modified_paths)
+        time_line = _time_span(snapshot.start_date, snapshot.completion_date)
+        completion_date = snapshot.completion_date
     else:
         added, modified = [], []
         time_line = f"{start_date} — продолжается"
@@ -369,6 +503,7 @@ def render_final_report(root: Path, milestone_id: str) -> str:
             "completion_state": "completed" if completed else "pending",
             "created": start_date,
             "updated": today,
+            "history_snapshot": _render_history_snapshot(snapshot) if snapshot else "",
             "milestone_label": milestone_id.upper(),
             "completion_section": completion_section,
             "functional_section": functional_section,

@@ -8,6 +8,9 @@ from pathlib import Path
 
 from operations.scripts.milestones.init_milestone import init_milestone
 from operations.scripts.milestones.update_completion_report import (
+    _existing_history_snapshot,
+    _validate_history_date,
+    _validate_history_paths,
     render_final_report,
     update_completion_report,
 )
@@ -134,6 +137,22 @@ class UpdateCompletionReportTests(unittest.TestCase):
             root = Path(tmp)
             self.assertFalse(update_completion_report("m07", root=root))
 
+    def test_history_snapshot_validation_fails_closed(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Некорректный history_start_date"):
+            _validate_history_date("not-a-date", "history_start_date")
+        with self.assertRaisesRegex(ValueError, "Некорректный history_start_date"):
+            _validate_history_date("20260910", "history_start_date")
+        with self.assertRaisesRegex(ValueError, "должен быть списком путей"):
+            _validate_history_paths("not-a-list", "history_added_paths")
+        with self.assertRaisesRegex(ValueError, "отсортирован без дублей"):
+            _validate_history_paths(["z.md", "a.md"], "history_added_paths")
+        with self.assertRaisesRegex(ValueError, "Некорректный путь"):
+            _validate_history_paths(["../escape.md"], "history_added_paths")
+        with self.assertRaisesRegex(ValueError, "Исключённый путь"):
+            _validate_history_paths(["runtime/evidence.json"], "history_added_paths")
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(_existing_history_snapshot(Path(tmp), "m06"))
+
     def test_render_pending_milestone_stays_in_progress(self) -> None:
         root = self._make_repo("m06")
 
@@ -160,14 +179,22 @@ class UpdateCompletionReportTests(unittest.TestCase):
         self.assertIn("- Статус: завершено", content)
         self.assertNotIn("Дата завершения: —", content)
 
-    def test_refuses_to_render_when_completion_commit_is_a_shallow_boundary(self) -> None:
-        """A shallow clone's boundary commit makes `git log`/`git show` look
-        like nothing existed before it — the completion commit might really
-        be earlier than local history reaches. render_final_report() must
-        raise rather than silently trust that illusion (this is exactly what
-        broke CI: work/acceptance/m01_final_report.md rendered with a fraction of its
-        real content because a shallow checkout's boundary commit already
-        showed m01 as completed)."""
+    def test_uses_sealed_snapshot_when_history_is_shallow(self) -> None:
+        """A report generated with full history remains reproducible after
+        the old commit objects are no longer available locally."""
+        root = self._make_repo("m06")
+        _write_milestone_section(root, "m06", "completed")
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "complete milestone")
+        full_history_render = render_final_report(root, "m06")
+        report_path = root / "work/acceptance/m06_final_report.md"
+        report_path.write_text(full_history_render, encoding="utf-8")
+        completion_sha = _run_git_output(root, "rev-parse", "HEAD")
+        (root / ".git" / "shallow").write_text(f"{completion_sha}\n", encoding="utf-8")
+
+        self.assertEqual(render_final_report(root, "m06"), full_history_render)
+
+    def test_refuses_shallow_history_without_complete_snapshot(self) -> None:
         root = self._make_repo("m06")
         _write_milestone_section(root, "m06", "completed")
         _run_git(root, "add", "-A")
@@ -175,7 +202,48 @@ class UpdateCompletionReportTests(unittest.TestCase):
         completion_sha = _run_git_output(root, "rev-parse", "HEAD")
         (root / ".git" / "shallow").write_text(f"{completion_sha}\n", encoding="utf-8")
 
-        with self.assertRaisesRegex(ValueError, "мелкий чекаут"):
+        with self.assertRaisesRegex(ValueError, "нет полного history snapshot"):
+            render_final_report(root, "m06")
+
+    def test_refuses_partial_snapshot_in_shallow_history(self) -> None:
+        root = self._make_repo("m06")
+        _write_milestone_section(root, "m06", "completed")
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "complete milestone")
+        report_path = root / "work/acceptance/m06_final_report.md"
+        content = render_final_report(root, "m06")
+        report_path.write_text(
+            "\n".join(
+                line for line in content.splitlines() if not line.startswith("history_start_date:")
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        completion_sha = _run_git_output(root, "rev-parse", "HEAD")
+        (root / ".git" / "shallow").write_text(f"{completion_sha}\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "Неполный history snapshot"):
+            render_final_report(root, "m06")
+
+    def test_refuses_snapshot_that_disagrees_with_full_history(self) -> None:
+        root = self._make_repo("m06")
+        _write_milestone_section(root, "m06", "completed")
+        _run_git(root, "add", "-A")
+        _run_git(root, "commit", "-q", "-m", "complete milestone")
+        report_path = root / "work/acceptance/m06_final_report.md"
+        report_path.write_text(render_final_report(root, "m06"), encoding="utf-8")
+        content = report_path.read_text(encoding="utf-8")
+        start_sha = _run_git_output(root, "rev-list", "--max-parents=0", "HEAD")
+        report_path.write_text(
+            content.replace(
+                f"history_start_sha: '{start_sha}'",
+                "history_start_sha: 'ffffffffffffffffffffffffffffffffffffffff'",
+                1,
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(ValueError, "расходится с полной локальной историей"):
             render_final_report(root, "m06")
 
     def test_returns_false_when_milestone_unknown(self) -> None:
