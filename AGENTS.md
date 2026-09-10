@@ -3,8 +3,8 @@ id: coding_agent_instruction
 type: agent_instruction
 document_state: current
 applicability: normative
-version: 4.6
-updated: 2026-09-09
+version: 4.7
+updated: 2026-09-10
 depends_on:
   - project_rules
   - project_milestones
@@ -40,6 +40,12 @@ depends_on:
 4. Для служебной правки не создавать TASK и не сохранять завершённую служебную карточку.
 5. Выполнять работу в отдельной ветке по [`change_process.md`](operations/change_process.md); напрямую в `main` не записывать.
 6. Внести связное изменение вместе с проверками и обновлением первичных документов.
+   При переводе TASK в `completed` автоматическая проверка сравнивает связанные
+   архитектурные разделы между базовым и новым SHA. Если изменился отображаемый
+   `ARC_*`, `INF_*` или `SEC_CTL_*`, агент обязан содержательно перерисовать
+   [`personal_ai_platform_architecture.svg`](work/artefacts/architecture/personal_ai_platform_architecture.svg),
+   увеличить `diagram_version` и синхронизировать метаданные; замена только даты
+   или версии не считается перерисовкой.
 7. Запустить полный локальный gate:
 
    ```bash

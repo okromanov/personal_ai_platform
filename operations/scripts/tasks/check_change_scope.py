@@ -3,10 +3,8 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import json
-import math
 import re
 import sys
-import tomllib
 from pathlib import Path
 
 if __package__ in {None, ""}:
@@ -20,6 +18,9 @@ from operations.scripts.common.project import (
 from operations.scripts.documents.index import is_primary_markdown
 from operations.scripts.quality.registry import DERIVED_PATH_PATTERNS, validate_server_source
 from operations.scripts.status.generate_project_status import collect_milestones
+from operations.scripts.tasks.check_architecture_visualization import (
+    review_task_architecture_visualization,
+)
 from operations.scripts.tasks.generate import TERMINAL_STATES, collect_tasks
 
 UPDATED_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -79,6 +80,7 @@ GATE_MACHINERY_PATTERNS = [
     "operations/scripts/documents/**",
     "operations/scripts/quality/**",
     "operations/scripts/tasks/check_change_scope.py",
+    "operations/scripts/tasks/check_architecture_visualization.py",
 ]
 
 # Продуктовая поставка — то, что вообще покрывается границами TASK.
@@ -336,68 +338,6 @@ def _blob_at(root: Path, revision: str, path: str) -> str | None:
     return result.stdout if result.ok else None
 
 
-def _coverage_policy_at(root: Path, revision: str) -> tuple[dict[str, float], dict[str, float]]:
-    raw = _blob_at(root, revision, "pyproject.toml")
-    if raw is None:
-        raise ValueError(f"{revision}: отсутствует pyproject.toml")
-    try:
-        document = tomllib.loads(raw)
-        tool = document["tool"]
-        coverage = tool["coverage"]
-        platform = tool["personal_ai_platform"]["coverage"]
-        modules = platform["modules"]
-        values = {
-            "tool.coverage.report.fail_under": coverage["report"]["fail_under"],
-            "tool.personal_ai_platform.coverage.overall": platform["overall"],
-            "tool.personal_ai_platform.coverage.diff": platform["diff"],
-        }
-    except (KeyError, TypeError, tomllib.TOMLDecodeError) as exc:
-        raise ValueError(f"{revision}: coverage policy в pyproject.toml неполна") from exc
-    if not isinstance(modules, dict):
-        raise ValueError(f"{revision}: coverage.modules должен быть таблицей")
-
-    def number(name: str, value: object) -> float:
-        if isinstance(value, bool) or not isinstance(value, (int, float)):
-            raise ValueError(f"{revision}: {name} должен быть числом")
-        result = float(value)
-        if not math.isfinite(result):
-            raise ValueError(f"{revision}: {name} должен быть конечным числом")
-        return result
-
-    floors = {name: number(name, value) for name, value in values.items()}
-    module_floors: dict[str, float] = {}
-    for name, value in modules.items():
-        if not isinstance(name, str):
-            raise ValueError(f"{revision}: имя coverage-модуля должно быть строкой")
-        module_floors[name] = number(f'tool.personal_ai_platform.coverage.modules."{name}"', value)
-    return floors, module_floors
-
-
-def validate_coverage_policy_ratchet(root: Path, base: str, head: str) -> list[str]:
-    """Coverage floors may increase, but cannot be silently weakened or removed."""
-    try:
-        base_floors, base_modules = _coverage_policy_at(root, base)
-        head_floors, head_modules = _coverage_policy_at(root, head)
-    except ValueError as exc:
-        return [str(exc)]
-
-    errors: list[str] = []
-    for name, old_floor in base_floors.items():
-        new_floor = head_floors[name]
-        if new_floor < old_floor:
-            errors.append(f"{name}: coverage-порог снижен с {old_floor:g} до {new_floor:g}")
-    for name, old_floor in base_modules.items():
-        if name not in head_modules:
-            errors.append(f"coverage.modules: удалён защищённый модуль {name}")
-            continue
-        new_floor = head_modules[name]
-        if new_floor < old_floor:
-            errors.append(
-                f'coverage.modules."{name}": порог снижен с {old_floor:g} до {new_floor:g}'
-            )
-    return errors
-
-
 def _last_change_date(root: Path, base: str, head: str, path: str) -> str:
     """Дата последнего коммита в проверяемом диапазоне, менявшего именно этот файл."""
     result = run_command(
@@ -524,7 +464,12 @@ def main() -> int:
     errors.extend(validate_document_metadata(root, args.base, args.head, changed))
     errors.extend(validate_audit_history(root, args.base, args.head))
     errors.extend(validate_gate_machinery_isolation(changed))
-    errors.extend(validate_coverage_policy_ratchet(root, args.base, args.head))
+    architecture_review = review_task_architecture_visualization(
+        root, args.base, args.head, changed
+    )
+    errors.extend(architecture_review.errors)
+    if architecture_review.completed_tasks:
+        print(architecture_review.summary())
     if errors:
         for error in errors:
             print(f"ERROR: {error}")

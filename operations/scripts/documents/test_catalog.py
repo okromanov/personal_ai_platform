@@ -35,6 +35,15 @@ def _humanize(method_name: str) -> str:
 # name (English) below, so a newly added test is never left without a row —
 # just without a Russian one until this registry is extended.
 RU_DESCRIPTIONS: dict[str, str] = {
+    "operations/tests/tooling/test_architecture_visualization_trigger.py|test_changed_visual_section_requires_real_svg_redraw": (
+        "Завершение TASK с изменением отображаемого раздела требует реальной перерисовки архитектурного SVG."
+    ),
+    "operations/tests/tooling/test_architecture_visualization_trigger.py|test_completed_task_without_architecture_change_needs_no_redraw": (
+        "Завершение TASK без изменения архитектурных инвариантов не требует бессодержательной перерисовки."
+    ),
+    "operations/tests/tooling/test_architecture_visualization_trigger.py|test_metadata_only_update_is_not_a_redraw": (
+        "Изменение только версии и метаданных SVG не выдаётся за содержательную перерисовку."
+    ),
     "operations/tests/test_checker_negative_paths.py|test_candidate_documents_participate_in_authority_graph": (
         "Кандидатные документы участвуют в графе нормативных зависимостей и разрешают ссылки по document id."
     ),
