@@ -3,11 +3,11 @@
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.6
-  generated_at: 2026-09-02T21:18:00+00:00
+  diagram_version: 1.7
+  generated_at: 2026-09-15T20:15:00+00:00
   status: current
-  source: specifications/architecture_baseline.md@1.4
-  source: specifications/system_specification.md@1.4
+  source: specifications/architecture_baseline.md@1.5
+  source: specifications/system_specification.md@1.5
   source: specifications/infrastructure_baseline.md@1.3
   id: ARC_CMP_001
   id: ARC_CMP_002
@@ -102,7 +102,7 @@
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.6 · Обновлено 2026-09-02 21:18 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.7 · Обновлено 2026-09-15 20:15 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->
@@ -168,7 +168,7 @@
     <text x="1171.5" y="489" class="small-title" text-anchor="middle">Web</text><text x="1171.5" y="507" class="small-text" text-anchor="middle">Веб-интерфейс</text>
   </g>
   <path class="main-line" d="M810 532V600"/>
-  <rect x="668" y="552" width="284" height="28" rx="4" class="flow-label"/><text x="810" y="571" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Нормализованный ввод</text>
+  <rect x="613" y="552" width="394" height="28" rx="4" class="flow-label"/><text x="810" y="571" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Цель · Ввод · Критерии · Доказательства</text>
 
   <g transform="translate(0 48)">
 
@@ -198,10 +198,10 @@
   <g data-spec-id="ARC_CMP_007">
     <rect x="310" y="784" width="1000" height="170" rx="7" class="data-card"/>
     <text x="338" y="812" class="component-id">ARC_CMP_007</text><text x="338" y="839" class="component-title">Состояние задач</text>
-    <text x="338" y="863" class="component-text">Каноническое состояние, жизненный цикл и восстановление задач</text>
+    <text x="338" y="863" class="component-text">Канонические цель, критерии, жизненный цикл и восстановление задач</text>
     <rect x="338" y="874" width="300" height="64" rx="4" class="inner-card"/>
     <text x="488" y="895" class="small-title" text-anchor="middle">Жизненный цикл</text>
-    <text x="488" y="913" class="small-text" text-anchor="middle">ID · Очередь · Статус</text><text x="488" y="927" class="small-text" text-anchor="middle">Повтор · Отмена</text>
+    <text x="488" y="913" class="small-text" text-anchor="middle">ID · Цель · Критерии</text><text x="488" y="927" class="small-text" text-anchor="middle">Статус · Повтор · Отмена</text>
     <rect x="650" y="874" width="300" height="64" rx="4" class="inner-card"/>
     <text x="800" y="895" class="small-title" text-anchor="middle">Надёжность исполнения</text>
     <text x="800" y="913" class="small-text" text-anchor="middle">Checkpoint · Lease · Heartbeat</text><text x="800" y="927" class="small-text" text-anchor="middle">Защита от дублей</text>
@@ -216,7 +216,7 @@
   <g transform="translate(0 28)" data-spec-id="ARC_CMP_003">
     <rect x="310" y="994" width="1000" height="222" rx="7" class="execution-card"/>
     <text x="338" y="1022" class="component-id">ARC_CMP_003</text><text x="338" y="1049" class="component-title">Оркестрация и RuntimePort</text>
-    <text x="338" y="1073" class="component-text">Преобразование задачи в исполнимый цикл и подключение выбранной среды агента</text>
+    <text x="338" y="1073" class="component-text">План, route и исполнимый цикл через выбранную среду агента</text>
 
     <rect x="338" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="448.5" y="1110" class="small-title" text-anchor="middle">Skills</text>
@@ -306,9 +306,9 @@
   <g data-spec-id="ARC_CMP_008">
     <rect x="310" y="1604" width="1000" height="200" rx="7" class="execution-card"/>
     <text x="338" y="1632" class="component-id">ARC_CMP_008</text><text x="338" y="1659" class="component-title">Проверка качества</text>
-    <text x="338" y="1683" class="component-text">Проверка формата, качества, источников и безопасности результата</text>
+    <text x="338" y="1683" class="component-text">Проверка относительно критериев, доказательств, источников и безопасности</text>
     <rect x="338" y="1698" width="221" height="48" rx="4" class="inner-card"/>
-    <text x="448.5" y="1719" class="small-title" text-anchor="middle">Контракт и формат</text><text x="448.5" y="1737" class="small-text" text-anchor="middle">Схема · Формат · Тесты</text>
+    <text x="448.5" y="1719" class="small-title" text-anchor="middle">Критерии и контракт</text><text x="448.5" y="1737" class="small-text" text-anchor="middle">Цель · Доказательства · Тесты</text>
     <rect x="579" y="1698" width="221" height="48" rx="4" class="inner-card"/>
     <text x="689.5" y="1719" class="small-title" text-anchor="middle">Материалы и источники</text><text x="689.5" y="1737" class="small-text" text-anchor="middle">Полнота · Источники · Рендер</text>
     <rect x="820" y="1698" width="221" height="48" rx="4" class="inner-card"/>
@@ -318,12 +318,23 @@
     <rect x="338" y="1760" width="462" height="28" rx="4" class="flow-label-blue"/>
     <text x="569" y="1779" class="flow-text" text-anchor="middle">Интерфейс проверенного результата</text>
     <rect x="820" y="1760" width="462" height="28" rx="4" class="control-card"/>
-    <text x="1051" y="1779" class="control-flow-text" text-anchor="middle">Интерфейс контролируемого исхода</text>
+    <text x="1051" y="1779" class="control-flow-text" text-anchor="middle">Решение или контролируемый исход</text>
+  </g>
+  <path class="control-line" d="M1310 1668H1536"/>
+  <rect x="1358" y="1638" width="170" height="28" rx="4" class="flow-label-red"/>
+  <text x="1443" y="1657" class="control-flow-text" text-anchor="middle">Решение владельца</text>
+  <g data-spec-id="ARC_CMP_008">
+    <rect x="1540" y="1604" width="300" height="148" rx="7" class="control-card"/>
+    <text x="1564" y="1632" class="component-id">HUMAN REVIEW</text>
+    <text x="1564" y="1659" class="component-title">Выбор владельца</text>
+    <text x="1564" y="1687" class="small-text">Подтвердить → проверенный результат</text>
+    <text x="1564" y="1711" class="small-text">Скорректировать → revise plan · новый Run</text>
+    <text x="1564" y="1735" class="small-text">Остановить → контролируемый исход</text>
   </g>
   <path class="main-line" d="M569 1788V1872"/>
   <path class="failure-line" d="M1051 1788V1872"/>
   <path class="retry-line" d="M1310 1722H1390V1164H1310"/>
-  <g transform="translate(1390 1443) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Повтор разрешён · Новый запуск</text></g>
+  <g transform="translate(1390 1443) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Revise plan · Новый Run</text></g>
 
   <!-- 08 Outcomes and result envelope -->
   <g transform="translate(0 36)">
@@ -361,8 +372,8 @@
     <text x="800" y="2169" class="small-title" text-anchor="middle">Надёжность и восстановление</text>
     <text x="800" y="2187" class="small-text" text-anchor="middle">Heartbeat · Lease · Checkpoint</text><text x="800" y="2201" class="small-text" text-anchor="middle">Recovery · Резервные копии</text>
     <rect x="962" y="2148" width="320" height="62" rx="4" class="inner-card"/>
-    <text x="1122" y="2169" class="small-title" text-anchor="middle">Контроль эксплуатации и изменений</text>
-    <text x="1122" y="2187" class="small-text" text-anchor="middle">Работоспособность · Аудит · Стоимость</text><text x="1122" y="2201" class="small-text" text-anchor="middle">Версии · Обновления · Откат</text>
+    <text x="1122" y="2169" class="small-title" text-anchor="middle">Метрики и улучшения</text>
+    <text x="1122" y="2187" class="small-text" text-anchor="middle">Время · Cost · Итерации · Ошибки</text><text x="1122" y="2201" class="small-text" text-anchor="middle">Quality · Offline eval · Owner gate</text>
   </g>
 
   <!-- 10 Placement -->
