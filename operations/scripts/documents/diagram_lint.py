@@ -6,19 +6,20 @@ operations/architecture/diagram_geometry_foundations.md и предметным 
 diagram_geometry_foundations.md §13). Проверяет только то, что можно
 проверить без рендеринга SVG: блок метаданных, дрейф заявленной версии
 источника от фактической, наличие каждого заявленного ID в спецификации,
-взаимное соответствие списка ID и data-spec-id в теле файла, базовую
-структуру (viewBox/title/desc), а также — через diagram_geometry_lint —
-узкий набор координатных геометрических инвариантов, честно
-задокументированный в diagram_geometry_foundations.md §6.1:
-дисциплину половинных координат и единый размер наконечника стрелки.
+взаимное соответствие списка ID и data-spec-id в теле файла, полноту
+семейств ID в легенде, привязку внешних подписей потоков, наследование
+цвета прямого коннектора от его источника и базовую структуру
+(viewBox/title/desc). Через diagram_geometry_lint дополнительно проверяет
+дисциплину половинных координат, единый размер наконечника стрелки и явно
+объявленные вертикальные зазоры между карточками.
 
 Не проверяет: контраст, реальное визуальное наложение текста, читаемость
 после масштабирования, буквальную кратность 4 px для каждой координаты,
-`layer-gap`/`right-port-gap`/`right-rail-gap` — это остаётся ручными
-пунктами чек-листа (diagram_geometry_foundations.md §17), поскольку требует
-либо измеренного рендеринга текста, либо разрешения произвольного стека
-`transform` (поворот, масштаб), которое нельзя сделать корректно без риска
-ложных срабатываний.
+необъявленные `layer-gap`/`right-port-gap`/`right-rail-gap` — это остаётся
+ручными пунктами чек-листа (diagram_geometry_foundations.md §17), поскольку
+требует либо измеренного рендеринга текста, либо разрешения произвольного
+стека `transform` (поворот, масштаб), которое нельзя сделать корректно без
+риска ложных срабатываний.
 """
 
 from __future__ import annotations
@@ -72,6 +73,48 @@ _CLASS_RULE = re.compile(
 )
 _MARKER_ID = re.compile(r"<marker\b[^>]*\bid=\"(?P<name>[^\"]+)\"")
 _URL_REF = re.compile(r"url\(#(?P<name>[^)]+)\)")
+_ID_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\d+$")
+_LEGEND_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\*$")
+_VISIBLE_FLOW_ID = re.compile(r"\b(?:ARC_FLOW|INF_FLOW|SEC_CTL)_\d{3}\b")
+_ARCHITECTURE_ID_PREFIXES = ("ARC_", "INF_", "SEC_CTL_")
+
+_SOURCE_PALETTE_CLASSES = {
+    "blue": {"execution-card", "flow-label-blue"},
+    "red": {"control-card", "flow-label-red"},
+    "green": {"data-card"},
+    "gray": {"neutral-card", "inner-card", "implementation-pill"},
+}
+_CONNECTOR_PALETTE_CLASSES = {
+    "blue": {"main-line", "branch-line", "bus-line", "scheduled-line"},
+    "red": {
+        "control-line",
+        "control-rail",
+        "control-main-line",
+        "failure-line",
+        "failure-bus",
+        "revision-line",
+    },
+    "green": {"data-line"},
+    "gray": {
+        "neutral-line",
+        "neutral-scheduled-line",
+        "support-line",
+        "support-rail",
+        "implementation-link",
+    },
+}
+_DIRECT_CONNECTOR_CLASSES = {
+    "main-line",
+    "neutral-line",
+    "data-line",
+    "control-main-line",
+    "branch-line",
+    "scheduled-line",
+    "neutral-scheduled-line",
+    "control-line",
+    "failure-line",
+    "revision-line",
+}
 
 
 @dataclass
@@ -209,6 +252,169 @@ def _check_ids(declared_ids: list[str], body_text: str, root: Path, result: Lint
             f'элемент схемы несёт data-spec-id="{identifier}", '
             "но этот id не заявлен в блоке метаданных"
         )
+
+
+def _classes(element: ElementTree.Element) -> set[str]:
+    return set((element.get("class") or "").split())
+
+
+def _parent_map(root_el: ElementTree.Element) -> dict[ElementTree.Element, ElementTree.Element]:
+    return {child: parent for parent in root_el.iter() for child in parent}
+
+
+def _bound_spec_ids(
+    element: ElementTree.Element,
+    parents: dict[ElementTree.Element, ElementTree.Element],
+) -> set[str]:
+    result: set[str] = set()
+    current: ElementTree.Element | None = element
+    while current is not None:
+        identifier = current.get("data-spec-id")
+        if identifier:
+            result.add(_normalize_id(identifier))
+        current = parents.get(current)
+    return result
+
+
+def _check_legend_id_families(
+    root_el: ElementTree.Element, declared_ids: list[str], result: LintResult
+) -> None:
+    declared_families: set[str] = set()
+    for identifier in declared_ids:
+        match = _ID_FAMILY.fullmatch(_normalize_id(identifier))
+        if match:
+            declared_families.add(f"{match.group('family')}_*")
+    if not declared_families:
+        return
+
+    legend_families: set[str] = set()
+    for element in root_el.iter():
+        if "legend-id" not in _classes(element):
+            continue
+        text = "".join(element.itertext()).strip().upper()
+        match = _LEGEND_FAMILY.fullmatch(text)
+        if match:
+            legend_families.add(f"{match.group('family')}_*")
+
+    if not legend_families:
+        if len(declared_families) > 1:
+            result.errors.append(
+                "легенда не перечисляет семейства идентификаторов: "
+                + ", ".join(sorted(declared_families))
+            )
+        return
+
+    missing = sorted(declared_families - legend_families)
+    if missing:
+        result.errors.append(
+            "в легенде отсутствуют используемые семейства идентификаторов: " + ", ".join(missing)
+        )
+    extra = sorted(legend_families - declared_families)
+    if extra:
+        result.errors.append(
+            "легенда содержит неиспользуемые семейства идентификаторов: " + ", ".join(extra)
+        )
+
+
+def _check_flow_label_bindings(root_el: ElementTree.Element, result: LintResult) -> None:
+    parents = _parent_map(root_el)
+    for element in root_el.iter():
+        classes = _classes(element)
+        if not classes.intersection({"flow-text", "control-flow-text"}):
+            continue
+        label = " ".join("".join(element.itertext()).split())
+        if "_XXX" in label:
+            continue
+        bound = _bound_spec_ids(element, parents)
+        visible_ids = {
+            _normalize_id(value) for value in _VISIBLE_FLOW_ID.findall("".join(element.itertext()))
+        }
+        missing = sorted(visible_ids - bound)
+        if missing:
+            result.errors.append(
+                "видимая подпись потока не связана с указанными ID через data-spec-id: "
+                + ", ".join(missing)
+            )
+
+        inside_component = any(
+            identifier.startswith(("ARC_CMP_", "INF_CMP_")) for identifier in bound
+        )
+        has_flow_binding = any(
+            identifier.startswith(("ARC_FLOW_", "INF_FLOW_", "SEC_CTL_")) for identifier in bound
+        )
+        if not inside_component and not has_flow_binding:
+            result.errors.append(
+                f"внешняя подпись потока {label!r} не имеет data-spec-id "
+                "существующего ARC_FLOW_*, INF_FLOW_* или SEC_CTL_*"
+            )
+
+
+def _palette_for(classes: set[str], mapping: dict[str, set[str]]) -> set[str]:
+    return {palette for palette, candidates in mapping.items() if classes & candidates}
+
+
+def _check_connector_source_colors(root_el: ElementTree.Element, result: LintResult) -> None:
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    for element in root_el.iter():
+        classes = _classes(element)
+        is_direct = bool(classes.intersection(_DIRECT_CONNECTOR_CLASSES))
+        source_ref = element.get("data-source-ref")
+        shared_route = element.get("data-shared-route") == "true"
+        if is_direct and bool(source_ref) == shared_route:
+            result.errors.append(
+                "прямой коннектор обязан нести ровно одно из data-source-ref "
+                'или data-shared-route="true"'
+            )
+            continue
+        if not is_direct and not source_ref:
+            continue
+        if source_ref and shared_route:
+            result.errors.append(
+                'коннектор не может одновременно нести data-source-ref и data-shared-route="true"'
+            )
+            continue
+        if shared_route:
+            continue
+
+        source = by_id.get(source_ref)
+        if source is None:
+            result.errors.append(
+                f"data-source-ref={source_ref!r} указывает на отсутствующий элемент"
+            )
+            continue
+        source_palettes = _palette_for(_classes(source), _SOURCE_PALETTE_CLASSES)
+        connector_palettes = _palette_for(classes, _CONNECTOR_PALETTE_CLASSES)
+        if len(source_palettes) != 1:
+            result.errors.append(
+                f"источник {source_ref!r} не имеет ровно одной поддерживаемой цветовой категории"
+            )
+            continue
+        if len(connector_palettes) != 1:
+            result.errors.append(
+                f"коннектор от {source_ref!r} не имеет ровно одного класса цвета линии"
+            )
+            continue
+        if source_palettes != connector_palettes:
+            result.errors.append(
+                f"цвет коннектора от {source_ref!r} не совпадает с цветом источника: "
+                f"источник={next(iter(source_palettes))}, линия={next(iter(connector_palettes))}"
+            )
+
+
+def _check_architecture_semantics(
+    root_el: ElementTree.Element,
+    declared_ids: list[str],
+    result: LintResult,
+) -> None:
+    is_architecture = root_el.get("data-diagram-kind") == "architecture" or any(
+        _normalize_id(identifier).startswith(_ARCHITECTURE_ID_PREFIXES)
+        for identifier in declared_ids
+    )
+    if not is_architecture:
+        return
+    _check_flow_label_bindings(root_el, result)
+    _check_connector_source_colors(root_el, result)
+    _check_legend_id_families(root_el, declared_ids, result)
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -403,6 +609,8 @@ def lint_file(path: Path, root: Path) -> LintResult:
         _check_sources(metadata.sources, root, result)
         _check_ids(metadata.ids, text, root, result)
         _check_visible_meta(metadata.scalars, text, result)
+        if root_el is not None:
+            _check_architecture_semantics(root_el, metadata.ids, result)
 
     geometry = check_geometry(text)
     result.errors.extend(geometry.errors)
