@@ -628,6 +628,24 @@ class DiagramLintTests(unittest.TestCase):
             result.errors,
         )
 
+    def test_shared_route_rejects_invalid_elements_and_transforms(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect x="0" width="10" height="10" class="control-card"/>'
+            '<g transform="scale(2)">'
+            '<rect x="0" y="0" width="10" height="10" class="control-card"/>'
+            '<path d="M20 0V10" data-shared-route="true"/>'
+            "</g>"
+            '<line x1="0" y1="0" x2="0" y2="10" data-shared-route="true"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("числовые x, y, width и height" in e for e in result.errors))
+        self.assertTrue(any("отличный от translate" in e for e in result.errors))
+        self.assertTrue(
+            any('data-shared-route="true" разрешён только для <path>' in e for e in result.errors)
+        )
+
     def test_control_transition_cards_share_calculated_layout(self) -> None:
         matching = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -667,6 +685,56 @@ class DiagramLintTests(unittest.TestCase):
             any("геометрия переходной карточки" in error for error in result.errors),
             result.errors,
         )
+
+    def test_control_transition_layout_rejects_invalid_contracts(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g data-layout="control-transition"/>'
+            '<g><rect id="wrong-class" x="0" y="0" width="100" height="60" rx="5" '
+            'class="execution-card" data-layout="control-transition"/></g>'
+            '<g><rect id="missing-box" x="0" y="0" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/></g>'
+            '<g><rect id="missing-radius" x="0" y="0" width="100" height="60" '
+            'class="control-card" data-layout="control-transition"/></g>'
+            '<g><rect id="non-text-slot" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<rect data-layout-slot="identity"/></g>'
+            '<g><rect id="duplicate-slot" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="50" y="15" text-anchor="middle" data-layout-slot="identity">A</text>'
+            '<text x="50" y="15" text-anchor="middle" data-layout-slot="identity">B</text>'
+            "</g>"
+            '<g><rect id="missing-text-position" x="0" y="0" width="100" height="60" '
+            'rx="5" class="control-card" data-layout="control-transition"/>'
+            '<text data-layout-slot="identity">A</text></g>'
+            '<g transform="rotate(90)">'
+            '<rect id="rotated" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="50" y="15" text-anchor="middle" data-layout-slot="identity">A</text>'
+            "</g>"
+            '<g><rect id="off-centre" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="48" y="15" data-layout-slot="identity">A</text></g>'
+            '<g><rect id="no-slots" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/></g>'
+            "</svg>"
+        )
+
+        expected_fragments = (
+            'data-layout="control-transition" разрешён только для <rect>',
+            "обязана использовать класс control-card",
+            "требует числовые x, y, width и height",
+            "обязана иметь числовой rx",
+            "data-layout-slot разрешён только для <text>",
+            "повторяет слот 'identity'",
+            "обязан иметь числовые x и y",
+            "отличный от translate",
+            "обязан быть центрирован",
+            "не содержит ни одного data-layout-slot",
+        )
+        for fragment in expected_fragments:
+            with self.subTest(fragment=fragment):
+                self.assertTrue(any(fragment in error for error in result.errors), result.errors)
 
     def test_legend_must_list_every_declared_identifier_family(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
