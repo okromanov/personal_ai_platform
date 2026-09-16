@@ -433,7 +433,7 @@ def _segment_crosses_rect_interior(
 
 def _check_shared_routes_stay_outside_cards(root_el, errors: list[str]) -> None:
     parents = {child: parent for parent in root_el.iter() for child in parent}
-    cards: list[tuple[object, tuple[float, float, float, float]]] = []
+    cards: list[tuple[ElementTree.Element, tuple[float, float, float, float]]] = []
     for element in root_el.iter():
         if _local_tag(element.tag) != "rect":
             continue
@@ -490,7 +490,12 @@ def _check_shared_routes_stay_outside_cards(root_el, errors: list[str]) -> None:
 
 def _check_control_transition_layouts(root_el, errors: list[str]) -> None:
     parents = {child: parent for parent in root_el.iter() for child in parent}
-    signatures: list[tuple[str, tuple[object, ...]]] = []
+    signatures: list[
+        tuple[
+            str,
+            tuple[float, float, float, tuple[tuple[str, str, float, float], ...]],
+        ]
+    ] = []
     for card in root_el.iter():
         if card.get("data-layout") != "control-transition":
             continue
@@ -517,7 +522,7 @@ def _check_control_transition_layouts(root_el, errors: list[str]) -> None:
             errors.append(f"переходная карточка {card_id!r} обязана иметь числовой rx")
             continue
         parent = parents.get(card)
-        slots: list[tuple[object, ...]] = []
+        slots: list[tuple[str, str, float, float]] = []
         seen_slots: set[str] = set()
         for text_element in list(parent) if parent is not None else []:
             slot = text_element.get("data-layout-slot")
