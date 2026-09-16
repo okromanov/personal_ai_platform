@@ -17,11 +17,13 @@ from raw XML attributes without rendering the SVG:
    attributes are uniform across all of them
    (diagram_geometry_foundations.md §6, token `arrow-marker-size`).
 3. **Referenced vertical gaps.** A rectangle may identify its predecessor
-   through `data-gap-from="source-id"`. The linter resolves the accumulated
-   translation-only ancestor stack, calculates the actual gap, and compares
-   it with the layer gap calculated from the registered architecture
-   template. A numeric expected value in `data-gap` is forbidden: geometry
-   remains the only source of the measurement.
+   through `data-gap-from="source-id"` and, when needed, classify the relation
+   symbolically through `data-gap-kind="transition"` (the default kind is
+   `layer`). The linter resolves the accumulated translation-only ancestor
+   stack, calculates the actual gap, and compares it with the corresponding
+   reference geometry calculated from the registered architecture template.
+   A numeric expected value in `data-gap` is forbidden: geometry remains the
+   only source of the measurement.
 4. **Centred section dividers.** A horizontal `.section-divider` is placed at
    the exact midpoint between the nearest rectangle row above it and the
    nearest rectangle row below it; the spacing is calculated from geometry,
@@ -110,6 +112,7 @@ class GeometryResult:
 class VerticalGap:
     source_id: str
     target_id: str
+    kind: str
     value: float
 
 
@@ -222,7 +225,17 @@ def _measure_referenced_vertical_gaps(root_el, errors: list[str]) -> list[Vertic
                 "в SVG, а вычисляется по геометрии шаблона"
             )
         source_id = element.get("data-gap-from")
+        kind = element.get("data-gap-kind", "layer")
+        if element.get("data-gap-kind") is not None and not source_id:
+            errors.append("data-gap-kind разрешён только вместе с data-gap-from")
+            continue
         if not source_id:
+            continue
+        if kind not in {"layer", "transition"}:
+            errors.append(
+                f"неподдерживаемое значение data-gap-kind={kind!r}: "
+                "допустимы 'layer' и 'transition'"
+            )
             continue
         source = by_id.get(source_id)
         if source is None:
@@ -237,22 +250,29 @@ def _measure_referenced_vertical_gaps(root_el, errors: list[str]) -> list[Vertic
             VerticalGap(
                 source_id=source_id,
                 target_id=element.get("id", "<без id>"),
+                kind=kind,
                 value=actual,
             )
         )
     return gaps
 
 
-def _check_reference_layer_gap(
-    gaps: list[VerticalGap], reference_layer_gap: float | None, errors: list[str]
+def _check_reference_gaps(
+    gaps: list[VerticalGap], reference_gaps: dict[str, float] | None, errors: list[str]
 ) -> None:
-    if reference_layer_gap is None:
+    if reference_gaps is None:
         return
     for gap in gaps:
-        if abs(gap.value - reference_layer_gap) > 1e-9:
+        reference_gap = reference_gaps.get(gap.kind)
+        if reference_gap is None:
+            continue
+        if abs(gap.value - reference_gap) > 1e-9:
+            reference_name = (
+                "эталон шаблона" if gap.kind == "layer" else f"эталон шаблона {gap.kind}-gap"
+            )
             errors.append(
                 f"геометрический просвет {gap.source_id!r} → {gap.target_id!r}: "
-                f"эталон шаблона {reference_layer_gap:g} px, фактически {gap.value:g} px "
+                f"{reference_name} {reference_gap:g} px, фактически {gap.value:g} px "
                 "(diagram_geometry_foundations.md §6)"
             )
 
@@ -343,7 +363,7 @@ def _check_direct_routes(root_el, errors: list[str]) -> None:
             errors.append('путь с data-route="direct" обязан быть горизонтальным или вертикальным')
 
 
-def check_geometry(text: str, *, reference_layer_gap: float | None = None) -> GeometryResult:
+def check_geometry(text: str, *, reference_gaps: dict[str, float] | None = None) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
     Assumes the caller has already validated the document is well-formed
@@ -361,7 +381,7 @@ def check_geometry(text: str, *, reference_layer_gap: float | None = None) -> Ge
     _check_half_pixel_discipline(root_el, errors)
     _check_arrow_marker_size(root_el, errors)
     vertical_gaps = _measure_referenced_vertical_gaps(root_el, errors)
-    _check_reference_layer_gap(vertical_gaps, reference_layer_gap, errors)
+    _check_reference_gaps(vertical_gaps, reference_gaps, errors)
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
     return GeometryResult(errors=errors, warnings=warnings, vertical_gaps=vertical_gaps)
