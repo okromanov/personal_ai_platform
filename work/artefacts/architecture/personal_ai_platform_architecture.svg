@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="2558" viewBox="0 0 1900 2558" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="2664" viewBox="0 0 1900 2664" role="img" aria-labelledby="title desc">
   <title id="title">Вертикальная архитектура Personal AI Platform</title>
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.7
-  generated_at: 2026-09-15T20:15:00+00:00
+  diagram_version: 1.8
+  generated_at: 2026-09-16T05:14:16+00:00
   status: current
-  source: specifications/architecture_baseline.md@1.5
+  source: specifications/architecture_baseline.md@1.6
   source: specifications/system_specification.md@1.5
   source: specifications/infrastructure_baseline.md@1.3
   id: ARC_CMP_001
@@ -77,9 +77,11 @@
       .branch-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-main); }
       .bus-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
       .retry-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-dasharray: 7 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-main); }
+      .retry-rail { fill: none; stroke: #315C88; stroke-width: 1; stroke-dasharray: 7 5; stroke-linecap: round; stroke-linejoin: round; }
       .control-line { fill: none; stroke: #A1463F; stroke-width: 1; stroke-dasharray: 5 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-control); }
       .control-rail { fill: none; stroke: #A1463F; stroke-width: 1; stroke-dasharray: 5 5; stroke-linecap: round; stroke-linejoin: round; }
       .failure-line { fill: none; stroke: #A1463F; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-control); }
+      .failure-bus { fill: none; stroke: #A1463F; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
       .scheduled-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-dasharray: 3 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-main); }
       .support-line { fill: none; stroke: #7D8895; stroke-width: 1; stroke-dasharray: 2 5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-support); }
       .support-rail { fill: none; stroke: #7D8895; stroke-width: 1; stroke-dasharray: 2 5; stroke-linecap: round; stroke-linejoin: round; }
@@ -97,12 +99,12 @@
       .gate-note { font-size: 10px; font-weight: 500; fill: #53606E; }
     </style>
   </defs>
-  <rect width="1900" height="2558" fill="#FFFFFF"/>
+  <rect width="1900" height="2664" fill="#FFFFFF"/>
 
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.7 · Обновлено 2026-09-15 20:15 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.8 · Обновлено 2026-09-16 05:14 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->
@@ -141,9 +143,9 @@
     <text x="80" y="1098" class="layer-no">05 · ИСПОЛНЕНИЕ</text>
     <text x="80" y="1428" class="layer-no">06 · ВОЗМОЖНОСТИ</text>
     <text x="80" y="1668" class="layer-no">07 · ПРОВЕРКА</text>
-    <text x="80" y="1936" class="layer-no">08 · РЕЗУЛЬТАТ</text>
-    <text x="80" y="2150" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
-    <text x="80" y="2386" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
+    <text x="80" y="2042" class="layer-no">08 · РЕЗУЛЬТАТ</text>
+    <text x="80" y="2256" class="layer-no">09 · ЭКСПЛУАТАЦИЯ</text>
+    <text x="80" y="2492" class="layer-no">10 · РАЗМЕЩЕНИЕ</text>
   </g>
 
   <!-- 01 Owner -->
@@ -315,29 +317,34 @@
     <text x="930.5" y="1719" class="small-title" text-anchor="middle">LLM-as-a-judge</text><text x="930.5" y="1737" class="small-text" text-anchor="middle">Смысл · Качество · Релевантность</text>
     <rect x="1061" y="1698" width="221" height="48" rx="4" class="inner-card"/>
     <text x="1171.5" y="1719" class="small-title" text-anchor="middle">Безопасность результата</text><text x="1171.5" y="1737" class="small-text" text-anchor="middle">Секреты · Политики · Воздействие</text>
-    <rect x="338" y="1760" width="462" height="28" rx="4" class="flow-label-blue"/>
-    <text x="569" y="1779" class="flow-text" text-anchor="middle">Интерфейс проверенного результата</text>
-    <rect x="820" y="1760" width="462" height="28" rx="4" class="control-card"/>
-    <text x="1051" y="1779" class="control-flow-text" text-anchor="middle">Решение или контролируемый исход</text>
+    <rect x="338" y="1760" width="221" height="28" rx="4" class="flow-label-blue"/>
+    <text x="448.5" y="1779" class="flow-text" text-anchor="middle">Проверенный результат</text>
+    <rect x="579" y="1760" width="221" height="28" rx="4" class="flow-label-blue"/>
+    <text x="689.5" y="1779" class="flow-text" text-anchor="middle">Повтор → новый Run</text>
+    <rect x="820" y="1760" width="221" height="28" rx="4" class="flow-label-red"/>
+    <text x="930.5" y="1779" class="control-flow-text" text-anchor="middle">Требуется выбор владельца</text>
+    <rect x="1061" y="1760" width="221" height="28" rx="4" class="flow-label-red"/>
+    <text x="1171.5" y="1779" class="control-flow-text" text-anchor="middle">Контролируемый исход</text>
   </g>
-  <path class="control-line" d="M1310 1668H1536"/>
-  <rect x="1358" y="1638" width="170" height="28" rx="4" class="flow-label-red"/>
-  <text x="1443" y="1657" class="control-flow-text" text-anchor="middle">Решение владельца</text>
+
+  <!-- Conditional owner choice between quality and terminal outcomes -->
+  <path class="control-line" d="M930.5 1788V1824"/>
   <g data-spec-id="ARC_CMP_008">
-    <rect x="1540" y="1604" width="300" height="148" rx="7" class="control-card"/>
-    <text x="1564" y="1632" class="component-id">HUMAN REVIEW</text>
-    <text x="1564" y="1659" class="component-title">Выбор владельца</text>
-    <text x="1564" y="1687" class="small-text">Подтвердить → проверенный результат</text>
-    <text x="1564" y="1711" class="small-text">Скорректировать → revise plan · новый Run</text>
-    <text x="1564" y="1735" class="small-text">Остановить → контролируемый исход</text>
+    <rect x="820" y="1824" width="221" height="76" rx="7" class="control-card"/>
+    <text x="930.5" y="1848" class="small-title" text-anchor="middle">Выбор владельца</text>
+    <text x="930.5" y="1870" class="small-text" text-anchor="middle">Подтвердить · Скорректировать</text>
+    <text x="930.5" y="1888" class="small-text" text-anchor="middle">Остановить</text>
   </g>
-  <path class="main-line" d="M569 1788V1872"/>
-  <path class="failure-line" d="M1051 1788V1872"/>
-  <path class="retry-line" d="M1310 1722H1390V1164H1310"/>
-  <g transform="translate(1390 1443) rotate(90)"><rect x="-120" y="-14" width="240" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Revise plan · Новый Run</text></g>
+  <path class="bus-line" d="M448.5 1788V1944H554M850 1900V1944H554"/>
+  <path class="branch-line" d="M554 1944V1978"/>
+  <path class="failure-bus" d="M1171.5 1788V1954H1066M1011 1900V1954H1066"/>
+  <path class="failure-line" d="M1066 1954V1978"/>
+  <path class="retry-rail" d="M1310 1722H1390M1041 1862H1390V1164"/>
+  <path class="retry-line" d="M1390 1164H1310"/>
+  <g transform="translate(1390 1513) rotate(90)"><rect x="-130" y="-14" width="260" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">Пересмотр плана · Новый Run</text></g>
 
   <!-- 08 Outcomes and result envelope -->
-  <g transform="translate(0 36)">
+  <g transform="translate(0 142)">
   <g>
     <rect x="310" y="1836" width="488" height="146" rx="7" class="execution-card"/>
     <text x="338" y="1868" class="component-title">Готовый результат или материал</text>
@@ -358,7 +365,7 @@
   </g>
   </g>
 
-  <g transform="translate(0 28)">
+  <g transform="translate(0 134)">
 
   <!-- 09 Operations -->
   <g data-spec-id="ARC_CMP_009">
@@ -405,22 +412,22 @@
   </g>
 
   <!-- Placement supports logical components -->
-  <path class="support-rail" d="M310 2487H270V456"/>
+  <path class="support-rail" d="M310 2593H270V456"/>
   <path class="support-line" d="M270 456H310"/><path class="support-line" d="M270 685H310"/><path class="support-line" d="M270 923H310"/>
   <path class="support-line" d="M270 1187H310"/><path class="support-line" d="M270 1492H310"/><path class="support-line" d="M270 1746H310"/>
-  <path class="support-line" d="M270 1987H310"/><path class="support-line" d="M270 2212H310"/><path class="support-line" d="M270 2487H310"/>
+  <path class="support-line" d="M270 2093H310"/><path class="support-line" d="M270 2318H310"/><path class="support-line" d="M270 2593H310"/>
 
   <!-- Scheduled flow and security rail -->
-  <path class="scheduled-line" d="M1310 2196H1430V688H1310" data-spec-id="ARC_FLOW_004"/>
-  <g transform="translate(1430 1442) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
-  <path class="control-rail" d="M1310 720H1350V2228"/>
-  <path class="control-line" d="M1350 1238H1310"/><path class="control-line" d="M1350 1492H1310"/><path class="control-line" d="M1350 2228H1310"/>
-  <g transform="translate(1350 1474) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
+  <path class="scheduled-line" d="M1310 2302H1430V688H1310" data-spec-id="ARC_FLOW_004"/>
+  <g transform="translate(1430 1495) rotate(90)" data-spec-id="SEC_CTL_017"><rect x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> / </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
+  <path class="control-rail" d="M1310 720H1350V2334"/>
+  <path class="control-line" d="M1350 1238H1310"/><path class="control-line" d="M1350 1492H1310"/><path class="control-line" d="M1350 2334H1310"/>
+  <g transform="translate(1350 1527) rotate(90)" data-spec-id="SEC_CTL_002"><rect x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">SEC_CTL_002 · Аварийный выключатель</text></g>
 
   <!-- Return through selected channel -->
-  <path class="main-line" d="M554 2060V2092H1470V476H1310"/>
-  <path class="failure-line" d="M1066 2060V2076H1510V508H1310"/>
-  <g transform="translate(1470 1284) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
-  <g transform="translate(1510 1292) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
+  <path class="main-line" d="M554 2166V2198H1470V476H1310"/>
+  <path class="failure-line" d="M1066 2166V2182H1510V508H1310"/>
+  <g transform="translate(1470 1337) rotate(90)"><rect x="-143" y="-14" width="286" height="28" rx="4" class="flow-label-blue"/><text x="0" y="1" class="flow-text" text-anchor="middle">ARC_FLOW_001 · Проверенный результат</text></g>
+  <g transform="translate(1510 1345) rotate(90)"><rect x="-148" y="-14" width="296" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Контролируемый исход</text></g>
   </g>
 </svg>
