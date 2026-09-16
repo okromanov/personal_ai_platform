@@ -511,6 +511,84 @@ class DiagramLintTests(unittest.TestCase):
             any("markerWidth" in error and "не единообразен" in error for error in result.errors)
         )
 
+    def test_section_divider_is_checked_from_surrounding_geometry(self) -> None:
+        valid = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg"><g>'
+            '<rect y="10" height="20"/>'
+            '<line x1="0" y1="40" x2="100" y2="40" class="section-divider"/>'
+            '<rect y="50" height="20"/>'
+            "</g></svg>"
+        )
+        invalid = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg"><g>'
+            '<rect y="10" height="20"/>'
+            '<line x1="0" y1="41" x2="100" y2="41" class="section-divider"/>'
+            '<rect y="50" height="20"/>'
+            "</g></svg>"
+        )
+
+        self.assertEqual(valid.errors, [])
+        self.assertTrue(
+            any("сверху 11 px, снизу 9 px" in error for error in invalid.errors),
+            invalid.errors,
+        )
+
+    def test_section_divider_rejects_an_invalid_contract(self) -> None:
+        wrong_element = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path class="section-divider" d="M0 0H10"/>'
+            "</svg>"
+        )
+        non_horizontal = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<line class="section-divider" x1="0" y1="0" x2="10" y2="10"/>'
+            "</svg>"
+        )
+        no_rows = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<line class="section-divider" x1="0" y1="10" x2="10" y2="10"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("элементом <line>" in error for error in wrong_element.errors))
+        self.assertTrue(any("горизонтальным" in error for error in non_horizontal.errors))
+        self.assertTrue(any("между рядами" in error for error in no_rows.errors))
+
+    def test_declared_direct_route_is_checked_from_path_geometry(self) -> None:
+        valid = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M0 0V10" data-route="direct"/>'
+            '<path d="M0 0L10 0" data-route="direct"/>'
+            "</svg>"
+        )
+        bent = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M0 0V10H20" data-route="direct"/>'
+            "</svg>"
+        )
+        diagonal = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M0 0L10 10" data-route="direct"/>'
+            "</svg>"
+        )
+
+        self.assertEqual(valid.errors, [])
+        self.assertTrue(any("ровно из одного" in error for error in bent.errors))
+        self.assertTrue(
+            any("горизонтальным или вертикальным" in error for error in diagonal.errors)
+        )
+
+    def test_declared_direct_route_rejects_invalid_metadata(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M0 0V10" data-route="curved"/>'
+            '<line x1="0" y1="0" x2="0" y2="10" data-route="direct"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("неподдерживаемое" in error for error in result.errors))
+        self.assertTrue(any("только для <path>" in error for error in result.errors))
+
     def test_legend_must_list_every_declared_identifier_family(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
             '<svg xmlns="http://www.w3.org/2000/svg"><text class="legend-id">ARC_CMP_*</text></svg>'
@@ -738,7 +816,7 @@ class DiagramLintTests(unittest.TestCase):
             result.errors,
         )
 
-    def test_declared_vertical_gap_is_checked_through_group_translations(self) -> None:
+    def test_referenced_vertical_gap_is_checked_against_reference_geometry(self) -> None:
         valid = (
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g transform="translate(0 5)">'
@@ -746,54 +824,171 @@ class DiagramLintTests(unittest.TestCase):
             "</g>"
             '<g transform="translate(0 100)">'
             '<rect id="owner-choice" x="0" y="3" width="20" height="10" '
-            'data-gap-from="quality" data-gap="68"/>'
+            'data-gap-from="quality"/>'
             "</g>"
             "</svg>"
         )
         invalid = valid.replace("translate(0 100)", "translate(0 99)")
 
-        valid_result = diagram_geometry_lint.check_geometry(valid)
-        invalid_result = diagram_geometry_lint.check_geometry(invalid)
+        measured = diagram_geometry_lint.check_geometry(valid)
+        reference_gap = measured.vertical_gaps[0].value
+        valid_result = diagram_geometry_lint.check_geometry(
+            valid, reference_layer_gap=reference_gap
+        )
+        invalid_result = diagram_geometry_lint.check_geometry(
+            invalid, reference_layer_gap=reference_gap
+        )
 
         self.assertEqual(valid_result.errors, [])
         self.assertTrue(
             any(
-                "объявлено 68 px" in error and "фактически 67 px" in error
+                "эталон шаблона 68 px" in error and "фактически 67 px" in error
                 for error in invalid_result.errors
             ),
             invalid_result.errors,
         )
 
-    def test_declared_vertical_gap_reports_an_invalid_contract(self) -> None:
+    def test_referenced_vertical_gap_reports_an_invalid_contract(self) -> None:
         missing_source = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<rect y="0" height="10" data-gap-from="missing" data-gap="68"/>'
+            '<rect y="0" height="10" data-gap-from="missing"/>'
             "</svg>"
         )
-        invalid_gap = diagram_geometry_lint.check_geometry(
+        duplicated_value = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="source" y="0" height="10"/>'
-            '<rect y="78" height="10" data-gap-from="source" data-gap="many"/>'
+            '<rect y="78" height="10" data-gap-from="source" data-gap="68"/>'
             "</svg>"
         )
         invalid_box = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="source" height="10"/>'
-            '<rect y="78" height="10" data-gap-from="source" data-gap="68"/>'
+            '<rect y="78" height="10" data-gap-from="source"/>'
             "</svg>"
         )
         unsupported_transform = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g transform="scale(2)"><rect id="source" y="0" height="10"/></g>'
-            '<rect y="78" height="10" data-gap-from="source" data-gap="68"/>'
+            '<rect y="78" height="10" data-gap-from="source"/>'
             "</svg>"
         )
 
         self.assertTrue(any("missing" in error for error in missing_source.errors))
-        self.assertTrue(any("числовой data-gap" in error for error in invalid_gap.errors))
+        self.assertTrue(any("data-gap запрещён" in error for error in duplicated_value.errors))
         self.assertTrue(any("числовые y и height" in error for error in invalid_box.errors))
         self.assertTrue(
             any("отличный от translate" in error for error in unsupported_transform.errors)
+        )
+
+    def test_architecture_reference_gap_is_calculated_from_template_geometry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="component" y="10" height="20"/>'
+                '<rect id="result" y="98" height="10" data-gap-from="component"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            result = diagram_lint.LintResult(file="diagram.svg")
+
+            gap = diagram_lint._architecture_reference_layer_gap(root, result)
+
+        self.assertEqual(result.errors, [])
+        self.assertEqual(gap, 68)
+
+    def test_architecture_reference_gap_reports_missing_or_ambiguous_geometry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            missing_result = diagram_lint.LintResult(file="diagram.svg")
+            missing_gap = diagram_lint._architecture_reference_layer_gap(root, missing_result)
+
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="source" y="0" height="10"/>'
+                '<rect y="78" height="10" data-gap-from="source" data-gap="68"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            invalid_result = diagram_lint.LintResult(file="diagram.svg")
+            invalid_gap = diagram_lint._architecture_reference_layer_gap(root, invalid_result)
+
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="first" y="0" height="10"/>'
+                '<rect id="second" y="78" height="10" data-gap-from="first"/>'
+                '<rect y="152" height="10" data-gap-from="second"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            ambiguous_result = diagram_lint.LintResult(file="diagram.svg")
+            ambiguous_gap = diagram_lint._architecture_reference_layer_gap(root, ambiguous_result)
+
+        self.assertIsNone(missing_gap)
+        self.assertTrue(any("не найден" in error for error in missing_result.errors))
+        self.assertIsNone(invalid_gap)
+        self.assertTrue(any("не позволяет" in error for error in invalid_result.errors))
+        self.assertIsNone(ambiguous_gap)
+        self.assertTrue(any("ровно одно" in error for error in ambiguous_result.errors))
+
+    def test_lint_file_compares_referenced_gap_with_template_geometry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="template-source" y="0" height="10"/>'
+                '<rect y="78" height="10" data-gap-from="template-source"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            svg = root / "diagram.svg"
+            body = (
+                '<g data-spec-id="ARC_CMP_001">'
+                '<rect id="source" y="0" height="10"/>'
+                '<rect y="77" height="10" data-gap-from="source"/>'
+                "</g>"
+            )
+            svg.write_text(
+                _svg_text(metadata_block=metadata).replace("<g ></g>", body),
+                encoding="utf-8",
+            )
+
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertTrue(
+            any(
+                "эталон шаблона 68 px" in error and "фактически 67 px" in error
+                for error in result.errors
+            ),
+            result.errors,
         )
 
     def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:

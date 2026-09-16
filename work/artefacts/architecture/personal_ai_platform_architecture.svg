@@ -3,8 +3,8 @@
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.9
-  generated_at: 2026-09-16T12:04:00+00:00
+  diagram_version: 1.10
+  generated_at: 2026-09-16T13:49:00+00:00
   status: current
   source: specifications/architecture_baseline.md@1.7
   source: specifications/system_specification.md@1.5
@@ -107,7 +107,7 @@
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.9 · Обновлено 2026-09-16 12:04 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.10 · Обновлено 2026-09-16 13:49 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->
@@ -159,7 +159,7 @@
     <text x="810" y="264" class="component-title" text-anchor="middle">Владелец платформы</text>
     <text x="810" y="289" class="component-text" text-anchor="middle">Постановка задач, принятие решений и окончательный контроль платформы</text>
   </g>
-  <path class="neutral-line" d="M810 312V380" data-spec-id="ARC_FLOW_001" data-source-ref="owner-card"/>
+  <path class="neutral-line" d="M810 312V380" data-spec-id="ARC_FLOW_001" data-source-ref="owner-card" data-route="direct"/>
   <rect x="722" y="332" width="176" height="28" rx="4" class="flow-label"/><text x="810" y="351" class="flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_001">ARC_FLOW_001 · Запрос</text>
 
   <!-- 02 Interfaces -->
@@ -174,7 +174,7 @@
     <text x="930.5" y="489" class="small-title" text-anchor="middle">Voice</text><text x="930.5" y="507" class="small-text" text-anchor="middle">Голосовой режим</text>
     <text x="1171.5" y="489" class="small-title" text-anchor="middle">Web</text><text x="1171.5" y="507" class="small-text" text-anchor="middle">Веб-интерфейс</text>
   </g>
-  <path class="neutral-line" d="M810 532V600" data-spec-id="ARC_FLOW_001" data-source-ref="channels-card"/>
+  <path class="neutral-line" d="M810 532V600" data-spec-id="ARC_FLOW_001" data-source-ref="channels-card" data-route="direct"/>
   <rect x="613" y="552" width="394" height="28" rx="4" class="flow-label"/><text x="810" y="571" class="flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_001">ARC_FLOW_001 · Цель · Ввод · Критерии · Доказательства</text>
 
   <g transform="translate(0 48)">
@@ -198,7 +198,7 @@
     <text x="1171.5" y="681" class="inverse-text" text-anchor="middle">Безусловный приоритет</text><text x="1171.5" y="695" class="inverse-text" text-anchor="middle">над моделью и исполнением</text>
   </g>
   <g transform="translate(0 6)">
-  <path class="control-main-line" d="M810 716V784" data-spec-id="ARC_FLOW_001" data-source-ref="security-card"/>
+  <path class="control-main-line" d="M810 716V784" data-spec-id="ARC_FLOW_001" data-source-ref="security-card" data-route="direct"/>
   <rect x="676" y="736" width="268" height="28" rx="4" class="flow-label"/><text x="810" y="755" class="flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_001">ARC_FLOW_001 · Разрешённая задача</text>
 
   <!-- 04 Durable task runtime state -->
@@ -216,7 +216,7 @@
     <text x="1122" y="895" class="small-title" text-anchor="middle">События и восстановление</text>
     <text x="1122" y="913" class="small-text" text-anchor="middle">История · Корреляция</text><text x="1122" y="927" class="small-text" text-anchor="middle">Зависшая задача · Recovery</text>
   </g>
-  <path class="data-line" d="M810 954V1022" data-spec-id="ARC_FLOW_001" data-source-ref="task-state-card"/>
+  <path class="data-line" d="M810 954V1022" data-spec-id="ARC_FLOW_001" data-source-ref="task-state-card" data-route="direct"/>
   <rect x="680" y="974" width="260" height="28" rx="4" class="flow-label"/><text x="810" y="993" class="flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_001">ARC_FLOW_001 · Исполнимая задача</text>
 
   <!-- 05 Orchestration and runtime contract -->
@@ -228,11 +228,11 @@
     <rect id="skills-card" x="338" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="448.5" y="1110" class="small-title" text-anchor="middle">Skills</text>
     <text x="448.5" y="1140" class="small-text" text-anchor="middle">Переиспользуемые инструкции</text><text x="448.5" y="1154" class="small-text" text-anchor="middle">для выполнения задач</text>
-    <path class="neutral-line" d="M559 1140H579" data-source-ref="skills-card"/>
+    <path class="neutral-line" d="M559 1140H579" data-source-ref="skills-card" data-route="direct"/>
     <rect id="capabilities-card" x="579" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="689.5" y="1110" class="small-title" text-anchor="middle">Capabilities</text>
     <text x="689.5" y="1140" class="small-text" text-anchor="middle">Устойчивые способности</text><text x="689.5" y="1154" class="small-text" text-anchor="middle">пользователя или системы</text>
-    <path class="neutral-line" d="M800 1140H820" data-source-ref="capabilities-card"/>
+    <path class="neutral-line" d="M800 1140H820" data-source-ref="capabilities-card" data-route="direct"/>
     <rect x="820" y="1084" width="221" height="116" rx="4" class="inner-card"/>
     <text x="930.5" y="1110" class="small-title" text-anchor="middle">Tools</text>
     <text x="930.5" y="1140" class="small-text" text-anchor="middle">Атомарные операции</text><text x="930.5" y="1154" class="small-text" text-anchor="middle">с явными полномочиями</text>
@@ -322,7 +322,7 @@
     <text x="930.5" y="1719" class="small-title" text-anchor="middle">LLM-as-a-judge</text><text x="930.5" y="1737" class="small-text" text-anchor="middle">Смысл · Качество · Релевантность</text>
     <rect x="1061" y="1698" width="221" height="48" rx="4" class="inner-card"/>
     <text x="1171.5" y="1719" class="small-title" text-anchor="middle">Безопасность результата</text><text x="1171.5" y="1737" class="small-text" text-anchor="middle">Секреты · Политики · Воздействие</text>
-    <line x1="338" y1="1756" x2="1282" y2="1756" class="section-divider"/>
+    <line x1="338" y1="1755" x2="1282" y2="1755" class="section-divider"/>
     <rect id="quality-verified-port" x="338" y="1764" width="300" height="28" rx="4" class="flow-label-blue"/>
     <text x="488" y="1783" class="flow-text" text-anchor="middle">Проверенный результат</text>
     <rect id="quality-owner-port" x="658" y="1764" width="300" height="28" rx="4" class="flow-label-red"/>
@@ -332,24 +332,24 @@
   </g>
 
   <!-- Conditional owner choice between quality and terminal outcomes -->
-  <path class="control-line" d="M808 1792V1876" data-spec-id="ARC_FLOW_001" data-source-ref="quality-owner-port"/>
+  <path class="control-line" d="M808 1792V1876" data-spec-id="ARC_FLOW_001" data-source-ref="quality-owner-port" data-route="direct"/>
   <g data-spec-id="ARC_CMP_008">
-    <rect id="owner-choice-card" x="658" y="1876" width="300" height="92" rx="7" class="control-card" data-gap-from="quality-card" data-gap="68"/>
+    <rect id="owner-choice-card" x="658" y="1876" width="300" height="92" rx="7" class="control-card" data-gap-from="quality-card"/>
     <text x="686" y="1900" class="component-id">ARC_CMP_008 · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
     <text x="686" y="1926" class="small-title">Выбор владельца</text>
     <text x="686" y="1950" class="small-text">Подтвердить · Скорректировать · Остановить</text>
   </g>
-  <path class="main-line" d="M488 1792V1980H510V2036" data-spec-id="ARC_FLOW_001" data-source-ref="quality-verified-port"/>
-  <path class="failure-line" d="M1130 1792V1992H1110V2036" data-spec-id="ARC_FLOW_001" data-source-ref="quality-controlled-port"/>
-  <path class="control-main-line" d="M714 1968V1996H598V2036" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card"/>
-  <path class="failure-line" d="M902 1968V2012H1066V2036" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card"/>
+  <path class="main-line" d="M488 1792V2036" data-spec-id="ARC_FLOW_001" data-source-ref="quality-verified-port" data-route="direct"/>
+  <path class="failure-line" d="M1130 1792V2036" data-spec-id="ARC_FLOW_001" data-source-ref="quality-controlled-port" data-route="direct"/>
+  <path class="control-main-line" d="M714 1968V2036" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card" data-route="direct"/>
+  <path class="failure-line" d="M902 1968V2036" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card" data-route="direct"/>
   <path class="revision-line" d="M958 1922H1390V1164H1310" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card"/>
   <g transform="translate(1390 1543) rotate(90)" data-spec-id="ARC_FLOW_001"><rect x="-160" y="-14" width="320" height="28" rx="4" class="flow-label-red"/><text x="0" y="1" class="control-flow-text" text-anchor="middle">ARC_FLOW_001 · Коррекция · Новый Run</text></g>
 
   <!-- 08 Outcomes and result envelope -->
   <g transform="translate(0 200)">
   <g>
-    <rect id="ready-result-card" x="310" y="1836" width="488" height="146" rx="7" class="execution-card" data-gap-from="owner-choice-card" data-gap="68"/>
+    <rect id="ready-result-card" x="310" y="1836" width="488" height="146" rx="7" class="execution-card" data-gap-from="owner-choice-card"/>
     <text x="338" y="1868" class="component-title">Готовый результат или материал</text>
     <text x="338" y="1892" class="component-text">Подтверждённый результат проверки</text>
     <rect x="338" y="1904" width="432" height="62" rx="4" class="inner-card"/>
@@ -358,7 +358,7 @@
     <text x="554" y="1957" class="small-text" text-anchor="middle">Виджет · Уведомление · Доказательства</text>
   </g>
   <g>
-    <rect id="controlled-result-card" x="822" y="1836" width="488" height="146" rx="7" class="control-card" data-gap-from="owner-choice-card" data-gap="68"/>
+    <rect id="controlled-result-card" x="822" y="1836" width="488" height="146" rx="7" class="control-card" data-gap-from="owner-choice-card"/>
     <text x="850" y="1868" class="component-title">Контролируемый исход</text>
     <text x="850" y="1892" class="component-text">Безопасно завершённая задача</text>
     <rect x="850" y="1904" width="432" height="62" rx="4" class="inner-card"/>

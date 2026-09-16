@@ -10,12 +10,12 @@ diagram_geometry_foundations.md §13). Проверяет только то, ч�
 семейств ID в легенде, привязку внешних подписей потоков, наследование
 цвета прямого коннектора от его источника и базовую структуру
 (viewBox/title/desc). Через diagram_geometry_lint дополнительно проверяет
-дисциплину половинных координат, единый размер наконечника стрелки и явно
-объявленные вертикальные зазоры между карточками.
+дисциплину половинных координат, единый размер наконечника стрелки и
+геометрически вычисленные вертикальные зазоры между связанными карточками.
 
 Не проверяет: контраст, реальное визуальное наложение текста, читаемость
 после масштабирования, буквальную кратность 4 px для каждой координаты,
-необъявленные `layer-gap`/`right-port-gap`/`right-rail-gap` — это остаётся
+несвязанные `layer-gap`/`right-port-gap`/`right-rail-gap` — это остаётся
 ручными пунктами чек-листа (diagram_geometry_foundations.md §17), поскольку
 требует либо измеренного рендеринга текста, либо разрешения произвольного
 стека `transform` (поворот, масштаб), которое нельзя сделать корректно без
@@ -401,20 +401,52 @@ def _check_connector_source_colors(root_el: ElementTree.Element, result: LintRes
             )
 
 
+def _is_architecture_diagram(
+    root_el: ElementTree.Element,
+    declared_ids: list[str],
+) -> bool:
+    return root_el.get("data-diagram-kind") == "architecture" or any(
+        _normalize_id(identifier).startswith(_ARCHITECTURE_ID_PREFIXES)
+        for identifier in declared_ids
+    )
+
+
 def _check_architecture_semantics(
     root_el: ElementTree.Element,
     declared_ids: list[str],
     result: LintResult,
 ) -> None:
-    is_architecture = root_el.get("data-diagram-kind") == "architecture" or any(
-        _normalize_id(identifier).startswith(_ARCHITECTURE_ID_PREFIXES)
-        for identifier in declared_ids
-    )
-    if not is_architecture:
+    if not _is_architecture_diagram(root_el, declared_ids):
         return
     _check_flow_label_bindings(root_el, result)
     _check_connector_source_colors(root_el, result)
     _check_legend_id_families(root_el, declared_ids, result)
+
+
+def _architecture_reference_layer_gap(root: Path, result: LintResult) -> float | None:
+    template = (
+        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+    )
+    if not template.is_file():
+        result.errors.append(
+            "не найден архитектурный SVG-шаблон: невозможно геометрически вычислить layer-gap"
+        )
+        return None
+    measured = check_geometry(read_text(template))
+    if measured.errors:
+        result.errors.append(
+            "геометрия архитектурного SVG-шаблона не позволяет вычислить layer-gap: "
+            + "; ".join(measured.errors)
+        )
+        return None
+    values = {gap.value for gap in measured.vertical_gaps}
+    if len(values) != 1:
+        result.errors.append(
+            "архитектурный SVG-шаблон должен геометрически задавать ровно одно "
+            "значение layer-gap через data-gap-from"
+        )
+        return None
+    return values.pop()
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -612,7 +644,19 @@ def lint_file(path: Path, root: Path) -> LintResult:
         if root_el is not None:
             _check_architecture_semantics(root_el, metadata.ids, result)
 
-    geometry = check_geometry(text)
+    declared_ids = metadata.ids if metadata is not None else []
+    has_referenced_gap = root_el is not None and any(
+        element.get("data-gap-from") is not None for element in root_el.iter()
+    )
+    reference_layer_gap = None
+    if (
+        root_el is not None
+        and has_referenced_gap
+        and _is_architecture_diagram(root_el, declared_ids)
+    ):
+        reference_layer_gap = _architecture_reference_layer_gap(root, result)
+
+    geometry = check_geometry(text, reference_layer_gap=reference_layer_gap)
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)
 
