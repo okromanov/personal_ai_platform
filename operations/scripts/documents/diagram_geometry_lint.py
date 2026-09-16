@@ -1,7 +1,7 @@
 """Coordinate-based geometry checks for SVG diagrams, factored out of
 diagram_lint.py so that module stays focused on metadata/traceability.
 
-Scope, precisely — this module enforces five invariants that are computable
+Scope, precisely — this module enforces seven invariants that are computable
 from raw XML attributes without rendering the SVG:
 
 1. **Half-pixel coordinate discipline.** Every numeric `x`/`y`/`width`/
@@ -31,6 +31,16 @@ from raw XML attributes without rendering the SVG:
 5. **Declared direct routes.** A path marked `data-route="direct"` contains
    exactly one horizontal or vertical segment. This lets diagrams state the
    local no-bend contract without pretending the linter can infer obstacles.
+6. **Shared routes stay outside cards.** A path marked
+   `data-shared-route="true"` is one direct horizontal or vertical segment
+   and may touch a card boundary, but may not enter or cross the interior of
+   an independently coloured card. At the boundary the route must be split;
+   the outgoing segment then uses `data-source-ref`, so source-colour
+   validation applies.
+7. **Repeated transition-card geometry.** Rectangles marked
+   `data-layout="control-transition"` have identical dimensions, radius and
+   text-slot geometry. Slot baselines are compared relative to each card, so
+   no copied pixel constants become a second source of truth.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -99,6 +109,12 @@ _DIRECT_PATH = re.compile(
     r")\s*$",
     re.IGNORECASE,
 )
+_INDEPENDENT_CARD_CLASSES = {
+    "control-card",
+    "data-card",
+    "execution-card",
+    "neutral-card",
+}
 
 
 @dataclass
@@ -335,6 +351,241 @@ def _check_centered_section_dividers(root_el, errors: list[str]) -> None:
             )
 
 
+def _direct_path_segment(element) -> tuple[float, float, float, float] | None:
+    match = _DIRECT_PATH.fullmatch(element.get("d") or "")
+    if match is None:
+        return None
+    x1 = float(match.group("x1"))
+    y1 = float(match.group("y1"))
+    axis = match.group("axis")
+    if axis is not None:
+        axis_value = float(match.group("axis_value"))
+        if axis.upper() == "H":
+            return x1, y1, axis_value, y1
+        return x1, y1, x1, axis_value
+    x2 = float(match.group("x2"))
+    y2 = float(match.group("y2"))
+    if abs(x1 - x2) > 1e-9 and abs(y1 - y2) > 1e-9:
+        return None
+    return x1, y1, x2, y2
+
+
+def _absolute_translation(
+    element,
+    parents: dict[object, object],
+    errors: list[str],
+    *,
+    contract: str,
+) -> tuple[float, float] | None:
+    x_offset = 0.0
+    y_offset = 0.0
+    current = element
+    while current is not None:
+        transform = current.get("transform")
+        if transform:
+            remaining = _TRANSLATE.sub("", transform).strip(" ,")
+            if remaining:
+                errors.append(
+                    f"{contract} нельзя проверить через transform, отличный от "
+                    f"translate(...): {transform!r}"
+                )
+                return None
+            for match in _TRANSLATE.finditer(transform):
+                x_offset += float(match.group("x"))
+                y_offset += float(match.group("y") or 0)
+        current = parents.get(current)
+    return x_offset, y_offset
+
+
+def _absolute_rect_box(
+    element,
+    parents: dict[object, object],
+    errors: list[str],
+    *,
+    contract: str,
+) -> tuple[float, float, float, float] | None:
+    try:
+        x = float(element.get("x"))
+        y = float(element.get("y"))
+        width = float(element.get("width"))
+        height = float(element.get("height"))
+    except (TypeError, ValueError):
+        errors.append(f"{contract} требует числовые x, y, width и height")
+        return None
+    offset = _absolute_translation(element, parents, errors, contract=contract)
+    if offset is None:
+        return None
+    x += offset[0]
+    y += offset[1]
+    return x, y, x + width, y + height
+
+
+def _segment_crosses_rect_interior(
+    segment: tuple[float, float, float, float],
+    box: tuple[float, float, float, float],
+) -> bool:
+    x1, y1, x2, y2 = segment
+    left, top, right, bottom = box
+    if abs(x1 - x2) < 1e-9:
+        return left < x1 < right and max(min(y1, y2), top) < min(max(y1, y2), bottom)
+    return top < y1 < bottom and max(min(x1, x2), left) < min(max(x1, x2), right)
+
+
+def _check_shared_routes_stay_outside_cards(root_el, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    cards: list[tuple[object, tuple[float, float, float, float]]] = []
+    for element in root_el.iter():
+        if _local_tag(element.tag) != "rect":
+            continue
+        classes = set((element.get("class") or "").split())
+        if not classes.intersection(_INDEPENDENT_CARD_CLASSES):
+            continue
+        box = _absolute_rect_box(
+            element,
+            parents,
+            errors,
+            contract="проверку общей трассы относительно карточки",
+        )
+        if box is not None:
+            cards.append((element, box))
+
+    for element in root_el.iter():
+        if element.get("data-shared-route") != "true":
+            continue
+        if _local_tag(element.tag) != "path":
+            errors.append('data-shared-route="true" разрешён только для <path>')
+            continue
+        segment = _direct_path_segment(element)
+        if segment is None:
+            errors.append(
+                'путь с data-shared-route="true" обязан состоять ровно из одного '
+                "прямого горизонтального или вертикального сегмента от шины или рельса"
+            )
+            continue
+        offset = _absolute_translation(
+            element,
+            parents,
+            errors,
+            contract="проверку общей трассы",
+        )
+        if offset is None:
+            continue
+        x1, y1, x2, y2 = segment
+        absolute_segment = (
+            x1 + offset[0],
+            y1 + offset[1],
+            x2 + offset[0],
+            y2 + offset[1],
+        )
+        for card, box in cards:
+            if not _segment_crosses_rect_interior(absolute_segment, box):
+                continue
+            card_id = card.get("id", "<без id>")
+            errors.append(
+                f"shared route проходит через внутреннюю область карточки {card_id!r}: "
+                "разделите маршрут на границе и задайте исходящему коннектору "
+                "data-source-ref"
+            )
+
+
+def _check_control_transition_layouts(root_el, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    signatures: list[tuple[str, tuple[object, ...]]] = []
+    for card in root_el.iter():
+        if card.get("data-layout") != "control-transition":
+            continue
+        card_id = card.get("id", "<без id>")
+        if _local_tag(card.tag) != "rect":
+            errors.append('data-layout="control-transition" разрешён только для <rect>')
+            continue
+        if "control-card" not in set((card.get("class") or "").split()):
+            errors.append(
+                f"переходная карточка {card_id!r} обязана использовать класс control-card"
+            )
+            continue
+        box = _absolute_rect_box(
+            card,
+            parents,
+            errors,
+            contract="сравнение геометрии переходных карточек",
+        )
+        if box is None:
+            continue
+        try:
+            radius = float(card.get("rx"))
+        except (TypeError, ValueError):
+            errors.append(f"переходная карточка {card_id!r} обязана иметь числовой rx")
+            continue
+        parent = parents.get(card)
+        slots: list[tuple[object, ...]] = []
+        seen_slots: set[str] = set()
+        for text_element in list(parent) if parent is not None else []:
+            slot = text_element.get("data-layout-slot")
+            if slot is None:
+                continue
+            if _local_tag(text_element.tag) != "text":
+                errors.append("data-layout-slot разрешён только для <text>")
+                continue
+            if slot in seen_slots:
+                errors.append(f"переходная карточка {card_id!r} повторяет слот {slot!r}")
+                continue
+            seen_slots.add(slot)
+            try:
+                text_x = float(text_element.get("x"))
+                text_y = float(text_element.get("y"))
+            except (TypeError, ValueError):
+                errors.append(f"слот {slot!r} карточки {card_id!r} обязан иметь числовые x и y")
+                continue
+            offset = _absolute_translation(
+                text_element,
+                parents,
+                errors,
+                contract="сравнение внутренних интервалов переходных карточек",
+            )
+            if offset is None:
+                continue
+            absolute_x = text_x + offset[0]
+            absolute_y = text_y + offset[1]
+            expected_center = (box[0] + box[2]) / 2
+            if (
+                text_element.get("text-anchor") != "middle"
+                or abs(absolute_x - expected_center) > 1e-9
+            ):
+                errors.append(
+                    f"слот {slot!r} карточки {card_id!r} обязан быть центрирован "
+                    "по геометрической оси карточки"
+                )
+            slots.append(
+                (
+                    slot,
+                    text_element.get("class", ""),
+                    absolute_x - box[0],
+                    absolute_y - box[1],
+                )
+            )
+        if not slots:
+            errors.append(f"переходная карточка {card_id!r} не содержит ни одного data-layout-slot")
+            continue
+        signature = (
+            box[2] - box[0],
+            box[3] - box[1],
+            radius,
+            tuple(sorted(slots)),
+        )
+        signatures.append((card_id, signature))
+
+    if not signatures:
+        return
+    reference_id, reference = signatures[0]
+    for card_id, signature in signatures[1:]:
+        if signature != reference:
+            errors.append(
+                f"геометрия переходной карточки {card_id!r} отличается от "
+                f"{reference_id!r}: размеры, выравнивание и внутренние интервалы "
+                "однотипных контрольных переходов должны совпадать"
+            )
+
+
 def _check_direct_routes(root_el, errors: list[str]) -> None:
     for element in root_el.iter():
         route = element.get("data-route")
@@ -384,4 +635,6 @@ def check_geometry(text: str, *, reference_gaps: dict[str, float] | None = None)
     _check_reference_gaps(vertical_gaps, reference_gaps, errors)
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
+    _check_shared_routes_stay_outside_cards(root_el, errors)
+    _check_control_transition_layouts(root_el, errors)
     return GeometryResult(errors=errors, warnings=warnings, vertical_gaps=vertical_gaps)
