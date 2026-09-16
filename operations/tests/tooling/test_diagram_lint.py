@@ -589,6 +589,153 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("неподдерживаемое" in error for error in result.errors))
         self.assertTrue(any("только для <path>" in error for error in result.errors))
 
+    def test_shared_route_may_touch_but_not_cross_a_card(self) -> None:
+        valid = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g transform="translate(10 20)">'
+            '<path d="M50 -10V0" data-shared-route="true"/>'
+            '<rect id="gate" x="0" y="0" width="100" height="100" '
+            'class="control-card"/>'
+            "</g></svg>"
+        )
+        crossing = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g transform="translate(10 20)">'
+            '<path d="M50 -10V110" data-shared-route="true"/>'
+            '<rect id="gate" x="0" y="0" width="100" height="100" '
+            'class="control-card"/>'
+            "</g></svg>"
+        )
+
+        self.assertEqual(valid.errors, [])
+        self.assertTrue(
+            any(
+                "внутреннюю область карточки 'gate'" in error and "data-source-ref" in error
+                for error in crossing.errors
+            ),
+            crossing.errors,
+        )
+
+    def test_shared_route_must_be_one_direct_segment(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M0 0V10H20" data-shared-route="true"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(
+            any("shared-route" in error and "одного" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_shared_route_rejects_invalid_elements_and_transforms(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect x="0" width="10" height="10" class="control-card"/>'
+            '<g transform="scale(2)">'
+            '<rect x="0" y="0" width="10" height="10" class="control-card"/>'
+            '<path d="M20 0V10" data-shared-route="true"/>'
+            "</g>"
+            '<line x1="0" y1="0" x2="0" y2="10" data-shared-route="true"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("числовые x, y, width и height" in e for e in result.errors))
+        self.assertTrue(any("отличный от translate" in e for e in result.errors))
+        self.assertTrue(
+            any('data-shared-route="true" разрешён только для <path>' in e for e in result.errors)
+        )
+
+    def test_control_transition_cards_share_calculated_layout(self) -> None:
+        matching = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g><rect id="first" x="10" y="20" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="60" y="35" class="eyebrow" text-anchor="middle" '
+            'data-layout-slot="identity">A</text>'
+            '<text x="60" y="55" class="title" text-anchor="middle" '
+            'data-layout-slot="title">B</text></g>'
+            '<g transform="translate(20 100)">'
+            '<rect id="second" x="10" y="20" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="60" y="35" class="eyebrow" text-anchor="middle" '
+            'data-layout-slot="identity">C</text>'
+            '<text x="60" y="55" class="title" text-anchor="middle" '
+            'data-layout-slot="title">D</text></g>'
+            "</svg>"
+        )
+
+        self.assertEqual(matching.errors, [])
+
+    def test_control_transition_layout_rejects_drift(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g><rect id="first" x="10" y="20" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="60" y="35" class="eyebrow" text-anchor="middle" '
+            'data-layout-slot="identity">A</text></g>'
+            '<g><rect id="second" x="10" y="100" width="104" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="62" y="116" class="eyebrow" text-anchor="middle" '
+            'data-layout-slot="identity">B</text></g>'
+            "</svg>"
+        )
+
+        self.assertTrue(
+            any("геометрия переходной карточки" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_control_transition_layout_rejects_invalid_contracts(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g data-layout="control-transition"/>'
+            '<g><rect id="wrong-class" x="0" y="0" width="100" height="60" rx="5" '
+            'class="execution-card" data-layout="control-transition"/></g>'
+            '<g><rect id="missing-box" x="0" y="0" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/></g>'
+            '<g><rect id="missing-radius" x="0" y="0" width="100" height="60" '
+            'class="control-card" data-layout="control-transition"/></g>'
+            '<g><rect id="non-text-slot" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<rect data-layout-slot="identity"/></g>'
+            '<g><rect id="duplicate-slot" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="50" y="15" text-anchor="middle" data-layout-slot="identity">A</text>'
+            '<text x="50" y="15" text-anchor="middle" data-layout-slot="identity">B</text>'
+            "</g>"
+            '<g><rect id="missing-text-position" x="0" y="0" width="100" height="60" '
+            'rx="5" class="control-card" data-layout="control-transition"/>'
+            '<text data-layout-slot="identity">A</text></g>'
+            '<g transform="rotate(90)">'
+            '<rect id="rotated" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="50" y="15" text-anchor="middle" data-layout-slot="identity">A</text>'
+            "</g>"
+            '<g><rect id="off-centre" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="48" y="15" data-layout-slot="identity">A</text></g>'
+            '<g><rect id="no-slots" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/></g>'
+            "</svg>"
+        )
+
+        expected_fragments = (
+            'data-layout="control-transition" разрешён только для <rect>',
+            "обязана использовать класс control-card",
+            "требует числовые x, y, width и height",
+            "обязана иметь числовой rx",
+            "data-layout-slot разрешён только для <text>",
+            "повторяет слот 'identity'",
+            "обязан иметь числовые x и y",
+            "отличный от translate",
+            "обязан быть центрирован",
+            "не содержит ни одного data-layout-slot",
+        )
+        for fragment in expected_fragments:
+            with self.subTest(fragment=fragment):
+                self.assertTrue(any(fragment in error for error in result.errors), result.errors)
+
     def test_legend_must_list_every_declared_identifier_family(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
             '<svg xmlns="http://www.w3.org/2000/svg"><text class="legend-id">ARC_CMP_*</text></svg>'
@@ -752,6 +899,22 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertTrue(
             any("ровно одно из data-source-ref" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_bus_line_must_be_declared_as_a_shared_route(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg"><path class="bus-line"/></svg>'
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_connector_source_colors(root_el, result)
+
+        self.assertTrue(
+            any(
+                "ровно одно из data-source-ref" in error and 'data-shared-route="true"' in error
+                for error in result.errors
+            ),
             result.errors,
         )
 
