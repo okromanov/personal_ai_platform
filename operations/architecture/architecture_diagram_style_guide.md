@@ -2,8 +2,8 @@
 id: operations_architecture_diagram_style_guide
 type: guide
 document_state: current
-version: 4.1
-updated: 2026-09-10
+version: 4.2
+updated: 2026-09-16
 depends_on:
   - project_rules
   - architecture_baseline
@@ -27,12 +27,18 @@ depends_on:
 
 Для текущей общей архитектуры основная колонка сохраняет десятислойную структуру, определённую baseline. Нумерация слоёв отражает логический порядок представления, а не номера `ARC_CMP_*`.
 
+Условный контрольный переход внутри компонента не становится новым `ARC_CMP_*` только потому, что показан отдельной карточкой.
+Такая карточка визуально несёт ID родительского компонента, располагается между источником и следующими слоями с просветом `layer-gap` с обеих сторон и связывает каждый собственный выход с существующим `ARC_FLOW_*` или `SEC_CTL_*`.
+В частности, «Выбор владельца» после Quality Gate относится к [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008), а коррекция с новым `Run` — к [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001).
+
 ## 3. Трассируемость и метаданные — архитектурная специфика
 
 Формат блока метаданных и механизм проверки — [`diagram_geometry_foundations.md`](diagram_geometry_foundations.md) §13. Для архитектурной схемы:
 
 - `source` — как правило [`architecture_baseline.md`](../../specifications/architecture_baseline.md), [`infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md) и [`system_specification.md`](../../specifications/system_specification.md), в зависимости от того, какие ID изображены.
 - `id` — одна строка на каждый реально изображённый `ARC_CMP_*`/`ARC_FLOW_*`/`SEC_CTL_*`/`INF_CMP_*`/`INF_FLOW_*`. Архитектурная схема, показывающая устойчивые компоненты, практически всегда несёт непустой список `id` — в отличие от процессной схемы, где список может быть пуст (см. [`process_diagram_style_guide.md`](process_diagram_style_guide.md) §2).
+- Легенда перечисляет каждое из реально используемых семейств ID, включая `SEC_CTL_*`; полнота и отсутствие лишних семейств проверяются `diagram_lint.py`.
+- Корневой `<svg>` несёт `data-diagram-kind="architecture"`. Для заполненного артефакта архитектурный профиль также распознаётся по заявленным `ARC_*`/`INF_*`/`SEC_CTL_*`; явный атрибут нужен шаблону без ID, чтобы те же проверки работали до заполнения.
 
 ## 4. Размещение файла
 
@@ -46,3 +52,4 @@ depends_on:
 2. Каждый `id` в метаданных сверен построчно с текстом соответствующего раздела [`architecture_baseline.md`](../../specifications/architecture_baseline.md)/[`system_specification.md`](../../specifications/system_specification.md)/[`infrastructure_baseline.md`](../../specifications/infrastructure_baseline.md), включая заданный спецификацией порядок/цепочку зависимостей.
 3. Файл размещён в `work/artefacts/architecture/` (раздел 4).
 4. При завершении TASK пройдена автоматическая проверка влияния результата; если она перечисляет затронутые ID, изменено графическое тело схемы и увеличен `diagram_version`, а не только метаданные.
+5. Каждый самостоятельный переходный блок показывает ID родительского компонента, а его внешние подписи и коннекторы связаны с существующим потоком или контролем.

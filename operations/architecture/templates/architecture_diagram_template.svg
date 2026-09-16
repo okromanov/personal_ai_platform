@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="991" height="556" viewBox="0 0 991 556" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="991" height="556" viewBox="0 0 991 556" role="img" aria-labelledby="title desc" data-diagram-kind="architecture">
   <title id="title">Шаблон архитектурной схемы</title>
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.1
-  generated_at: 2026-09-02
+  diagram_version: 1.2
+  generated_at: 2026-09-16
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.9
+  source: operations/architecture/diagram_geometry_foundations.md@1.10
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -45,11 +45,11 @@
   <line x1="40" y1="100" x2="640" y2="100" stroke="#D7DCE2"/>
 
   <!-- Connector drawn before the nodes it links (foundations §10) -->
-  <path class="main-line" d="M320 320V388"/>
+  <path class="main-line" d="M320 320V388" data-source-ref="template-component"/>
 
   <!-- Component card: ID -> title -> short description -> nested object -->
   <g>
-    <rect x="40" y="140" width="560" height="180" rx="7" class="execution-card"/>
+    <rect id="template-component" x="40" y="140" width="560" height="180" rx="7" class="execution-card"/>
     <text x="68" y="174" class="component-id">ARC_CMP_XXX</text>
     <text x="68" y="199" class="component-title">Название компонента (плейсхолдер)</text>
     <text x="68" y="223" class="component-text">Краткое функциональное описание компонента</text>
@@ -64,7 +64,7 @@
 
   <!-- Result / port node -->
   <g>
-    <rect x="40" y="388" width="560" height="92" rx="7" class="neutral-card"/>
+    <rect id="template-result" x="40" y="388" width="560" height="92" rx="7" class="neutral-card" data-gap-from="template-component" data-gap="68"/>
     <text x="68" y="429" class="component-title">Результат или порт (плейсхолдер)</text>
     <text x="68" y="453" class="component-text">Контракт результата или выходной порт</text>
   </g>

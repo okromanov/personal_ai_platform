@@ -1,10 +1,8 @@
 """Coordinate-based geometry checks for SVG diagrams, factored out of
 diagram_lint.py so that module stays focused on metadata/traceability.
 
-Scope, precisely — this module enforces exactly two invariants, both real,
-both true today of every checked-in diagram, and both computable from raw
-XML attributes without rendering the SVG or resolving an arbitrary
-`transform` stack:
+Scope, precisely — this module enforces three invariants that are computable
+from raw XML attributes without rendering the SVG:
 
 1. **Half-pixel coordinate discipline.** Every numeric `x`/`y`/`width`/
    `height`/`rx`/`ry`/`x1`/`y1`/`x2`/`y2`/`cx`/`cy`/`r` attribute on a shape
@@ -18,6 +16,11 @@ XML attributes without rendering the SVG or resolving an arbitrary
    `<marker>` elements (arrowheads), their `markerWidth`/`markerHeight`
    attributes are uniform across all of them
    (diagram_geometry_foundations.md §6, token `arrow-marker-size`).
+3. **Declared vertical gaps.** A rectangle may declare
+   `data-gap-from="source-id" data-gap="68"`; the linter resolves the
+   accumulated translation-only ancestor stack and verifies the exact gap.
+   This makes the standard 68 px separation between major cards executable
+   without pretending to solve arbitrary SVG geometry.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -43,14 +46,11 @@ invariant instead, and diagram_geometry_foundations.md §6.1 states this
 scope explicitly next to the tokens table, rather than letting a reader
 infer more automated coverage than exists.
 
-`right-port-gap`, `layer-gap`, `right-rail-gap` and the nested-bottom-gap
-family (diagram_geometry_foundations.md §6, §10) are NOT checked here
-either: verifying them correctly requires resolving the full accumulated
-`transform` stack (translations here are simple and summable, but nothing
-in the format guarantees a diagram never rotates or scales a group) and,
-for label-plaque sizing, real text metrics. Faking that resolution would
-produce false negatives or false positives on exactly the diagrams most in
-need of the check. These remain manual items on the checklist in
+Undeclared `right-port-gap`, `layer-gap`, `right-rail-gap` and the
+nested-bottom-gap family (diagram_geometry_foundations.md §6, §10) are NOT
+inferred here: arbitrary transforms and label plaques require real rendered
+geometry. Only explicitly annotated vertical gaps with translation-only
+ancestors are checked; other spacing remains a manual checklist item in
 diagram_geometry_foundations.md §17.
 """
 
@@ -77,6 +77,10 @@ _COORD_ATTRS_BY_LOCAL_TAG: dict[str, tuple[str, ...]] = {
 
 _PATH_NUMBER = re.compile(r"-?\d+\.?\d*")
 _ALLOWED_FRACTIONS = (0.0, 0.5)
+_TRANSLATE = re.compile(
+    r"translate\(\s*(?P<x>-?\d+(?:\.\d+)?)"
+    r"(?:[ ,]+(?P<y>-?\d+(?:\.\d+)?))?\s*\)"
+)
 
 
 @dataclass
@@ -151,6 +155,66 @@ def _check_arrow_marker_size(root_el, errors: list[str]) -> None:
         )
 
 
+def _absolute_vertical_box(
+    element,
+    parents: dict[object, object],
+    errors: list[str],
+) -> tuple[float, float] | None:
+    try:
+        y = float(element.get("y"))
+        height = float(element.get("height"))
+    except (TypeError, ValueError):
+        errors.append(
+            "элемент с data-gap-from обязан иметь числовые y и height "
+            "(diagram_geometry_foundations.md §6)"
+        )
+        return None
+
+    current = element
+    while current is not None:
+        transform = current.get("transform")
+        if transform:
+            remaining = _TRANSLATE.sub("", transform).strip(" ,")
+            if remaining:
+                errors.append(
+                    "data-gap-from нельзя проверить через transform, отличный от translate(...): "
+                    f"{transform!r}"
+                )
+                return None
+            for match in _TRANSLATE.finditer(transform):
+                y += float(match.group("y") or 0)
+        current = parents.get(current)
+    return y, y + height
+
+
+def _check_declared_vertical_gaps(root_el, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    for element in root_el.iter():
+        source_id = element.get("data-gap-from")
+        if not source_id:
+            continue
+        source = by_id.get(source_id)
+        if source is None:
+            errors.append(f"data-gap-from={source_id!r} указывает на отсутствующий элемент")
+            continue
+        try:
+            expected = float(element.get("data-gap", ""))
+        except ValueError:
+            errors.append(f"элемент с data-gap-from={source_id!r} обязан иметь числовой data-gap")
+            continue
+        source_box = _absolute_vertical_box(source, parents, errors)
+        target_box = _absolute_vertical_box(element, parents, errors)
+        if source_box is None or target_box is None:
+            continue
+        actual = target_box[0] - source_box[1]
+        if abs(actual - expected) > 1e-9:
+            errors.append(
+                f"вертикальный просвет от {source_id!r}: объявлено {expected:g} px, "
+                f"фактически {actual:g} px (diagram_geometry_foundations.md §6)"
+            )
+
+
 def check_geometry(text: str) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
@@ -168,4 +232,5 @@ def check_geometry(text: str) -> GeometryResult:
 
     _check_half_pixel_discipline(root_el, errors)
     _check_arrow_marker_size(root_el, errors)
+    _check_declared_vertical_gaps(root_el, errors)
     return GeometryResult(errors=errors, warnings=warnings)

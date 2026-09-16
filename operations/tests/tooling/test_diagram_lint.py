@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from operations.scripts.documents import diagram_lint
+from operations.scripts.documents import diagram_geometry_lint, diagram_lint
 
 
 def _spec_text(version: str) -> str:
@@ -509,6 +509,291 @@ class DiagramLintTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertTrue(
             any("markerWidth" in error and "не единообразен" in error for error in result.errors)
+        )
+
+    def test_legend_must_list_every_declared_identifier_family(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg"><text class="legend-id">ARC_CMP_*</text></svg>'
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_legend_id_families(
+            root_el,
+            ["ARC_CMP_001", "SEC_CTL_001"],
+            result,
+        )
+
+        self.assertTrue(
+            any("SEC_CTL_*" in error and "отсутствуют" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_legend_accepts_exactly_the_declared_identifier_families(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text class="legend-id">ARC_CMP_*</text>'
+            '<text class="legend-id">SEC_CTL_*</text>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_legend_id_families(
+            root_el,
+            ["ARC_CMP_001", "SEC_CTL_001"],
+            result,
+        )
+
+        self.assertEqual(result.errors, [])
+
+    def test_legend_rejects_missing_section_and_unused_family(self) -> None:
+        no_legend = diagram_lint.ElementTree.fromstring('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        missing_result = diagram_lint.LintResult(file="diagram.svg")
+        diagram_lint._check_legend_id_families(
+            no_legend,
+            ["ARC_CMP_001", "SEC_CTL_001"],
+            missing_result,
+        )
+
+        extra_legend = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text class="legend-id">ARC_CMP_*</text>'
+            '<text class="legend-id">SEC_CTL_*</text>'
+            "</svg>"
+        )
+        extra_result = diagram_lint.LintResult(file="diagram.svg")
+        diagram_lint._check_legend_id_families(
+            extra_legend,
+            ["ARC_CMP_001"],
+            extra_result,
+        )
+
+        self.assertTrue(
+            any("не перечисляет" in error for error in missing_result.errors),
+            missing_result.errors,
+        )
+        self.assertTrue(
+            any(
+                "неиспользуемые" in error and "SEC_CTL_*" in error for error in extra_result.errors
+            ),
+            extra_result.errors,
+        )
+
+    def test_external_flow_label_requires_a_traceability_binding(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text class="flow-text">Пересмотр · Новый Run</text>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_flow_label_bindings(root_el, result)
+
+        self.assertTrue(
+            any("не имеет data-spec-id" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_external_flow_label_accepts_an_existing_flow_binding(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g data-spec-id="ARC_FLOW_001">'
+            '<text class="flow-text">ARC_FLOW_001 · Коррекция · Новый Run</text>'
+            "</g>"
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_flow_label_bindings(root_el, result)
+
+        self.assertEqual(result.errors, [])
+
+    def test_visible_flow_id_must_match_its_binding_and_template_id_is_skipped(self) -> None:
+        mismatched = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g data-spec-id="ARC_FLOW_002">'
+            '<text class="flow-text">ARC_FLOW_001 · Новый Run</text>'
+            "</g>"
+            "</svg>"
+        )
+        mismatch_result = diagram_lint.LintResult(file="diagram.svg")
+        diagram_lint._check_flow_label_bindings(mismatched, mismatch_result)
+
+        template = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text class="flow-text">ARC_FLOW_XXX · Переход</text>'
+            "</svg>"
+        )
+        template_result = diagram_lint.LintResult(file="template.svg")
+        diagram_lint._check_flow_label_bindings(template, template_result)
+
+        self.assertTrue(
+            any(
+                "ARC_FLOW_001" in error and "не связана" in error
+                for error in mismatch_result.errors
+            ),
+            mismatch_result.errors,
+        )
+        self.assertEqual(template_result.errors, [])
+
+    def test_direct_connector_color_must_match_its_source_card(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="owner-choice" class="control-card"/>'
+            '<path class="main-line" data-source-ref="owner-choice"/>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_connector_source_colors(root_el, result)
+
+        self.assertTrue(
+            any("не совпадает с цветом источника" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_direct_connector_accepts_the_source_card_palette(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="owner-choice" class="control-card"/>'
+            '<path class="control-main-line" data-source-ref="owner-choice"/>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_connector_source_colors(root_el, result)
+
+        self.assertEqual(result.errors, [])
+
+    def test_direct_connector_requires_a_source_or_shared_route_marker(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg"><path class="main-line"/></svg>'
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_connector_source_colors(root_el, result)
+
+        self.assertTrue(
+            any("ровно одно из data-source-ref" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_connector_source_contract_reports_invalid_references_and_palettes(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="unknown-palette" class="ghost-card"/>'
+            '<rect id="valid-source" class="control-card"/>'
+            '<path class="main-line" data-source-ref="missing"/>'
+            '<path class="main-line" data-source-ref="unknown-palette"/>'
+            '<path class="ghost-line" data-source-ref="valid-source"/>'
+            '<path class="main-line" data-shared-route="true"/>'
+            '<path class="control-rail" data-source-ref="valid-source" '
+            'data-shared-route="true"/>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_connector_source_colors(root_el, result)
+
+        self.assertTrue(
+            any("missing" in error and "отсутствующий" in error for error in result.errors)
+        )
+        self.assertTrue(
+            any("unknown-palette" in error and "категории" in error for error in result.errors)
+        )
+        self.assertTrue(
+            any("valid-source" in error and "класса цвета" in error for error in result.errors)
+        )
+        self.assertTrue(any("одновременно" in error for error in result.errors))
+
+    def test_architecture_semantics_do_not_reclassify_process_branches(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg" data-diagram-kind="process">'
+            '<text class="flow-text">Да</text>'
+            '<path class="main-line"/>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="process.svg")
+
+        diagram_lint._check_architecture_semantics(root_el, [], result)
+
+        self.assertEqual(result.errors, [])
+
+    def test_architecture_kind_enables_flow_and_source_contracts_for_templates(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg" data-diagram-kind="architecture">'
+            '<text class="flow-text">Пересмотр · Новый Run</text>'
+            '<path class="main-line"/>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="architecture-template.svg")
+
+        diagram_lint._check_architecture_semantics(root_el, [], result)
+
+        self.assertTrue(
+            any("не имеет data-spec-id" in error for error in result.errors),
+            result.errors,
+        )
+        self.assertTrue(
+            any("ровно одно из data-source-ref" in error for error in result.errors),
+            result.errors,
+        )
+
+    def test_declared_vertical_gap_is_checked_through_group_translations(self) -> None:
+        valid = (
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g transform="translate(0 5)">'
+            '<rect id="quality" x="0" y="10" width="20" height="20"/>'
+            "</g>"
+            '<g transform="translate(0 100)">'
+            '<rect id="owner-choice" x="0" y="3" width="20" height="10" '
+            'data-gap-from="quality" data-gap="68"/>'
+            "</g>"
+            "</svg>"
+        )
+        invalid = valid.replace("translate(0 100)", "translate(0 99)")
+
+        valid_result = diagram_geometry_lint.check_geometry(valid)
+        invalid_result = diagram_geometry_lint.check_geometry(invalid)
+
+        self.assertEqual(valid_result.errors, [])
+        self.assertTrue(
+            any(
+                "объявлено 68 px" in error and "фактически 67 px" in error
+                for error in invalid_result.errors
+            ),
+            invalid_result.errors,
+        )
+
+    def test_declared_vertical_gap_reports_an_invalid_contract(self) -> None:
+        missing_source = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect y="0" height="10" data-gap-from="missing" data-gap="68"/>'
+            "</svg>"
+        )
+        invalid_gap = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="source" y="0" height="10"/>'
+            '<rect y="78" height="10" data-gap-from="source" data-gap="many"/>'
+            "</svg>"
+        )
+        invalid_box = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="source" height="10"/>'
+            '<rect y="78" height="10" data-gap-from="source" data-gap="68"/>'
+            "</svg>"
+        )
+        unsupported_transform = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g transform="scale(2)"><rect id="source" y="0" height="10"/></g>'
+            '<rect y="78" height="10" data-gap-from="source" data-gap="68"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("missing" in error for error in missing_source.errors))
+        self.assertTrue(any("числовой data-gap" in error for error in invalid_gap.errors))
+        self.assertTrue(any("числовые y и height" in error for error in invalid_box.errors))
+        self.assertTrue(
+            any("отличный от translate" in error for error in unsupported_transform.errors)
         )
 
     def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:
