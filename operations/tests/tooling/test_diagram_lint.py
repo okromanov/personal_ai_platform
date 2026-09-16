@@ -574,7 +574,9 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertEqual(valid.errors, [])
         self.assertTrue(any("ровно из одного" in error for error in bent.errors))
-        self.assertTrue(any("горизонтальным или вертикальным" in error for error in diagonal.errors))
+        self.assertTrue(
+            any("горизонтальным или вертикальным" in error for error in diagonal.errors)
+        )
 
     def test_declared_direct_route_rejects_invalid_metadata(self) -> None:
         result = diagram_geometry_lint.check_geometry(

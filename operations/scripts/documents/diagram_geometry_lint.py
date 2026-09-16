@@ -340,9 +340,7 @@ def _check_direct_routes(root_el, errors: list[str]) -> None:
         x2 = float(match.group("x2"))
         y2 = float(match.group("y2"))
         if abs(x1 - x2) > 1e-9 and abs(y1 - y2) > 1e-9:
-            errors.append(
-                'путь с data-route="direct" обязан быть горизонтальным или вертикальным'
-            )
+            errors.append('путь с data-route="direct" обязан быть горизонтальным или вертикальным')
 
 
 def check_geometry(text: str, *, reference_layer_gap: float | None = None) -> GeometryResult:
