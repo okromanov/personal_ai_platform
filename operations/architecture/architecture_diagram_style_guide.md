@@ -2,7 +2,7 @@
 id: operations_architecture_diagram_style_guide
 type: guide
 document_state: current
-version: 4.2
+version: 4.3
 updated: 2026-09-16
 depends_on:
   - project_rules
@@ -29,6 +29,8 @@ depends_on:
 
 Условный контрольный переход внутри компонента не становится новым `ARC_CMP_*` только потому, что показан отдельной карточкой.
 Такая карточка визуально несёт ID родительского компонента, располагается между источником и следующими слоями с просветом `layer-gap` с обеих сторон и связывает каждый собственный выход с существующим `ARC_FLOW_*` или `SEC_CTL_*`.
+Положение вычисляется по формуле из [`diagram_geometry_foundations.md`](diagram_geometry_foundations.md) §6; ожидаемый интервал не дублируется числом в `data-*`-атрибуте.
+Её локальные входы и выходы проводятся одним прямым сегментом, если между границами нет препятствия; такие пути помечаются `data-route="direct"` по правилу [`diagram_geometry_foundations.md`](diagram_geometry_foundations.md) §10.
 В частности, «Выбор владельца» после Quality Gate относится к [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008), а коррекция с новым `Run` — к [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001).
 
 ## 3. Трассируемость и метаданные — архитектурная специфика

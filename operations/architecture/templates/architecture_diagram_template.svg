@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.2
+  diagram_version: 1.3
   generated_at: 2026-09-16
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.10
+  source: operations/architecture/diagram_geometry_foundations.md@1.11
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -45,7 +45,7 @@
   <line x1="40" y1="100" x2="640" y2="100" stroke="#D7DCE2"/>
 
   <!-- Connector drawn before the nodes it links (foundations §10) -->
-  <path class="main-line" d="M320 320V388" data-source-ref="template-component"/>
+  <path class="main-line" d="M320 320V388" data-source-ref="template-component" data-route="direct"/>
 
   <!-- Component card: ID -> title -> short description -> nested object -->
   <g>
@@ -62,9 +62,10 @@
   <rect x="242" y="340" width="157" height="28" rx="4" class="flow-label"/>
   <text x="320" y="358" class="flow-text" text-anchor="middle">ARC_FLOW_XXX · Поток</text>
 
-  <!-- Result / port node -->
+  <!-- Result / port node: 388 - (140 + 180) = layer-gap. The expected
+       interval is calculated from geometry and is not duplicated as data. -->
   <g>
-    <rect id="template-result" x="40" y="388" width="560" height="92" rx="7" class="neutral-card" data-gap-from="template-component" data-gap="68"/>
+    <rect id="template-result" x="40" y="388" width="560" height="92" rx="7" class="neutral-card" data-gap-from="template-component"/>
     <text x="68" y="429" class="component-title">Результат или порт (плейсхолдер)</text>
     <text x="68" y="453" class="component-text">Контракт результата или выходной порт</text>
   </g>
