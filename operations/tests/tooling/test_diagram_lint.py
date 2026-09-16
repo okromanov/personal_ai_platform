@@ -833,13 +833,14 @@ class DiagramLintTests(unittest.TestCase):
         measured = diagram_geometry_lint.check_geometry(valid)
         reference_gap = measured.vertical_gaps[0].value
         valid_result = diagram_geometry_lint.check_geometry(
-            valid, reference_layer_gap=reference_gap
+            valid, reference_gaps={"layer": reference_gap}
         )
         invalid_result = diagram_geometry_lint.check_geometry(
-            invalid, reference_layer_gap=reference_gap
+            invalid, reference_gaps={"layer": reference_gap}
         )
 
         self.assertEqual(valid_result.errors, [])
+        self.assertEqual(measured.vertical_gaps[0].kind, "layer")
         self.assertTrue(
             any(
                 "эталон шаблона 68 px" in error and "фактически 67 px" in error
@@ -872,6 +873,17 @@ class DiagramLintTests(unittest.TestCase):
             '<rect y="78" height="10" data-gap-from="source"/>'
             "</svg>"
         )
+        orphan_kind = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect y="0" height="10" data-gap-kind="transition"/>'
+            "</svg>"
+        )
+        unsupported_kind = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="source" y="0" height="10"/>'
+            '<rect y="20" height="10" data-gap-from="source" data-gap-kind="compact"/>'
+            "</svg>"
+        )
 
         self.assertTrue(any("missing" in error for error in missing_source.errors))
         self.assertTrue(any("data-gap запрещён" in error for error in duplicated_value.errors))
@@ -879,8 +891,10 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(
             any("отличный от translate" in error for error in unsupported_transform.errors)
         )
+        self.assertTrue(any("только вместе" in error for error in orphan_kind.errors))
+        self.assertTrue(any("неподдерживаемое" in error for error in unsupported_kind.errors))
 
-    def test_architecture_reference_gap_is_calculated_from_template_geometry(self) -> None:
+    def test_architecture_reference_gaps_are_calculated_from_template_geometry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             template = (
@@ -894,22 +908,24 @@ class DiagramLintTests(unittest.TestCase):
             template.write_text(
                 '<svg xmlns="http://www.w3.org/2000/svg">'
                 '<rect id="component" y="10" height="20"/>'
+                '<rect id="transition" y="50" height="10" data-gap-from="component" '
+                'data-gap-kind="transition"/>'
                 '<rect id="result" y="98" height="10" data-gap-from="component"/>'
                 "</svg>",
                 encoding="utf-8",
             )
             result = diagram_lint.LintResult(file="diagram.svg")
 
-            gap = diagram_lint._architecture_reference_layer_gap(root, result)
+            gaps = diagram_lint._architecture_reference_gaps(root, {"layer", "transition"}, result)
 
         self.assertEqual(result.errors, [])
-        self.assertEqual(gap, 68)
+        self.assertEqual(gaps, {"layer": 68, "transition": 20})
 
     def test_architecture_reference_gap_reports_missing_or_ambiguous_geometry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             missing_result = diagram_lint.LintResult(file="diagram.svg")
-            missing_gap = diagram_lint._architecture_reference_layer_gap(root, missing_result)
+            missing_gap = diagram_lint._architecture_reference_gaps(root, {"layer"}, missing_result)
 
             template = (
                 root
@@ -927,7 +943,7 @@ class DiagramLintTests(unittest.TestCase):
                 encoding="utf-8",
             )
             invalid_result = diagram_lint.LintResult(file="diagram.svg")
-            invalid_gap = diagram_lint._architecture_reference_layer_gap(root, invalid_result)
+            invalid_gap = diagram_lint._architecture_reference_gaps(root, {"layer"}, invalid_result)
 
             template.write_text(
                 '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -938,7 +954,9 @@ class DiagramLintTests(unittest.TestCase):
                 encoding="utf-8",
             )
             ambiguous_result = diagram_lint.LintResult(file="diagram.svg")
-            ambiguous_gap = diagram_lint._architecture_reference_layer_gap(root, ambiguous_result)
+            ambiguous_gap = diagram_lint._architecture_reference_gaps(
+                root, {"layer"}, ambiguous_result
+            )
 
         self.assertIsNone(missing_gap)
         self.assertTrue(any("не найден" in error for error in missing_result.errors))
@@ -986,6 +1004,52 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(
             any(
                 "эталон шаблона 68 px" in error and "фактически 67 px" in error
+                for error in result.errors
+            ),
+            result.errors,
+        )
+
+    def test_lint_file_compares_transition_gap_with_template_geometry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="template-source" y="0" height="10"/>'
+                '<rect y="30" height="10" data-gap-from="template-source" '
+                'data-gap-kind="transition"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            body = (
+                '<g data-spec-id="ARC_CMP_001">'
+                '<rect id="source" y="0" height="10"/>'
+                '<rect y="31" height="10" data-gap-from="source" '
+                'data-gap-kind="transition"/>'
+                "</g>"
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(metadata_block=metadata).replace("<g ></g>", body),
+                encoding="utf-8",
+            )
+
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertTrue(
+            any(
+                "эталон шаблона transition-gap 20 px" in error and "фактически 21 px" in error
                 for error in result.errors
             ),
             result.errors,

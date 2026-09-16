@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.3
+  diagram_version: 1.4
   generated_at: 2026-09-16
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.11
+  source: operations/architecture/diagram_geometry_foundations.md@1.12
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -59,11 +59,12 @@
   </g>
 
   <!-- Flow label: width = text + 2*space-m, centred on the connector -->
-  <rect x="242" y="340" width="157" height="28" rx="4" class="flow-label"/>
+  <rect id="template-flow-label" x="242" y="340" width="157" height="28" rx="4" class="flow-label" data-gap-from="template-component" data-gap-kind="transition"/>
   <text x="320" y="358" class="flow-text" text-anchor="middle">ARC_FLOW_XXX · Поток</text>
 
-  <!-- Result / port node: 388 - (140 + 180) = layer-gap. The expected
-       interval is calculated from geometry and is not duplicated as data. -->
+  <!-- Result / port node: 388 - (140 + 180) = layer-gap. The flow label
+       above also defines transition-gap geometrically: 340 - 320 = 20.
+       Expected intervals are calculated and never duplicated as numbers. -->
   <g>
     <rect id="template-result" x="40" y="388" width="560" height="92" rx="7" class="neutral-card" data-gap-from="template-component"/>
     <text x="68" y="429" class="component-title">Результат или порт (плейсхолдер)</text>

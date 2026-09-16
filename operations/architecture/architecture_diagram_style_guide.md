@@ -2,7 +2,7 @@
 id: operations_architecture_diagram_style_guide
 type: guide
 document_state: current
-version: 4.3
+version: 4.4
 updated: 2026-09-16
 depends_on:
   - project_rules
@@ -28,8 +28,8 @@ depends_on:
 Для текущей общей архитектуры основная колонка сохраняет десятислойную структуру, определённую baseline. Нумерация слоёв отражает логический порядок представления, а не номера `ARC_CMP_*`.
 
 Условный контрольный переход внутри компонента не становится новым `ARC_CMP_*` только потому, что показан отдельной карточкой.
-Такая карточка визуально несёт ID родительского компонента, располагается между источником и следующими слоями с просветом `layer-gap` с обеих сторон и связывает каждый собственный выход с существующим `ARC_FLOW_*` или `SEC_CTL_*`.
-Положение вычисляется по формуле из [`diagram_geometry_foundations.md`](diagram_geometry_foundations.md) §6; ожидаемый интервал не дублируется числом в `data-*`-атрибуте.
+Такая карточка визуально несёт ID родительского компонента и связывает каждый собственный выход с существующим `ARC_FLOW_*` или `SEC_CTL_*`.
+Если карточка не получает номера слоя в левой колонке, она располагается между предыдущим и следующим нумерованными объектами с компактным просветом `transition-gap` с обеих сторон — по тому же ритму, что слой 01, плашка [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001) и слой 02. Оба отношения обозначаются `data-gap-from` и символическим `data-gap-kind="transition"`; числовое ожидаемое значение не дублируется в `data-*`-атрибуте, а вычисляется по формулам и геометрии шаблона из [`diagram_geometry_foundations.md`](diagram_geometry_foundations.md) §6.
 Её локальные входы и выходы проводятся одним прямым сегментом, если между границами нет препятствия; такие пути помечаются `data-route="direct"` по правилу [`diagram_geometry_foundations.md`](diagram_geometry_foundations.md) §10.
 В частности, «Выбор владельца» после Quality Gate относится к [`ARC_CMP_008`](../../specifications/architecture_baseline.md#arc_cmp_008), а коррекция с новым `Run` — к [`ARC_FLOW_001`](../../specifications/architecture_baseline.md#arc_flow_001).
 

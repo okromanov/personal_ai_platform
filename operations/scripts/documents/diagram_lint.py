@@ -423,30 +423,37 @@ def _check_architecture_semantics(
     _check_legend_id_families(root_el, declared_ids, result)
 
 
-def _architecture_reference_layer_gap(root: Path, result: LintResult) -> float | None:
+def _architecture_reference_gaps(
+    root: Path,
+    required_kinds: set[str],
+    result: LintResult,
+) -> dict[str, float] | None:
     template = (
         root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
     )
     if not template.is_file():
         result.errors.append(
-            "не найден архитектурный SVG-шаблон: невозможно геометрически вычислить layer-gap"
+            "не найден архитектурный SVG-шаблон: невозможно геометрически вычислить просветы"
         )
         return None
     measured = check_geometry(read_text(template))
     if measured.errors:
         result.errors.append(
-            "геометрия архитектурного SVG-шаблона не позволяет вычислить layer-gap: "
+            "геометрия архитектурного SVG-шаблона не позволяет вычислить просветы: "
             + "; ".join(measured.errors)
         )
         return None
-    values = {gap.value for gap in measured.vertical_gaps}
-    if len(values) != 1:
-        result.errors.append(
-            "архитектурный SVG-шаблон должен геометрически задавать ровно одно "
-            "значение layer-gap через data-gap-from"
-        )
-        return None
-    return values.pop()
+    references: dict[str, float] = {}
+    for kind in required_kinds:
+        values = {gap.value for gap in measured.vertical_gaps if gap.kind == kind}
+        if len(values) != 1:
+            result.errors.append(
+                "архитектурный SVG-шаблон должен геометрически задавать ровно одно "
+                f"значение {kind}-gap через data-gap-from"
+            )
+            return None
+        references[kind] = values.pop()
+    return references
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -648,15 +655,20 @@ def lint_file(path: Path, root: Path) -> LintResult:
     has_referenced_gap = root_el is not None and any(
         element.get("data-gap-from") is not None for element in root_el.iter()
     )
-    reference_layer_gap = None
+    reference_gaps = None
     if (
         root_el is not None
         and has_referenced_gap
         and _is_architecture_diagram(root_el, declared_ids)
     ):
-        reference_layer_gap = _architecture_reference_layer_gap(root, result)
+        required_gap_kinds = {
+            element.get("data-gap-kind", "layer")
+            for element in root_el.iter()
+            if element.get("data-gap-from") is not None
+        }
+        reference_gaps = _architecture_reference_gaps(root, required_gap_kinds, result)
 
-    geometry = check_geometry(text, reference_layer_gap=reference_layer_gap)
+    geometry = check_geometry(text, reference_gaps=reference_gaps)
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)
 
