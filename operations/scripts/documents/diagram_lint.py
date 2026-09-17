@@ -44,7 +44,10 @@ from operations.scripts.common.project import (
     relative_posix,
     require_supported_python,
 )
-from operations.scripts.documents.diagram_geometry_lint import check_geometry
+from operations.scripts.documents.diagram_geometry_lint import (
+    ControlTransitionLayout,
+    check_geometry,
+)
 from operations.scripts.documents.metadata import load_document
 from operations.scripts.documents.traceability import _normalize_id, collect_traceable_elements
 
@@ -78,6 +81,7 @@ _URL_REF = re.compile(r"url\(#(?P<name>[^)]+)\)")
 _ID_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\d+$")
 _LEGEND_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\*$")
 _VISIBLE_FLOW_ID = re.compile(r"\b(?:ARC_FLOW|INF_FLOW|SEC_CTL)_\d{3}\b")
+_VISIBLE_ARC_FLOW_ID = re.compile(r"\bARC_FLOW_(?:\d{3}|XXX)\b")
 _ARCHITECTURE_ID_PREFIXES = ("ARC_", "INF_", "SEC_CTL_")
 
 _SOURCE_PALETTE_CLASSES = {
@@ -87,7 +91,7 @@ _SOURCE_PALETTE_CLASSES = {
     "gray": {"neutral-card", "inner-card", "implementation-pill"},
 }
 _CONNECTOR_PALETTE_CLASSES = {
-    "blue": {"main-line", "branch-line", "bus-line", "scheduled-line"},
+    "blue": {"main-line", "merge-line", "branch-line", "bus-line", "scheduled-line"},
     "red": {
         "control-line",
         "control-rail",
@@ -96,7 +100,7 @@ _CONNECTOR_PALETTE_CLASSES = {
         "failure-bus",
         "revision-line",
     },
-    "green": {"data-line"},
+    "green": {"data-line", "data-merge-line"},
     "gray": {
         "neutral-line",
         "neutral-scheduled-line",
@@ -108,8 +112,10 @@ _CONNECTOR_PALETTE_CLASSES = {
 _DIRECT_CONNECTOR_CLASSES = {
     "bus-line",
     "main-line",
+    "merge-line",
     "neutral-line",
     "data-line",
+    "data-merge-line",
     "control-main-line",
     "branch-line",
     "scheduled-line",
@@ -117,6 +123,16 @@ _DIRECT_CONNECTOR_CLASSES = {
     "control-line",
     "failure-line",
     "revision-line",
+}
+
+_ARC_FLOW_FILL_CLASSES = {
+    "control-card",
+    "data-card",
+    "execution-card",
+    "flow-label-blue",
+    "flow-label-red",
+    "inner-card",
+    "neutral-card",
 }
 
 
@@ -352,6 +368,53 @@ def _check_flow_label_bindings(root_el: ElementTree.Element, result: LintResult)
             )
 
 
+def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult) -> None:
+    """Require every visible ARC_FLOW label to sit on a semantic filled shape."""
+
+    parents = _parent_map(root_el)
+    for element in root_el.iter():
+        if element.tag.rsplit("}", 1)[-1] != "text" or "legend-id" in _classes(element):
+            continue
+        label = " ".join("".join(element.itertext()).split())
+        if _VISIBLE_ARC_FLOW_ID.search(label) is None:
+            continue
+        try:
+            x = float(element.get("x"))
+            y = float(element.get("y"))
+        except (TypeError, ValueError):
+            result.errors.append(
+                f"видимая подпись ARC_FLOW {label!r} обязана иметь числовые x и y "
+                "для проверки заливки"
+            )
+            continue
+        parent = parents.get(element)
+        candidates = list(parent) if parent is not None else list(root_el)
+        containing: list[tuple[float, ElementTree.Element]] = []
+        for candidate in candidates:
+            if candidate.tag.rsplit("}", 1)[-1] != "rect":
+                continue
+            try:
+                rect_x = float(candidate.get("x", "0"))
+                rect_y = float(candidate.get("y", "0"))
+                width = float(candidate.get("width"))
+                height = float(candidate.get("height"))
+            except (TypeError, ValueError):
+                continue
+            if rect_x <= x <= rect_x + width and rect_y <= y <= rect_y + height:
+                containing.append((width * height, candidate))
+        if not containing:
+            result.errors.append(
+                f"видимая подпись ARC_FLOW {label!r} не помещена в залитую плашку или карточку"
+            )
+            continue
+        container = min(containing, key=lambda item: item[0])[1]
+        if not _classes(container).intersection(_ARC_FLOW_FILL_CLASSES):
+            result.errors.append(
+                f"видимая подпись ARC_FLOW {label!r} находится в контейнере без "
+                "семантической заливки"
+            )
+
+
 def _palette_for(classes: set[str], mapping: dict[str, set[str]]) -> set[str]:
     return {palette for palette, candidates in mapping.items() if classes & candidates}
 
@@ -422,6 +485,7 @@ def _check_architecture_semantics(
     if not _is_architecture_diagram(root_el, declared_ids):
         return
     _check_flow_label_bindings(root_el, result)
+    _check_arc_flow_label_fills(root_el, result)
     _check_connector_source_colors(root_el, result)
     _check_legend_id_families(root_el, declared_ids, result)
 
@@ -457,6 +521,35 @@ def _architecture_reference_gaps(
             return None
         references[kind] = values.pop()
     return references
+
+
+def _architecture_reference_transition_layout(
+    root: Path,
+    result: LintResult,
+) -> ControlTransitionLayout | None:
+    template = (
+        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+    )
+    if not template.is_file():
+        result.errors.append(
+            "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию "
+            "контрольного перехода"
+        )
+        return None
+    measured = check_geometry(read_text(template))
+    if measured.errors:
+        result.errors.append(
+            "геометрия архитектурного SVG-шаблона не позволяет вычислить контрольный "
+            "переход: " + "; ".join(measured.errors)
+        )
+        return None
+    if len(measured.control_transition_layouts) != 1:
+        result.errors.append(
+            "архитектурный SVG-шаблон должен геометрически задавать ровно один "
+            'data-layout="control-transition"'
+        )
+        return None
+    return measured.control_transition_layouts[0]
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -659,6 +752,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
         element.get("data-gap-from") is not None for element in root_el.iter()
     )
     reference_gaps = None
+    reference_transition_layout = None
     if (
         root_el is not None
         and has_referenced_gap
@@ -671,7 +765,25 @@ def lint_file(path: Path, root: Path) -> LintResult:
         }
         reference_gaps = _architecture_reference_gaps(root, required_gap_kinds, result)
 
-    geometry = check_geometry(text, reference_gaps=reference_gaps)
+    has_control_transition = root_el is not None and any(
+        element.get("data-layout") == "control-transition" for element in root_el.iter()
+    )
+    architecture_template = (
+        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+    )
+    if (
+        root_el is not None
+        and has_control_transition
+        and _is_architecture_diagram(root_el, declared_ids)
+        and path.resolve() != architecture_template.resolve()
+    ):
+        reference_transition_layout = _architecture_reference_transition_layout(root, result)
+
+    geometry = check_geometry(
+        text,
+        reference_gaps=reference_gaps,
+        reference_transition_layout=reference_transition_layout,
+    )
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)
 
