@@ -375,9 +375,7 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
     errors: list[str] = []
     grouped_captions: dict[str, list[tuple[str, float, float]]] = {}
     for plaque in (
-        element
-        for element in elements
-        if element.kind == "shape" and element.padding_profile
+        element for element in elements if element.kind == "shape" and element.padding_profile
     ):
         if plaque.w == 0 or plaque.h == 0:
             # Geometry references inside <defs> are intentionally not rendered.
