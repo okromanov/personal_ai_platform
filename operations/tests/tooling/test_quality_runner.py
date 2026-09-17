@@ -306,6 +306,13 @@ class QualityRunnerTests(unittest.TestCase):
                 run_suite.run_full(root, "python", "base-sha")
             names = [name for name, _, _ in calls]
             self.assertEqual(names.count("Unit tests with branch coverage"), 1)
+            render_lint = next(
+                command for name, command, _ in calls if name == "Rendered diagram geometry"
+            )
+            self.assertEqual(
+                render_lint,
+                ["python", "operations/scripts/documents/diagram_render_lint.py"],
+            )
             coverage = next(command for name, command, _ in calls if name == "Coverage policy")
             self.assertEqual(coverage[-2:], ["--base", "base-sha"])
             self.assertIn("runtime/coverage.json", coverage)
