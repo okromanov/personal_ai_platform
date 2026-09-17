@@ -50,9 +50,11 @@ from raw XML attributes without rendering the SVG:
 9. **Grouped side-port spacing.** Paths marked with the same `data-port-group`
    end on the declared side of one `data-port-target`; the distance between
    their endpoints matches the port-gap geometry registered in the template.
-10. **Flow-label geometry.** One-line plaques marked
-   `data-layout="flow-label"` share template-derived height, radius, centred
-   text baseline, and text-anchor. Plaque width remains content-derived.
+10. **Flow-label geometry.** Every rectangle whose class is `flow-label-*`
+   must declare a supported one- or two-line layout and bind every text row
+   through `data-label-for`. Height, radius, centred baselines and text anchors
+   are compared with template geometry. Equal-width groups are checked from
+   geometry rather than copied constants.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -82,9 +84,11 @@ Unreferenced `right-port-gap`, `layer-gap`, `right-rail-gap` and the
 nested-bottom-gap family (diagram_geometry_foundations.md §6, §10) are NOT
 inferred here: arbitrary transforms require real rendered geometry. Layer
 pairs must be linked through `data-gap-from`; side ports must be linked through
-`data-port-group`; one-line plaques must opt in through
-`data-layout="flow-label"`. Other spacing remains a manual checklist item in
-diagram_geometry_foundations.md §17.
+`data-port-group`. Unlike the earlier opt-in contract, every `flow-label-*`
+rectangle is discovered from its class and must declare either
+`data-layout="flow-label"` or `data-layout="flow-label-multiline"`; omitting the
+attribute cannot bypass the check. Other spacing remains a manual checklist
+item in diagram_geometry_foundations.md §17.
 """
 
 from __future__ import annotations
@@ -133,6 +137,14 @@ _INDEPENDENT_CARD_CLASSES = {
     "execution-card",
     "neutral-card",
 }
+_FLOW_LABEL_CLASSES = {
+    "flow-label",
+    "flow-label-blue",
+    "flow-label-gray",
+    "flow-label-green",
+    "flow-label-red",
+}
+_FLOW_LABEL_ROW_COUNTS = {"flow-label": 1, "flow-label-multiline": 2}
 
 
 @dataclass
@@ -187,15 +199,32 @@ class PortGap:
 @dataclass(frozen=True)
 class FlowLabelLayout:
     label_id: str
+    kind: str
+    width: float
     height: float
     radius: float
-    text_y_offset: float
-    text_anchor: str
+    text_y_offsets: tuple[float, ...]
+    text_anchors: tuple[str, ...]
 
-    def signature(self) -> tuple[float, float, float, str]:
-        """Vertical geometry shared by one-line flow-label plaques."""
+    def signature(
+        self,
+    ) -> tuple[str, float | None, float, float, tuple[float, ...], tuple[str, ...]]:
+        """Geometry shared by every flow-label plaque of one layout kind.
 
-        return self.height, self.radius, self.text_y_offset, self.text_anchor
+        One-line labels remain content-sized. Wrapped labels are the compact,
+        symmetric side-label pattern and therefore inherit their width from
+        the template as well as their height and baselines.
+        """
+
+        template_width = self.width if self.kind == "flow-label-multiline" else None
+        return (
+            self.kind,
+            template_width,
+            self.height,
+            self.radius,
+            self.text_y_offsets,
+            self.text_anchors,
+        )
 
 
 def _local_tag(tag: str) -> str:
@@ -826,7 +855,7 @@ def _check_reference_port_gaps(
 def _check_flow_label_layouts(
     root_el,
     errors: list[str],
-    reference_layout: FlowLabelLayout | None,
+    reference_layouts: dict[str, FlowLabelLayout] | None,
 ) -> list[FlowLabelLayout]:
     parents = {child: parent for parent in root_el.iter() for child in parent}
     texts_by_label: dict[str, list] = {}
@@ -835,80 +864,142 @@ def _check_flow_label_layouts(
         if label_for is not None:
             texts_by_label.setdefault(label_for, []).append(element)
 
-    layouts: list[FlowLabelLayout] = []
+    flow_plaques: list = []
     for plaque in root_el.iter():
-        if plaque.get("data-layout") != "flow-label":
+        classes = set((plaque.get("class") or "").split())
+        is_flow_plaque = bool(classes.intersection(_FLOW_LABEL_CLASSES))
+        kind = plaque.get("data-layout")
+        if not is_flow_plaque and kind not in _FLOW_LABEL_ROW_COUNTS:
             continue
-        plaque_id = plaque.get("id", "<без id>")
-        if _local_tag(plaque.tag) != "rect":
-            errors.append('data-layout="flow-label" разрешён только для <rect>')
-            continue
-        box = _absolute_rect_box(
-            plaque,
-            parents,
-            errors,
-            contract="сравнение геометрии плашек потока",
-        )
-        try:
-            radius = float(plaque.get("rx"))
-        except (TypeError, ValueError):
-            errors.append(f"плашка потока {plaque_id!r} обязана иметь числовой rx")
-            continue
-        labels = texts_by_label.get(plaque_id, [])
-        if len(labels) != 1:
+        if _local_tag(plaque.tag) != "rect" or not is_flow_plaque:
             errors.append(
-                f"плашка потока {plaque_id!r} должна иметь ровно один <text "
-                f"data-label-for={plaque_id!r}>"
+                'data-layout="flow-label*" разрешён только для <rect> класса '
+                "flow-label/flow-label-*"
             )
             continue
-        text_element = labels[0]
-        if _local_tag(text_element.tag) != "text" or box is None:
-            errors.append(f"data-label-for={plaque_id!r} обязан стоять на <text>")
+        flow_plaques.append(plaque)
+
+    plaque_ids = {plaque.get("id") for plaque in flow_plaques if plaque.get("id")}
+    for label_for, labels in texts_by_label.items():
+        if label_for not in plaque_ids:
+            errors.append(
+                f"data-label-for={label_for!r} не указывает на плашку класса flow-label-*"
+            )
+
+    layouts: list[FlowLabelLayout] = []
+    widths_by_group: dict[str, list[tuple[str, float]]] = {}
+    for plaque in flow_plaques:
+        plaque_id = plaque.get("id")
+        if not plaque_id:
+            errors.append("каждая плашка класса flow-label/flow-label-* обязана иметь id")
             continue
+        kind = plaque.get("data-layout")
+        if kind not in _FLOW_LABEL_ROW_COUNTS:
+            errors.append(
+                f"плашка потока {plaque_id!r} обязана задать data-layout="
+                "'flow-label' или 'flow-label-multiline'"
+            )
+            continue
+        equal_width_group = plaque.get("data-equal-width-group")
+        ancestor = parents.get(plaque)
+        under_defs = False
+        while ancestor is not None:
+            if _local_tag(ancestor.tag) == "defs":
+                under_defs = True
+                break
+            ancestor = parents.get(ancestor)
+        if kind == "flow-label-multiline" and not equal_width_group and not under_defs:
+            errors.append(
+                f"двухстрочная плашка потока {plaque_id!r} обязана задать data-equal-width-group"
+            )
         try:
-            text_x = float(text_element.get("x"))
-            text_y = float(text_element.get("y"))
+            plaque_x = float(plaque.get("x", "0"))
+            plaque_y = float(plaque.get("y", "0"))
+            width = float(plaque.get("width"))
+            height = float(plaque.get("height"))
+            radius = float(plaque.get("rx"))
         except (TypeError, ValueError):
-            errors.append(f"подпись плашки {plaque_id!r} обязана иметь числовые x и y")
+            errors.append(f"плашка потока {plaque_id!r} обязана иметь числовые x/y/width/height/rx")
             continue
-        offset = _absolute_translation(
-            text_element,
-            parents,
-            errors,
-            contract="сравнение внутренних полей плашек потока",
-        )
-        if offset is None:
+        labels = texts_by_label.get(plaque_id, [])
+        expected_rows = _FLOW_LABEL_ROW_COUNTS[kind]
+        if len(labels) != expected_rows:
+            errors.append(
+                f"плашка потока {plaque_id!r} с data-layout={kind!r} должна иметь "
+                f"ровно {expected_rows} <text data-label-for={plaque_id!r}>"
+            )
             continue
-        absolute_x = text_x + offset[0]
-        absolute_y = text_y + offset[1]
-        text_anchor = text_element.get("text-anchor", "start")
-        if text_anchor != "middle" or abs(absolute_x - (box[0] + box[2]) / 2) > 1e-9:
-            errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по горизонтали")
+        rows: list[tuple[float, str]] = []
+        valid_rows = True
+        for text_element in labels:
+            if _local_tag(text_element.tag) != "text":
+                errors.append(f"data-label-for={plaque_id!r} обязан стоять на <text>")
+                valid_rows = False
+                continue
+            if parents.get(text_element) is not parents.get(plaque):
+                errors.append(
+                    f"подпись плашки {plaque_id!r} должна быть соседним элементом "
+                    "того же контейнера"
+                )
+                valid_rows = False
+                continue
+            try:
+                text_x = float(text_element.get("x"))
+                text_y = float(text_element.get("y"))
+            except (TypeError, ValueError):
+                errors.append(f"подпись плашки {plaque_id!r} обязана иметь числовые x и y")
+                valid_rows = False
+                continue
+            text_anchor = text_element.get("text-anchor", "start")
+            if text_anchor != "middle" or abs(text_x - (plaque_x + width / 2)) > 1e-9:
+                errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке")
+            rows.append((text_y - plaque_y, text_anchor))
+        if not valid_rows:
+            continue
+        rows.sort(key=lambda row: row[0])
         layouts.append(
             FlowLabelLayout(
                 label_id=plaque_id,
-                height=box[3] - box[1],
+                kind=kind,
+                width=width,
+                height=height,
                 radius=radius,
-                text_y_offset=absolute_y - box[1],
-                text_anchor=text_anchor,
+                text_y_offsets=tuple(row[0] for row in rows),
+                text_anchors=tuple(row[1] for row in rows),
             )
         )
+        if equal_width_group:
+            widths_by_group.setdefault(equal_width_group, []).append((plaque_id, width))
 
-    if not layouts:
-        return layouts
-    peer_signature = layouts[0].signature()
-    for layout in layouts[1:]:
-        if layout.signature() != peer_signature:
-            errors.append(
-                f"геометрия плашки потока {layout.label_id!r} отличается от "
-                f"{layouts[0].label_id!r}: вертикальные поля должны совпадать"
-            )
-    if reference_layout is not None:
+    layouts_by_kind: dict[str, list[FlowLabelLayout]] = {}
+    for layout in layouts:
+        layouts_by_kind.setdefault(layout.kind, []).append(layout)
+    for kind, kind_layouts in layouts_by_kind.items():
+        peer_signature = kind_layouts[0].signature()
+        for layout in kind_layouts[1:]:
+            if layout.signature() != peer_signature:
+                errors.append(
+                    f"геометрия плашки потока {layout.label_id!r} отличается от "
+                    f"{kind_layouts[0].label_id!r}: строки и поля {kind!r} должны совпадать"
+                )
+    if reference_layouts is not None:
         for layout in layouts:
-            if layout.signature() != reference_layout.signature():
+            reference_layout = reference_layouts.get(layout.kind)
+            if reference_layout is None or layout.signature() != reference_layout.signature():
                 errors.append(
                     f"геометрия плашки потока {layout.label_id!r} отличается от "
                     "эталона architecture_diagram_template.svg"
+                )
+    for group, members in widths_by_group.items():
+        if len(members) < 2:
+            errors.append(f"группа равной ширины {group!r} должна содержать минимум две плашки")
+            continue
+        reference_width = members[0][1]
+        for label_id, width in members[1:]:
+            if abs(width - reference_width) > 1e-9:
+                errors.append(
+                    f"ширина плашки {label_id!r} в группе {group!r}: "
+                    f"эталон группы {reference_width:g} px, фактически {width:g} px"
                 )
     return layouts
 
@@ -985,7 +1076,7 @@ def check_geometry(
     reference_gaps: dict[str, float] | None = None,
     reference_transition_layout: ControlTransitionLayout | None = None,
     reference_port_gap: float | None = None,
-    reference_flow_label_layout: FlowLabelLayout | None = None,
+    reference_flow_label_layouts: dict[str, FlowLabelLayout] | None = None,
 ) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
@@ -1014,7 +1105,7 @@ def check_geometry(
     control_transition_layouts = _check_control_transition_layouts(
         root_el, errors, reference_transition_layout
     )
-    flow_label_layouts = _check_flow_label_layouts(root_el, errors, reference_flow_label_layout)
+    flow_label_layouts = _check_flow_label_layouts(root_el, errors, reference_flow_label_layouts)
     return GeometryResult(
         errors=errors,
         warnings=warnings,
