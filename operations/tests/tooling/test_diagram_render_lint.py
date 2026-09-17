@@ -370,37 +370,84 @@ class FindPaddingViolationsTests(unittest.TestCase):
 
     def test_equal_width_caption_group_is_sized_by_its_widest_member(self) -> None:
         left = _box(
-            "shape", "flow-label-red", 0.0, 0.0, 176.0, 44.0,
-            element_id="left", padding_profile="flow-caption", equal_width_group="pair",
+            "shape",
+            "flow-label-red",
+            0.0,
+            0.0,
+            176.0,
+            44.0,
+            element_id="left",
+            padding_profile="flow-caption",
+            equal_width_group="pair",
         )
         right = _box(
-            "shape", "flow-label-red", 200.0, 0.0, 176.0, 44.0,
-            element_id="right", padding_profile="flow-caption", equal_width_group="pair",
+            "shape",
+            "flow-label-red",
+            200.0,
+            0.0,
+            176.0,
+            44.0,
+            element_id="right",
+            padding_profile="flow-caption",
+            equal_width_group="pair",
         )
         longest = _box(
-            "text", "control-flow-text", 12.5, 8.0, 151.0, 11.0,
-            anchor="middle", content="Longest row", label_for="left",
+            "text",
+            "control-flow-text",
+            12.5,
+            8.0,
+            151.0,
+            11.0,
+            anchor="middle",
+            content="Longest row",
+            label_for="left",
         )
         shorter = _box(
-            "text", "control-flow-text", 225.0, 8.0, 126.0, 11.0,
-            anchor="middle", content="Shorter row", label_for="right",
+            "text",
+            "control-flow-text",
+            225.0,
+            8.0,
+            126.0,
+            11.0,
+            anchor="middle",
+            content="Shorter row",
+            label_for="right",
         )
 
-        self.assertEqual(
-            render_lint.find_padding_violations([left, right, longest, shorter]), []
-        )
+        self.assertEqual(render_lint.find_padding_violations([left, right, longest, shorter]), [])
 
         too_wide_left = _box(
-            "shape", "flow-label-red", 0.0, 0.0, 200.0, 44.0,
-            element_id="left", padding_profile="flow-caption", equal_width_group="pair",
+            "shape",
+            "flow-label-red",
+            0.0,
+            0.0,
+            200.0,
+            44.0,
+            element_id="left",
+            padding_profile="flow-caption",
+            equal_width_group="pair",
         )
         too_wide_right = _box(
-            "shape", "flow-label-red", 224.0, 0.0, 200.0, 44.0,
-            element_id="right", padding_profile="flow-caption", equal_width_group="pair",
+            "shape",
+            "flow-label-red",
+            224.0,
+            0.0,
+            200.0,
+            44.0,
+            element_id="right",
+            padding_profile="flow-caption",
+            equal_width_group="pair",
         )
         shifted_shorter = _box(
-            "text", "control-flow-text", 261.0, 8.0, 126.0, 11.0,
-            anchor="middle", content="Shorter row", label_for="right",
+            "text",
+            "control-flow-text",
+            261.0,
+            8.0,
+            126.0,
+            11.0,
+            anchor="middle",
+            content="Shorter row",
+            label_for="right",
         )
         errors = render_lint.find_padding_violations(
             [too_wide_left, too_wide_right, longest, shifted_shorter]
