@@ -643,8 +643,7 @@ def _architecture_reference_flow_label_layout(
     )
     if not template.is_file():
         result.errors.append(
-            "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию "
-            "плашки потока"
+            "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию плашки потока"
         )
         return None
     measured = check_geometry(read_text(template))
