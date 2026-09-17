@@ -84,7 +84,8 @@ _LEGEND_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\*$")
 _VISIBLE_FLOW_ID = re.compile(r"\b(?:ARC_FLOW|INF_FLOW|SEC_CTL)_\d{3}\b")
 _VISIBLE_ARC_FLOW_ID = re.compile(r"\bARC_FLOW_(?:\d{3}|XXX)\b")
 _ID_SLASH_SEPARATOR = re.compile(
-    r"\b(?:ARC_(?:CMP|FLOW)|INF_(?:CMP|FLOW)|SEC_CTL)_(?:\d{3}|XXX)(?:–\d{3})?\s*/"
+    r"\b(?:ARC_(?:CMP|FLOW)|INF_(?:CMP|FLOW)|SEC_CTL)_(?:\d{3}|XXX)(?:–\d{3})?"
+    r"\s*/\s*(?:ARC_(?:CMP|FLOW)|INF_(?:CMP|FLOW)|SEC_CTL)_"
 )
 _ARCHITECTURE_ID_PREFIXES = ("ARC_", "INF_", "SEC_CTL_")
 
@@ -141,11 +142,12 @@ _ARC_FLOW_FILL_CLASSES = {
     "neutral-card",
 }
 _FLOW_LABEL_PALETTE_CLASSES = {
-    "blue": {"flow-label-blue"},
+    "blue": {"flow-label", "flow-label-blue"},
     "red": {"flow-label-red"},
     "green": {"flow-label-green"},
     "gray": {"flow-label-gray"},
 }
+_FLOW_LABEL_CLASSES = set().union(*_FLOW_LABEL_PALETTE_CLASSES.values())
 
 
 @dataclass
@@ -457,6 +459,40 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
             )
 
 
+def _check_all_flow_label_connectors(root_el: ElementTree.Element, result: LintResult) -> None:
+    """Every flow-label plaque is bound to one existing connector of its palette."""
+
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    for plaque in root_el.iter():
+        label_palettes = _palette_for(_classes(plaque), _FLOW_LABEL_PALETTE_CLASSES)
+        if not label_palettes:
+            continue
+        plaque_id = plaque.get("id", "<без id>")
+        connector_ref = plaque.get("data-connector-ref")
+        if not connector_ref:
+            result.errors.append(f"плашка потока {plaque_id!r} обязана задать data-connector-ref")
+            continue
+        connector = by_id.get(connector_ref)
+        if connector is None or connector.tag.rsplit("}", 1)[-1] != "path":
+            result.errors.append(
+                f"data-connector-ref={connector_ref!r} у плашки {plaque_id!r} "
+                "не указывает на существующий <path>"
+            )
+            continue
+        connector_palettes = _palette_for(_classes(connector), _CONNECTOR_PALETTE_CLASSES)
+        if len(label_palettes) != 1 or len(connector_palettes) != 1:
+            result.errors.append(
+                f"плашка {plaque_id!r} или её стрелка не имеет ровно одной цветовой категории"
+            )
+            continue
+        if label_palettes != connector_palettes:
+            result.errors.append(
+                f"цвет плашки {plaque_id!r} не совпадает с цветом стрелки: "
+                f"плашка={next(iter(label_palettes))}, "
+                f"линия={next(iter(connector_palettes))}"
+            )
+
+
 def _palette_for(classes: set[str], mapping: dict[str, set[str]]) -> set[str]:
     return {palette for palette, candidates in mapping.items() if classes & candidates}
 
@@ -635,9 +671,9 @@ def _architecture_reference_port_gap(root: Path, result: LintResult) -> float | 
     return values.pop()
 
 
-def _architecture_reference_flow_label_layout(
+def _architecture_reference_flow_label_layouts(
     root: Path, result: LintResult
-) -> FlowLabelLayout | None:
+) -> dict[str, FlowLabelLayout] | None:
     template = (
         root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
     )
@@ -653,13 +689,15 @@ def _architecture_reference_flow_label_layout(
             + "; ".join(measured.errors)
         )
         return None
-    if len(measured.flow_label_layouts) != 1:
+    layouts = {layout.kind: layout for layout in measured.flow_label_layouts}
+    required = {"flow-label", "flow-label-multiline"}
+    if set(layouts) != required or len(measured.flow_label_layouts) != len(required):
         result.errors.append(
-            "архитектурный SVG-шаблон должен геометрически задавать ровно одну "
-            'data-layout="flow-label" плашку'
+            "архитектурный SVG-шаблон должен геометрически задавать ровно по одной "
+            "одно- и двухстрочной плашке потока"
         )
         return None
-    return measured.flow_label_layouts[0]
+    return layouts
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -848,6 +886,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     root_el = _check_structure(text, result)
     if root_el is not None:
         _check_dead_definitions(text, root_el, result)
+        _check_all_flow_label_connectors(root_el, result)
 
     metadata = _parse_metadata_block(text, result)
     if metadata is not None:
@@ -864,7 +903,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     reference_gaps = None
     reference_transition_layout = None
     reference_port_gap = None
-    reference_flow_label_layout = None
+    reference_flow_label_layouts = None
     if (
         root_el is not None
         and has_referenced_gap
@@ -902,23 +941,23 @@ def lint_file(path: Path, root: Path) -> LintResult:
     ):
         reference_port_gap = _architecture_reference_port_gap(root, result)
 
-    has_flow_label_layout = root_el is not None and any(
-        element.get("data-layout") == "flow-label" for element in root_el.iter()
+    has_flow_labels = root_el is not None and any(
+        _classes(element).intersection(_FLOW_LABEL_CLASSES) for element in root_el.iter()
     )
     if (
         root_el is not None
-        and has_flow_label_layout
+        and has_flow_labels
         and _is_architecture_diagram(root_el, declared_ids)
         and path.resolve() != architecture_template.resolve()
     ):
-        reference_flow_label_layout = _architecture_reference_flow_label_layout(root, result)
+        reference_flow_label_layouts = _architecture_reference_flow_label_layouts(root, result)
 
     geometry = check_geometry(
         text,
         reference_gaps=reference_gaps,
         reference_transition_layout=reference_transition_layout,
         reference_port_gap=reference_port_gap,
-        reference_flow_label_layout=reference_flow_label_layout,
+        reference_flow_label_layouts=reference_flow_label_layouts,
     )
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)

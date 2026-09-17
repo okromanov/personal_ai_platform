@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.8
+  diagram_version: 1.9
   generated_at: 2026-09-17
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.16
+  source: operations/architecture/diagram_geometry_foundations.md@1.17
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -33,6 +33,14 @@
       .flow-label-blue { fill: #F3F7FB; stroke: #315C88; stroke-width: 0.9; }
       .main-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-main); }
     </style>
+    <!-- Non-rendered geometry reference for wrapped flow labels. It lives in
+         the SVG template, not in Python constants, and is measured by lint. -->
+    <g id="template-multiline-label-reference">
+      <path id="template-multiline-flow" class="main-line" d="M100 -20V0" data-shared-route="true" data-route="direct"/>
+      <rect id="template-flow-label-multiline" x="0" y="0" width="200" height="44" rx="4" class="flow-label-blue" data-connector-ref="template-multiline-flow" data-layout="flow-label-multiline"/>
+      <text x="100" y="17" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Первая строка подписи</text>
+      <text x="100" y="33" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Вторая строка подписи</text>
+    </g>
   </defs>
   <rect width="991" height="644" fill="#FFFFFF"/>
 
