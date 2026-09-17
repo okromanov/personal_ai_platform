@@ -670,6 +670,19 @@ class DiagramLintTests(unittest.TestCase):
             result.errors,
         )
 
+    def test_connector_source_attachment_skips_unresolvable_contracts(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text id="not-a-rect" x="0" y="0">source</text>'
+            '<path d="bad" data-source-ref="not-a-rect"/>'
+            '<g transform="scale(2)">'
+            '<rect id="scaled-source" x="0" y="0" width="100" height="60"/>'
+            '<path d="M50 60V80" data-source-ref="scaled-source"/>'
+            "</g></svg>"
+        )
+
+        self.assertTrue(any("отличный от translate" in error for error in result.errors))
+
     def test_control_transition_cards_share_calculated_layout(self) -> None:
         matching = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -791,6 +804,21 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("указывает на отсутствующий" in error for error in result.errors))
         self.assertTrue(any("обязан указывать на <rect>" in error for error in result.errors))
         self.assertTrue(any("не центрирована" in error for error in result.errors))
+
+    def test_control_transition_skips_unresolvable_anchor_and_slot_transforms(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="scaled-anchor" x="0" y="0" width="200" height="10" '
+            'transform="scale(2)"/>'
+            '<g><rect id="transition" x="50" y="20" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-center-with="scaled-anchor"/>'
+            '<text x="100" y="35" text-anchor="middle" transform="rotate(90)" '
+            'data-layout-slot="identity">A</text></g>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("отличный от translate" in error for error in result.errors))
 
     def test_control_transition_compares_internal_rhythm_with_template_layout(self) -> None:
         template_result = diagram_geometry_lint.check_geometry(
@@ -1011,6 +1039,30 @@ class DiagramLintTests(unittest.TestCase):
             any("не совпадает с цветом стрелки" in error for error in result.errors),
             result.errors,
         )
+
+    def test_arc_flow_label_connector_contract_rejects_incomplete_bindings(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<path id="uncoloured-flow" class="custom-line"/>'
+            '<g><rect x="0" y="0" width="160" height="28" class="control-card"/>'
+            '<text x="80" y="18">ARC_FLOW_001 · Внутри карточки</text></g>'
+            '<g><rect x="200" y="0" width="160" height="28" class="flow-label-blue"/>'
+            '<text x="280" y="18">ARC_FLOW_002 · Без ссылки</text></g>'
+            '<g><rect x="400" y="0" width="160" height="28" class="flow-label-red" '
+            'data-connector-ref="missing"/>'
+            '<text x="480" y="18">ARC_FLOW_003 · Нет пути</text></g>'
+            '<g><rect x="600" y="0" width="160" height="28" class="flow-label-green" '
+            'data-connector-ref="uncoloured-flow"/>'
+            '<text x="680" y="18">ARC_FLOW_004 · Нет палитры</text></g>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_arc_flow_label_fills(root_el, result)
+
+        self.assertTrue(any("обязана задать data-connector-ref" in e for e in result.errors))
+        self.assertTrue(any("не указывает на существующий <path>" in e for e in result.errors))
+        self.assertTrue(any("не имеет ровно одной" in e for e in result.errors))
 
     def test_direct_connector_color_must_match_its_source_card(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
