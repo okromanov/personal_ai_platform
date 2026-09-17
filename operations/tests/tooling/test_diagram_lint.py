@@ -1785,12 +1785,12 @@ class DiagramLintTests(unittest.TestCase):
     def test_visible_architecture_ids_use_middle_dot_not_slash(self) -> None:
         invalid = diagram_lint.ElementTree.fromstring(
             '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<text>ARC_FLOW_004 / SEC_CTL_017 · Плановая задача</text>'
+            "<text>ARC_FLOW_004 / SEC_CTL_017 · Плановая задача</text>"
             "</svg>"
         )
         valid = diagram_lint.ElementTree.fromstring(
             '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<text>ARC_FLOW_004 · SEC_CTL_017 · Плановая задача</text>'
+            "<text>ARC_FLOW_004 · SEC_CTL_017 · Плановая задача</text>"
             "</svg>"
         )
         invalid_result = diagram_lint.LintResult(file="invalid.svg")
