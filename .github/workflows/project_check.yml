@@ -297,6 +297,7 @@ jobs:
             --artifact runtime/security_audit.json \
             --artifact runtime/code_analysis.json \
             --artifact runtime/dead_code.txt \
+            --artifact runtime/diagram_render_lint.txt \
             --artifact runtime/ruff_check.txt \
             --artifact runtime/ruff_format.txt \
             --artifact runtime/mypy_baseline.txt \
@@ -337,6 +338,7 @@ jobs:
             runtime/security_audit.json
             runtime/code_analysis.json
             runtime/dead_code.txt
+            runtime/diagram_render_lint.txt
             runtime/ruff_check.txt
             runtime/ruff_format.txt
             runtime/mypy_baseline.txt
