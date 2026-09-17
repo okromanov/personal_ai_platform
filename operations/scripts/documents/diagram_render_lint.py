@@ -81,7 +81,7 @@ from operations.scripts.common.project import (
 )
 from operations.scripts.documents.diagram_lint import default_targets
 
-_ANCHOR_TOLERANCE_PX = 1.0
+_ANCHOR_TOLERANCE_PX = 2.0
 _CONTAINMENT_TOLERANCE_PX = 0.5  # sub-pixel rounding slack for "fully inside"
 _PADDING_TOLERANCE_PX = 0.5
 _FLOW_LABEL_CLASSES = {
