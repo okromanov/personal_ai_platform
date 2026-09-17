@@ -1730,7 +1730,7 @@ class DiagramLintTests(unittest.TestCase):
         template = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="template-label" x="0" y="0" width="120" height="28" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text x="60" y="19" text-anchor="middle" '
             'data-label-for="template-label">Flow</text>'
             "</svg>"
@@ -1739,7 +1739,7 @@ class DiagramLintTests(unittest.TestCase):
         matching = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg"><g transform="translate(10 20)">'
             '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
-            'class="flow-label-red" data-layout="flow-label"/>'
+            'class="flow-label-red" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text x="100" y="19" text-anchor="middle" '
             'data-label-for="actual-label">Longer flow</text>'
             "</g></svg>",
@@ -1748,7 +1748,7 @@ class DiagramLintTests(unittest.TestCase):
         drifted = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
-            'class="flow-label-green" data-layout="flow-label"/>'
+            'class="flow-label-green" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text x="100" y="18" text-anchor="middle" '
             'data-label-for="actual-label">Longer flow</text>'
             "</svg>",
@@ -1763,9 +1763,9 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g data-layout="flow-label"/>'
             '<rect id="missing-label" x="0" y="0" width="100" height="28" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<rect id="uncentred" x="0" y="40" width="100" height="28" rx="4" '
-            'class="flow-label-red" data-layout="flow-label"/>'
+            'class="flow-label-red" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text x="40" y="59" data-label-for="uncentred">Flow</text>'
             "</svg>"
         )
@@ -1778,19 +1778,19 @@ class DiagramLintTests(unittest.TestCase):
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="bad-radius" x="0" y="0" width="100" height="28" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<rect id="non-text" x="0" y="40" width="100" height="28" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<g data-label-for="non-text"/>'
             '<rect id="bad-coordinates" x="0" y="80" width="100" height="28" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text data-label-for="bad-coordinates">Flow</text>'
             '<rect id="peer-a" x="0" y="160" width="100" height="28" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text x="50" y="179" text-anchor="middle" '
             'data-label-for="peer-a">Flow</text>'
             '<rect id="peer-b" x="0" y="200" width="100" height="28" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label"/>'
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
             '<text x="50" y="218" text-anchor="middle" '
             'data-label-for="peer-b">Flow</text>'
             "</svg>"
@@ -1813,12 +1813,41 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertTrue(any("обязана задать data-layout" in error for error in result.errors))
 
+    def test_flow_labels_require_padding_profile_by_object_type(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="missing" x="0" y="0" width="100" height="28" rx="4" '
+            'class="flow-label-blue" data-layout="flow-label"/>'
+            '<text x="50" y="19" text-anchor="middle" data-label-for="missing">Flow</text>'
+            '<rect id="unknown" x="0" y="40" width="100" height="28" rx="4" '
+            'class="flow-label-blue" data-layout="flow-label" data-padding-profile="wide"/>'
+            '<text x="50" y="59" text-anchor="middle" data-label-for="unknown">Flow</text>'
+            '<defs><rect id="multiline-port" x="0" y="80" width="160" height="44" rx="4" '
+            'class="flow-label-red" data-layout="flow-label-multiline" '
+            'data-padding-profile="flow-port"/>'
+            '<text x="80" y="97" text-anchor="middle" '
+            'data-label-for="multiline-port">First</text>'
+            '<text x="80" y="113" text-anchor="middle" '
+            'data-label-for="multiline-port">Second</text></defs>'
+            '<rect id="port" x="0" y="140" width="300" height="28" rx="4" '
+            'class="flow-label-green" data-layout="flow-label" data-padding-profile="flow-port"/>'
+            '<text x="150" y="159" text-anchor="middle" data-label-for="port">Port</text>'
+            "</svg>"
+        )
+
+        self.assertEqual(
+            sum("обязана задать data-padding-profile" in error for error in result.errors),
+            2,
+        )
+        self.assertTrue(any("поддерживает только" in error for error in result.errors))
+        self.assertFalse(any("плашка потока 'port'" in error for error in result.errors))
+
     def test_multiline_flow_labels_use_template_rows_and_equal_width_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             "<defs>"
             '<rect id="template" x="0" y="0" width="180" height="44" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label-multiline"/>'
+            'class="flow-label-blue" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
             '<text x="90" y="17" text-anchor="middle" '
             'data-label-for="template">First</text>'
             '<text x="90" y="33" text-anchor="middle" '
@@ -1831,14 +1860,14 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g transform="rotate(90 100 100)">'
             '<rect id="left" x="0" y="0" width="200" height="44" rx="4" '
-            'class="flow-label-red" data-layout="flow-label-multiline" '
+            'class="flow-label-red" data-layout="flow-label-multiline" data-padding-profile="flow-caption" '
             'data-equal-width-group="sides"/>'
             '<text x="100" y="17" text-anchor="middle" '
             'data-label-for="left">First</text>'
             '<text x="100" y="33" text-anchor="middle" '
             'data-label-for="left">Second</text></g>'
             '<rect id="right" x="300" y="0" width="180" height="44" rx="4" '
-            'class="flow-label-green" data-layout="flow-label-multiline" '
+            'class="flow-label-green" data-layout="flow-label-multiline" data-padding-profile="flow-caption" '
             'data-equal-width-group="sides"/>'
             '<text x="390" y="17" text-anchor="middle" '
             'data-label-for="right">First</text>'
@@ -1849,17 +1878,17 @@ class DiagramLintTests(unittest.TestCase):
         )
 
         self.assertTrue(any("ширина плашки" in error for error in result.errors))
-        self.assertTrue(any("эталона architecture" in error for error in result.errors))
+        self.assertFalse(any("эталона architecture" in error for error in result.errors))
 
     def test_flow_label_rows_must_be_complete_local_and_bound(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g><rect id="multiline" x="0" y="0" width="180" height="44" rx="4" '
-            'class="flow-label-blue" data-layout="flow-label-multiline"/>'
+            'class="flow-label-blue" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
             '<text x="90" y="17" text-anchor="middle" '
             'data-label-for="multiline">Only row</text></g>'
             '<g><rect id="local" x="0" y="60" width="180" height="28" rx="4" '
-            'class="flow-label-red" data-layout="flow-label"/></g>'
+            'class="flow-label-red" data-layout="flow-label" data-padding-profile="flow-caption"/></g>'
             '<text x="90" y="79" text-anchor="middle" '
             'data-label-for="local">Wrong parent</text>'
             '<text x="90" y="33" text-anchor="middle" '
@@ -1911,11 +1940,11 @@ class DiagramLintTests(unittest.TestCase):
                 '<path d="M240 72H200" data-port-group="right-inputs" '
                 'data-port-target="target" data-port-side="right"/>'
                 '<rect id="label" x="0" y="140" width="120" height="28" rx="4" '
-                'class="flow-label-blue" data-layout="flow-label"/>'
+                'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
                 '<text x="60" y="159" text-anchor="middle" '
                 'data-label-for="label">Flow</text>'
                 '<defs><rect id="multiline-label" x="0" y="180" width="160" height="44" rx="4" '
-                'class="flow-label-red" data-layout="flow-label-multiline"/>'
+                'class="flow-label-red" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
                 '<text x="80" y="197" text-anchor="middle" '
                 'data-label-for="multiline-label">First</text>'
                 '<text x="80" y="213" text-anchor="middle" '
