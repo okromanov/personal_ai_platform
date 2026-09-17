@@ -277,6 +277,20 @@ class FindPaddingViolationsTests(unittest.TestCase):
 
         self.assertEqual(render_lint.find_padding_violations([plaque, text]), [])
 
+    def test_ignores_zero_sized_definition_geometry(self) -> None:
+        definition = _box(
+            "shape",
+            "flow-label-red",
+            0.0,
+            0.0,
+            0.0,
+            28.0,
+            element_id="definition",
+            padding_profile="flow-caption",
+        )
+
+        self.assertEqual(render_lint.find_padding_violations([definition]), [])
+
     def test_compact_caption_rejects_oversized_and_asymmetric_fields(self) -> None:
         plaque = _box(
             "shape",
