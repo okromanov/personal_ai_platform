@@ -397,6 +397,12 @@ def run_full(
     )
     run_step(
         root,
+        "Rendered diagram geometry",
+        [python, "operations/scripts/documents/diagram_render_lint.py"],
+        artifact="runtime/diagram_render_lint.txt",
+    )
+    run_step(
+        root,
         "Security audit (Bandit)",
         [
             python,
