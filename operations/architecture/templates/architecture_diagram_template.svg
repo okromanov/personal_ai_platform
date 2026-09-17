@@ -11,7 +11,7 @@
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
     <style>
-      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
+      text { font-family: "DejaVu Sans", sans-serif; fill: #17202D; }
       .title { font-size: 34px; font-weight: 600; }
       .subtitle { font-size: 15px; font-weight: 400; fill: #596574; }
       .component-id { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; fill: #687482; }
