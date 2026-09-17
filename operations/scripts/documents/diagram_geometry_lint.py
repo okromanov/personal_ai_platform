@@ -956,9 +956,7 @@ def _check_flow_label_layouts(
             text_anchor = text_element.get("text-anchor", "start")
             expected_x = plaque_x + width / 2
             if text_anchor != "middle" or abs(text_x - expected_x) > 1e-9:
-                errors.append(
-                    f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке"
-                )
+                errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке")
             rows.append((text_y - plaque_y, text_anchor))
         if not valid_rows:
             continue
