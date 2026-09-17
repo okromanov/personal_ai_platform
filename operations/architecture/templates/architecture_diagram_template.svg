@@ -110,7 +110,7 @@
     <rect x="688" y="188" width="18" height="14" rx="2" fill="#F3F7FB" stroke="#315C88"/>
     <text x="718" y="199" class="legend">Исполнение и проверка</text>
     <rect x="688" y="218" width="18" height="14" rx="2" fill="#FFFFFF" stroke="#A7B0BB"/>
-    <text x="718" y="229" class="legend">Граничные и поддерживающие узлы</text>
+    <text x="718" y="229" class="legend">Граничные и поддерживающие</text>
     <text x="688" y="268" class="legend-section">ЛИНИИ</text>
     <line x1="688" y1="293" x2="728" y2="293" stroke="#315C88" stroke-width="1" marker-end="url(#arrow-main)"/>
     <text x="740" y="297" class="legend">Ход задачи</text>
