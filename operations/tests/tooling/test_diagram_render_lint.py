@@ -20,6 +20,10 @@ def _box(
     tag: str = "",
     anchor: str = "start",
     content: str = "",
+    element_id: str = "",
+    label_for: str = "",
+    padding_profile: str = "",
+    equal_width_group: str = "",
 ) -> ElementBox:
     return ElementBox(
         kind=kind,
@@ -31,6 +35,10 @@ def _box(
         y=y,
         w=w,
         h=h,
+        id=element_id,
+        label_for=label_for,
+        padding_profile=padding_profile,
+        equal_width_group=equal_width_group,
     )
 
 
@@ -241,6 +249,202 @@ class FindAsymmetricAnchorsTests(unittest.TestCase):
             content="Результат: сохранён",
         )
         self.assertEqual(render_lint.find_asymmetric_anchors([text, background], canvas), [])
+
+
+class FindPaddingViolationsTests(unittest.TestCase):
+    def test_compact_caption_accepts_programmed_space_m_and_grid_rounding(self) -> None:
+        plaque = _box(
+            "shape",
+            "flow-label-blue",
+            100.0,
+            50.0,
+            176.0,
+            28.0,
+            element_id="caption",
+            padding_profile="flow-caption",
+        )
+        text = _box(
+            "text",
+            "flow-text",
+            112.4,
+            58.0,
+            151.0,
+            11.0,
+            anchor="middle",
+            content="Flow caption",
+            label_for="caption",
+        )
+
+        self.assertEqual(render_lint.find_padding_violations([plaque, text]), [])
+
+    def test_compact_caption_rejects_oversized_and_asymmetric_fields(self) -> None:
+        plaque = _box(
+            "shape",
+            "flow-label-red",
+            100.0,
+            50.0,
+            200.0,
+            28.0,
+            element_id="caption",
+            padding_profile="flow-caption",
+        )
+        text = _box(
+            "text",
+            "control-flow-text",
+            128.0,
+            58.0,
+            140.0,
+            11.0,
+            anchor="middle",
+            content="Drifted caption",
+            label_for="caption",
+        )
+
+        errors = render_lint.find_padding_violations([plaque, text])
+
+        self.assertTrue(any("несимметричные" in error for error in errors))
+        self.assertTrue(any("некомпактна" in error for error in errors))
+
+    def test_port_profile_allows_parent_grid_width_but_enforces_minimum(self) -> None:
+        port = _box(
+            "shape",
+            "flow-label-green",
+            100.0,
+            50.0,
+            300.0,
+            28.0,
+            element_id="port",
+            padding_profile="flow-port",
+        )
+        centred = _box(
+            "text",
+            "data-flow-text",
+            180.0,
+            58.0,
+            140.0,
+            11.0,
+            anchor="middle",
+            content="Port",
+            label_for="port",
+        )
+        too_wide = _box(
+            "text",
+            "data-flow-text",
+            108.0,
+            58.0,
+            284.0,
+            11.0,
+            anchor="middle",
+            content="Too wide",
+            label_for="port",
+        )
+
+        self.assertEqual(render_lint.find_padding_violations([port, centred]), [])
+        errors = render_lint.find_padding_violations([port, too_wide])
+        self.assertTrue(any("минимальный padding" in error for error in errors))
+
+    def test_rotated_caption_uses_rendered_vertical_inline_axis(self) -> None:
+        plaque = _box(
+            "shape",
+            "flow-label-gray",
+            100.0,
+            50.0,
+            28.0,
+            288.0,
+            element_id="rail-caption",
+            padding_profile="flow-caption",
+        )
+        text = _box(
+            "text",
+            "neutral-flow-text",
+            108.0,
+            62.5,
+            11.0,
+            263.0,
+            anchor="middle",
+            content="Rotated caption",
+            label_for="rail-caption",
+        )
+
+        self.assertEqual(render_lint.find_padding_violations([plaque, text]), [])
+
+    def test_equal_width_caption_group_is_sized_by_its_widest_member(self) -> None:
+        left = _box(
+            "shape", "flow-label-red", 0.0, 0.0, 176.0, 44.0,
+            element_id="left", padding_profile="flow-caption", equal_width_group="pair",
+        )
+        right = _box(
+            "shape", "flow-label-red", 200.0, 0.0, 176.0, 44.0,
+            element_id="right", padding_profile="flow-caption", equal_width_group="pair",
+        )
+        longest = _box(
+            "text", "control-flow-text", 12.5, 8.0, 151.0, 11.0,
+            anchor="middle", content="Longest row", label_for="left",
+        )
+        shorter = _box(
+            "text", "control-flow-text", 225.0, 8.0, 126.0, 11.0,
+            anchor="middle", content="Shorter row", label_for="right",
+        )
+
+        self.assertEqual(
+            render_lint.find_padding_violations([left, right, longest, shorter]), []
+        )
+
+        too_wide_left = _box(
+            "shape", "flow-label-red", 0.0, 0.0, 200.0, 44.0,
+            element_id="left", padding_profile="flow-caption", equal_width_group="pair",
+        )
+        too_wide_right = _box(
+            "shape", "flow-label-red", 224.0, 0.0, 200.0, 44.0,
+            element_id="right", padding_profile="flow-caption", equal_width_group="pair",
+        )
+        shifted_shorter = _box(
+            "text", "control-flow-text", 261.0, 8.0, 126.0, 11.0,
+            anchor="middle", content="Shorter row", label_for="right",
+        )
+        errors = render_lint.find_padding_violations(
+            [too_wide_left, too_wide_right, longest, shifted_shorter]
+        )
+        self.assertTrue(any("группа равной ширины" in error for error in errors))
+
+    def test_rejects_unknown_profile_wrong_object_and_missing_rows(self) -> None:
+        unknown = _box(
+            "shape",
+            "flow-label-blue",
+            0.0,
+            0.0,
+            100.0,
+            28.0,
+            element_id="unknown",
+            padding_profile="other",
+        )
+        wrong = _box(
+            "shape",
+            "neutral-card",
+            0.0,
+            40.0,
+            100.0,
+            28.0,
+            element_id="wrong",
+            padding_profile="flow-port",
+        )
+        missing = _box(
+            "shape",
+            "flow-label-red",
+            0.0,
+            80.0,
+            100.0,
+            28.0,
+            element_id="missing",
+            padding_profile="flow-caption",
+        )
+
+        errors = render_lint.find_padding_violations([unknown, wrong, missing])
+
+        self.assertEqual(len(errors), 3)
+        self.assertTrue(any("неизвестный" in error for error in errors))
+        self.assertTrue(any("неподдерживаемому" in error for error in errors))
+        self.assertTrue(any("не имеет измеряемой строки" in error for error in errors))
 
 
 class LintFileTests(unittest.TestCase):
