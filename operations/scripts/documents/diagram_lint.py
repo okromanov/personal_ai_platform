@@ -449,8 +449,7 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
             continue
         if label_palettes != connector_palettes:
             result.errors.append(
-                f"цвет плашки ARC_FLOW {label!r} не совпадает с цветом стрелки "
-                f"{connector_ref!r}"
+                f"цвет плашки ARC_FLOW {label!r} не совпадает с цветом стрелки {connector_ref!r}"
             )
 
 
