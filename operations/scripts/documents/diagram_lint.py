@@ -46,6 +46,7 @@ from operations.scripts.common.project import (
 )
 from operations.scripts.documents.diagram_geometry_lint import (
     ControlTransitionLayout,
+    FlowLabelLayout,
     check_geometry,
 )
 from operations.scripts.documents.metadata import load_document
@@ -82,6 +83,9 @@ _ID_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\d+$")
 _LEGEND_FAMILY = re.compile(r"^(?P<family>[A-Z]+(?:_[A-Z]+)*)_\*$")
 _VISIBLE_FLOW_ID = re.compile(r"\b(?:ARC_FLOW|INF_FLOW|SEC_CTL)_\d{3}\b")
 _VISIBLE_ARC_FLOW_ID = re.compile(r"\bARC_FLOW_(?:\d{3}|XXX)\b")
+_ID_SLASH_SEPARATOR = re.compile(
+    r"\b(?:ARC_(?:CMP|FLOW)|INF_(?:CMP|FLOW)|SEC_CTL)_(?:\d{3}|XXX)(?:–\d{3})?\s*/"
+)
 _ARCHITECTURE_ID_PREFIXES = ("ARC_", "INF_", "SEC_CTL_")
 
 _SOURCE_PALETTE_CLASSES = {
@@ -505,6 +509,20 @@ def _check_connector_source_colors(root_el: ElementTree.Element, result: LintRes
             )
 
 
+def _check_visible_id_separators(root_el: ElementTree.Element, result: LintResult) -> None:
+    """Forbid slash-separated architectural IDs in visible diagram labels."""
+
+    for element in root_el.iter():
+        if element.tag.rsplit("}", 1)[-1] != "text":
+            continue
+        label = " ".join("".join(element.itertext()).split())
+        if _ID_SLASH_SEPARATOR.search(label) is not None:
+            result.errors.append(
+                f"видимая подпись {label!r} разделяет архитектурные ID символом '/'; "
+                "разные элементы разделяются точкой '·'"
+            )
+
+
 def _is_architecture_diagram(
     root_el: ElementTree.Element,
     declared_ids: list[str],
@@ -525,6 +543,7 @@ def _check_architecture_semantics(
     _check_flow_label_bindings(root_el, result)
     _check_arc_flow_label_fills(root_el, result)
     _check_connector_source_colors(root_el, result)
+    _check_visible_id_separators(root_el, result)
     _check_legend_id_families(root_el, declared_ids, result)
 
 
@@ -588,6 +607,59 @@ def _architecture_reference_transition_layout(
         )
         return None
     return measured.control_transition_layouts[0]
+
+
+def _architecture_reference_port_gap(root: Path, result: LintResult) -> float | None:
+    template = (
+        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+    )
+    if not template.is_file():
+        result.errors.append(
+            "не найден архитектурный SVG-шаблон: невозможно вычислить right-port-gap"
+        )
+        return None
+    measured = check_geometry(read_text(template))
+    if measured.errors:
+        result.errors.append(
+            "геометрия архитектурного SVG-шаблона не позволяет вычислить "
+            "right-port-gap: " + "; ".join(measured.errors)
+        )
+        return None
+    values = {gap.value for gap in measured.port_gaps}
+    if len(values) != 1:
+        result.errors.append(
+            "архитектурный SVG-шаблон должен геометрически задавать ровно один "
+            "right-port-gap через data-port-group"
+        )
+        return None
+    return values.pop()
+
+
+def _architecture_reference_flow_label_layout(
+    root: Path, result: LintResult
+) -> FlowLabelLayout | None:
+    template = (
+        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+    )
+    if not template.is_file():
+        result.errors.append(
+            "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию плашки потока"
+        )
+        return None
+    measured = check_geometry(read_text(template))
+    if measured.errors:
+        result.errors.append(
+            "геометрия архитектурного SVG-шаблона не позволяет вычислить плашку потока: "
+            + "; ".join(measured.errors)
+        )
+        return None
+    if len(measured.flow_label_layouts) != 1:
+        result.errors.append(
+            "архитектурный SVG-шаблон должен геометрически задавать ровно одну "
+            'data-layout="flow-label" плашку'
+        )
+        return None
+    return measured.flow_label_layouts[0]
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -791,6 +863,8 @@ def lint_file(path: Path, root: Path) -> LintResult:
     )
     reference_gaps = None
     reference_transition_layout = None
+    reference_port_gap = None
+    reference_flow_label_layout = None
     if (
         root_el is not None
         and has_referenced_gap
@@ -817,10 +891,34 @@ def lint_file(path: Path, root: Path) -> LintResult:
     ):
         reference_transition_layout = _architecture_reference_transition_layout(root, result)
 
+    has_port_groups = root_el is not None and any(
+        element.get("data-port-group") is not None for element in root_el.iter()
+    )
+    if (
+        root_el is not None
+        and has_port_groups
+        and _is_architecture_diagram(root_el, declared_ids)
+        and path.resolve() != architecture_template.resolve()
+    ):
+        reference_port_gap = _architecture_reference_port_gap(root, result)
+
+    has_flow_label_layout = root_el is not None and any(
+        element.get("data-layout") == "flow-label" for element in root_el.iter()
+    )
+    if (
+        root_el is not None
+        and has_flow_label_layout
+        and _is_architecture_diagram(root_el, declared_ids)
+        and path.resolve() != architecture_template.resolve()
+    ):
+        reference_flow_label_layout = _architecture_reference_flow_label_layout(root, result)
+
     geometry = check_geometry(
         text,
         reference_gaps=reference_gaps,
         reference_transition_layout=reference_transition_layout,
+        reference_port_gap=reference_port_gap,
+        reference_flow_label_layout=reference_flow_label_layout,
     )
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)

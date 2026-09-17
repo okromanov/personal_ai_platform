@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.7
+  diagram_version: 1.8
   generated_at: 2026-09-17
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.15
+  source: operations/architecture/diagram_geometry_foundations.md@1.16
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -53,6 +53,11 @@
        and matching identity/title/detail-1/detail-2 data-layout-slot values
        on centred text rows; diagram_lint compares them with this template. -->
   <path id="template-main-flow" class="main-line" d="M320 320V388" data-source-ref="template-component" data-route="direct"/>
+  <!-- Two independent connectors entering one side of a card define the
+       template-derived side-port interval. Production diagrams group the
+       corresponding connectors with the same data-port-group value. -->
+  <path class="main-line" d="M620 220H600" data-shared-route="true" data-route="direct" data-port-group="template-right-inputs" data-port-target="template-component" data-port-side="right"/>
+  <path class="main-line" d="M620 252H600" data-shared-route="true" data-route="direct" data-port-group="template-right-inputs" data-port-target="template-component" data-port-side="right"/>
 
   <!-- Component card: ID -> title -> short description -> nested object -->
   <g>
@@ -66,8 +71,8 @@
   </g>
 
   <!-- Flow label: width = text + 2*space-m, centred on the connector -->
-  <rect id="template-flow-label" x="242" y="340" width="157" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow"/>
-  <text x="320" y="358" class="flow-text" text-anchor="middle">ARC_FLOW_XXX · Поток</text>
+  <rect id="template-flow-label" x="242" y="340" width="156" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow" data-layout="flow-label"/>
+  <text x="320" y="359" class="flow-text" text-anchor="middle" data-label-for="template-flow-label">ARC_FLOW_XXX · Поток</text>
 
   <!-- Result / port node: 388 - (140 + 180) = layer-gap. The flow label
        above also defines transition-gap geometrically: 340 - 320 = 20.

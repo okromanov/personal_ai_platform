@@ -1642,6 +1642,252 @@ class DiagramLintTests(unittest.TestCase):
             [error for error in result.errors if "класс" in error or "маркер" in error], []
         )
 
+    def test_grouped_side_ports_use_template_derived_spacing_after_transforms(self) -> None:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g transform="translate(0 10)">'
+            '<rect id="target" x="100" y="20" width="100" height="100"/>'
+            '<path d="M240 40H200" data-port-group="right-inputs" '
+            'data-port-target="target" data-port-side="right"/>'
+            '<path d="M240 72H200" data-port-group="right-inputs" '
+            'data-port-target="target" data-port-side="right"/>'
+            "</g></svg>"
+        )
+
+        matching = diagram_geometry_lint.check_geometry(svg, reference_port_gap=32)
+        drifted = diagram_geometry_lint.check_geometry(
+            svg.replace("M240 72H200", "M240 44H200"),
+            reference_port_gap=32,
+        )
+
+        self.assertEqual(matching.errors, [])
+        self.assertEqual(matching.port_gaps[0].value, 32)
+        self.assertTrue(any("фактически 4 px" in error for error in drifted.errors))
+
+    def test_grouped_side_ports_reject_an_invalid_contract(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="target" x="100" y="20" width="100" height="100"/>'
+            '<rect data-port-group="not-a-path"/>'
+            '<path d="M240 40H200" data-port-group="missing-side" '
+            'data-port-target="target"/>'
+            '<path d="M240 40H180" data-port-group="off-boundary" '
+            'data-port-target="target" data-port-side="right"/>'
+            '<path d="M240 72H200" data-port-group="single" '
+            'data-port-target="target" data-port-side="right"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("только для <path>" in error for error in result.errors))
+        self.assertTrue(any("обязана задать" in error for error in result.errors))
+        self.assertTrue(any("не на right-границе" in error for error in result.errors))
+        self.assertTrue(any("ровно два коннектора" in error for error in result.errors))
+
+    def test_grouped_side_ports_reject_bad_paths_transforms_and_mixed_targets(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="target-a" x="100" y="20" width="100" height="100"/>'
+            '<rect id="target-b" x="200" y="20" width="100" height="100"/>'
+            '<path d="m240 40h200" data-port-group="bad-path" '
+            'data-port-target="target-a" data-port-side="right"/>'
+            '<path d="M240 40H200" transform="rotate(10)" data-port-group="bad-transform" '
+            'data-port-target="target-a" data-port-side="right"/>'
+            '<path d="M240 40H200" data-port-group="mixed" '
+            'data-port-target="target-a" data-port-side="right"/>'
+            '<path d="M160 72H200" data-port-group="mixed" '
+            'data-port-target="target-b" data-port-side="left"/>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("не позволяет вычислить" in error for error in result.errors))
+        self.assertTrue(any("отличный от translate" in error for error in result.errors))
+        self.assertTrue(any("одну границу" in error for error in result.errors))
+
+    def test_flow_label_layout_matches_template_geometry(self) -> None:
+        template = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="template-label" x="0" y="0" width="120" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="60" y="19" text-anchor="middle" '
+            'data-label-for="template-label">Flow</text>'
+            "</svg>"
+        )
+        reference = template.flow_label_layouts[0]
+        matching = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg"><g transform="translate(10 20)">'
+            '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="100" y="19" text-anchor="middle" '
+            'data-label-for="actual-label">Longer flow</text>'
+            "</g></svg>",
+            reference_flow_label_layout=reference,
+        )
+        drifted = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="100" y="18" text-anchor="middle" '
+            'data-label-for="actual-label">Longer flow</text>'
+            "</svg>",
+            reference_flow_label_layout=reference,
+        )
+
+        self.assertEqual(matching.errors, [])
+        self.assertTrue(any("эталона" in error for error in drifted.errors))
+
+    def test_flow_label_layout_rejects_missing_or_uncentred_labels(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g data-layout="flow-label"/>'
+            '<rect id="missing-label" x="0" y="0" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<rect id="uncentred" x="0" y="40" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="40" y="59" data-label-for="uncentred">Flow</text>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("только для <rect>" in error for error in result.errors))
+        self.assertTrue(any("ровно один <text" in error for error in result.errors))
+        self.assertTrue(any("центрирована" in error for error in result.errors))
+
+    def test_flow_label_layout_rejects_invalid_geometry_and_peer_drift(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="bad-radius" x="0" y="0" width="100" height="28" '
+            'data-layout="flow-label"/>'
+            '<rect id="non-text" x="0" y="40" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/><g data-label-for="non-text"/>'
+            '<rect id="bad-coordinates" x="0" y="80" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text data-label-for="bad-coordinates">Flow</text>'
+            '<rect id="bad-transform" x="0" y="120" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="50" y="139" text-anchor="middle" transform="rotate(10)" '
+            'data-label-for="bad-transform">Flow</text>'
+            '<rect id="peer-a" x="0" y="160" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="50" y="179" text-anchor="middle" '
+            'data-label-for="peer-a">Flow</text>'
+            '<rect id="peer-b" x="0" y="200" width="100" height="28" rx="4" '
+            'data-layout="flow-label"/>'
+            '<text x="50" y="218" text-anchor="middle" '
+            'data-label-for="peer-b">Flow</text>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("числовой rx" in error for error in result.errors))
+        self.assertTrue(any("обязан стоять на <text>" in error for error in result.errors))
+        self.assertTrue(any("числовые x и y" in error for error in result.errors))
+        self.assertTrue(any("отличный от translate" in error for error in result.errors))
+        self.assertTrue(any("вертикальные поля" in error for error in result.errors))
+
+    def test_visible_architecture_ids_use_middle_dot_not_slash(self) -> None:
+        invalid = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            "<text>ARC_FLOW_004 / SEC_CTL_017 · Плановая задача</text>"
+            "</svg>"
+        )
+        valid = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            "<text>ARC_FLOW_004 · SEC_CTL_017 · Плановая задача</text>"
+            "</svg>"
+        )
+        invalid_result = diagram_lint.LintResult(file="invalid.svg")
+        valid_result = diagram_lint.LintResult(file="valid.svg")
+
+        diagram_lint._check_visible_id_separators(invalid, invalid_result)
+        diagram_lint._check_visible_id_separators(valid, valid_result)
+
+        self.assertTrue(any("символом '/'" in error for error in invalid_result.errors))
+        self.assertEqual(valid_result.errors, [])
+
+    def test_architecture_template_exposes_port_and_flow_label_references(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="target" x="100" y="20" width="100" height="100"/>'
+                '<path d="M240 40H200" data-port-group="right-inputs" '
+                'data-port-target="target" data-port-side="right"/>'
+                '<path d="M240 72H200" data-port-group="right-inputs" '
+                'data-port-target="target" data-port-side="right"/>'
+                '<rect id="label" x="0" y="140" width="120" height="28" rx="4" '
+                'data-layout="flow-label"/>'
+                '<text x="60" y="159" text-anchor="middle" '
+                'data-label-for="label">Flow</text>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            port_result = diagram_lint.LintResult(file="diagram.svg")
+            label_result = diagram_lint.LintResult(file="diagram.svg")
+
+            port_gap = diagram_lint._architecture_reference_port_gap(root, port_result)
+            label_layout = diagram_lint._architecture_reference_flow_label_layout(
+                root, label_result
+            )
+
+        self.assertEqual(port_result.errors, [])
+        self.assertEqual(port_gap, 32)
+        self.assertEqual(label_result.errors, [])
+        self.assertIsNotNone(label_layout)
+        assert label_layout is not None
+        self.assertEqual(label_layout.text_y_offset, 19)
+
+    def test_architecture_reference_helpers_report_missing_invalid_and_empty_templates(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            missing_port = diagram_lint.LintResult(file="diagram.svg")
+            missing_label = diagram_lint.LintResult(file="diagram.svg")
+            self.assertIsNone(diagram_lint._architecture_reference_port_gap(root, missing_port))
+            self.assertIsNone(
+                diagram_lint._architecture_reference_flow_label_layout(root, missing_label)
+            )
+
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg"><rect x="0.33"/></svg>',
+                encoding="utf-8",
+            )
+            invalid_port = diagram_lint.LintResult(file="diagram.svg")
+            invalid_label = diagram_lint.LintResult(file="diagram.svg")
+            self.assertIsNone(diagram_lint._architecture_reference_port_gap(root, invalid_port))
+            self.assertIsNone(
+                diagram_lint._architecture_reference_flow_label_layout(root, invalid_label)
+            )
+
+            template.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
+            empty_port = diagram_lint.LintResult(file="diagram.svg")
+            empty_label = diagram_lint.LintResult(file="diagram.svg")
+            self.assertIsNone(diagram_lint._architecture_reference_port_gap(root, empty_port))
+            self.assertIsNone(
+                diagram_lint._architecture_reference_flow_label_layout(root, empty_label)
+            )
+
+        self.assertTrue(any("не найден" in error for error in missing_port.errors))
+        self.assertTrue(any("не найден" in error for error in missing_label.errors))
+        self.assertTrue(any("не позволяет" in error for error in invalid_port.errors))
+        self.assertTrue(any("не позволяет" in error for error in invalid_label.errors))
+        self.assertTrue(any("ровно один" in error for error in empty_port.errors))
+        self.assertTrue(any("ровно одну" in error for error in empty_label.errors))
+
     def test_default_targets_empty_without_artefacts_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
