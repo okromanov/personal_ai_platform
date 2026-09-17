@@ -649,18 +649,22 @@ class DiagramLintTests(unittest.TestCase):
     def test_control_transition_cards_share_calculated_layout(self) -> None:
         matching = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="first-anchor" x="10" y="0" width="100" height="10"/>'
             '<g><rect id="first" x="10" y="20" width="100" height="60" rx="5" '
-            'class="control-card" data-layout="control-transition"/>'
-            '<text x="60" y="35" class="eyebrow" text-anchor="middle" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="first-anchor"/>'
+            '<text x="20" y="35" class="eyebrow" '
             'data-layout-slot="identity">A</text>'
-            '<text x="60" y="55" class="title" text-anchor="middle" '
+            '<text x="20" y="55" class="title" '
             'data-layout-slot="title">B</text></g>'
             '<g transform="translate(20 100)">'
+            '<rect id="second-anchor" x="10" y="0" width="100" height="10"/>'
             '<rect id="second" x="10" y="20" width="100" height="60" rx="5" '
-            'class="control-card" data-layout="control-transition"/>'
-            '<text x="60" y="35" class="eyebrow" text-anchor="middle" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="second-anchor"/>'
+            '<text x="20" y="35" class="eyebrow" '
             'data-layout-slot="identity">C</text>'
-            '<text x="60" y="55" class="title" text-anchor="middle" '
+            '<text x="20" y="55" class="title" '
             'data-layout-slot="title">D</text></g>'
             "</svg>"
         )
@@ -670,13 +674,16 @@ class DiagramLintTests(unittest.TestCase):
     def test_control_transition_layout_rejects_drift(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="10" y="0" width="100" height="10"/>'
             '<g><rect id="first" x="10" y="20" width="100" height="60" rx="5" '
-            'class="control-card" data-layout="control-transition"/>'
-            '<text x="60" y="35" class="eyebrow" text-anchor="middle" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="anchor"/>'
+            '<text x="20" y="35" class="eyebrow" '
             'data-layout-slot="identity">A</text></g>'
             '<g><rect id="second" x="10" y="100" width="104" height="60" rx="5" '
-            'class="control-card" data-layout="control-transition"/>'
-            '<text x="62" y="116" class="eyebrow" text-anchor="middle" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="anchor"/>'
+            '<text x="22" y="116" class="eyebrow" '
             'data-layout-slot="identity">B</text></g>'
             "</svg>"
         )
@@ -729,12 +736,77 @@ class DiagramLintTests(unittest.TestCase):
             "повторяет слот 'identity'",
             "обязан иметь числовые x и y",
             "отличный от translate",
-            "обязан быть центрирован",
+            "обязана задать data-align-left-with",
+            "обязан использовать левое выравнивание",
             "не содержит ни одного data-layout-slot",
         )
         for fragment in expected_fragments:
             with self.subTest(fragment=fragment):
                 self.assertTrue(any(fragment in error for error in result.errors), result.errors)
+
+    def test_control_transition_requires_a_real_left_alignment_anchor(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text id="not-a-rect" x="0" y="0">anchor</text>'
+            '<rect id="misaligned-anchor" x="20" y="0" width="100" height="10"/>'
+            '<g><rect id="missing-target" x="10" y="20" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="missing"/>'
+            '<text x="20" y="35" data-layout-slot="identity">A</text></g>'
+            '<g><rect id="wrong-target" x="10" y="100" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="not-a-rect"/>'
+            '<text x="20" y="115" data-layout-slot="identity">B</text></g>'
+            '<g><rect id="misaligned" x="10" y="180" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="misaligned-anchor"/>'
+            '<text x="20" y="195" data-layout-slot="identity">C</text></g>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("указывает на отсутствующий" in error for error in result.errors))
+        self.assertTrue(any("обязан указывать на <rect>" in error for error in result.errors))
+        self.assertTrue(any("не выровнена слева" in error for error in result.errors))
+
+    def test_control_transition_compares_internal_rhythm_with_template_layout(self) -> None:
+        template_result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="10" y="0" width="100" height="10"/>'
+            '<g><rect id="template" x="10" y="20" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="anchor"/>'
+            '<text x="20" y="35" class="component-id" '
+            'data-layout-slot="identity">A</text></g>'
+            "</svg>"
+        )
+        reference = template_result.control_transition_layouts[0]
+        matching = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="30" y="0" width="200" height="10"/>'
+            '<g><rect id="actual" x="30" y="20" width="200" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="anchor"/>'
+            '<text x="40" y="35" class="component-id" '
+            'data-layout-slot="identity">B</text></g>'
+            "</svg>",
+            reference_transition_layout=reference,
+        )
+        drifted = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="30" y="0" width="200" height="10"/>'
+            '<g><rect id="actual" x="30" y="20" width="200" height="64" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-align-left-with="anchor"/>'
+            '<text x="40" y="36" class="component-id" '
+            'data-layout-slot="identity">B</text></g>'
+            "</svg>",
+            reference_transition_layout=reference,
+        )
+
+        self.assertEqual(matching.errors, [])
+        self.assertTrue(
+            any("эталона architecture_diagram_template.svg" in e for e in drifted.errors)
+        )
 
     def test_legend_must_list_every_declared_identifier_family(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
@@ -860,6 +932,40 @@ class DiagramLintTests(unittest.TestCase):
         )
         self.assertEqual(template_result.errors, [])
 
+    def test_visible_arc_flow_labels_require_semantic_fill(self) -> None:
+        compliant = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g><rect x="0" y="0" width="100" height="28" class="flow-label-blue"/>'
+            '<text x="50" y="18">ARC_FLOW_001 · Поток</text></g>'
+            '<g transform="rotate(90)">'
+            '<rect x="-50" y="-14" width="100" height="28" class="flow-label-red"/>'
+            '<text x="0" y="1">ARC_FLOW_XXX · Шаблон</text></g>'
+            '<text x="0" y="0" class="legend-id">ARC_FLOW_*</text>'
+            "</svg>"
+        )
+        compliant_result = diagram_lint.LintResult(file="diagram.svg")
+        diagram_lint._check_arc_flow_label_fills(compliant, compliant_result)
+
+        invalid = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text x="10" y="10">ARC_FLOW_001 · Без плашки</text>'
+            '<g><rect x="0" y="20" width="100" height="28"/>'
+            '<text x="50" y="38">ARC_FLOW_002 · Без класса заливки</text></g>'
+            '<g><rect width="bad" height="28" class="flow-label-blue"/>'
+            '<text x="50" y="18">ARC_FLOW_003 · Некорректный контейнер</text></g>'
+            "<text>ARC_FLOW_004 · Нет координат</text>"
+            "</svg>"
+        )
+        invalid_result = diagram_lint.LintResult(file="diagram.svg")
+        diagram_lint._check_arc_flow_label_fills(invalid, invalid_result)
+
+        self.assertEqual(compliant_result.errors, [])
+        self.assertTrue(any("не помещена" in error for error in invalid_result.errors))
+        self.assertTrue(
+            any("без семантической заливки" in error for error in invalid_result.errors)
+        )
+        self.assertTrue(any("числовые x и y" in error for error in invalid_result.errors))
+
     def test_direct_connector_color_must_match_its_source_card(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
             '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -881,6 +987,21 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="owner-choice" class="control-card"/>'
             '<path class="control-main-line" data-source-ref="owner-choice"/>'
+            "</svg>"
+        )
+        result = diagram_lint.LintResult(file="diagram.svg")
+
+        diagram_lint._check_connector_source_colors(root_el, result)
+
+        self.assertEqual(result.errors, [])
+
+    def test_markerless_merge_legs_keep_the_source_palette(self) -> None:
+        root_el = diagram_lint.ElementTree.fromstring(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="blue-source" class="execution-card"/>'
+            '<rect id="green-source" class="data-card"/>'
+            '<path class="merge-line" data-source-ref="blue-source"/>'
+            '<path class="data-merge-line" data-source-ref="green-source"/>'
             "</svg>"
         )
         result = diagram_lint.LintResult(file="diagram.svg")
@@ -1128,6 +1249,74 @@ class DiagramLintTests(unittest.TestCase):
         self.assertIsNone(ambiguous_gap)
         self.assertTrue(any("ровно одно" in error for error in ambiguous_result.errors))
 
+    def test_architecture_reference_transition_layout_is_calculated_from_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="anchor" x="10" y="0" width="100" height="10"/>'
+                '<g><rect id="transition" x="10" y="20" width="100" height="60" rx="5" '
+                'class="control-card" data-layout="control-transition" '
+                'data-align-left-with="anchor"/>'
+                '<text x="20" y="35" class="component-id" '
+                'data-layout-slot="identity">A</text></g>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            result = diagram_lint.LintResult(file="diagram.svg")
+
+            layout = diagram_lint._architecture_reference_transition_layout(root, result)
+
+        self.assertEqual(result.errors, [])
+        self.assertIsNotNone(layout)
+        assert layout is not None
+        self.assertEqual(layout.template_signature(), (60, 5, layout.slots))
+
+    def test_architecture_reference_transition_layout_reports_invalid_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            missing_result = diagram_lint.LintResult(file="diagram.svg")
+            missing = diagram_lint._architecture_reference_transition_layout(root, missing_result)
+
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="anchor" x="0" y="0" width="10" height="10"/>'
+                '<rect id="bad" x="1.25" y="20" width="10" height="10" rx="2" '
+                'class="control-card" data-layout="control-transition" '
+                'data-align-left-with="anchor"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            invalid_result = diagram_lint.LintResult(file="diagram.svg")
+            invalid = diagram_lint._architecture_reference_transition_layout(root, invalid_result)
+
+            template.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
+            absent_result = diagram_lint.LintResult(file="diagram.svg")
+            absent = diagram_lint._architecture_reference_transition_layout(root, absent_result)
+
+        self.assertIsNone(missing)
+        self.assertTrue(any("не найден" in error for error in missing_result.errors))
+        self.assertIsNone(invalid)
+        self.assertTrue(any("не позволяет" in error for error in invalid_result.errors))
+        self.assertIsNone(absent)
+        self.assertTrue(any("ровно один" in error for error in absent_result.errors))
+
     def test_lint_file_compares_referenced_gap_with_template_geometry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -1217,6 +1406,54 @@ class DiagramLintTests(unittest.TestCase):
             ),
             result.errors,
         )
+
+    def test_lint_file_uses_template_transition_layout_for_architecture(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_spec(root, version="1.0")
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="template-anchor" x="10" y="0" width="100" height="10"/>'
+                '<g><rect id="template-transition" x="10" y="20" width="100" height="60" '
+                'rx="5" class="control-card" data-layout="control-transition" '
+                'data-align-left-with="template-anchor"/>'
+                '<text x="20" y="35" class="component-id" '
+                'data-layout-slot="identity">A</text></g>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            metadata = _metadata_block(
+                sources=["specifications/example.md@1.0"], ids=["ARC_CMP_001"]
+            )
+            body = (
+                "<style>.control-card { fill: red; } .component-id { fill: black; }</style>"
+                '<rect id="anchor" x="10" y="0" width="200" height="10"/>'
+                '<g data-spec-id="ARC_CMP_001">'
+                '<rect id="transition" x="10" y="20" width="200" height="60" rx="5" '
+                'class="control-card" data-layout="control-transition" '
+                'data-align-left-with="anchor"/>'
+                '<text x="20" y="35" class="component-id" '
+                'data-layout-slot="identity">A</text></g>'
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                _svg_text(metadata_block=metadata)
+                .replace("<svg ", '<svg data-diagram-kind="architecture" ', 1)
+                .replace("<g ></g>", body),
+                encoding="utf-8",
+            )
+
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertEqual(result.errors, [])
 
     def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:
         return (

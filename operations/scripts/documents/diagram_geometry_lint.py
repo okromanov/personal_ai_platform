@@ -37,10 +37,12 @@ from raw XML attributes without rendering the SVG:
    an independently coloured card. At the boundary the route must be split;
    the outgoing segment then uses `data-source-ref`, so source-colour
    validation applies.
-7. **Repeated transition-card geometry.** Rectangles marked
-   `data-layout="control-transition"` have identical dimensions, radius and
-   text-slot geometry. Slot baselines are compared relative to each card, so
-   no copied pixel constants become a second source of truth.
+7. **Transition-card geometry.** Rectangles marked
+   `data-layout="control-transition"` align their left edge with the rectangle
+   named by `data-align-left-with`, share local width and text-slot geometry,
+   and match the registered architecture template's height, radius and slot
+   rhythm. Slot coordinates are calculated relative to each card, so no
+   copied pixel constants become a second source of truth.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -122,6 +124,7 @@ class GeometryResult:
     errors: list[str]
     warnings: list[str]
     vertical_gaps: list["VerticalGap"] = field(default_factory=list)
+    control_transition_layouts: list["ControlTransitionLayout"] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -130,6 +133,34 @@ class VerticalGap:
     target_id: str
     kind: str
     value: float
+
+
+@dataclass(frozen=True)
+class LayoutSlot:
+    name: str
+    class_name: str
+    x_offset: float
+    y_offset: float
+    text_anchor: str
+
+
+@dataclass(frozen=True)
+class ControlTransitionLayout:
+    card_id: str
+    width: float
+    height: float
+    radius: float
+    slots: tuple[LayoutSlot, ...]
+
+    def template_signature(self) -> tuple[float, float, tuple[LayoutSlot, ...]]:
+        """Geometry shared across canvases; width follows the local main column."""
+
+        return self.height, self.radius, self.slots
+
+    def peer_signature(self) -> tuple[float, float, float, tuple[LayoutSlot, ...]]:
+        """Geometry that must be identical for peers on the same canvas."""
+
+        return self.width, self.height, self.radius, self.slots
 
 
 def _local_tag(tag: str) -> str:
@@ -488,14 +519,14 @@ def _check_shared_routes_stay_outside_cards(root_el, errors: list[str]) -> None:
             )
 
 
-def _check_control_transition_layouts(root_el, errors: list[str]) -> None:
+def _check_control_transition_layouts(
+    root_el,
+    errors: list[str],
+    reference_layout: ControlTransitionLayout | None,
+) -> list[ControlTransitionLayout]:
     parents = {child: parent for parent in root_el.iter() for child in parent}
-    signatures: list[
-        tuple[
-            str,
-            tuple[float, float, float, tuple[tuple[str, str, float, float], ...]],
-        ]
-    ] = []
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    layouts: list[ControlTransitionLayout] = []
     for card in root_el.iter():
         if card.get("data-layout") != "control-transition":
             continue
@@ -516,13 +547,40 @@ def _check_control_transition_layouts(root_el, errors: list[str]) -> None:
         )
         if box is None:
             continue
+        align_with = card.get("data-align-left-with")
+        if not align_with:
+            errors.append(f"переходная карточка {card_id!r} обязана задать data-align-left-with")
+        else:
+            anchor = by_id.get(align_with)
+            if anchor is None:
+                errors.append(
+                    f"data-align-left-with={align_with!r} у карточки {card_id!r} "
+                    "указывает на отсутствующий элемент"
+                )
+            elif _local_tag(anchor.tag) != "rect":
+                errors.append(
+                    f"data-align-left-with={align_with!r} у карточки {card_id!r} "
+                    "обязан указывать на <rect>"
+                )
+            else:
+                anchor_box = _absolute_rect_box(
+                    anchor,
+                    parents,
+                    errors,
+                    contract="проверку левого выравнивания переходной карточки",
+                )
+                if anchor_box is not None and abs(box[0] - anchor_box[0]) > 1e-9:
+                    errors.append(
+                        f"переходная карточка {card_id!r} не выровнена слева с "
+                        f"{align_with!r}: {box[0]:g} px вместо {anchor_box[0]:g} px"
+                    )
         try:
             radius = float(card.get("rx"))
         except (TypeError, ValueError):
             errors.append(f"переходная карточка {card_id!r} обязана иметь числовой rx")
             continue
         parent = parents.get(card)
-        slots: list[tuple[str, str, float, float]] = []
+        slots: list[LayoutSlot] = []
         seen_slots: set[str] = set()
         for text_element in list(parent) if parent is not None else []:
             slot = text_element.get("data-layout-slot")
@@ -551,44 +609,53 @@ def _check_control_transition_layouts(root_el, errors: list[str]) -> None:
                 continue
             absolute_x = text_x + offset[0]
             absolute_y = text_y + offset[1]
-            expected_center = (box[0] + box[2]) / 2
-            if (
-                text_element.get("text-anchor") != "middle"
-                or abs(absolute_x - expected_center) > 1e-9
-            ):
+            text_anchor = text_element.get("text-anchor", "start")
+            if text_anchor not in {"start", ""}:
                 errors.append(
-                    f"слот {slot!r} карточки {card_id!r} обязан быть центрирован "
-                    "по геометрической оси карточки"
+                    f"слот {slot!r} карточки {card_id!r} обязан использовать левое "
+                    "выравнивание text-anchor=start"
                 )
             slots.append(
-                (
-                    slot,
-                    text_element.get("class", ""),
-                    absolute_x - box[0],
-                    absolute_y - box[1],
+                LayoutSlot(
+                    name=slot,
+                    class_name=text_element.get("class", ""),
+                    x_offset=absolute_x - box[0],
+                    y_offset=absolute_y - box[1],
+                    text_anchor=text_anchor,
                 )
             )
         if not slots:
             errors.append(f"переходная карточка {card_id!r} не содержит ни одного data-layout-slot")
             continue
-        signature = (
-            box[2] - box[0],
-            box[3] - box[1],
-            radius,
-            tuple(sorted(slots)),
+        layout = ControlTransitionLayout(
+            card_id=card_id,
+            width=box[2] - box[0],
+            height=box[3] - box[1],
+            radius=radius,
+            slots=tuple(sorted(slots, key=lambda item: item.name)),
         )
-        signatures.append((card_id, signature))
+        layouts.append(layout)
 
-    if not signatures:
-        return
-    reference_id, reference = signatures[0]
-    for card_id, signature in signatures[1:]:
-        if signature != reference:
+    if not layouts:
+        return layouts
+    peer_reference = layouts[0]
+    for layout in layouts[1:]:
+        if layout.peer_signature() != peer_reference.peer_signature():
             errors.append(
-                f"геометрия переходной карточки {card_id!r} отличается от "
-                f"{reference_id!r}: размеры, выравнивание и внутренние интервалы "
+                f"геометрия переходной карточки {layout.card_id!r} отличается от "
+                f"{peer_reference.card_id!r}: размеры, выравнивание и внутренние интервалы "
                 "однотипных контрольных переходов должны совпадать"
             )
+    if reference_layout is not None:
+        reference_signature = reference_layout.template_signature()
+        for layout in layouts:
+            if layout.template_signature() != reference_signature:
+                errors.append(
+                    f"геометрия переходной карточки {layout.card_id!r} отличается от "
+                    "эталона architecture_diagram_template.svg: высота, радиус и "
+                    "внутренние интервалы вычисляются по шаблону"
+                )
+    return layouts
 
 
 def _check_direct_routes(root_el, errors: list[str]) -> None:
@@ -619,7 +686,12 @@ def _check_direct_routes(root_el, errors: list[str]) -> None:
             errors.append('путь с data-route="direct" обязан быть горизонтальным или вертикальным')
 
 
-def check_geometry(text: str, *, reference_gaps: dict[str, float] | None = None) -> GeometryResult:
+def check_geometry(
+    text: str,
+    *,
+    reference_gaps: dict[str, float] | None = None,
+    reference_transition_layout: ControlTransitionLayout | None = None,
+) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
     Assumes the caller has already validated the document is well-formed
@@ -641,5 +713,12 @@ def check_geometry(text: str, *, reference_gaps: dict[str, float] | None = None)
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
     _check_shared_routes_stay_outside_cards(root_el, errors)
-    _check_control_transition_layouts(root_el, errors)
-    return GeometryResult(errors=errors, warnings=warnings, vertical_gaps=vertical_gaps)
+    control_transition_layouts = _check_control_transition_layouts(
+        root_el, errors, reference_transition_layout
+    )
+    return GeometryResult(
+        errors=errors,
+        warnings=warnings,
+        vertical_gaps=vertical_gaps,
+        control_transition_layouts=control_transition_layouts,
+    )
