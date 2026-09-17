@@ -883,9 +883,7 @@ def _check_flow_label_layouts(
         absolute_y = text_y + offset[1]
         text_anchor = text_element.get("text-anchor", "start")
         if text_anchor != "middle" or abs(absolute_x - (box[0] + box[2]) / 2) > 1e-9:
-            errors.append(
-                f"подпись плашки {plaque_id!r} обязана быть центрирована по горизонтали"
-            )
+            errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по горизонтали")
         layouts.append(
             FlowLabelLayout(
                 label_id=plaque_id,
@@ -1016,9 +1014,7 @@ def check_geometry(
     control_transition_layouts = _check_control_transition_layouts(
         root_el, errors, reference_transition_layout
     )
-    flow_label_layouts = _check_flow_label_layouts(
-        root_el, errors, reference_flow_label_layout
-    )
+    flow_label_layouts = _check_flow_label_layouts(root_el, errors, reference_flow_label_layout)
     return GeometryResult(
         errors=errors,
         warnings=warnings,
