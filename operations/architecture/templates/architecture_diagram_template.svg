@@ -3,15 +3,15 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.9
+  diagram_version: 1.10
   generated_at: 2026-09-17
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.17
+  source: operations/architecture/diagram_geometry_foundations.md@1.18
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
     <style>
-      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
+      text { font-family: "DejaVu Sans", sans-serif; fill: #17202D; }
       .title { font-size: 34px; font-weight: 600; }
       .subtitle { font-size: 15px; font-weight: 400; fill: #596574; }
       .component-id { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; fill: #687482; }
@@ -37,7 +37,7 @@
          the SVG template, not in Python constants, and is measured by lint. -->
     <g id="template-multiline-label-reference">
       <path id="template-multiline-flow" class="main-line" d="M100 -20V0" data-shared-route="true" data-route="direct"/>
-      <rect id="template-flow-label-multiline" x="0" y="0" width="200" height="44" rx="4" class="flow-label-blue" data-connector-ref="template-multiline-flow" data-layout="flow-label-multiline"/>
+      <rect id="template-flow-label-multiline" x="20" y="0" width="160" height="44" rx="4" class="flow-label-blue" data-connector-ref="template-multiline-flow" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>
       <text x="100" y="17" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Первая строка подписи</text>
       <text x="100" y="33" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Вторая строка подписи</text>
     </g>
@@ -79,7 +79,7 @@
   </g>
 
   <!-- Flow label: width = text + 2*space-m, centred on the connector -->
-  <rect id="template-flow-label" x="242" y="340" width="156" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow" data-layout="flow-label"/>
+  <rect id="template-flow-label" x="234" y="340" width="172" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
   <text x="320" y="359" class="flow-text" text-anchor="middle" data-label-for="template-flow-label">ARC_FLOW_XXX · Поток</text>
 
   <!-- Result / port node: 388 - (140 + 180) = layer-gap. The flow label
@@ -110,7 +110,7 @@
     <rect x="688" y="188" width="18" height="14" rx="2" fill="#F3F7FB" stroke="#315C88"/>
     <text x="718" y="199" class="legend">Исполнение и проверка</text>
     <rect x="688" y="218" width="18" height="14" rx="2" fill="#FFFFFF" stroke="#A7B0BB"/>
-    <text x="718" y="229" class="legend">Граничные и поддерживающие узлы</text>
+    <text x="718" y="229" class="legend">Граничные и поддерживающие</text>
     <text x="688" y="268" class="legend-section">ЛИНИИ</text>
     <line x1="688" y1="293" x2="728" y2="293" stroke="#315C88" stroke-width="1" marker-end="url(#arrow-main)"/>
     <text x="740" y="297" class="legend">Ход задачи</text>
