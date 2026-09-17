@@ -623,9 +623,7 @@ def _check_control_transition_layouts(
                     "центрирование text-anchor=middle"
                 )
             if abs(absolute_x - (box[0] + box[2]) / 2) > 1e-9:
-                errors.append(
-                    f"слот {slot!r} карточки {card_id!r} не находится на центральной оси"
-                )
+                errors.append(f"слот {slot!r} карточки {card_id!r} не находится на центральной оси")
             slots.append(
                 LayoutSlot(
                     name=slot,
@@ -669,7 +667,9 @@ def _check_control_transition_layouts(
     return layouts
 
 
-def _point_on_rect_boundary(point: tuple[float, float], box: tuple[float, float, float, float]) -> bool:
+def _point_on_rect_boundary(
+    point: tuple[float, float], box: tuple[float, float, float, float]
+) -> bool:
     x, y = point
     left, top, right, bottom = box
     on_horizontal = left <= x <= right and (abs(y - top) < 1e-9 or abs(y - bottom) < 1e-9)
