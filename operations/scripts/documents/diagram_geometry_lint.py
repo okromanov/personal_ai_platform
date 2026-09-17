@@ -1,7 +1,7 @@
 """Coordinate-based geometry checks for SVG diagrams, factored out of
 diagram_lint.py so that module stays focused on metadata/traceability.
 
-Scope, precisely — this module enforces seven invariants that are computable
+Scope, precisely — this module enforces eight invariants that are computable
 from raw XML attributes without rendering the SVG:
 
 1. **Half-pixel coordinate discipline.** Every numeric `x`/`y`/`width`/
@@ -38,11 +38,15 @@ from raw XML attributes without rendering the SVG:
    the outgoing segment then uses `data-source-ref`, so source-colour
    validation applies.
 7. **Transition-card geometry.** Rectangles marked
-   `data-layout="control-transition"` align their left edge with the rectangle
-   named by `data-align-left-with`, share local width and text-slot geometry,
-   and match the registered architecture template's height, radius and slot
-   rhythm. Slot coordinates are calculated relative to each card, so no
-   copied pixel constants become a second source of truth.
+   `data-layout="control-transition"` align their centre with the rectangle
+   named by `data-center-with`, share dimensions and text-slot geometry, and
+   match the registered architecture template. Slot coordinates are calculated
+   relative to each card, so no copied pixel constants become a second source
+   of truth.
+8. **Connector source attachment.** Every path with `data-source-ref` begins
+   on the referenced rectangle's boundary after translation-only transforms
+   are resolved. This prevents a visually plausible arrow from hanging in the
+   gap below or beside its declared source.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -111,6 +115,10 @@ _DIRECT_PATH = re.compile(
     r")\s*$",
     re.IGNORECASE,
 )
+_PATH_START = re.compile(
+    r"^\s*M\s*(?P<x>-?\d+(?:\.\d+)?)[ ,]+(?P<y>-?\d+(?:\.\d+)?)",
+    re.IGNORECASE,
+)
 _INDEPENDENT_CARD_CLASSES = {
     "control-card",
     "data-card",
@@ -152,13 +160,8 @@ class ControlTransitionLayout:
     radius: float
     slots: tuple[LayoutSlot, ...]
 
-    def template_signature(self) -> tuple[float, float, tuple[LayoutSlot, ...]]:
-        """Geometry shared across canvases; width follows the local main column."""
-
-        return self.height, self.radius, self.slots
-
-    def peer_signature(self) -> tuple[float, float, float, tuple[LayoutSlot, ...]]:
-        """Geometry that must be identical for peers on the same canvas."""
+    def signature(self) -> tuple[float, float, float, tuple[LayoutSlot, ...]]:
+        """Geometry shared by the template and every transition card."""
 
         return self.width, self.height, self.radius, self.slots
 
@@ -547,19 +550,19 @@ def _check_control_transition_layouts(
         )
         if box is None:
             continue
-        align_with = card.get("data-align-left-with")
-        if not align_with:
-            errors.append(f"переходная карточка {card_id!r} обязана задать data-align-left-with")
+        center_with = card.get("data-center-with")
+        if not center_with:
+            errors.append(f"переходная карточка {card_id!r} обязана задать data-center-with")
         else:
-            anchor = by_id.get(align_with)
+            anchor = by_id.get(center_with)
             if anchor is None:
                 errors.append(
-                    f"data-align-left-with={align_with!r} у карточки {card_id!r} "
+                    f"data-center-with={center_with!r} у карточки {card_id!r} "
                     "указывает на отсутствующий элемент"
                 )
             elif _local_tag(anchor.tag) != "rect":
                 errors.append(
-                    f"data-align-left-with={align_with!r} у карточки {card_id!r} "
+                    f"data-center-with={center_with!r} у карточки {card_id!r} "
                     "обязан указывать на <rect>"
                 )
             else:
@@ -567,13 +570,17 @@ def _check_control_transition_layouts(
                     anchor,
                     parents,
                     errors,
-                    contract="проверку левого выравнивания переходной карточки",
+                    contract="проверку центрирования переходной карточки",
                 )
-                if anchor_box is not None and abs(box[0] - anchor_box[0]) > 1e-9:
-                    errors.append(
-                        f"переходная карточка {card_id!r} не выровнена слева с "
-                        f"{align_with!r}: {box[0]:g} px вместо {anchor_box[0]:g} px"
-                    )
+                if anchor_box is not None:
+                    card_center = (box[0] + box[2]) / 2
+                    anchor_center = (anchor_box[0] + anchor_box[2]) / 2
+                    if abs(card_center - anchor_center) > 1e-9:
+                        errors.append(
+                            f"переходная карточка {card_id!r} не центрирована с "
+                            f"{center_with!r}: ось {card_center:g} px вместо "
+                            f"{anchor_center:g} px"
+                        )
         try:
             radius = float(card.get("rx"))
         except (TypeError, ValueError):
@@ -610,10 +617,14 @@ def _check_control_transition_layouts(
             absolute_x = text_x + offset[0]
             absolute_y = text_y + offset[1]
             text_anchor = text_element.get("text-anchor", "start")
-            if text_anchor not in {"start", ""}:
+            if text_anchor != "middle":
                 errors.append(
-                    f"слот {slot!r} карточки {card_id!r} обязан использовать левое "
-                    "выравнивание text-anchor=start"
+                    f"слот {slot!r} карточки {card_id!r} обязан использовать "
+                    "центрирование text-anchor=middle"
+                )
+            if abs(absolute_x - (box[0] + box[2]) / 2) > 1e-9:
+                errors.append(
+                    f"слот {slot!r} карточки {card_id!r} не находится на центральной оси"
                 )
             slots.append(
                 LayoutSlot(
@@ -640,22 +651,68 @@ def _check_control_transition_layouts(
         return layouts
     peer_reference = layouts[0]
     for layout in layouts[1:]:
-        if layout.peer_signature() != peer_reference.peer_signature():
+        if layout.signature() != peer_reference.signature():
             errors.append(
                 f"геометрия переходной карточки {layout.card_id!r} отличается от "
                 f"{peer_reference.card_id!r}: размеры, выравнивание и внутренние интервалы "
                 "однотипных контрольных переходов должны совпадать"
             )
     if reference_layout is not None:
-        reference_signature = reference_layout.template_signature()
+        reference_signature = reference_layout.signature()
         for layout in layouts:
-            if layout.template_signature() != reference_signature:
+            if layout.signature() != reference_signature:
                 errors.append(
                     f"геометрия переходной карточки {layout.card_id!r} отличается от "
-                    "эталона architecture_diagram_template.svg: высота, радиус и "
+                    "эталона architecture_diagram_template.svg: размеры, радиус и "
                     "внутренние интервалы вычисляются по шаблону"
                 )
     return layouts
+
+
+def _point_on_rect_boundary(point: tuple[float, float], box: tuple[float, float, float, float]) -> bool:
+    x, y = point
+    left, top, right, bottom = box
+    on_horizontal = left <= x <= right and (abs(y - top) < 1e-9 or abs(y - bottom) < 1e-9)
+    on_vertical = top <= y <= bottom and (abs(x - left) < 1e-9 or abs(x - right) < 1e-9)
+    return on_horizontal or on_vertical
+
+
+def _check_connector_source_attachment(root_el, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    for path in root_el.iter():
+        source_ref = path.get("data-source-ref")
+        if source_ref is None or _local_tag(path.tag) != "path":
+            continue
+        match = _PATH_START.match(path.get("d") or "")
+        source = by_id.get(source_ref)
+        if match is None or source is None or _local_tag(source.tag) != "rect":
+            continue
+        path_offset = _absolute_translation(
+            path,
+            parents,
+            errors,
+            contract="проверку начала исходящего коннектора",
+        )
+        source_box = _absolute_rect_box(
+            source,
+            parents,
+            errors,
+            contract="проверку границы источника коннектора",
+        )
+        if path_offset is None or source_box is None:
+            continue
+        start = (
+            float(match.group("x")) + path_offset[0],
+            float(match.group("y")) + path_offset[1],
+        )
+        if not _point_on_rect_boundary(start, source_box):
+            errors.append(
+                f"коннектор от {source_ref!r} начинается в точке "
+                f"({start[0]:g}, {start[1]:g}), не на границе источника "
+                f"({source_box[0]:g}, {source_box[1]:g})–"
+                f"({source_box[2]:g}, {source_box[3]:g})"
+            )
 
 
 def _check_direct_routes(root_el, errors: list[str]) -> None:
@@ -712,6 +769,7 @@ def check_geometry(
     _check_reference_gaps(vertical_gaps, reference_gaps, errors)
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
+    _check_connector_source_attachment(root_el, errors)
     _check_shared_routes_stay_outside_cards(root_el, errors)
     control_transition_layouts = _check_control_transition_layouts(
         root_el, errors, reference_transition_layout
