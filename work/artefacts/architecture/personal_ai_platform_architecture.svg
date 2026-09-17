@@ -50,7 +50,7 @@
     <marker id="arrow-support" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#7D8895"/></marker>
     <marker id="arrow-data" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#6C8173"/></marker>
     <style>
-      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #17202D; }
+      text { font-family: "DejaVu Sans", sans-serif; fill: #17202D; }
       .title { font-size: 34px; font-weight: 600; }
       .subtitle { font-size: 15px; font-weight: 400; fill: #596574; }
       .legend { font-size: 12px; font-weight: 500; fill: #4E5A68; }
