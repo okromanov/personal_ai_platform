@@ -87,8 +87,8 @@ _ARCHITECTURE_ID_PREFIXES = ("ARC_", "INF_", "SEC_CTL_")
 _SOURCE_PALETTE_CLASSES = {
     "blue": {"execution-card", "flow-label-blue"},
     "red": {"control-card", "flow-label-red"},
-    "green": {"data-card"},
-    "gray": {"neutral-card", "inner-card", "implementation-pill"},
+    "green": {"data-card", "flow-label-green"},
+    "gray": {"neutral-card", "inner-card", "implementation-pill", "flow-label-gray"},
 }
 _CONNECTOR_PALETTE_CLASSES = {
     "blue": {"main-line", "merge-line", "branch-line", "bus-line", "scheduled-line"},
@@ -130,9 +130,17 @@ _ARC_FLOW_FILL_CLASSES = {
     "data-card",
     "execution-card",
     "flow-label-blue",
+    "flow-label-gray",
+    "flow-label-green",
     "flow-label-red",
     "inner-card",
     "neutral-card",
+}
+_FLOW_LABEL_PALETTE_CLASSES = {
+    "blue": {"flow-label-blue"},
+    "red": {"flow-label-red"},
+    "green": {"flow-label-green"},
+    "gray": {"flow-label-gray"},
 }
 
 
@@ -372,6 +380,7 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
     """Require every visible ARC_FLOW label to sit on a semantic filled shape."""
 
     parents = _parent_map(root_el)
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
     for element in root_el.iter():
         if element.tag.rsplit("}", 1)[-1] != "text" or "legend-id" in _classes(element):
             continue
@@ -412,6 +421,35 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
             result.errors.append(
                 f"видимая подпись ARC_FLOW {label!r} находится в контейнере без "
                 "семантической заливки"
+            )
+            continue
+        label_palettes = _palette_for(_classes(container), _FLOW_LABEL_PALETTE_CLASSES)
+        if not label_palettes:
+            continue
+        connector_ref = container.get("data-connector-ref")
+        if not connector_ref:
+            result.errors.append(
+                f"плашка ARC_FLOW {label!r} обязана задать data-connector-ref, "
+                "чтобы её цвет проверялся по стрелке"
+            )
+            continue
+        connector = by_id.get(connector_ref)
+        if connector is None or connector.tag.rsplit("}", 1)[-1] != "path":
+            result.errors.append(
+                f"data-connector-ref={connector_ref!r} у плашки ARC_FLOW {label!r} "
+                "не указывает на существующий <path>"
+            )
+            continue
+        connector_palettes = _palette_for(_classes(connector), _CONNECTOR_PALETTE_CLASSES)
+        if len(label_palettes) != 1 or len(connector_palettes) != 1:
+            result.errors.append(
+                f"плашка ARC_FLOW {label!r} или её стрелка не имеет ровно одной "
+                "поддерживаемой цветовой категории"
+            )
+            continue
+        if label_palettes != connector_palettes:
+            result.errors.append(
+                f"цвет плашки ARC_FLOW {label!r} не совпадает с цветом стрелки {connector_ref!r}"
             )
 
 
