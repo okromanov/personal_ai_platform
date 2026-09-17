@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="991" height="700" viewBox="0 0 991 700" role="img" aria-labelledby="title desc" data-diagram-kind="architecture">
+<svg xmlns="http://www.w3.org/2000/svg" width="991" height="644" viewBox="0 0 991 644" role="img" aria-labelledby="title desc" data-diagram-kind="architecture">
   <title id="title">Шаблон архитектурной схемы</title>
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.6
+  diagram_version: 1.7
   generated_at: 2026-09-17
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.14
+  source: operations/architecture/diagram_geometry_foundations.md@1.15
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -20,7 +20,6 @@
       .nested-title { font-size: 14px; font-weight: 600; }
       .nested-text { font-size: 12px; font-weight: 400; fill: #5E6875; }
       .flow-text { font-size: 11px; font-weight: 600; fill: #315C88; }
-      .control-flow-text { font-size: 11px; font-weight: 600; fill: #A1463F; }
       .legend { font-size: 12px; font-weight: 500; fill: #4E5A68; }
       .legend-section { font-size: 11px; font-weight: 700; letter-spacing: 1px; fill: #707B89; }
       .legend-id { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; fill: #566271; }
@@ -32,11 +31,10 @@
       .neutral-card { fill: #FFFFFF; stroke: #A7B0BB; stroke-width: 1.2; }
       .inner-card { fill: #FFFFFF; stroke: #D1D7DE; stroke-width: 1; }
       .flow-label-blue { fill: #F3F7FB; stroke: #315C88; stroke-width: 0.9; }
-      .flow-label-red { fill: #FFF6F5; stroke: #A1463F; stroke-width: 0.9; }
       .main-line { fill: none; stroke: #315C88; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-main); }
     </style>
   </defs>
-  <rect width="991" height="556" fill="#FFFFFF"/>
+  <rect width="991" height="644" fill="#FFFFFF"/>
 
   <!-- Header -->
   <text x="40" y="44" class="title">Шаблон архитектурной схемы</text>
@@ -53,8 +51,8 @@
        and therefore inherits the source card's colour. Repeated independent
        control transitions use data-layout="control-transition" on the rect
        and matching identity/title/detail-1/detail-2 data-layout-slot values
-       on left-aligned text rows; diagram_lint compares them with this template. -->
-  <path class="main-line" d="M320 320V388" data-source-ref="template-component" data-route="direct"/>
+       on centred text rows; diagram_lint compares them with this template. -->
+  <path id="template-main-flow" class="main-line" d="M320 320V388" data-source-ref="template-component" data-route="direct"/>
 
   <!-- Component card: ID -> title -> short description -> nested object -->
   <g>
@@ -68,7 +66,7 @@
   </g>
 
   <!-- Flow label: width = text + 2*space-m, centred on the connector -->
-  <rect id="template-flow-label" x="242" y="340" width="157" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition"/>
+  <rect id="template-flow-label" x="242" y="340" width="157" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow"/>
   <text x="320" y="358" class="flow-text" text-anchor="middle">ARC_FLOW_XXX · Поток</text>
 
   <!-- Result / port node: 388 - (140 + 180) = layer-gap. The flow label
@@ -80,17 +78,15 @@
     <text x="68" y="453" class="component-text">Контракт результата или выходной порт</text>
   </g>
 
-  <!-- Standalone unnumbered control transition. Its left edge follows the
-       main column; text baselines and port rhythm are the calculated layout
+  <!-- Standalone unnumbered control transition. Its compact card is centred
+       on the main column; text baselines are the calculated layout
        reference for every data-layout="control-transition" card. -->
   <g>
-    <rect id="template-control-transition" x="40" y="500" width="560" height="152" rx="7" class="control-card" data-gap-from="template-result" data-gap-kind="transition" data-layout="control-transition" data-align-left-with="template-component"/>
-    <text x="68" y="528" class="component-id" data-layout-slot="identity">ARC_CMP_XXX · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
-    <text x="68" y="555" class="component-title" data-layout-slot="title">Название контрольного перехода</text>
-    <text x="68" y="579" class="component-text" data-layout-slot="detail-1">Первое пояснение решения или ограничения</text>
-    <text x="68" y="593" class="component-text" data-layout-slot="detail-2">Второе пояснение решения или ограничения</text>
-    <rect x="68" y="608" width="504" height="28" rx="4" class="flow-label-red"/>
-    <text x="320" y="627" class="control-flow-text" text-anchor="middle">ARC_FLOW_XXX · Выход перехода</text>
+    <rect id="template-control-transition" x="100" y="500" width="440" height="96" rx="7" class="control-card" data-gap-from="template-result" data-gap-kind="transition" data-layout="control-transition" data-center-with="template-component"/>
+    <text x="320" y="520" class="component-id" text-anchor="middle" data-layout-slot="identity">ARC_CMP_XXX · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
+    <text x="320" y="545" class="component-title" text-anchor="middle" data-layout-slot="title">Название контрольного перехода</text>
+    <text x="320" y="568" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Первое пояснение решения или ограничения</text>
+    <text x="320" y="584" class="component-text" text-anchor="middle" data-layout-slot="detail-2">Второе пояснение решения или ограничения</text>
   </g>
 
   <!-- Legend -->
@@ -110,5 +106,5 @@
     <text x="770" y="365" class="legend">Логический компонент</text>
   </g>
 
-  <text x="40" y="680" class="template-note">Шаблон — заполните ID, названия и описания реальным содержимым перед публикацией; см. diagram_geometry_foundations.md §15.1.</text>
+  <text x="40" y="624" class="template-note">Шаблон — заполните ID, названия и описания реальным содержимым перед публикацией; см. diagram_geometry_foundations.md §15.1.</text>
 </svg>
