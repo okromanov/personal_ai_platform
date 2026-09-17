@@ -1,22 +1,11 @@
 """Render-based checks for SVG diagrams: real text ink-boxes via headless
-Chromium, matched against diagram_geometry_foundations.md §6/§9/§11.
+Chromium, matched against diagram_geometry_foundations.md §6/§9/§10.
 
-Separate, deliberately optional tool -- not wired into diagram_lint.py,
-check.py --all, or run_suite.py. It closes a gap those static checks are
-honest about leaving open: diagram_geometry_lint.py's own module docstring
-says text-overflow and label-plaque sizing are unautomatable "without
-rendering the SVG or resolving an arbitrary transform stack ... requires
-... real text metrics ... remain manual items on the checklist". This
-module does exactly that rendering, at the cost of a dependency the
-canonical toolchain does not carry: Playwright plus a downloaded Chromium
-binary, which -- unlike every other pinned dev tool in
-operations/quality/requirements_dev.txt -- is not `pip install
---require-hashes`-reproducible (the browser binary is a separate,
-out-of-band download; see "Setup" below). Wiring this into the blocking
-gate would mean adding that download to CI (network access, ~300 MB,
-two more runners to provision) -- an infrastructure decision for the
-repository owner, not one this tool makes for them by quietly appearing
-in `check.py --all`.
+This is the rendered-geometry step of the canonical full quality suite.
+Static XML can prove that a text anchor sits on a rectangle's centre, but
+cannot prove the visible glyphs have the programmed padding: font metrics,
+side bearings and transforms only exist after rendering. This module closes
+that gap and makes padding profiles executable rather than advisory prose.
 
 What it checks, precisely
 --------------------------
@@ -30,6 +19,11 @@ What it checks, precisely
    label's left and right padding against its smallest enclosing shape
    must match within `_ANCHOR_TOLERANCE_PX` (foundations §11: "плашка и
    текст имеют общий геометрический центр").
+3. **Programmed padding profiles** (`find_padding_violations`): every shape
+   with `data-padding-profile` is checked against the profile selected by
+   its object type. `flow-caption` requires compact `space-m` padding around
+   the widest row; `flow-port` keeps a fixed cell but still requires at least
+   `space-m` and symmetric visible fields.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -39,10 +33,11 @@ its own bbox interior, so this can under-report overflow into a decision
 node's corners). These remain manual items on the checklist
 (diagram_geometry_foundations.md §17).
 
-Setup (once; not part of the pinned toolchain)
-------------------------------------------------
-    python3.12 -m pip install playwright==<version>
-    python3.12 -m playwright install chromium
+Runtime
+-------
+Playwright is pinned in `requirements_dev.txt`. The measurer first uses the
+system Chrome channel available on the canonical CI runner, then falls back
+to a Playwright-managed Chromium installation.
 
 Usage
 -----
@@ -55,12 +50,9 @@ plus operations/architecture/templates/*.svg).
 Testability
 -----------
 `measure_svg_elements` is the one function in this module that launches a
-browser; it is not exercised by the automated test suite (no Chromium
-binary is guaranteed present wherever tests run, and this repository's
-"no skipped tests" policy -- operations/scripts/quality/run_unittests.py
--- forbids a test that quietly no-ops when a dependency is missing).
-Every other function -- `find_overflow`, `find_asymmetric_anchors`,
-`lint_file`, `main` -- takes or defaults to a `measurer` callable, so
+browser. Every other function -- `find_overflow`,
+`find_asymmetric_anchors`, `find_padding_violations`, `lint_file`, `main` --
+takes or defaults to a `measurer` callable, so
 test_diagram_render_lint.py exercises the real checking logic and the real
 CLI against a fake, in-process measurer with canned `ElementBox` lists,
 with zero external dependencies. Run this module directly against real
@@ -89,21 +81,40 @@ from operations.scripts.common.project import (
 )
 from operations.scripts.documents.diagram_lint import default_targets
 
-_ANCHOR_TOLERANCE_PX = 2.0
+_ANCHOR_TOLERANCE_PX = 1.0
 _CONTAINMENT_TOLERANCE_PX = 0.5  # sub-pixel rounding slack for "fully inside"
+_PADDING_TOLERANCE_PX = 0.5
+_FLOW_LABEL_CLASSES = {
+    "flow-label",
+    "flow-label-blue",
+    "flow-label-gray",
+    "flow-label-green",
+    "flow-label-red",
+}
+_PADDING_PROFILES = {
+    # Content-sized label: width is the widest rendered row plus 2*space-m,
+    # rounded up by at most one 4 px grid step. Per-side padding is therefore
+    # 12 <= p < 14 px before the small render tolerance is applied.
+    "flow-caption": (12.0, 14.0),
+    # Fixed-width port cell: only the minimum and symmetry are normative.
+    "flow-port": (12.0, None),
+}
 
 _MEASURE_JS = """() => {
   const box = (el, kind) => {
-    const b = el.getBBox();
-    const m = el.getCTM();
+    const b = el.getBoundingClientRect();
     return {
       kind,
       tag: el.tagName.toLowerCase(),
+      id: el.getAttribute('id') || '',
       cls: el.getAttribute('class') || '',
       anchor: el.getAttribute('text-anchor') || 'start',
       content: (el.textContent || '').trim(),
-      x: b.x + (m ? m.e : 0),
-      y: b.y + (m ? m.f : 0),
+      label_for: el.getAttribute('data-label-for') || '',
+      padding_profile: el.getAttribute('data-padding-profile') || '',
+      equal_width_group: el.getAttribute('data-equal-width-group') || '',
+      x: b.x,
+      y: b.y,
       w: b.width,
       h: b.height,
     };
@@ -128,6 +139,10 @@ class ElementBox:
     y: float
     w: float
     h: float
+    id: str = ""
+    label_for: str = ""
+    padding_profile: str = ""
+    equal_width_group: str = ""
 
     @property
     def x1(self) -> float:
@@ -161,14 +176,17 @@ def measure_svg_elements(svg_text: str, *, executable_path: str | None = None) -
     "Testability" section for why this function has no automated test.
     """
 
-    from playwright.sync_api import sync_playwright  # local import: optional heavy dependency
+    from playwright.sync_api import Error as PlaywrightError
+    from playwright.sync_api import sync_playwright
 
     with sync_playwright() as playwright:
-        browser = (
-            playwright.chromium.launch(executable_path=executable_path)
-            if executable_path
-            else playwright.chromium.launch()
-        )
+        if executable_path:
+            browser = playwright.chromium.launch(executable_path=executable_path)
+        else:
+            try:
+                browser = playwright.chromium.launch(channel="chrome")
+            except PlaywrightError:
+                browser = playwright.chromium.launch()
         try:
             page = browser.new_page()
             page.set_content(f"<!doctype html><body style='margin:0'>{svg_text}</body>")
@@ -333,6 +351,105 @@ def find_asymmetric_anchors(
     return errors
 
 
+def _inline_edges(box: ElementBox, *, vertical: bool) -> tuple[float, float, float]:
+    if vertical:
+        return box.y, box.y1, box.h
+    return box.x, box.x1, box.w
+
+
+def find_padding_violations(elements: list[ElementBox]) -> list[str]:
+    """Check rendered ink padding selected by each object's padding profile.
+
+    Flow captions are content-sized, so the widest row (or the widest row of
+    an explicitly equal-width group) must leave `space-m` plus at most half of
+    one 4 px rounding step on either side. Port cells are fixed by their parent
+    grid and therefore only enforce the minimum field.
+    Every row is checked for visible leading/trailing symmetry after transforms.
+    """
+
+    texts_by_label: dict[str, list[ElementBox]] = {}
+    for element in elements:
+        if element.kind == "text" and element.label_for:
+            texts_by_label.setdefault(element.label_for, []).append(element)
+
+    errors: list[str] = []
+    grouped_captions: dict[str, list[tuple[str, float, float]]] = {}
+    for plaque in (
+        element
+        for element in elements
+        if element.kind == "shape" and element.padding_profile
+    ):
+        if plaque.w == 0 or plaque.h == 0:
+            # Geometry references inside <defs> are intentionally not rendered.
+            continue
+        profile = _PADDING_PROFILES.get(plaque.padding_profile)
+        if profile is None:
+            errors.append(
+                f"плашка {plaque.id or '<без id>'!r} использует неизвестный "
+                f"padding-профиль {plaque.padding_profile!r}"
+            )
+            continue
+        if not set(plaque.cls.split()).intersection(_FLOW_LABEL_CLASSES):
+            errors.append(
+                f"padding-профиль {plaque.padding_profile!r} назначен неподдерживаемому "
+                f"объекту {plaque.id or '<без id>'!r}"
+            )
+            continue
+        rows = texts_by_label.get(plaque.id, [])
+        if not rows:
+            errors.append(
+                f"плашка {plaque.id or '<без id>'!r} не имеет измеряемой строки data-label-for"
+            )
+            continue
+
+        vertical = plaque.h > plaque.w
+        plaque_start, plaque_end, plaque_inline = _inline_edges(plaque, vertical=vertical)
+        widest_inline = 0.0
+        smallest_side = float("inf")
+        for row in rows:
+            row_start, row_end, row_inline = _inline_edges(row, vertical=vertical)
+            leading = row_start - plaque_start
+            trailing = plaque_end - row_end
+            widest_inline = max(widest_inline, row_inline)
+            smallest_side = min(smallest_side, leading, trailing)
+            if abs(leading - trailing) > _ANCHOR_TOLERANCE_PX:
+                errors.append(
+                    f'строка "{row.content[:40]}" в {plaque.id!r} имеет несимметричные '
+                    f"поля: первое {leading:.1f}px, второе {trailing:.1f}px"
+                )
+
+        minimum, maximum = profile
+        if smallest_side < minimum - _PADDING_TOLERANCE_PX:
+            errors.append(
+                f"плашка {plaque.id!r} нарушает минимальный padding профиля "
+                f"{plaque.padding_profile!r}: {smallest_side:.1f}px < {minimum:.1f}px"
+            )
+        average_widest_padding = (plaque_inline - widest_inline) / 2
+        if maximum is not None and plaque.equal_width_group:
+            grouped_captions.setdefault(plaque.equal_width_group, []).append(
+                (plaque.id, plaque_inline, widest_inline)
+            )
+        elif maximum is not None and average_widest_padding >= maximum + _PADDING_TOLERANCE_PX:
+            errors.append(
+                f"плашка {plaque.id!r} некомпактна для профиля "
+                f"{plaque.padding_profile!r}: поле {average_widest_padding:.1f}px, "
+                f"допустимо < {maximum:.1f}px"
+            )
+    for group, members in grouped_captions.items():
+        group_inline = min(member[1] for member in members)
+        group_widest = max(member[2] for member in members)
+        group_padding = (group_inline - group_widest) / 2
+        maximum = _PADDING_PROFILES["flow-caption"][1]
+        assert maximum is not None
+        if group_padding >= maximum + _PADDING_TOLERANCE_PX:
+            errors.append(
+                f"группа равной ширины {group!r} некомпактна для профиля "
+                f"'flow-caption': поле по самой широкой строке группы "
+                f"{group_padding:.1f}px, допустимо < {maximum:.1f}px"
+            )
+    return errors
+
+
 def _display_name(path: Path, root: Path) -> str:
     try:
         return relative_posix(path, root)
@@ -347,6 +464,7 @@ def lint_file(path: Path, root: Path, *, measurer: Measurer = measure_svg_elemen
     canvas = _canvas_box(text)
     result.errors.extend(find_overflow(elements, canvas))
     result.errors.extend(find_asymmetric_anchors(elements, canvas))
+    result.errors.extend(find_padding_violations(elements))
     return result
 
 
@@ -354,9 +472,8 @@ def main(*, measurer: Measurer = measure_svg_elements) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Рендер-проверка SVG-схем через headless Chromium: переполнение текста "
-            "за границы объектов, несимметричные поля центрированных подписей. "
-            "Требует Playwright + Chromium (см. docstring модуля); не входит в "
-            "check.py --all и run_suite.py."
+            "за границы объектов, несимметричные поля и программные padding-профили. "
+            "Требует Playwright и Chrome/Chromium; входит в полный quality gate."
         )
     )
     parser.add_argument(
