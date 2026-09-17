@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.9
+  diagram_version: 1.10
   generated_at: 2026-09-17
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.17
+  source: operations/architecture/diagram_geometry_foundations.md@1.18
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -37,7 +37,7 @@
          the SVG template, not in Python constants, and is measured by lint. -->
     <g id="template-multiline-label-reference">
       <path id="template-multiline-flow" class="main-line" d="M100 -20V0" data-shared-route="true" data-route="direct"/>
-      <rect id="template-flow-label-multiline" x="0" y="0" width="200" height="44" rx="4" class="flow-label-blue" data-connector-ref="template-multiline-flow" data-layout="flow-label-multiline"/>
+      <rect id="template-flow-label-multiline" x="20" y="0" width="160" height="44" rx="4" class="flow-label-blue" data-connector-ref="template-multiline-flow" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>
       <text x="100" y="17" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Первая строка подписи</text>
       <text x="100" y="33" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Вторая строка подписи</text>
     </g>
@@ -79,7 +79,7 @@
   </g>
 
   <!-- Flow label: width = text + 2*space-m, centred on the connector -->
-  <rect id="template-flow-label" x="242" y="340" width="156" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow" data-layout="flow-label"/>
+  <rect id="template-flow-label" x="234" y="340" width="172" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
   <text x="320" y="359" class="flow-text" text-anchor="middle" data-label-for="template-flow-label">ARC_FLOW_XXX · Поток</text>
 
   <!-- Result / port node: 388 - (140 + 180) = layer-gap. The flow label
