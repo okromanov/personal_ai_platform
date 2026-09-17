@@ -1,7 +1,7 @@
 """Coordinate-based geometry checks for SVG diagrams, factored out of
 diagram_lint.py so that module stays focused on metadata/traceability.
 
-Scope, precisely — this module enforces eight invariants that are computable
+Scope, precisely — this module enforces ten invariants that are computable
 from raw XML attributes without rendering the SVG:
 
 1. **Half-pixel coordinate discipline.** Every numeric `x`/`y`/`width`/
@@ -47,6 +47,12 @@ from raw XML attributes without rendering the SVG:
    on the referenced rectangle's boundary after translation-only transforms
    are resolved. This prevents a visually plausible arrow from hanging in the
    gap below or beside its declared source.
+9. **Grouped side-port spacing.** Paths marked with the same `data-port-group`
+   end on the declared side of one `data-port-target`; the distance between
+   their endpoints matches the port-gap geometry registered in the template.
+10. **Flow-label geometry.** One-line plaques marked
+   `data-layout="flow-label"` share template-derived height, radius, centred
+   text baseline, and text-anchor. Plaque width remains content-derived.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -74,9 +80,10 @@ infer more automated coverage than exists.
 
 Unreferenced `right-port-gap`, `layer-gap`, `right-rail-gap` and the
 nested-bottom-gap family (diagram_geometry_foundations.md §6, §10) are NOT
-inferred here: arbitrary transforms and label plaques require real rendered
-geometry. Only pairs linked through `data-gap-from` and translation-only
-ancestors are checked; other spacing remains a manual checklist item in
+inferred here: arbitrary transforms require real rendered geometry. Layer
+pairs must be linked through `data-gap-from`; side ports must be linked through
+`data-port-group`; one-line plaques must opt in through
+`data-layout="flow-label"`. Other spacing remains a manual checklist item in
 diagram_geometry_foundations.md §17.
 """
 
@@ -119,6 +126,7 @@ _PATH_START = re.compile(
     r"^\s*M\s*(?P<x>-?\d+(?:\.\d+)?)[ ,]+(?P<y>-?\d+(?:\.\d+)?)",
     re.IGNORECASE,
 )
+_PATH_SEGMENT = re.compile(r"(?P<command>[MLHV])(?P<args>[^MLHV]*)", re.IGNORECASE)
 _INDEPENDENT_CARD_CLASSES = {
     "control-card",
     "data-card",
@@ -133,6 +141,8 @@ class GeometryResult:
     warnings: list[str]
     vertical_gaps: list["VerticalGap"] = field(default_factory=list)
     control_transition_layouts: list["ControlTransitionLayout"] = field(default_factory=list)
+    port_gaps: list["PortGap"] = field(default_factory=list)
+    flow_label_layouts: list["FlowLabelLayout"] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -164,6 +174,28 @@ class ControlTransitionLayout:
         """Geometry shared by the template and every transition card."""
 
         return self.width, self.height, self.radius, self.slots
+
+
+@dataclass(frozen=True)
+class PortGap:
+    group: str
+    target_id: str
+    side: str
+    value: float
+
+
+@dataclass(frozen=True)
+class FlowLabelLayout:
+    label_id: str
+    height: float
+    radius: float
+    text_y_offset: float
+    text_anchor: str
+
+    def signature(self) -> tuple[float, float, float, str]:
+        """Vertical geometry shared by one-line flow-label plaques."""
+
+        return self.height, self.radius, self.text_y_offset, self.text_anchor
 
 
 def _local_tag(tag: str) -> str:
@@ -677,6 +709,212 @@ def _point_on_rect_boundary(
     return on_horizontal or on_vertical
 
 
+def _path_terminal_point(path_data: str) -> tuple[float, float] | None:
+    """Return the last point of a simple absolute orthogonal SVG path."""
+
+    x: float | None = None
+    y: float | None = None
+    segments = list(_PATH_SEGMENT.finditer(path_data))
+    if not segments or "".join(match.group(0) for match in segments) != path_data.strip():
+        return None
+    for segment in segments:
+        command = segment.group("command")
+        if command != command.upper():
+            return None
+        values = [float(value) for value in _PATH_NUMBER.findall(segment.group("args"))]
+        if command in {"M", "L"} and len(values) == 2:
+            x, y = values
+        elif command == "H" and len(values) == 1 and y is not None:
+            x = values[0]
+        elif command == "V" and len(values) == 1 and x is not None:
+            y = values[0]
+        else:
+            return None
+    if x is None or y is None:
+        return None
+    return x, y
+
+
+def _measure_port_gaps(root_el, errors: list[str]) -> list[PortGap]:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    grouped: dict[str, list[tuple[str, str, tuple[float, float]]]] = {}
+    for path in root_el.iter():
+        group = path.get("data-port-group")
+        if group is None:
+            continue
+        if _local_tag(path.tag) != "path":
+            errors.append("data-port-group разрешён только для <path>")
+            continue
+        target_id = path.get("data-port-target")
+        side = path.get("data-port-side")
+        if not target_id or side not in {"left", "right"}:
+            errors.append(
+                f"портовая группа {group!r} обязана задать data-port-target и "
+                "data-port-side='left'|'right'"
+            )
+            continue
+        target = by_id.get(target_id)
+        terminal = _path_terminal_point(path.get("d") or "")
+        if target is None or _local_tag(target.tag) != "rect" or terminal is None:
+            errors.append(
+                f"портовая группа {group!r} не позволяет вычислить конечную точку "
+                f"или прямоугольник {target_id!r}"
+            )
+            continue
+        offset = _absolute_translation(
+            path,
+            parents,
+            errors,
+            contract="проверку интервала входных портов",
+        )
+        target_box = _absolute_rect_box(
+            target,
+            parents,
+            errors,
+            contract="проверку границы получателя портовой группы",
+        )
+        if offset is None or target_box is None:
+            continue
+        endpoint = terminal[0] + offset[0], terminal[1] + offset[1]
+        expected_x = target_box[0] if side == "left" else target_box[2]
+        if abs(endpoint[0] - expected_x) > 1e-9 or not (
+            target_box[1] <= endpoint[1] <= target_box[3]
+        ):
+            errors.append(
+                f"коннектор портовой группы {group!r} заканчивается в "
+                f"({endpoint[0]:g}, {endpoint[1]:g}), не на {side}-границе "
+                f"получателя {target_id!r}"
+            )
+            continue
+        grouped.setdefault(group, []).append((target_id, side, endpoint))
+
+    gaps: list[PortGap] = []
+    for group, endpoints in grouped.items():
+        if len(endpoints) != 2:
+            errors.append(
+                f"портовая группа {group!r} должна содержать ровно два коннектора, "
+                f"фактически {len(endpoints)}"
+            )
+            continue
+        targets = {(target_id, side) for target_id, side, _ in endpoints}
+        if len(targets) != 1:
+            errors.append(
+                f"коннекторы портовой группы {group!r} должны входить в одну границу "
+                "одного получателя"
+            )
+            continue
+        target_id, side = targets.pop()
+        gap = abs(endpoints[0][2][1] - endpoints[1][2][1])
+        gaps.append(PortGap(group=group, target_id=target_id, side=side, value=gap))
+    return gaps
+
+
+def _check_reference_port_gaps(
+    gaps: list[PortGap], reference_port_gap: float | None, errors: list[str]
+) -> None:
+    if reference_port_gap is None:
+        return
+    for gap in gaps:
+        if abs(gap.value - reference_port_gap) > 1e-9:
+            errors.append(
+                f"интервал портовой группы {gap.group!r}: эталон шаблона "
+                f"{reference_port_gap:g} px, фактически {gap.value:g} px"
+            )
+
+
+def _check_flow_label_layouts(
+    root_el,
+    errors: list[str],
+    reference_layout: FlowLabelLayout | None,
+) -> list[FlowLabelLayout]:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    texts_by_label: dict[str, list] = {}
+    for element in root_el.iter():
+        label_for = element.get("data-label-for")
+        if label_for is not None:
+            texts_by_label.setdefault(label_for, []).append(element)
+
+    layouts: list[FlowLabelLayout] = []
+    for plaque in root_el.iter():
+        if plaque.get("data-layout") != "flow-label":
+            continue
+        plaque_id = plaque.get("id", "<без id>")
+        if _local_tag(plaque.tag) != "rect":
+            errors.append('data-layout="flow-label" разрешён только для <rect>')
+            continue
+        box = _absolute_rect_box(
+            plaque,
+            parents,
+            errors,
+            contract="сравнение геометрии плашек потока",
+        )
+        try:
+            radius = float(plaque.get("rx"))
+        except (TypeError, ValueError):
+            errors.append(f"плашка потока {plaque_id!r} обязана иметь числовой rx")
+            continue
+        labels = texts_by_label.get(plaque_id, [])
+        if len(labels) != 1:
+            errors.append(
+                f"плашка потока {plaque_id!r} должна иметь ровно один <text "
+                f"data-label-for={plaque_id!r}>"
+            )
+            continue
+        text_element = labels[0]
+        if _local_tag(text_element.tag) != "text" or box is None:
+            errors.append(f"data-label-for={plaque_id!r} обязан стоять на <text>")
+            continue
+        try:
+            text_x = float(text_element.get("x"))
+            text_y = float(text_element.get("y"))
+        except (TypeError, ValueError):
+            errors.append(f"подпись плашки {plaque_id!r} обязана иметь числовые x и y")
+            continue
+        offset = _absolute_translation(
+            text_element,
+            parents,
+            errors,
+            contract="сравнение внутренних полей плашек потока",
+        )
+        if offset is None:
+            continue
+        absolute_x = text_x + offset[0]
+        absolute_y = text_y + offset[1]
+        text_anchor = text_element.get("text-anchor", "start")
+        if text_anchor != "middle" or abs(absolute_x - (box[0] + box[2]) / 2) > 1e-9:
+            errors.append(
+                f"подпись плашки {plaque_id!r} обязана быть центрирована по горизонтали"
+            )
+        layouts.append(
+            FlowLabelLayout(
+                label_id=plaque_id,
+                height=box[3] - box[1],
+                radius=radius,
+                text_y_offset=absolute_y - box[1],
+                text_anchor=text_anchor,
+            )
+        )
+
+    if not layouts:
+        return layouts
+    peer_signature = layouts[0].signature()
+    for layout in layouts[1:]:
+        if layout.signature() != peer_signature:
+            errors.append(
+                f"геометрия плашки потока {layout.label_id!r} отличается от "
+                f"{layouts[0].label_id!r}: вертикальные поля должны совпадать"
+            )
+    if reference_layout is not None:
+        for layout in layouts:
+            if layout.signature() != reference_layout.signature():
+                errors.append(
+                    f"геометрия плашки потока {layout.label_id!r} отличается от "
+                    "эталона architecture_diagram_template.svg"
+                )
+    return layouts
+
+
 def _check_connector_source_attachment(root_el, errors: list[str]) -> None:
     parents = {child: parent for parent in root_el.iter() for child in parent}
     by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
@@ -748,6 +986,8 @@ def check_geometry(
     *,
     reference_gaps: dict[str, float] | None = None,
     reference_transition_layout: ControlTransitionLayout | None = None,
+    reference_port_gap: float | None = None,
+    reference_flow_label_layout: FlowLabelLayout | None = None,
 ) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
@@ -770,13 +1010,20 @@ def check_geometry(
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
     _check_connector_source_attachment(root_el, errors)
+    port_gaps = _measure_port_gaps(root_el, errors)
+    _check_reference_port_gaps(port_gaps, reference_port_gap, errors)
     _check_shared_routes_stay_outside_cards(root_el, errors)
     control_transition_layouts = _check_control_transition_layouts(
         root_el, errors, reference_transition_layout
+    )
+    flow_label_layouts = _check_flow_label_layouts(
+        root_el, errors, reference_flow_label_layout
     )
     return GeometryResult(
         errors=errors,
         warnings=warnings,
         vertical_gaps=vertical_gaps,
         control_transition_layouts=control_transition_layouts,
+        port_gaps=port_gaps,
+        flow_label_layouts=flow_label_layouts,
     )
