@@ -3,7 +3,7 @@ id: operations_architecture_diagram_style_guide
 type: guide
 document_state: current
 version: 4.6
-updated: 2026-09-16
+updated: 2026-09-17
 depends_on:
   - project_rules
   - architecture_baseline

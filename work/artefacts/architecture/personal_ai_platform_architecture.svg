@@ -4,7 +4,7 @@
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
   diagram_version: 1.13
-  generated_at: 2026-09-16T19:42:59+00:00
+  generated_at: 2026-09-17T04:57:00+00:00
   status: current
   source: specifications/architecture_baseline.md@1.7
   source: specifications/system_specification.md@1.5
@@ -108,7 +108,7 @@
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.13 · Обновлено 2026-09-16 19:42 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.13 · Обновлено 2026-09-17 04:57 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->
