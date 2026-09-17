@@ -53,8 +53,10 @@ from raw XML attributes without rendering the SVG:
 10. **Flow-label geometry.** Every rectangle whose class is `flow-label-*`
    must declare a supported one- or two-line layout and bind every text row
    through `data-label-for`. Height, radius, centred baselines and text anchors
-   are compared with template geometry. Equal-width groups are checked from
-   geometry rather than copied constants.
+   are compared with template geometry. Every plaque selects a programmed
+   `data-padding-profile`; every row stays on the exact geometric centre, while
+   the rendered-padding gate checks the visible ink box without per-label hacks.
+   Equal-width groups are checked from geometry rather than copied constants.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -145,6 +147,7 @@ _FLOW_LABEL_CLASSES = {
     "flow-label-red",
 }
 _FLOW_LABEL_ROW_COUNTS = {"flow-label": 1, "flow-label-multiline": 2}
+_FLOW_LABEL_PADDING_PROFILES = {"flow-caption", "flow-port"}
 
 
 @dataclass
@@ -206,25 +209,14 @@ class FlowLabelLayout:
     text_y_offsets: tuple[float, ...]
     text_anchors: tuple[str, ...]
 
-    def signature(
-        self,
-    ) -> tuple[str, float | None, float, float, tuple[float, ...], tuple[str, ...]]:
+    def signature(self) -> tuple[str, float, float, tuple[float, ...], tuple[str, ...]]:
         """Geometry shared by every flow-label plaque of one layout kind.
 
-        One-line labels remain content-sized. Wrapped labels are the compact,
-        symmetric side-label pattern and therefore inherit their width from
-        the template as well as their height and baselines.
+        Width remains content-derived for captions and parent-grid-derived for
+        ports; rendered padding profiles validate it separately.
         """
 
-        template_width = self.width if self.kind == "flow-label-multiline" else None
-        return (
-            self.kind,
-            template_width,
-            self.height,
-            self.radius,
-            self.text_y_offsets,
-            self.text_anchors,
-        )
+        return self.kind, self.height, self.radius, self.text_y_offsets, self.text_anchors
 
 
 def _local_tag(tag: str) -> str:
@@ -900,6 +892,17 @@ def _check_flow_label_layouts(
                 "'flow-label' или 'flow-label-multiline'"
             )
             continue
+        padding_profile = plaque.get("data-padding-profile")
+        if padding_profile not in _FLOW_LABEL_PADDING_PROFILES:
+            errors.append(
+                f"плашка потока {plaque_id!r} обязана задать data-padding-profile="
+                "'flow-caption' или 'flow-port'"
+            )
+        elif kind == "flow-label-multiline" and padding_profile != "flow-caption":
+            errors.append(
+                f"двухстрочная плашка потока {plaque_id!r} поддерживает только "
+                "data-padding-profile='flow-caption'"
+            )
         equal_width_group = plaque.get("data-equal-width-group")
         ancestor = parents.get(plaque)
         under_defs = False
@@ -951,8 +954,11 @@ def _check_flow_label_layouts(
                 valid_rows = False
                 continue
             text_anchor = text_element.get("text-anchor", "start")
-            if text_anchor != "middle" or abs(text_x - (plaque_x + width / 2)) > 1e-9:
-                errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке")
+            expected_x = plaque_x + width / 2
+            if text_anchor != "middle" or abs(text_x - expected_x) > 1e-9:
+                errors.append(
+                    f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке"
+                )
             rows.append((text_y - plaque_y, text_anchor))
         if not valid_rows:
             continue
