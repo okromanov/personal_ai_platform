@@ -962,6 +962,12 @@ def _check_flow_label_layouts(
             length_adjust = text_element.get("lengthAdjust")
             if padding_profile == "flow-caption" and kind == "flow-label":
                 expected_text_length = width - 2 * _FLOW_CAPTION_INLINE_PADDING
+                has_inline_segments = any(
+                    _local_tag(child.tag) == "tspan" for child in text_element
+                )
+                expected_length_adjust = (
+                    "spacingAndGlyphs" if has_inline_segments else "spacing"
+                )
                 try:
                     actual_text_length = float(text_length)
                 except (TypeError, ValueError):
@@ -976,10 +982,10 @@ def _check_flow_label_layouts(
                             f"width - 2 × space-m = {expected_text_length:g} px, "
                             f"фактически {actual_text_length:g} px"
                         )
-                if length_adjust != "spacing":
+                if length_adjust != expected_length_adjust:
                     errors.append(
                         f"однострочная flow-caption {plaque_id!r} обязана задать "
-                        "lengthAdjust='spacing'"
+                        f"lengthAdjust={expected_length_adjust!r}"
                     )
             elif padding_profile == "flow-port" and (
                 text_length is not None or length_adjust is not None
