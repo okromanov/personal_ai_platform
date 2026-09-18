@@ -792,8 +792,7 @@ def measure_reference_card_text_inset(template_text: str) -> tuple[float | None,
         (
             el
             for el in list(parent)[list(parent).index(component) + 1 :]
-            if _local_tag(el.tag) == "text"
-            and "component-id" in (el.get("class") or "").split()
+            if _local_tag(el.tag) == "text" and "component-id" in (el.get("class") or "").split()
         ),
         None,
     )

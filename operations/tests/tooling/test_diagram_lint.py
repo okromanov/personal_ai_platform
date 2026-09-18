@@ -2326,9 +2326,7 @@ class DiagramLintTests(unittest.TestCase):
 class ArchitectureCardAlignmentTests(unittest.TestCase):
     def test_component_and_transition_rows_use_template_left_inset(self) -> None:
         root = Path(__file__).resolve().parents[3]
-        template = (root / diagram_lint.ARCHITECTURE_TEMPLATE_RELATIVE).read_text(
-            encoding="utf-8"
-        )
+        template = (root / diagram_lint.ARCHITECTURE_TEMPLATE_RELATIVE).read_text(encoding="utf-8")
         svg = (
             root / "work/artefacts/architecture/personal_ai_platform_architecture.svg"
         ).read_text(encoding="utf-8")
