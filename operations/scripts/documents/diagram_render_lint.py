@@ -65,7 +65,6 @@ files (see Usage) to exercise the browser path itself.
 
 from __future__ import annotations
 
-import argparse
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -77,18 +76,13 @@ from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from operations.scripts.common.project import (
-    find_project_root,
-    read_text,
-    relative_posix,
-    require_supported_python,
-)
+from operations.scripts.common.project import read_text, relative_posix
 from operations.scripts.documents.diagram_geometry_lint import (
     measure_reference_flow_caption_padding,
 )
 from operations.scripts.documents.diagram_lint import (
     ARCHITECTURE_TEMPLATE_RELATIVE,
-    default_targets,
+    run_cli,
 )
 
 _ANCHOR_TOLERANCE_PX = 3.0
@@ -512,48 +506,16 @@ def lint_file(path: Path, root: Path, *, measurer: Measurer = measure_svg_elemen
 
 
 def main(*, measurer: Measurer = measure_svg_elements) -> int:
-    parser = argparse.ArgumentParser(
+    return run_cli(
         description=(
             "Рендер-проверка SVG-схем через headless Chromium: переполнение текста "
             "за границы объектов, несимметричные поля и программные padding-профили. "
             "Требует Playwright и Chrome/Chromium; входит в полный quality gate."
-        )
+        ),
+        paths_help="Файлы .svg для проверки. По умолчанию — те же цели, что у diagram_lint.py.",
+        no_targets_message="Файлы схем не найдены — проверять нечего.",
+        lint_one=lambda target, root: lint_file(target, root, measurer=measurer),
     )
-    parser.add_argument(
-        "paths",
-        nargs="*",
-        type=Path,
-        help="Файлы .svg для проверки. По умолчанию — те же цели, что у diagram_lint.py.",
-    )
-    args = parser.parse_args()
-    require_supported_python()
-    root = find_project_root(Path.cwd())
-
-    targets = [p if p.is_absolute() else Path.cwd() / p for p in args.paths] or default_targets(
-        root
-    )
-    if not targets:
-        print("Файлы схем не найдены — проверять нечего.")
-        return 0
-
-    all_ok = True
-    total_errors = 0
-    for target in targets:
-        if not target.is_file():
-            print(f"[FAIL] {target}")
-            print(f"  ERROR: файл не найден: {target}")
-            all_ok = False
-            total_errors += 1
-            continue
-        result = lint_file(target, root, measurer=measurer)
-        print(f"[{'PASS' if result.ok else 'FAIL'}] {result.file}")
-        for error in result.errors:
-            print(f"  ERROR: {error}")
-        all_ok = all_ok and result.ok
-        total_errors += len(result.errors)
-
-    print(f"Итог: файлов={len(targets)}, errors={total_errors}")
-    return 0 if all_ok else 1
 
 
 if __name__ == "__main__":

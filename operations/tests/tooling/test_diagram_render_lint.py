@@ -838,15 +838,18 @@ class MainCliTests(unittest.TestCase):
         self.assertEqual(calls, [])
 
     def test_main_reports_no_targets_when_default_targets_is_empty(self) -> None:
+        # main() now delegates its arg-parsing/target-resolution loop to
+        # diagram_lint.run_cli, so find_project_root/default_targets are
+        # resolved from diagram_lint's own module namespace, not this one's.
         with tempfile.TemporaryDirectory() as tmp:
             with (
                 patch("os.getcwd", return_value=tmp),
                 patch(
-                    "operations.scripts.documents.diagram_render_lint.find_project_root",
+                    "operations.scripts.documents.diagram_lint.find_project_root",
                     return_value=Path(tmp),
                 ),
                 patch(
-                    "operations.scripts.documents.diagram_render_lint.default_targets",
+                    "operations.scripts.documents.diagram_lint.default_targets",
                     return_value=[],
                 ),
                 patch("sys.argv", ["diagram_render_lint.py"]),
@@ -873,7 +876,7 @@ class MainCliTests(unittest.TestCase):
             )
             with (
                 patch(
-                    "operations.scripts.documents.diagram_render_lint.find_project_root",
+                    "operations.scripts.documents.diagram_lint.find_project_root",
                     return_value=root,
                 ),
                 patch("sys.argv", ["diagram_render_lint.py"]),
