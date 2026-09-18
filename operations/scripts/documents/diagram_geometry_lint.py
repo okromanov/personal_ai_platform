@@ -965,9 +965,7 @@ def _check_flow_label_layouts(
                 has_inline_segments = any(
                     _local_tag(child.tag) == "tspan" for child in text_element
                 )
-                expected_length_adjust = (
-                    "spacingAndGlyphs" if has_inline_segments else "spacing"
-                )
+                expected_length_adjust = "spacingAndGlyphs" if has_inline_segments else "spacing"
                 try:
                     actual_text_length = float(text_length)
                 except (TypeError, ValueError):
