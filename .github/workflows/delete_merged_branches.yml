@@ -65,9 +65,15 @@ jobs:
               page += 1
 
           # Удаляются ветки любого префикса, а не только codex/*. Границу
-          # держат два условия ниже, а не имя ветки: это не ветка по умолчанию,
-          # и GitHub подтверждает для неё слитый pull request. Защищённая ветка
-          # без слитого PR под это не подпадает.
+          # держат три условия ниже, а не имя ветки: это не ветка по умолчанию,
+          # GitHub подтверждает для неё слитый pull request, и у неё сейчас нет
+          # открытого pull request. Последнее условие обязательно: имя ветки
+          # переиспользуется (тот же branch name перезапускается от main после
+          # слияния — см. process в AGENTS.md), поэтому старый закрытый+слитый
+          # PR с тем же head остаётся в истории и без явной проверки на "нет
+          # открытого PR сейчас" ветка с новым открытым PR удаляется тоже —
+          # это и произошло на практике (issue: удалена ветка под открытым PR
+          # только из-за более раннего слитого PR с тем же именем).
           for branch in branches:
               name = branch["name"]
               if name == default_branch or branch.get("protected"):
@@ -75,8 +81,10 @@ jobs:
               head = quote(f"{owner}:{name}", safe="")
               pulls = request(
                   "GET",
-                  f"/repos/{repository}/pulls?state=closed&head={head}&per_page=100",
+                  f"/repos/{repository}/pulls?state=all&head={head}&per_page=100",
               )
+              if any(pull.get("state") == "open" for pull in pulls):
+                  continue
               if not any(pull.get("merged_at") for pull in pulls):
                   continue
               encoded_ref = quote(f"heads/{name}", safe="/")

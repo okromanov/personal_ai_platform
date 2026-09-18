@@ -1388,6 +1388,8 @@ jobs:
           for branch in branches:
               if name == default_branch or branch.get("protected"):
                   continue
+              if any(pull.get("state") == "open" for pull in pulls):
+                  continue
               if not any(pull.get("merged_at") for pull in pulls):
                   continue
               request("DELETE", f"/repos/{repository}/git/refs/{encoded_ref}")
@@ -1439,14 +1441,18 @@ jobs:
         """Границу держит не имя ветки, а её свойства и доказанный merge.
 
         Владелец решил удалять слитые ветки любого префикса, поэтому проверка
-        префикса `codex/*` снята. Взамен обязаны остаться три ограничения: не
-        трогать ветку по умолчанию, не трогать защищённую ветку и удалять
-        только ту, для которой GitHub подтверждает слитый pull request.
+        префикса `codex/*` снята. Взамен обязаны остаться четыре ограничения:
+        не трогать ветку по умолчанию, не трогать защищённую ветку, удалять
+        только ту, для которой GitHub подтверждает слитый pull request, и не
+        трогать ветку с открытым сейчас pull request — без последнего гарда
+        имя ветки, переиспользованное после более раннего слияния, удаляет
+        ветку под новым открытым PR (реальный инцидент).
         """
         for marker, replacement, expected in (
             ("name == default_branch", "False", "ветка по умолчанию"),
             ('branch.get("protected")', "False", "защищённая ветка"),
             ('pull.get("merged_at")', "True", "слитым pull request"),
+            ('pull.get("state") == "open"', "False", "открытым сейчас pull request"),
         ):
             with self.subTest(marker=marker):
                 errors = self._errors(self.WORKFLOW.replace(marker, replacement, 1))
