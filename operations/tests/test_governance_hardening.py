@@ -419,6 +419,8 @@ jobs:
       - run: |-
           if name == default_branch or branch.get(\"protected\"):
               continue
+          if any(pull.get(\"state\") == \"open\" for pull in pulls):
+              continue
           if not any(pull.get(\"merged_at\") for pull in pulls):
               continue
           delete(name)
