@@ -24,7 +24,10 @@ What it checks, precisely
    its object type. A one-line `flow-caption` fixes its text advance to the
    inner slot, so every renderer preserves `space-m` padding; multiline
    captions use the widest row. `flow-port` keeps a fixed cell but still
-   requires at least `space-m` and symmetric visible fields.
+   requires at least `space-m` and symmetric visible fields. `space-m`
+   itself is measured from the architecture template's own captions
+   (`_reference_padding_profiles`), the same value diagram_geometry_lint.py
+   derives for the static textLength check -- not a literal kept here.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -80,6 +83,9 @@ from operations.scripts.common.project import (
     relative_posix,
     require_supported_python,
 )
+from operations.scripts.documents.diagram_geometry_lint import (
+    measure_reference_flow_caption_padding,
+)
 from operations.scripts.documents.diagram_lint import default_targets
 
 _ANCHOR_TOLERANCE_PX = 3.0
@@ -93,14 +99,37 @@ _FLOW_LABEL_CLASSES = {
     "flow-label-green",
     "flow-label-red",
 }
-_PADDING_PROFILES = {
-    # Content-sized label: a one-line caption normalizes its SVG text advance
-    # to width - 2*space-m. The 1 px tolerance covers ink side bearings and
-    # sub-pixel rounding; it is not permission for a wider object-specific gap.
-    "flow-caption": (12.0, 12.0),
-    # Fixed-width port cell: only the minimum and symmetry are normative.
-    "flow-port": (12.0, None),
-}
+_ARCHITECTURE_TEMPLATE_RELATIVE = Path(
+    "operations/architecture/templates/architecture_diagram_template.svg"
+)
+
+PaddingProfiles = dict[str, tuple[float, float | None]]
+
+
+def _reference_padding_profiles(root: Path) -> tuple[PaddingProfiles | None, list[str]]:
+    """Build the padding-profile table from the architecture template's own
+    measured `space-m`, rather than a literal copied a second time into this
+    module (diagram_geometry_lint.py's `_FLOW_CAPTION_INLINE_PADDING` was the
+    first copy; both are now derived from the same template).
+
+    `flow-caption` is content-sized: a one-line caption normalizes its SVG
+    text advance to width - 2*space-m, so both the minimum and the maximum
+    equal the measured space-m; the 1 px tolerance applied where this is used
+    covers ink side bearings and sub-pixel rounding, not a wider
+    object-specific gap. `flow-port` is a fixed-width cell, so only the
+    minimum is normative.
+    """
+
+    template = root / _ARCHITECTURE_TEMPLATE_RELATIVE
+    if not template.is_file():
+        return None, [
+            "не найден архитектурный SVG-шаблон: невозможно вычислить боковой отступ flow-caption"
+        ]
+    space_m, errors = measure_reference_flow_caption_padding(read_text(template))
+    if space_m is None:
+        return None, errors
+    return {"flow-caption": (space_m, space_m), "flow-port": (space_m, None)}, []
+
 
 _MEASURE_JS = """() => {
   const box = (el, kind) => {
@@ -359,7 +388,9 @@ def _inline_edges(box: ElementBox, *, vertical: bool) -> tuple[float, float, flo
     return box.x, box.x1, box.w
 
 
-def find_padding_violations(elements: list[ElementBox]) -> list[str]:
+def find_padding_violations(
+    elements: list[ElementBox], padding_profiles: PaddingProfiles
+) -> list[str]:
     """Check rendered ink padding selected by each object's padding profile.
 
     Flow captions are content-sized. A one-line caption has a normalized SVG
@@ -367,6 +398,11 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
     multiline/equal-width group is checked against the same target. Port cells
     are fixed by their parent grid and therefore only enforce the minimum field.
     Every row is checked for visible leading/trailing symmetry after transforms.
+
+    `padding_profiles` carries the measured `space-m` value (see
+    `_reference_padding_profiles`) -- callers own how it was derived so this
+    function stays a pure check of `elements` against whatever table it is
+    given, the same dependency-injection shape as the `measurer` callable.
     """
 
     texts_by_label: dict[str, list[ElementBox]] = {}
@@ -382,7 +418,7 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
         if plaque.w == 0 or plaque.h == 0:
             # Geometry references inside <defs> are intentionally not rendered.
             continue
-        profile = _PADDING_PROFILES.get(plaque.padding_profile)
+        profile = padding_profiles.get(plaque.padding_profile)
         if profile is None:
             errors.append(
                 f"плашка {plaque.id or '<без id>'!r} использует неизвестный "
@@ -439,7 +475,7 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
         group_inline = min(member[1] for member in members)
         group_widest = max(member[2] for member in members)
         group_padding = (group_inline - group_widest) / 2
-        maximum = _PADDING_PROFILES["flow-caption"][1]
+        maximum = padding_profiles["flow-caption"][1]
         assert maximum is not None
         if group_padding > maximum + _PADDING_TOLERANCE_PX:
             errors.append(
@@ -465,7 +501,13 @@ def lint_file(path: Path, root: Path, *, measurer: Measurer = measure_svg_elemen
     canvas = _canvas_box(text)
     result.errors.extend(find_overflow(elements, canvas))
     result.errors.extend(find_asymmetric_anchors(elements, canvas))
-    result.errors.extend(find_padding_violations(elements))
+    if any(element.kind == "shape" and element.padding_profile for element in elements):
+        padding_profiles, padding_errors = _reference_padding_profiles(root)
+        if padding_errors:
+            result.errors.extend(padding_errors)
+        else:
+            assert padding_profiles is not None
+            result.errors.extend(find_padding_violations(elements, padding_profiles))
     return result
 
 

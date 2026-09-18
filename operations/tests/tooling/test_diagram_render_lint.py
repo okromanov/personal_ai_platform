@@ -8,6 +8,16 @@ from unittest.mock import patch
 from operations.scripts.documents import diagram_render_lint as render_lint
 from operations.scripts.documents.diagram_render_lint import ElementBox
 
+# Test-local stand-in for the padding-profile table find_padding_violations
+# now takes as an explicit argument instead of reading a module constant --
+# production code derives the same numbers from the architecture template
+# (see _reference_padding_profiles), this fixture only needs concrete
+# numbers to assert arithmetic against.
+_PADDING_PROFILES: render_lint.PaddingProfiles = {
+    "flow-caption": (12.0, 12.0),
+    "flow-port": (12.0, None),
+}
+
 
 def _box(
     kind: str,
@@ -275,7 +285,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="caption",
         )
 
-        self.assertEqual(render_lint.find_padding_violations([plaque, text]), [])
+        self.assertEqual(render_lint.find_padding_violations([plaque, text], _PADDING_PROFILES), [])
 
     def test_ignores_zero_sized_definition_geometry(self) -> None:
         definition = _box(
@@ -289,7 +299,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             padding_profile="flow-caption",
         )
 
-        self.assertEqual(render_lint.find_padding_violations([definition]), [])
+        self.assertEqual(render_lint.find_padding_violations([definition], _PADDING_PROFILES), [])
 
     def test_compact_caption_rejects_oversized_and_asymmetric_fields(self) -> None:
         plaque = _box(
@@ -314,7 +324,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="caption",
         )
 
-        errors = render_lint.find_padding_violations([plaque, text])
+        errors = render_lint.find_padding_violations([plaque, text], _PADDING_PROFILES)
 
         self.assertTrue(any("несимметричные" in error for error in errors))
         self.assertTrue(any("некомпактна" in error for error in errors))
@@ -353,8 +363,10 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="port",
         )
 
-        self.assertEqual(render_lint.find_padding_violations([port, centred]), [])
-        errors = render_lint.find_padding_violations([port, too_wide])
+        self.assertEqual(
+            render_lint.find_padding_violations([port, centred], _PADDING_PROFILES), []
+        )
+        errors = render_lint.find_padding_violations([port, too_wide], _PADDING_PROFILES)
         self.assertTrue(any("минимальный padding" in error for error in errors))
 
     def test_rotated_caption_uses_rendered_vertical_inline_axis(self) -> None:
@@ -380,7 +392,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="rail-caption",
         )
 
-        self.assertEqual(render_lint.find_padding_violations([plaque, text]), [])
+        self.assertEqual(render_lint.find_padding_violations([plaque, text], _PADDING_PROFILES), [])
 
     def test_rotated_caption_rejects_renderer_specific_extra_padding(self) -> None:
         plaque = _box(
@@ -416,10 +428,12 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="scheduled",
         )
 
-        errors = render_lint.find_padding_violations([plaque, drifted])
+        errors = render_lint.find_padding_violations([plaque, drifted], _PADDING_PROFILES)
 
         self.assertTrue(any("ожидается 12.0±1.0px" in error for error in errors))
-        self.assertEqual(render_lint.find_padding_violations([plaque, normalized]), [])
+        self.assertEqual(
+            render_lint.find_padding_violations([plaque, normalized], _PADDING_PROFILES), []
+        )
 
     def test_equal_width_caption_group_is_sized_by_its_widest_member(self) -> None:
         left = _box(
@@ -467,7 +481,10 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="right",
         )
 
-        self.assertEqual(render_lint.find_padding_violations([left, right, longest, shorter]), [])
+        self.assertEqual(
+            render_lint.find_padding_violations([left, right, longest, shorter], _PADDING_PROFILES),
+            [],
+        )
 
         too_wide_left = _box(
             "shape",
@@ -503,7 +520,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="right",
         )
         errors = render_lint.find_padding_violations(
-            [too_wide_left, too_wide_right, longest, shifted_shorter]
+            [too_wide_left, too_wide_right, longest, shifted_shorter], _PADDING_PROFILES
         )
         self.assertTrue(any("группа равной ширины" in error for error in errors))
 
@@ -539,12 +556,59 @@ class FindPaddingViolationsTests(unittest.TestCase):
             padding_profile="flow-caption",
         )
 
-        errors = render_lint.find_padding_violations([unknown, wrong, missing])
+        errors = render_lint.find_padding_violations([unknown, wrong, missing], _PADDING_PROFILES)
 
         self.assertEqual(len(errors), 3)
         self.assertTrue(any("неизвестный" in error for error in errors))
         self.assertTrue(any("неподдерживаемому" in error for error in errors))
         self.assertTrue(any("не имеет измеряемой строки" in error for error in errors))
+
+
+class ReferencePaddingProfilesTests(unittest.TestCase):
+    def _template_path(self, root: Path) -> Path:
+        return (
+            root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+        )
+
+    def test_reports_missing_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            profiles, errors = render_lint._reference_padding_profiles(Path(tmp))
+
+        self.assertIsNone(profiles)
+        self.assertTrue(any("не найден" in error for error in errors))
+
+    def test_reports_a_template_without_a_consistent_caption_padding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = self._template_path(root)
+            template.parent.mkdir(parents=True)
+            template.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
+
+            profiles, errors = render_lint._reference_padding_profiles(root)
+
+        self.assertIsNone(profiles)
+        self.assertTrue(any("ровно одно значение" in error for error in errors))
+
+    def test_derives_space_m_from_the_template_own_caption(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = self._template_path(root)
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="label" x="0" y="0" width="120" height="28" rx="4" '
+                'class="flow-label-blue" data-layout="flow-label" '
+                'data-padding-profile="flow-caption"/>'
+                '<text x="60" y="19" text-anchor="middle" textLength="96" '
+                'lengthAdjust="spacing" data-label-for="label">Flow</text>'
+                "</svg>",
+                encoding="utf-8",
+            )
+
+            profiles, errors = render_lint._reference_padding_profiles(root)
+
+        self.assertEqual(errors, [])
+        self.assertEqual(profiles, {"flow-caption": (12.0, 12.0), "flow-port": (12.0, None)})
 
 
 class LintFileTests(unittest.TestCase):
@@ -602,6 +666,100 @@ class LintFileTests(unittest.TestCase):
 
         self.assertTrue(result.ok)
         self.assertEqual(result.errors, [])
+
+    def test_lint_file_checks_padding_profiles_against_the_template(self) -> None:
+        plaque = _box(
+            "shape",
+            "flow-label-blue",
+            100.0,
+            50.0,
+            176.0,
+            28.0,
+            element_id="caption",
+            padding_profile="flow-caption",
+        )
+        drifted_text = _box(
+            "text",
+            "flow-text",
+            108.0,
+            58.0,
+            140.0,
+            11.0,
+            anchor="middle",
+            content="Drifted caption",
+            label_for="caption",
+        )
+
+        def fake_measurer(_svg_text: str) -> list[ElementBox]:
+            return [plaque, drifted_text]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="label" x="0" y="0" width="120" height="28" rx="4" '
+                'class="flow-label-blue" data-layout="flow-label" '
+                'data-padding-profile="flow-caption"/>'
+                '<text x="60" y="19" text-anchor="middle" textLength="96" '
+                'lengthAdjust="spacing" data-label-for="label">Flow</text>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500"></svg>',
+                encoding="utf-8",
+            )
+            result = render_lint.lint_file(svg, root, measurer=fake_measurer)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("некомпактна" in error for error in result.errors))
+
+    def test_lint_file_reports_a_missing_template_when_a_padding_profile_is_present(self) -> None:
+        plaque = _box(
+            "shape",
+            "flow-label-blue",
+            100.0,
+            50.0,
+            176.0,
+            28.0,
+            element_id="caption",
+            padding_profile="flow-caption",
+        )
+        text = _box(
+            "text",
+            "flow-text",
+            112.4,
+            58.0,
+            151.0,
+            11.0,
+            anchor="middle",
+            content="Flow caption",
+            label_for="caption",
+        )
+
+        def fake_measurer(_svg_text: str) -> list[ElementBox]:
+            return [plaque, text]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            svg = root / "diagram.svg"
+            svg.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500"></svg>',
+                encoding="utf-8",
+            )
+            result = render_lint.lint_file(svg, root, measurer=fake_measurer)
+
+        self.assertFalse(result.ok)
+        self.assertTrue(any("не найден" in error for error in result.errors))
 
     def test_lint_file_tolerates_a_canvas_without_declared_dimensions(self) -> None:
         def fake_measurer(_svg_text: str) -> list[ElementBox]:

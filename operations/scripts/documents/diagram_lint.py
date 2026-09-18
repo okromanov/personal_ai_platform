@@ -48,6 +48,7 @@ from operations.scripts.documents.diagram_geometry_lint import (
     ControlTransitionLayout,
     FlowLabelLayout,
     check_geometry,
+    measure_reference_flow_caption_padding,
 )
 from operations.scripts.documents.metadata import load_document
 from operations.scripts.documents.traceability import _normalize_id, collect_traceable_elements
@@ -700,6 +701,26 @@ def _architecture_reference_flow_label_layouts(
     return layouts
 
 
+def _architecture_reference_flow_caption_padding(root: Path, result: LintResult) -> float | None:
+    """Measure the shared `space-m` flow-caption padding from the registered
+    architecture template rather than assuming a literal -- both diagram
+    families (architecture and process) use the same token, so a single
+    template stays the one source of truth for it, matching how gaps,
+    transition layouts and port spacing are already measured here."""
+
+    template = (
+        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
+    )
+    if not template.is_file():
+        result.errors.append(
+            "не найден архитектурный SVG-шаблон: невозможно вычислить боковой отступ flow-caption"
+        )
+        return None
+    value, errors = measure_reference_flow_caption_padding(read_text(template))
+    result.errors.extend(errors)
+    return value
+
+
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
     r"""Header содержит видимую строку версии/даты, читаемую человеком без
     обращения к исходнику (diagram_geometry_foundations.md §5, §13.1) —
@@ -904,6 +925,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     reference_transition_layout = None
     reference_port_gap = None
     reference_flow_label_layouts = None
+    reference_flow_caption_padding = None
     if (
         root_el is not None
         and has_referenced_gap
@@ -952,12 +974,24 @@ def lint_file(path: Path, root: Path) -> LintResult:
     ):
         reference_flow_label_layouts = _architecture_reference_flow_label_layouts(root, result)
 
+    # Unlike the three reference_* checks above, flow-caption padding
+    # (space-m) is not architecture-specific: process diagrams use the same
+    # token, so this is measured from the architecture template for every
+    # file, not gated behind _is_architecture_diagram.
+    if (
+        root_el is not None
+        and has_flow_labels
+        and path.resolve() != architecture_template.resolve()
+    ):
+        reference_flow_caption_padding = _architecture_reference_flow_caption_padding(root, result)
+
     geometry = check_geometry(
         text,
         reference_gaps=reference_gaps,
         reference_transition_layout=reference_transition_layout,
         reference_port_gap=reference_port_gap,
         reference_flow_label_layouts=reference_flow_label_layouts,
+        reference_flow_caption_padding=reference_flow_caption_padding,
     )
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)
