@@ -57,6 +57,11 @@ from raw XML attributes without rendering the SVG:
    `data-padding-profile`; every row stays on the exact geometric centre, while
    the rendered-padding gate checks the visible ink box without per-label hacks.
    Equal-width groups are checked from geometry rather than copied constants.
+   The `flow-caption` inner text slot (`textLength = width - 2 × space-m`) is
+   validated against a `reference_flow_caption_padding` value the caller
+   measures from the registered architecture template's own single-line
+   captions (see `measure_reference_flow_caption_padding` below) — `space-m`
+   is not a literal copied into this module a second time.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -148,7 +153,6 @@ _FLOW_LABEL_CLASSES = {
 }
 _FLOW_LABEL_ROW_COUNTS = {"flow-label": 1, "flow-label-multiline": 2}
 _FLOW_LABEL_PADDING_PROFILES = {"flow-caption", "flow-port"}
-_FLOW_CAPTION_INLINE_PADDING = 12.0
 
 
 @dataclass
@@ -159,6 +163,7 @@ class GeometryResult:
     control_transition_layouts: list["ControlTransitionLayout"] = field(default_factory=list)
     port_gaps: list["PortGap"] = field(default_factory=list)
     flow_label_layouts: list["FlowLabelLayout"] = field(default_factory=list)
+    flow_caption_paddings: list["FlowCaptionPadding"] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -198,6 +203,18 @@ class PortGap:
     group: str
     target_id: str
     side: str
+    value: float
+
+
+@dataclass(frozen=True)
+class FlowCaptionPadding:
+    """One single-line flow-caption plaque's measured side padding,
+    (width - textLength) / 2 -- the raw material from which
+    measure_reference_flow_caption_padding derives the shared `space-m`
+    token, rather than that token being copied into this module as a
+    literal."""
+
+    label_id: str
     value: float
 
 
@@ -886,7 +903,8 @@ def _check_flow_label_layouts(
     root_el,
     errors: list[str],
     reference_layouts: dict[str, FlowLabelLayout] | None,
-) -> list[FlowLabelLayout]:
+    reference_flow_caption_padding: float | None,
+) -> tuple[list[FlowLabelLayout], list[FlowCaptionPadding]]:
     parents = {child: parent for parent in root_el.iter() for child in parent}
     texts_by_label: dict[str, list] = {}
     for element in root_el.iter():
@@ -917,6 +935,7 @@ def _check_flow_label_layouts(
             )
 
     layouts: list[FlowLabelLayout] = []
+    flow_caption_paddings: list[FlowCaptionPadding] = []
     widths_by_group: dict[str, list[tuple[str, float]]] = {}
     for plaque in flow_plaques:
         plaque_id = plaque.get("id")
@@ -998,7 +1017,6 @@ def _check_flow_label_layouts(
             text_length = text_element.get("textLength")
             length_adjust = text_element.get("lengthAdjust")
             if padding_profile == "flow-caption" and kind == "flow-label":
-                expected_text_length = width - 2 * _FLOW_CAPTION_INLINE_PADDING
                 has_inline_segments = any(
                     _local_tag(child.tag) == "tspan" for child in text_element
                 )
@@ -1016,12 +1034,21 @@ def _check_flow_label_layouts(
                         "textLength для межрендерной нормализации полей"
                     )
                 else:
-                    if abs(actual_text_length - expected_text_length) > 1e-9:
-                        errors.append(
-                            f"textLength плашки {plaque_id!r}: ожидается "
-                            f"width - 2 × space-m = {expected_text_length:g} px, "
-                            f"фактически {actual_text_length:g} px"
+                    flow_caption_paddings.append(
+                        FlowCaptionPadding(
+                            label_id=plaque_id, value=(width - actual_text_length) / 2
                         )
+                    )
+                    if reference_flow_caption_padding is not None:
+                        expected_text_length = width - 2 * reference_flow_caption_padding
+                        if abs(actual_text_length - expected_text_length) > 1e-9:
+                            errors.append(
+                                f"textLength плашки {plaque_id!r}: ожидается "
+                                f"width - 2 × space-m = {expected_text_length:g} px "
+                                f"(space-m = {reference_flow_caption_padding:g} px, "
+                                "измерено из эталона шаблона), фактически "
+                                f"{actual_text_length:g} px"
+                            )
                 if length_adjust != "spacing":
                     errors.append(
                         f"однострочная flow-caption {plaque_id!r} обязана задать "
@@ -1082,7 +1109,7 @@ def _check_flow_label_layouts(
                     f"ширина плашки {label_id!r} в группе {group!r}: "
                     f"эталон группы {reference_width:g} px, фактически {width:g} px"
                 )
-    return layouts
+    return layouts, flow_caption_paddings
 
 
 def _check_connector_source_attachment(root_el, errors: list[str]) -> None:
@@ -1158,6 +1185,7 @@ def check_geometry(
     reference_transition_layout: ControlTransitionLayout | None = None,
     reference_port_gap: float | None = None,
     reference_flow_label_layouts: dict[str, FlowLabelLayout] | None = None,
+    reference_flow_caption_padding: float | None = None,
 ) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
@@ -1186,7 +1214,9 @@ def check_geometry(
     control_transition_layouts = _check_control_transition_layouts(
         root_el, errors, reference_transition_layout
     )
-    flow_label_layouts = _check_flow_label_layouts(root_el, errors, reference_flow_label_layouts)
+    flow_label_layouts, flow_caption_paddings = _check_flow_label_layouts(
+        root_el, errors, reference_flow_label_layouts, reference_flow_caption_padding
+    )
     return GeometryResult(
         errors=errors,
         warnings=warnings,
@@ -1194,4 +1224,34 @@ def check_geometry(
         control_transition_layouts=control_transition_layouts,
         port_gaps=port_gaps,
         flow_label_layouts=flow_label_layouts,
+        flow_caption_paddings=flow_caption_paddings,
     )
+
+
+def measure_reference_flow_caption_padding(template_text: str) -> tuple[float | None, list[str]]:
+    """Measure the shared `space-m` token from a template's own single-line
+    `flow-caption` plaques, requiring every one of them to agree on exactly
+    one value (diagram_geometry_foundations.md token table: `space-m` = 12
+    px). Pure function of the template text -- callers (diagram_lint.py for
+    the static check, diagram_render_lint.py for the rendered-padding gate)
+    supply the template and own the filesystem access and error routing, so
+    this stays the one place the arithmetic lives instead of being copied
+    into each caller as a literal.
+    """
+
+    errors: list[str] = []
+    measured = check_geometry(template_text)
+    if measured.errors:
+        errors.append(
+            "геометрия шаблона не позволяет вычислить боковой отступ flow-caption "
+            "(space-m): " + "; ".join(measured.errors)
+        )
+        return None, errors
+    values = {round(padding.value, 9) for padding in measured.flow_caption_paddings}
+    if len(values) != 1:
+        errors.append(
+            "шаблон должен геометрически задавать ровно одно значение бокового "
+            "отступа flow-caption (space-m) по всем однострочным плашкам"
+        )
+        return None, errors
+    return values.pop(), errors

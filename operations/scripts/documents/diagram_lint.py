@@ -29,8 +29,10 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal, Protocol, TypeVar
 
 from defusedxml import ElementTree  # type: ignore[import-untyped]  # no PEP 561 marker
 from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped]  # same package
@@ -48,11 +50,16 @@ from operations.scripts.documents.diagram_geometry_lint import (
     ControlTransitionLayout,
     FlowLabelLayout,
     check_geometry,
+    measure_reference_flow_caption_padding,
 )
 from operations.scripts.documents.metadata import load_document
 from operations.scripts.documents.traceability import _normalize_id, collect_traceable_elements
 
 _SVG_NS = "{http://www.w3.org/2000/svg}"
+
+ARCHITECTURE_TEMPLATE_RELATIVE = Path(
+    "operations/architecture/templates/architecture_diagram_template.svg"
+)
 
 _METADATA_BLOCK = re.compile(
     r"<!--\s*diagram-metadata\s*(?P<body>.*?)\s*end-diagram-metadata\s*-->",
@@ -291,6 +298,10 @@ def _classes(element: ElementTree.Element) -> set[str]:
     return set((element.get("class") or "").split())
 
 
+def _local_tag(element: ElementTree.Element) -> str:
+    return element.tag.rsplit("}", 1)[-1]
+
+
 def _parent_map(root_el: ElementTree.Element) -> dict[ElementTree.Element, ElementTree.Element]:
     return {child: parent for parent in root_el.iter() for child in parent}
 
@@ -388,7 +399,7 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
     parents = _parent_map(root_el)
     by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
     for element in root_el.iter():
-        if element.tag.rsplit("}", 1)[-1] != "text" or "legend-id" in _classes(element):
+        if _local_tag(element) != "text" or "legend-id" in _classes(element):
             continue
         label = " ".join("".join(element.itertext()).split())
         if _VISIBLE_ARC_FLOW_ID.search(label) is None:
@@ -406,7 +417,7 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
         candidates = list(parent) if parent is not None else list(root_el)
         containing: list[tuple[float, ElementTree.Element]] = []
         for candidate in candidates:
-            if candidate.tag.rsplit("}", 1)[-1] != "rect":
+            if _local_tag(candidate) != "rect":
                 continue
             try:
                 rect_x = float(candidate.get("x", "0"))
@@ -440,20 +451,20 @@ def _check_arc_flow_label_fills(root_el: ElementTree.Element, result: LintResult
             )
             continue
         connector = by_id.get(connector_ref)
-        if connector is None or connector.tag.rsplit("}", 1)[-1] != "path":
+        if connector is None or _local_tag(connector) != "path":
             result.errors.append(
                 f"data-connector-ref={connector_ref!r} у плашки ARC_FLOW {label!r} "
                 "не указывает на существующий <path>"
             )
             continue
         connector_palettes = _palette_for(_classes(connector), _CONNECTOR_PALETTE_CLASSES)
-        if len(label_palettes) != 1 or len(connector_palettes) != 1:
+        match = _match_palettes(label_palettes, connector_palettes)
+        if match in ("a_ambiguous", "b_ambiguous"):
             result.errors.append(
                 f"плашка ARC_FLOW {label!r} или её стрелка не имеет ровно одной "
                 "поддерживаемой цветовой категории"
             )
-            continue
-        if label_palettes != connector_palettes:
+        elif match == "mismatch":
             result.errors.append(
                 f"цвет плашки ARC_FLOW {label!r} не совпадает с цветом стрелки {connector_ref!r}"
             )
@@ -473,19 +484,19 @@ def _check_all_flow_label_connectors(root_el: ElementTree.Element, result: LintR
             result.errors.append(f"плашка потока {plaque_id!r} обязана задать data-connector-ref")
             continue
         connector = by_id.get(connector_ref)
-        if connector is None or connector.tag.rsplit("}", 1)[-1] != "path":
+        if connector is None or _local_tag(connector) != "path":
             result.errors.append(
                 f"data-connector-ref={connector_ref!r} у плашки {plaque_id!r} "
                 "не указывает на существующий <path>"
             )
             continue
         connector_palettes = _palette_for(_classes(connector), _CONNECTOR_PALETTE_CLASSES)
-        if len(label_palettes) != 1 or len(connector_palettes) != 1:
+        match = _match_palettes(label_palettes, connector_palettes)
+        if match in ("a_ambiguous", "b_ambiguous"):
             result.errors.append(
                 f"плашка {plaque_id!r} или её стрелка не имеет ровно одной цветовой категории"
             )
-            continue
-        if label_palettes != connector_palettes:
+        elif match == "mismatch":
             result.errors.append(
                 f"цвет плашки {plaque_id!r} не совпадает с цветом стрелки: "
                 f"плашка={next(iter(label_palettes))}, "
@@ -495,6 +506,28 @@ def _check_all_flow_label_connectors(root_el: ElementTree.Element, result: LintR
 
 def _palette_for(classes: set[str], mapping: dict[str, set[str]]) -> set[str]:
     return {palette for palette, candidates in mapping.items() if classes & candidates}
+
+
+_PaletteMatch = Literal["ok", "a_ambiguous", "b_ambiguous", "mismatch"]
+
+
+def _match_palettes(a_palettes: set[str], b_palettes: set[str]) -> _PaletteMatch:
+    """Classify one side of a colour-inheritance check against the other.
+
+    The three call sites below (`_check_arc_flow_label_fills`,
+    `_check_all_flow_label_connectors`, `_check_connector_source_colors`)
+    each require exactly one supported palette on both sides and then
+    compare them -- the same three-way branch, previously written out
+    separately in each. Only the comparison is shared; each caller keeps
+    its own error wording, since "плашка ARC_FLOW" and "источник" are not
+    interchangeable in the message a reader sees.
+    """
+
+    if len(a_palettes) != 1:
+        return "a_ambiguous"
+    if len(b_palettes) != 1:
+        return "b_ambiguous"
+    return "ok" if a_palettes == b_palettes else "mismatch"
 
 
 def _check_connector_source_colors(root_el: ElementTree.Element, result: LintResult) -> None:
@@ -528,17 +561,18 @@ def _check_connector_source_colors(root_el: ElementTree.Element, result: LintRes
             continue
         source_palettes = _palette_for(_classes(source), _SOURCE_PALETTE_CLASSES)
         connector_palettes = _palette_for(classes, _CONNECTOR_PALETTE_CLASSES)
-        if len(source_palettes) != 1:
+        match = _match_palettes(source_palettes, connector_palettes)
+        if match == "a_ambiguous":
             result.errors.append(
                 f"источник {source_ref!r} не имеет ровно одной поддерживаемой цветовой категории"
             )
             continue
-        if len(connector_palettes) != 1:
+        if match == "b_ambiguous":
             result.errors.append(
                 f"коннектор от {source_ref!r} не имеет ровно одного класса цвета линии"
             )
             continue
-        if source_palettes != connector_palettes:
+        if match == "mismatch":
             result.errors.append(
                 f"цвет коннектора от {source_ref!r} не совпадает с цветом источника: "
                 f"источник={next(iter(source_palettes))}, линия={next(iter(connector_palettes))}"
@@ -549,7 +583,7 @@ def _check_visible_id_separators(root_el: ElementTree.Element, result: LintResul
     """Forbid slash-separated architectural IDs in visible diagram labels."""
 
     for element in root_el.iter():
-        if element.tag.rsplit("}", 1)[-1] != "text":
+        if _local_tag(element) != "text":
             continue
         label = " ".join("".join(element.itertext()).split())
         if _ID_SLASH_SEPARATOR.search(label) is not None:
@@ -588,9 +622,7 @@ def _architecture_reference_gaps(
     required_kinds: set[str],
     result: LintResult,
 ) -> dict[str, float] | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно геометрически вычислить просветы"
@@ -620,9 +652,7 @@ def _architecture_reference_transition_layout(
     root: Path,
     result: LintResult,
 ) -> ControlTransitionLayout | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию "
@@ -646,9 +676,7 @@ def _architecture_reference_transition_layout(
 
 
 def _architecture_reference_port_gap(root: Path, result: LintResult) -> float | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить right-port-gap"
@@ -674,9 +702,7 @@ def _architecture_reference_port_gap(root: Path, result: LintResult) -> float | 
 def _architecture_reference_flow_label_layouts(
     root: Path, result: LintResult
 ) -> dict[str, FlowLabelLayout] | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию плашки потока"
@@ -698,6 +724,24 @@ def _architecture_reference_flow_label_layouts(
         )
         return None
     return layouts
+
+
+def _architecture_reference_flow_caption_padding(root: Path, result: LintResult) -> float | None:
+    """Measure the shared `space-m` flow-caption padding from the registered
+    architecture template rather than assuming a literal -- both diagram
+    families (architecture and process) use the same token, so a single
+    template stays the one source of truth for it, matching how gaps,
+    transition layouts and port spacing are already measured here."""
+
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
+    if not template.is_file():
+        result.errors.append(
+            "не найден архитектурный SVG-шаблон: невозможно вычислить боковой отступ flow-caption"
+        )
+        return None
+    value, errors = measure_reference_flow_caption_padding(read_text(template))
+    result.errors.extend(errors)
+    return value
 
 
 def _check_visible_meta(scalars: dict[str, str], body_text: str, result: LintResult) -> None:
@@ -786,7 +830,7 @@ def _check_structure(text: str, result: LintResult) -> ElementTree.Element | Non
     elif width and height:
         try:
             _, _, vb_w, vb_h = (float(part) for part in view_box.split())
-            if float(width) != vb_w or float(height) != vb_h:
+            if abs(float(width) - vb_w) > 1e-9 or abs(float(height) - vb_h) > 1e-9:
                 result.errors.append(
                     f"viewBox ({vb_w}x{vb_h}) не совпадает с width/height ({width}x{height})"
                 )
@@ -795,8 +839,7 @@ def _check_structure(text: str, result: LintResult) -> ElementTree.Element | Non
 
     def _find_local(name: str) -> ElementTree.Element | None:
         for el in root_el.iter():
-            local = el.tag.rsplit("}", 1)[-1]
-            if local == name:
+            if _local_tag(el) == name:
                 return el
         return None
 
@@ -904,6 +947,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     reference_transition_layout = None
     reference_port_gap = None
     reference_flow_label_layouts = None
+    reference_flow_caption_padding = None
     if (
         root_el is not None
         and has_referenced_gap
@@ -919,9 +963,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     has_control_transition = root_el is not None and any(
         element.get("data-layout") == "control-transition" for element in root_el.iter()
     )
-    architecture_template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    architecture_template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if (
         root_el is not None
         and has_control_transition
@@ -952,12 +994,24 @@ def lint_file(path: Path, root: Path) -> LintResult:
     ):
         reference_flow_label_layouts = _architecture_reference_flow_label_layouts(root, result)
 
+    # Unlike the three reference_* checks above, flow-caption padding
+    # (space-m) is not architecture-specific: process diagrams use the same
+    # token, so this is measured from the architecture template for every
+    # file, not gated behind _is_architecture_diagram.
+    if (
+        root_el is not None
+        and has_flow_labels
+        and path.resolve() != architecture_template.resolve()
+    ):
+        reference_flow_caption_padding = _architecture_reference_flow_caption_padding(root, result)
+
     geometry = check_geometry(
         text,
         reference_gaps=reference_gaps,
         reference_transition_layout=reference_transition_layout,
         reference_port_gap=reference_port_gap,
         reference_flow_label_layouts=reference_flow_label_layouts,
+        reference_flow_caption_padding=reference_flow_caption_padding,
     )
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)
@@ -983,14 +1037,37 @@ def default_targets(root: Path) -> list[Path]:
     return sorted(targets)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Проверка архитектурных SVG-схем")
-    parser.add_argument(
-        "paths",
-        nargs="*",
-        type=Path,
-        help="Файлы .svg для проверки. По умолчанию — все work/artefacts/**/*.svg (может быть пусто).",
-    )
+class _LintResultLike(Protocol):
+    file: str
+    errors: list[str]
+
+    @property
+    def ok(self) -> bool: ...
+
+
+_ResultT = TypeVar("_ResultT", bound=_LintResultLike)
+
+
+def run_cli(
+    *,
+    description: str,
+    paths_help: str,
+    no_targets_message: str,
+    lint_one: Callable[[Path, Path], _ResultT],
+    warnings_of: Callable[[_ResultT], list[str]] | None = None,
+) -> int:
+    """Shared CLI shape for this module's `main()` and diagram_render_lint.py's:
+    parse `paths`, resolve targets via `default_targets`, lint each one, print
+    PASS/FAIL with its errors (and warnings, when `warnings_of` is given), and
+    exit non-zero on any failure. `warnings_of` stays optional rather than a
+    field every `_LintResultLike` must carry -- diagram_render_lint.py's own
+    result type has no warnings concept yet, and giving it an always-empty
+    field just to satisfy a shared shape would be speculative, not shared
+    behaviour.
+    """
+
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("paths", nargs="*", type=Path, help=paths_help)
     args = parser.parse_args()
     require_supported_python()
     root = find_project_root(Path.cwd())
@@ -999,7 +1076,7 @@ def main() -> int:
         root
     )
     if not targets:
-        print("Файлы схем не найдены (work/artefacts/**/*.svg) — проверять нечего.")
+        print(no_targets_message)
         return 0
 
     all_ok = True
@@ -1012,18 +1089,32 @@ def main() -> int:
             all_ok = False
             total_errors += 1
             continue
-        result = lint_file(target, root)
+        result = lint_one(target, root)
         print(f"[{'PASS' if result.ok else 'FAIL'}] {result.file}")
-        for warning in result.warnings:
+        warnings = warnings_of(result) if warnings_of is not None else []
+        for warning in warnings:
             print(f"  WARNING: {warning}")
         for error in result.errors:
             print(f"  ERROR: {error}")
         all_ok = all_ok and result.ok
         total_errors += len(result.errors)
-        total_warnings += len(result.warnings)
+        total_warnings += len(warnings)
 
-    print(f"Итог: файлов={len(targets)}, errors={total_errors}, warnings={total_warnings}")
+    summary = f"Итог: файлов={len(targets)}, errors={total_errors}"
+    if warnings_of is not None:
+        summary += f", warnings={total_warnings}"
+    print(summary)
     return 0 if all_ok else 1
+
+
+def main() -> int:
+    return run_cli(
+        description="Проверка архитектурных SVG-схем",
+        paths_help="Файлы .svg для проверки. По умолчанию — все work/artefacts/**/*.svg (может быть пусто).",
+        no_targets_message="Файлы схем не найдены (work/artefacts/**/*.svg) — проверять нечего.",
+        lint_one=lint_file,
+        warnings_of=lambda result: result.warnings,
+    )
 
 
 if __name__ == "__main__":

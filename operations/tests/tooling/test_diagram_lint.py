@@ -1672,6 +1672,47 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertEqual(result.errors, [])
 
+    def test_lint_file_rejects_a_caption_padding_mismatched_with_the_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="template-label" x="0" y="0" width="120" height="28" rx="4" '
+                'class="flow-label-blue" data-layout="flow-label" '
+                'data-padding-profile="flow-caption"/>'
+                '<text x="60" y="19" text-anchor="middle" textLength="96" '
+                'lengthAdjust="spacing" data-label-for="template-label">Flow</text>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            body = (
+                "<style>.flow-label-blue { fill: #eef; }</style>"
+                '<rect id="label" x="0" y="0" width="120" height="28" rx="4" '
+                'class="flow-label-blue" data-layout="flow-label" '
+                'data-padding-profile="flow-caption"/>'
+                '<text x="60" y="19" text-anchor="middle" textLength="104" '
+                'lengthAdjust="spacing" data-label-for="label">Flow</text>'
+            )
+            svg = root / "diagram.svg"
+            svg.write_text(_svg_text().replace("<g ></g>", body), encoding="utf-8")
+
+            result = diagram_lint.lint_file(svg, root)
+
+        self.assertTrue(
+            any(
+                "textLength плашки 'label'" in error and "эталона шаблона" in error
+                for error in result.errors
+            )
+        )
+
     def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" '
@@ -1956,7 +1997,8 @@ class DiagramLintTests(unittest.TestCase):
             'data-padding-profile="flow-port"/>'
             '<text x="150" y="99" text-anchor="middle" textLength="276" '
             'lengthAdjust="spacing" data-label-for="port">Port</text>'
-            "</svg>"
+            "</svg>",
+            reference_flow_caption_padding=12.0,
         )
 
         self.assertTrue(any("числовой textLength" in error for error in result.errors))
@@ -2091,10 +2133,14 @@ class DiagramLintTests(unittest.TestCase):
             )
             port_result = diagram_lint.LintResult(file="diagram.svg")
             label_result = diagram_lint.LintResult(file="diagram.svg")
+            padding_result = diagram_lint.LintResult(file="diagram.svg")
 
             port_gap = diagram_lint._architecture_reference_port_gap(root, port_result)
             label_layouts = diagram_lint._architecture_reference_flow_label_layouts(
                 root, label_result
+            )
+            padding = diagram_lint._architecture_reference_flow_caption_padding(
+                root, padding_result
             )
 
         self.assertEqual(port_result.errors, [])
@@ -2104,6 +2150,8 @@ class DiagramLintTests(unittest.TestCase):
         assert label_layouts is not None
         self.assertEqual(label_layouts["flow-label"].text_y_offsets, (19,))
         self.assertEqual(label_layouts["flow-label-multiline"].text_y_offsets, (17, 33))
+        self.assertEqual(padding_result.errors, [])
+        self.assertEqual(padding, 12.0)
 
     def test_architecture_reference_helpers_report_missing_invalid_and_empty_templates(
         self,
@@ -2112,9 +2160,13 @@ class DiagramLintTests(unittest.TestCase):
             root = Path(tmp)
             missing_port = diagram_lint.LintResult(file="diagram.svg")
             missing_label = diagram_lint.LintResult(file="diagram.svg")
+            missing_padding = diagram_lint.LintResult(file="diagram.svg")
             self.assertIsNone(diagram_lint._architecture_reference_port_gap(root, missing_port))
             self.assertIsNone(
                 diagram_lint._architecture_reference_flow_label_layouts(root, missing_label)
+            )
+            self.assertIsNone(
+                diagram_lint._architecture_reference_flow_caption_padding(root, missing_padding)
             )
 
             template = (
@@ -2131,25 +2183,70 @@ class DiagramLintTests(unittest.TestCase):
             )
             invalid_port = diagram_lint.LintResult(file="diagram.svg")
             invalid_label = diagram_lint.LintResult(file="diagram.svg")
+            invalid_padding = diagram_lint.LintResult(file="diagram.svg")
             self.assertIsNone(diagram_lint._architecture_reference_port_gap(root, invalid_port))
             self.assertIsNone(
                 diagram_lint._architecture_reference_flow_label_layouts(root, invalid_label)
+            )
+            self.assertIsNone(
+                diagram_lint._architecture_reference_flow_caption_padding(root, invalid_padding)
             )
 
             template.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
             empty_port = diagram_lint.LintResult(file="diagram.svg")
             empty_label = diagram_lint.LintResult(file="diagram.svg")
+            empty_padding = diagram_lint.LintResult(file="diagram.svg")
             self.assertIsNone(diagram_lint._architecture_reference_port_gap(root, empty_port))
             self.assertIsNone(
                 diagram_lint._architecture_reference_flow_label_layouts(root, empty_label)
             )
+            self.assertIsNone(
+                diagram_lint._architecture_reference_flow_caption_padding(root, empty_padding)
+            )
 
         self.assertTrue(any("не найден" in error for error in missing_port.errors))
         self.assertTrue(any("не найден" in error for error in missing_label.errors))
+        self.assertTrue(any("не найден" in error for error in missing_padding.errors))
         self.assertTrue(any("не позволяет" in error for error in invalid_port.errors))
         self.assertTrue(any("не позволяет" in error for error in invalid_label.errors))
+        self.assertTrue(any("не позволяет" in error for error in invalid_padding.errors))
         self.assertTrue(any("ровно один" in error for error in empty_port.errors))
         self.assertTrue(any("ровно по одной" in error for error in empty_label.errors))
+        self.assertTrue(any("ровно одно значение" in error for error in empty_padding.errors))
+
+    def test_architecture_reference_flow_caption_padding_reports_ambiguous_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            template = (
+                root
+                / "operations"
+                / "architecture"
+                / "templates"
+                / "architecture_diagram_template.svg"
+            )
+            template.parent.mkdir(parents=True)
+            template.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<rect id="twelve" x="0" y="0" width="120" height="28" rx="4" '
+                'class="flow-label-blue" data-layout="flow-label" '
+                'data-padding-profile="flow-caption"/>'
+                '<text x="60" y="19" text-anchor="middle" textLength="96" '
+                'lengthAdjust="spacing" data-label-for="twelve">Flow</text>'
+                '<rect id="eight" x="0" y="40" width="120" height="28" rx="4" '
+                'class="flow-label-blue" data-layout="flow-label" '
+                'data-padding-profile="flow-caption"/>'
+                '<text x="60" y="59" text-anchor="middle" textLength="104" '
+                'lengthAdjust="spacing" data-label-for="eight">Flow</text>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            ambiguous_result = diagram_lint.LintResult(file="diagram.svg")
+            ambiguous_padding = diagram_lint._architecture_reference_flow_caption_padding(
+                root, ambiguous_result
+            )
+
+        self.assertIsNone(ambiguous_padding)
+        self.assertTrue(any("ровно одно значение" in error for error in ambiguous_result.errors))
 
     def test_default_targets_empty_without_artefacts_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
