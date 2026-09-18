@@ -421,7 +421,10 @@ jobs:
               continue
           if any(pull.get(\"state\") == \"open\" for pull in pulls):
               continue
-          if not any(pull.get(\"merged_at\") for pull in pulls):
+          merged_head_shas = {
+              pull.get(\"head\", {}).get(\"sha\") for pull in pulls if pull.get(\"merged_at\")
+          }
+          if not branch_sha or branch_sha not in merged_head_shas:
               continue
           delete(name)
 """,
