@@ -86,7 +86,10 @@ from operations.scripts.common.project import (
 from operations.scripts.documents.diagram_geometry_lint import (
     measure_reference_flow_caption_padding,
 )
-from operations.scripts.documents.diagram_lint import default_targets
+from operations.scripts.documents.diagram_lint import (
+    ARCHITECTURE_TEMPLATE_RELATIVE,
+    default_targets,
+)
 
 _ANCHOR_TOLERANCE_PX = 3.0
 _CONTAINMENT_TOLERANCE_PX = 0.5  # sub-pixel rounding slack for "fully inside"
@@ -99,18 +102,15 @@ _FLOW_LABEL_CLASSES = {
     "flow-label-green",
     "flow-label-red",
 }
-_ARCHITECTURE_TEMPLATE_RELATIVE = Path(
-    "operations/architecture/templates/architecture_diagram_template.svg"
-)
 
 PaddingProfiles = dict[str, tuple[float, float | None]]
 
 
 def _reference_padding_profiles(root: Path) -> tuple[PaddingProfiles | None, list[str]]:
     """Build the padding-profile table from the architecture template's own
-    measured `space-m`, rather than a literal copied a second time into this
-    module (diagram_geometry_lint.py's `_FLOW_CAPTION_INLINE_PADDING` was the
-    first copy; both are now derived from the same template).
+    measured `space-m`, via the same `measure_reference_flow_caption_padding`
+    diagram_geometry_lint.py uses for its static textLength check -- this
+    module holds no `space-m` literal of its own.
 
     `flow-caption` is content-sized: a one-line caption normalizes its SVG
     text advance to width - 2*space-m, so both the minimum and the maximum
@@ -120,7 +120,7 @@ def _reference_padding_profiles(root: Path) -> tuple[PaddingProfiles | None, lis
     minimum is normative.
     """
 
-    template = root / _ARCHITECTURE_TEMPLATE_RELATIVE
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         return None, [
             "не найден архитектурный SVG-шаблон: невозможно вычислить боковой отступ flow-caption"

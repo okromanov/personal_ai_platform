@@ -55,6 +55,10 @@ from operations.scripts.documents.traceability import _normalize_id, collect_tra
 
 _SVG_NS = "{http://www.w3.org/2000/svg}"
 
+ARCHITECTURE_TEMPLATE_RELATIVE = Path(
+    "operations/architecture/templates/architecture_diagram_template.svg"
+)
+
 _METADATA_BLOCK = re.compile(
     r"<!--\s*diagram-metadata\s*(?P<body>.*?)\s*end-diagram-metadata\s*-->",
     re.DOTALL,
@@ -589,9 +593,7 @@ def _architecture_reference_gaps(
     required_kinds: set[str],
     result: LintResult,
 ) -> dict[str, float] | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно геометрически вычислить просветы"
@@ -621,9 +623,7 @@ def _architecture_reference_transition_layout(
     root: Path,
     result: LintResult,
 ) -> ControlTransitionLayout | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию "
@@ -647,9 +647,7 @@ def _architecture_reference_transition_layout(
 
 
 def _architecture_reference_port_gap(root: Path, result: LintResult) -> float | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить right-port-gap"
@@ -675,9 +673,7 @@ def _architecture_reference_port_gap(root: Path, result: LintResult) -> float | 
 def _architecture_reference_flow_label_layouts(
     root: Path, result: LintResult
 ) -> dict[str, FlowLabelLayout] | None:
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить геометрию плашки потока"
@@ -708,9 +704,7 @@ def _architecture_reference_flow_caption_padding(root: Path, result: LintResult)
     template stays the one source of truth for it, matching how gaps,
     transition layouts and port spacing are already measured here."""
 
-    template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if not template.is_file():
         result.errors.append(
             "не найден архитектурный SVG-шаблон: невозможно вычислить боковой отступ flow-caption"
@@ -941,9 +935,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
     has_control_transition = root_el is not None and any(
         element.get("data-layout") == "control-transition" for element in root_el.iter()
     )
-    architecture_template = (
-        root / "operations" / "architecture" / "templates" / "architecture_diagram_template.svg"
-    )
+    architecture_template = root / ARCHITECTURE_TEMPLATE_RELATIVE
     if (
         root_el is not None
         and has_control_transition
