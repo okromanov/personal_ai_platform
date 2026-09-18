@@ -965,7 +965,12 @@ def _check_flow_label_layouts(
                 has_inline_segments = any(
                     _local_tag(child.tag) == "tspan" for child in text_element
                 )
-                expected_length_adjust = "spacingAndGlyphs" if has_inline_segments else "spacing"
+                if has_inline_segments:
+                    errors.append(
+                        f"однострочная flow-caption {plaque_id!r} не должна содержать "
+                        "<tspan>: единый текстовый run обязателен для одинаковых "
+                        "межрендерных полей"
+                    )
                 try:
                     actual_text_length = float(text_length)
                 except (TypeError, ValueError):
@@ -980,10 +985,10 @@ def _check_flow_label_layouts(
                             f"width - 2 × space-m = {expected_text_length:g} px, "
                             f"фактически {actual_text_length:g} px"
                         )
-                if length_adjust != expected_length_adjust:
+                if length_adjust != "spacing":
                     errors.append(
                         f"однострочная flow-caption {plaque_id!r} обязана задать "
-                        f"lengthAdjust={expected_length_adjust!r}"
+                        "lengthAdjust='spacing'"
                     )
             elif padding_profile == "flow-port" and (
                 text_length is not None or length_adjust is not None

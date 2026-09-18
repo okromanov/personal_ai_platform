@@ -3,8 +3,8 @@
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.19
-  generated_at: 2026-09-18T11:55:50+00:00
+  diagram_version: 1.20
+  generated_at: 2026-09-18T12:34:05+00:00
   status: current
   source: specifications/architecture_baseline.md@1.7
   source: specifications/system_specification.md@1.5
@@ -112,7 +112,7 @@
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.19 · Обновлено 2026-09-18 11:55 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.20 · Обновлено 2026-09-18 12:34 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->
@@ -431,7 +431,7 @@
 
   <!-- Scheduled flow and security rail -->
   <path id="flow-scheduled-run" class="neutral-scheduled-line" d="M1310 2296H1430V688H1310" data-spec-id="ARC_FLOW_004" data-source-ref="operations-card"/>
-  <g transform="translate(1430 1492) rotate(90)" data-spec-id="SEC_CTL_017"><rect id="flow-scheduled-run-label" x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-gray" data-connector-ref="flow-scheduled-run" data-layout="flow-label" data-padding-profile="flow-caption"/><text x="0" y="5" class="neutral-flow-text" text-anchor="middle" textLength="528" lengthAdjust="spacingAndGlyphs" data-spec-id="ARC_FLOW_004" data-label-for="flow-scheduled-run-label"><tspan>ARC_FLOW_004</tspan><tspan fill="#687482"> · </tspan><tspan class="control-flow-text">SEC_CTL_017</tspan><tspan> · Плановая задача без дополнительных полномочий</tspan></text></g>
+  <g transform="translate(1430 1492) rotate(90)" data-spec-id="SEC_CTL_017"><rect id="flow-scheduled-run-label" x="-276" y="-14" width="552" height="28" rx="4" class="flow-label-gray" data-connector-ref="flow-scheduled-run" data-layout="flow-label" data-padding-profile="flow-caption"/><text x="0" y="5" class="neutral-flow-text" text-anchor="middle" textLength="528" lengthAdjust="spacing" data-spec-id="ARC_FLOW_004" data-label-for="flow-scheduled-run-label">ARC_FLOW_004 · SEC_CTL_017 · Плановая задача без дополнительных полномочий</text></g>
   <path id="security-control-rail" class="control-rail" d="M1310 720H1350V2328" data-source-ref="security-card"/>
   <path class="control-line" d="M1350 1250H1310" data-shared-route="true" data-port-group="orchestration-right-inputs" data-port-target="orchestration-card" data-port-side="right"/><path class="control-line" d="M1350 1520H1310" data-shared-route="true"/><path class="control-line" d="M1350 2328H1310" data-shared-route="true"/>
   <g transform="translate(1350 1524) rotate(90)" data-spec-id="SEC_CTL_002"><rect id="security-control-rail-label" x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red" data-connector-ref="security-control-rail" data-layout="flow-label" data-padding-profile="flow-caption"/><text x="0" y="5" class="control-flow-text" text-anchor="middle" textLength="256" lengthAdjust="spacing" data-label-for="security-control-rail-label">SEC_CTL_002 · Аварийный выключатель</text></g>

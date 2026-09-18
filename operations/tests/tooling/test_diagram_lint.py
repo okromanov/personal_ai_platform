@@ -1868,30 +1868,19 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("lengthAdjust='spacing'" in error for error in result.errors))
         self.assertTrue(any("не должен растягивать текст" in error for error in result.errors))
 
-    def test_segmented_caption_requires_glyph_safe_length_adjustment(self) -> None:
-        valid = diagram_geometry_lint.check_geometry(
+    def test_single_line_caption_rejects_inline_segments(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<rect id="valid" x="0" y="0" width="120" height="28" rx="4" '
+            '<rect id="segmented" x="0" y="0" width="120" height="28" rx="4" '
             'class="flow-label-gray" data-layout="flow-label" '
             'data-padding-profile="flow-caption"/>'
             '<text x="60" y="19" text-anchor="middle" textLength="96" '
-            'lengthAdjust="spacingAndGlyphs" data-label-for="valid">'
-            "<tspan>ARC_FLOW_004</tspan><tspan> · SEC_CTL_017</tspan></text>"
-            "</svg>"
-        )
-        invalid = diagram_geometry_lint.check_geometry(
-            '<svg xmlns="http://www.w3.org/2000/svg">'
-            '<rect id="invalid" x="0" y="0" width="120" height="28" rx="4" '
-            'class="flow-label-gray" data-layout="flow-label" '
-            'data-padding-profile="flow-caption"/>'
-            '<text x="60" y="19" text-anchor="middle" textLength="96" '
-            'lengthAdjust="spacing" data-label-for="invalid">'
+            'lengthAdjust="spacing" data-label-for="segmented">'
             "<tspan>ARC_FLOW_004</tspan><tspan> · SEC_CTL_017</tspan></text>"
             "</svg>"
         )
 
-        self.assertEqual(valid.errors, [])
-        self.assertTrue(any("lengthAdjust='spacingAndGlyphs'" in error for error in invalid.errors))
+        self.assertTrue(any("не должна содержать <tspan>" in error for error in result.errors))
 
     def test_multiline_flow_labels_use_template_rows_and_equal_width_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
