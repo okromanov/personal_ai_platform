@@ -1390,7 +1390,10 @@ jobs:
                   continue
               if any(pull.get("state") == "open" for pull in pulls):
                   continue
-              if not any(pull.get("merged_at") for pull in pulls):
+              merged_head_shas = {
+                  pull.get("head", {}).get("sha") for pull in pulls if pull.get("merged_at")
+              }
+              if not branch_sha or branch_sha not in merged_head_shas:
                   continue
               request("DELETE", f"/repos/{repository}/git/refs/{encoded_ref}")
 """
@@ -1441,18 +1444,22 @@ jobs:
         """Границу держит не имя ветки, а её свойства и доказанный merge.
 
         Владелец решил удалять слитые ветки любого префикса, поэтому проверка
-        префикса `codex/*` снята. Взамен обязаны остаться четыре ограничения:
+        префикса `codex/*` снята. Взамен обязаны остаться пять ограничений:
         не трогать ветку по умолчанию, не трогать защищённую ветку, удалять
-        только ту, для которой GitHub подтверждает слитый pull request, и не
-        трогать ветку с открытым сейчас pull request — без последнего гарда
-        имя ветки, переиспользованное после более раннего слияния, удаляет
-        ветку под новым открытым PR (реальный инцидент).
+        только ту, для которой GitHub подтверждает слитый pull request, не
+        трогать ветку с открытым сейчас pull request, и требовать буквальное
+        совпадение tip-коммита ветки с head.sha слитого PR — без последних
+        двух гардов имя ветки, переиспользованное после более раннего
+        слияния, либо удаляет ветку под новым открытым PR, либо удаляет
+        новые, никогда не прошедшие через pull request коммиты поверх уже
+        слитой истории (оба — реальные инциденты).
         """
         for marker, replacement, expected in (
             ("name == default_branch", "False", "ветка по умолчанию"),
             ('branch.get("protected")', "False", "защищённая ветка"),
             ('pull.get("merged_at")', "True", "слитым pull request"),
             ('pull.get("state") == "open"', "False", "открытым сейчас pull request"),
+            ("branch_sha not in merged_head_shas", "False", "head.sha слитого pull request"),
         ):
             with self.subTest(marker=marker):
                 errors = self._errors(self.WORKFLOW.replace(marker, replacement, 1))
