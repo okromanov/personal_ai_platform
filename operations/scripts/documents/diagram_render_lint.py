@@ -21,9 +21,10 @@ What it checks, precisely
    текст имеют общий геометрический центр").
 3. **Programmed padding profiles** (`find_padding_violations`): every shape
    with `data-padding-profile` is checked against the profile selected by
-   its object type. `flow-caption` requires compact `space-m` padding around
-   the widest row; `flow-port` keeps a fixed cell but still requires at least
-   `space-m` and symmetric visible fields.
+   its object type. A one-line `flow-caption` fixes its text advance to the
+   inner slot, so every renderer preserves `space-m` padding; multiline
+   captions use the widest row. `flow-port` keeps a fixed cell but still
+   requires at least `space-m` and symmetric visible fields.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -84,6 +85,7 @@ from operations.scripts.documents.diagram_lint import default_targets
 _ANCHOR_TOLERANCE_PX = 3.0
 _CONTAINMENT_TOLERANCE_PX = 0.5  # sub-pixel rounding slack for "fully inside"
 _PADDING_TOLERANCE_PX = 1.0
+_PADDING_SYMMETRY_TOLERANCE_PX = 1.5
 _FLOW_LABEL_CLASSES = {
     "flow-label",
     "flow-label-blue",
@@ -92,10 +94,10 @@ _FLOW_LABEL_CLASSES = {
     "flow-label-red",
 }
 _PADDING_PROFILES = {
-    # Content-sized label: width is the widest rendered row plus 2*space-m,
-    # rounded up by at most one 4 px grid step. Per-side padding is therefore
-    # 12 <= p < 14 px before the small render tolerance is applied.
-    "flow-caption": (12.0, 14.0),
+    # Content-sized label: a one-line caption normalizes its SVG text advance
+    # to width - 2*space-m. The 1 px tolerance covers ink side bearings and
+    # sub-pixel rounding; it is not permission for a wider object-specific gap.
+    "flow-caption": (12.0, 12.0),
     # Fixed-width port cell: only the minimum and symmetry are normative.
     "flow-port": (12.0, None),
 }
@@ -360,10 +362,10 @@ def _inline_edges(box: ElementBox, *, vertical: bool) -> tuple[float, float, flo
 def find_padding_violations(elements: list[ElementBox]) -> list[str]:
     """Check rendered ink padding selected by each object's padding profile.
 
-    Flow captions are content-sized, so the widest row (or the widest row of
-    an explicitly equal-width group) must leave `space-m` plus at most half of
-    one 4 px rounding step on either side. Port cells are fixed by their parent
-    grid and therefore only enforce the minimum field.
+    Flow captions are content-sized. A one-line caption has a normalized SVG
+    text advance and must leave `space-m` on each side; the widest row of a
+    multiline/equal-width group is checked against the same target. Port cells
+    are fixed by their parent grid and therefore only enforce the minimum field.
     Every row is checked for visible leading/trailing symmetry after transforms.
     """
 
@@ -410,7 +412,7 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
             trailing = plaque_end - row_end
             widest_inline = max(widest_inline, row_inline)
             smallest_side = min(smallest_side, leading, trailing)
-            if abs(leading - trailing) > _ANCHOR_TOLERANCE_PX:
+            if abs(leading - trailing) > _PADDING_SYMMETRY_TOLERANCE_PX:
                 errors.append(
                     f'строка "{row.content[:40]}" в {plaque.id!r} имеет несимметричные '
                     f"поля: первое {leading:.1f}px, второе {trailing:.1f}px"
@@ -427,11 +429,11 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
             grouped_captions.setdefault(plaque.equal_width_group, []).append(
                 (plaque.id, plaque_inline, widest_inline)
             )
-        elif maximum is not None and average_widest_padding >= maximum + _PADDING_TOLERANCE_PX:
+        elif maximum is not None and average_widest_padding > maximum + _PADDING_TOLERANCE_PX:
             errors.append(
                 f"плашка {plaque.id!r} некомпактна для профиля "
                 f"{plaque.padding_profile!r}: поле {average_widest_padding:.1f}px, "
-                f"допустимо < {maximum:.1f}px"
+                f"ожидается {maximum:.1f}±{_PADDING_TOLERANCE_PX:.1f}px"
             )
     for group, members in grouped_captions.items():
         group_inline = min(member[1] for member in members)
@@ -439,11 +441,12 @@ def find_padding_violations(elements: list[ElementBox]) -> list[str]:
         group_padding = (group_inline - group_widest) / 2
         maximum = _PADDING_PROFILES["flow-caption"][1]
         assert maximum is not None
-        if group_padding >= maximum + _PADDING_TOLERANCE_PX:
+        if group_padding > maximum + _PADDING_TOLERANCE_PX:
             errors.append(
                 f"группа равной ширины {group!r} некомпактна для профиля "
                 f"'flow-caption': поле по самой широкой строке группы "
-                f"{group_padding:.1f}px, допустимо < {maximum:.1f}px"
+                f"{group_padding:.1f}px, ожидается "
+                f"{maximum:.1f}±{_PADDING_TOLERANCE_PX:.1f}px"
             )
     return errors
 

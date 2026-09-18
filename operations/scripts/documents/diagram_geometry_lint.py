@@ -148,6 +148,7 @@ _FLOW_LABEL_CLASSES = {
 }
 _FLOW_LABEL_ROW_COUNTS = {"flow-label": 1, "flow-label-multiline": 2}
 _FLOW_LABEL_PADDING_PROFILES = {"flow-caption", "flow-port"}
+_FLOW_CAPTION_INLINE_PADDING = 12.0
 
 
 @dataclass
@@ -957,6 +958,36 @@ def _check_flow_label_layouts(
             expected_x = plaque_x + width / 2
             if text_anchor != "middle" or abs(text_x - expected_x) > 1e-9:
                 errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке")
+            text_length = text_element.get("textLength")
+            length_adjust = text_element.get("lengthAdjust")
+            if padding_profile == "flow-caption" and kind == "flow-label":
+                expected_text_length = width - 2 * _FLOW_CAPTION_INLINE_PADDING
+                try:
+                    actual_text_length = float(text_length)
+                except (TypeError, ValueError):
+                    errors.append(
+                        f"однострочная flow-caption {plaque_id!r} обязана задать числовой "
+                        "textLength для межрендерной нормализации полей"
+                    )
+                else:
+                    if abs(actual_text_length - expected_text_length) > 1e-9:
+                        errors.append(
+                            f"textLength плашки {plaque_id!r}: ожидается "
+                            f"width - 2 × space-m = {expected_text_length:g} px, "
+                            f"фактически {actual_text_length:g} px"
+                        )
+                if length_adjust != "spacing":
+                    errors.append(
+                        f"однострочная flow-caption {plaque_id!r} обязана задать "
+                        "lengthAdjust='spacing'"
+                    )
+            elif padding_profile == "flow-port" and (
+                text_length is not None or length_adjust is not None
+            ):
+                errors.append(
+                    f"flow-port {plaque_id!r} не должен растягивать текст через "
+                    "textLength/lengthAdjust: его ширину задаёт сетка родителя"
+                )
             rows.append((text_y - plaque_y, text_anchor))
         if not valid_rows:
             continue

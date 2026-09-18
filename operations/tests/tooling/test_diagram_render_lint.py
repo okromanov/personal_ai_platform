@@ -252,7 +252,7 @@ class FindAsymmetricAnchorsTests(unittest.TestCase):
 
 
 class FindPaddingViolationsTests(unittest.TestCase):
-    def test_compact_caption_accepts_programmed_space_m_and_grid_rounding(self) -> None:
+    def test_compact_caption_accepts_programmed_space_m_with_render_tolerance(self) -> None:
         plaque = _box(
             "shape",
             "flow-label-blue",
@@ -381,6 +381,45 @@ class FindPaddingViolationsTests(unittest.TestCase):
         )
 
         self.assertEqual(render_lint.find_padding_violations([plaque, text]), [])
+
+    def test_rotated_caption_rejects_renderer_specific_extra_padding(self) -> None:
+        plaque = _box(
+            "shape",
+            "flow-label-gray",
+            100.0,
+            50.0,
+            28.0,
+            552.0,
+            element_id="scheduled",
+            padding_profile="flow-caption",
+        )
+        drifted = _box(
+            "text",
+            "neutral-flow-text",
+            108.0,
+            68.25,
+            11.0,
+            515.5,
+            anchor="middle",
+            content="ARC_FLOW_004 · SEC_CTL_017",
+            label_for="scheduled",
+        )
+        normalized = _box(
+            "text",
+            "neutral-flow-text",
+            108.0,
+            62.5,
+            11.0,
+            527.0,
+            anchor="middle",
+            content="ARC_FLOW_004 · SEC_CTL_017",
+            label_for="scheduled",
+        )
+
+        errors = render_lint.find_padding_violations([plaque, drifted])
+
+        self.assertTrue(any("ожидается 12.0±1.0px" in error for error in errors))
+        self.assertEqual(render_lint.find_padding_violations([plaque, normalized]), [])
 
     def test_equal_width_caption_group_is_sized_by_its_widest_member(self) -> None:
         left = _box(

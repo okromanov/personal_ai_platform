@@ -1731,7 +1731,7 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="template-label" x="0" y="0" width="120" height="28" rx="4" '
             'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-            '<text x="60" y="19" text-anchor="middle" '
+            '<text x="60" y="19" text-anchor="middle" textLength="96" lengthAdjust="spacing" '
             'data-label-for="template-label">Flow</text>'
             "</svg>"
         )
@@ -1740,7 +1740,7 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg"><g transform="translate(10 20)">'
             '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
             'class="flow-label-red" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-            '<text x="100" y="19" text-anchor="middle" '
+            '<text x="100" y="19" text-anchor="middle" textLength="176" lengthAdjust="spacing" '
             'data-label-for="actual-label">Longer flow</text>'
             "</g></svg>",
             reference_flow_label_layouts={"flow-label": reference},
@@ -1749,7 +1749,7 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
             'class="flow-label-green" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-            '<text x="100" y="18" text-anchor="middle" '
+            '<text x="100" y="18" text-anchor="middle" textLength="176" lengthAdjust="spacing" '
             'data-label-for="actual-label">Longer flow</text>'
             "</svg>",
             reference_flow_label_layouts={"flow-label": reference},
@@ -1841,6 +1841,32 @@ class DiagramLintTests(unittest.TestCase):
         )
         self.assertTrue(any("поддерживает только" in error for error in result.errors))
         self.assertFalse(any("плашка потока 'port'" in error for error in result.errors))
+
+    def test_single_line_caption_requires_normalized_inner_text_slot(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="missing" x="0" y="0" width="120" height="28" rx="4" '
+            'class="flow-label-gray" data-layout="flow-label" '
+            'data-padding-profile="flow-caption"/>'
+            '<text x="60" y="19" text-anchor="middle" '
+            'data-label-for="missing">Flow</text>'
+            '<rect id="wrong" x="0" y="40" width="120" height="28" rx="4" '
+            'class="flow-label-red" data-layout="flow-label" '
+            'data-padding-profile="flow-caption"/>'
+            '<text x="60" y="59" text-anchor="middle" textLength="100" '
+            'lengthAdjust="spacingAndGlyphs" data-label-for="wrong">Flow</text>'
+            '<rect id="port" x="0" y="80" width="300" height="28" rx="4" '
+            'class="flow-label-green" data-layout="flow-label" '
+            'data-padding-profile="flow-port"/>'
+            '<text x="150" y="99" text-anchor="middle" textLength="276" '
+            'lengthAdjust="spacing" data-label-for="port">Port</text>'
+            "</svg>"
+        )
+
+        self.assertTrue(any("числовой textLength" in error for error in result.errors))
+        self.assertTrue(any("width - 2 × space-m = 96 px" in error for error in result.errors))
+        self.assertTrue(any("lengthAdjust='spacing'" in error for error in result.errors))
+        self.assertTrue(any("не должен растягивать текст" in error for error in result.errors))
 
     def test_multiline_flow_labels_use_template_rows_and_equal_width_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
@@ -1941,7 +1967,8 @@ class DiagramLintTests(unittest.TestCase):
                 'data-port-target="target" data-port-side="right"/>'
                 '<rect id="label" x="0" y="140" width="120" height="28" rx="4" '
                 'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-                '<text x="60" y="159" text-anchor="middle" '
+                '<text x="60" y="159" text-anchor="middle" textLength="96" '
+                'lengthAdjust="spacing" '
                 'data-label-for="label">Flow</text>'
                 '<defs><rect id="multiline-label" x="0" y="180" width="160" height="44" rx="4" '
                 'class="flow-label-red" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
