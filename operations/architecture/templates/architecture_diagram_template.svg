@@ -3,7 +3,7 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.14
+  diagram_version: 1.13
   generated_at: 2026-09-17
   status: current
   source: operations/architecture/diagram_geometry_foundations.md@1.21
@@ -58,7 +58,7 @@
        a card boundary. The outgoing segment starts there with data-source-ref
        and therefore inherits the source card's colour. Repeated independent
        control transitions use data-layout="control-transition" on the rect
-       and matching identity/title/detail-1 data-layout-slot values
+       and matching identity/title/detail-1/detail-2 data-layout-slot values
        on centred text rows; diagram_lint compares them with this template. -->
   <path id="template-main-flow" class="main-line" d="M320 320V388" data-source-ref="template-component" data-route="direct"/>
   <!-- Two independent connectors entering one side of a card define the
@@ -98,7 +98,8 @@
     <rect id="template-control-transition" x="100" y="500" width="440" height="96" rx="7" class="control-card" data-gap-from="template-result" data-gap-kind="transition" data-layout="control-transition" data-center-with="template-component"/>
     <text x="320" y="520" class="component-id" text-anchor="middle" data-layout-slot="identity">ARC_CMP_XXX · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
     <text x="320" y="545" class="component-title" text-anchor="middle" data-layout-slot="title">Название контрольного перехода</text>
-    <text x="320" y="568" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Варианты решения или ограничения</text>
+    <text x="320" y="568" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Первое пояснение решения или ограничения</text>
+    <text x="320" y="584" class="component-text" text-anchor="middle" data-layout-slot="detail-2">Второе пояснение решения или ограничения</text>
   </g>
 
   <!-- Legend -->
