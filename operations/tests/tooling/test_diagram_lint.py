@@ -1866,9 +1866,7 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("числовой textLength" in error for error in result.errors))
         self.assertTrue(any("width - 2 × space-m = 96 px" in error for error in result.errors))
         self.assertTrue(any("lengthAdjust='spacing'" in error for error in result.errors))
-        self.assertTrue(
-            any("не должен растягивать текст" in error for error in result.errors)
-        )
+        self.assertTrue(any("не должен растягивать текст" in error for error in result.errors))
 
     def test_multiline_flow_labels_use_template_rows_and_equal_width_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
