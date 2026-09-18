@@ -37,20 +37,24 @@ from raw XML attributes without rendering the SVG:
    an independently coloured card. At the boundary the route must be split;
    the outgoing segment then uses `data-source-ref`, so source-colour
    validation applies.
-7. **Transition-card geometry.** Rectangles marked
+7. **Card text alignment.** The leading text rows of coloured component
+   cards align to the same left inset, measured from the registered template
+   component. This includes capability cards and standalone transitions,
+   but excludes nested cards and flow labels.
+8. **Transition-card geometry.** Rectangles marked
    `data-layout="control-transition"` align their centre with the rectangle
    named by `data-center-with`, share dimensions and text-slot geometry, and
    match the registered architecture template. Slot coordinates are calculated
    relative to each card, so no copied pixel constants become a second source
    of truth.
-8. **Connector source attachment.** Every path with `data-source-ref` begins
+9. **Connector source attachment.** Every path with `data-source-ref` begins
    on the referenced rectangle's boundary after translation-only transforms
    are resolved. This prevents a visually plausible arrow from hanging in the
    gap below or beside its declared source.
-9. **Grouped side-port spacing.** Paths marked with the same `data-port-group`
+10. **Grouped side-port spacing.** Paths marked with the same `data-port-group`
    end on the declared side of one `data-port-target`; the distance between
    their endpoints matches the port-gap geometry registered in the template.
-10. **Flow-label geometry.** Every rectangle whose class is `flow-label-*`
+11. **Flow-label geometry.** Every rectangle whose class is `flow-label-*`
    must declare a supported one- or two-line layout and bind every text row
    through `data-label-for`. Height, radius, centred baselines and text anchors
    are compared with template geometry. Every plaque selects a programmed
@@ -144,6 +148,8 @@ _INDEPENDENT_CARD_CLASSES = {
     "execution-card",
     "neutral-card",
 }
+_COLOURED_COMPONENT_CLASSES = {"control-card", "data-card", "execution-card"}
+_LEADING_TEXT_CLASSES = {"component-id", "component-title", "component-text", "small-text"}
 _FLOW_LABEL_CLASSES = {
     "flow-label",
     "flow-label-blue",
@@ -695,13 +701,6 @@ def _check_control_transition_layouts(
             absolute_x = text_x + offset[0]
             absolute_y = text_y + offset[1]
             text_anchor = text_element.get("text-anchor", "start")
-            if text_anchor != "middle":
-                errors.append(
-                    f"слот {slot!r} карточки {card_id!r} обязан использовать "
-                    "центрирование text-anchor=middle"
-                )
-            if abs(absolute_x - (box[0] + box[2]) / 2) > 1e-9:
-                errors.append(f"слот {slot!r} карточки {card_id!r} не находится на центральной оси")
             slots.append(
                 LayoutSlot(
                     name=slot,
@@ -773,6 +772,81 @@ def _check_control_transition_layouts(
                     "внутренние интервалы вычисляются по шаблону"
                 )
     return layouts
+
+
+def measure_reference_card_text_inset(template_text: str) -> tuple[float | None, list[str]]:
+    """Read the outer component's leading text inset from the SVG template."""
+    errors: list[str] = []
+    try:
+        root = ElementTree.fromstring(template_text)
+    except Exception:  # noqa: BLE001 - report a malformed template to the caller
+        return None, ["не удалось разобрать SVG-шаблон для отступа текста карточки"]
+    component = next((el for el in root.iter() if el.get("id") == "template-component"), None)
+    if component is None:
+        return None, ["SVG-шаблон не содержит template-component"]
+    parents = {child: parent for parent in root.iter() for child in parent}
+    parent = parents.get(component)
+    if parent is None:
+        return None, ["template-component не имеет контейнера"]
+    first_text = next(
+        (
+            el
+            for el in list(parent)[list(parent).index(component) + 1 :]
+            if _local_tag(el.tag) == "text"
+            and "component-id" in (el.get("class") or "").split()
+        ),
+        None,
+    )
+    if first_text is None:
+        return None, ["SVG-шаблон не содержит строки component-id в template-component"]
+    try:
+        inset = float(first_text.get("x")) - float(component.get("x"))
+    except (TypeError, ValueError):
+        return None, ["SVG-шаблон задаёт нечисловой левый отступ карточки"]
+    if inset <= 0:
+        errors.append("SVG-шаблон задаёт неверный левый отступ карточки")
+        return None, errors
+    return inset, errors
+
+
+def _check_coloured_card_text_alignment(root_el, inset: float, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    for parent in root_el.iter():
+        children = list(parent)
+        for index, card in enumerate(children):
+            if _local_tag(card.tag) != "rect" or not (
+                set((card.get("class") or "").split()) & _COLOURED_COMPONENT_CLASSES
+            ):
+                continue
+            box = _absolute_rect_box(card, parents, errors, contract="выравнивание текста карточки")
+            if box is None:
+                continue
+            card_id = card.get("id", "<без id>")
+            for text_element in children[index + 1 :]:
+                if _local_tag(text_element.tag) == "rect":
+                    break  # Nested objects and their centred labels have their own layout.
+                if _local_tag(text_element.tag) != "text" or not (
+                    set((text_element.get("class") or "").split()) & _LEADING_TEXT_CLASSES
+                ):
+                    continue
+                offset = _absolute_translation(
+                    text_element, parents, errors, contract="выравнивание текста карточки"
+                )
+                if offset is None:
+                    continue
+                try:
+                    x = float(text_element.get("x")) + offset[0]
+                except (TypeError, ValueError):
+                    errors.append(f"карточка {card_id!r} содержит текст без числового x")
+                    continue
+                if (
+                    text_element.get("text-anchor", "start") != "start"
+                    or abs(x - box[0] - inset) > 1e-9
+                ):
+                    errors.append(
+                        f"карточка {card_id!r}: ведущие строки должны быть выровнены слева "
+                        "с отступом из architecture_diagram_template.svg"
+                    )
 
 
 def _point_on_rect_boundary(
@@ -1186,6 +1260,7 @@ def check_geometry(
     reference_port_gap: float | None = None,
     reference_flow_label_layouts: dict[str, FlowLabelLayout] | None = None,
     reference_flow_caption_padding: float | None = None,
+    reference_card_text_inset: float | None = None,
 ) -> GeometryResult:
     """Run the coordinate geometry checks against raw SVG text.
 
@@ -1211,6 +1286,8 @@ def check_geometry(
     port_gaps = _measure_port_gaps(root_el, errors)
     _check_reference_port_gaps(port_gaps, reference_port_gap, errors)
     _check_shared_routes_stay_outside_cards(root_el, errors)
+    if reference_card_text_inset is not None:
+        _check_coloured_card_text_alignment(root_el, reference_card_text_inset, errors)
     control_transition_layouts = _check_control_transition_layouts(
         root_el, errors, reference_transition_layout
     )

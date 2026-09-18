@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -774,7 +775,6 @@ class DiagramLintTests(unittest.TestCase):
             "обязан иметь числовые x и y",
             "отличный от translate",
             "обязана задать data-center-with",
-            "обязан использовать центрирование",
             "не содержит ни одного data-layout-slot",
         )
         for fragment in expected_fragments:
@@ -2321,6 +2321,58 @@ class DiagramLintTests(unittest.TestCase):
                 patch("sys.argv", ["diagram_lint", str(root / "missing.svg")]),
             ):
                 self.assertEqual(diagram_lint.main(), 1)
+
+
+class ArchitectureCardAlignmentTests(unittest.TestCase):
+    def test_component_and_transition_rows_use_template_left_inset(self) -> None:
+        root = Path(__file__).resolve().parents[3]
+        template = (root / diagram_lint.ARCHITECTURE_TEMPLATE_RELATIVE).read_text(
+            encoding="utf-8"
+        )
+        svg = (
+            root / "work/artefacts/architecture/personal_ai_platform_architecture.svg"
+        ).read_text(encoding="utf-8")
+        inset, errors = diagram_geometry_lint.measure_reference_card_text_inset(template)
+        self.assertEqual(errors, [])
+        self.assertIsNotNone(inset)
+        assert inset is not None
+        reference = diagram_geometry_lint.check_geometry(template).control_transition_layouts[0]
+
+        def check(text: str) -> list[str]:
+            return diagram_geometry_lint.check_geometry(
+                text,
+                reference_card_text_inset=inset,
+                reference_transition_layout=reference,
+            ).errors
+
+        self.assertEqual(check(svg), [])
+        for card_id in (
+            "pre-model-control-card",
+            "owner-choice-card",
+            "context-card",
+            "model-gateway-card",
+            "tool-gateway-card",
+        ):
+            with self.subTest(card_id=card_id):
+                start = svg.index(f'<rect id="{card_id}"')
+                first_text = re.search(r'<text x="([^"]+)"', svg[start:])
+                self.assertIsNotNone(first_text)
+                assert first_text is not None
+                x_start = start + first_text.start(1)
+                x_end = start + first_text.end(1)
+                shifted = svg[:x_start] + str(float(first_text.group(1)) + 4) + svg[x_end:]
+                self.assertTrue(
+                    any(card_id in error and "выровнены слева" in error for error in check(shifted))
+                )
+        original = '<text x="618" y="1245" class="component-title"'
+        centred = '<text x="618" y="1245" class="component-title" text-anchor="middle"'
+        self.assertIn(original, svg)
+        self.assertTrue(
+            any(
+                "pre-model-control-card" in error and "выровнены слева" in error
+                for error in check(svg.replace(original, centred, 1))
+            )
+        )
 
 
 if __name__ == "__main__":
