@@ -907,6 +907,33 @@ class DiagramLintTests(unittest.TestCase):
         missing = diagram_geometry_lint.check_geometry(
             prefix + "</g></svg>", reference_transition_layout=reference
         )
+        unknown_variant = diagram_geometry_lint.check_geometry(
+            prefix.replace("single-detail", "unknown") + detail + "</g></svg>",
+            reference_transition_layout=reference,
+        )
+        incomplete_reference = diagram_geometry_lint.ControlTransitionLayout(
+            card_id=reference.card_id,
+            width=reference.width,
+            height=reference.height,
+            radius=reference.radius,
+            slots=tuple(slot for slot in reference.slots if slot.name != "detail-2"),
+        )
+        invalid_template = diagram_geometry_lint.check_geometry(
+            prefix + detail + "</g></svg>",
+            reference_transition_layout=incomplete_reference,
+        )
+        detail_2 = next(slot for slot in reference.slots if slot.name == "detail-2")
+        missing_bottom_inset = diagram_geometry_lint.ControlTransitionLayout(
+            card_id=reference.card_id,
+            width=reference.width,
+            height=detail_2.y_offset,
+            radius=reference.radius,
+            slots=reference.slots,
+        )
+        invalid_inset = diagram_geometry_lint.check_geometry(
+            prefix + detail + "</g></svg>",
+            reference_transition_layout=missing_bottom_inset,
+        )
         self.assertEqual(matching.errors, [])
         self.assertTrue(
             any("эталона architecture_diagram_template.svg" in e for e in shifted.errors)
@@ -915,6 +942,19 @@ class DiagramLintTests(unittest.TestCase):
             any("эталона architecture_diagram_template.svg" in e for e in too_tall.errors)
         )
         self.assertTrue(any("ровно слоты identity, title и detail-1" in e for e in missing.errors))
+        self.assertTrue(any("неизвестный data-layout-variant" in e for e in unknown_variant.errors))
+        self.assertTrue(
+            any(
+                "эталон переходной карточки не содержит обязательные слоты" in e
+                for e in invalid_template.errors
+            )
+        )
+        self.assertTrue(
+            any(
+                "эталон переходной карточки задаёт неверный нижний отступ" in e
+                for e in invalid_inset.errors
+            )
+        )
 
     def test_legend_must_list_every_declared_identifier_family(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
