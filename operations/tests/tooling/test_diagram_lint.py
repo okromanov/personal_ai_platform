@@ -1891,9 +1891,7 @@ class DiagramLintTests(unittest.TestCase):
         )
 
         self.assertEqual(valid.errors, [])
-        self.assertTrue(
-            any("lengthAdjust='spacingAndGlyphs'" in error for error in invalid.errors)
-        )
+        self.assertTrue(any("lengthAdjust='spacingAndGlyphs'" in error for error in invalid.errors))
 
     def test_multiline_flow_labels_use_template_rows_and_equal_width_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
