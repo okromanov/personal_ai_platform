@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.10
+  diagram_version: 1.11
   generated_at: 2026-09-17
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.18
+  source: operations/architecture/diagram_geometry_foundations.md@1.19
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -80,7 +80,7 @@
 
   <!-- Flow label: width = text + 2*space-m, centred on the connector -->
   <rect id="template-flow-label" x="234" y="340" width="172" height="28" rx="4" class="flow-label-blue" data-gap-from="template-component" data-gap-kind="transition" data-connector-ref="template-main-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
-  <text x="320" y="359" class="flow-text" text-anchor="middle" data-label-for="template-flow-label">ARC_FLOW_XXX · Поток</text>
+  <text x="320" y="359" class="flow-text" text-anchor="middle" textLength="148" lengthAdjust="spacing" data-label-for="template-flow-label">ARC_FLOW_XXX · Поток</text>
 
   <!-- Result / port node: 388 - (140 + 180) = layer-gap. The flow label
        above also defines transition-gap geometrically: 340 - 320 = 20.
