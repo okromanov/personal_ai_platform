@@ -860,6 +860,102 @@ class DiagramLintTests(unittest.TestCase):
             any("эталона architecture_diagram_template.svg" in e for e in drifted.errors)
         )
 
+    def test_control_transition_single_detail_uses_template_geometry(self) -> None:
+        template = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="0" width="200" height="10"/>'
+            '<g><rect id="reference" x="50" y="20" width="100" height="80" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-center-with="anchor"/>'
+            '<text x="100" y="35" class="component-id" text-anchor="middle" '
+            'data-layout-slot="identity">A</text>'
+            '<text x="100" y="55" class="component-title" text-anchor="middle" '
+            'data-layout-slot="title">B</text>'
+            '<text x="100" y="75" class="component-text" text-anchor="middle" '
+            'data-layout-slot="detail-1">C</text>'
+            '<text x="100" y="91" class="component-text" text-anchor="middle" '
+            'data-layout-slot="detail-2">D</text></g></svg>'
+        )
+        self.assertEqual(template.errors, [])
+        reference = template.control_transition_layouts[0]
+        prefix = (
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="0" width="200" height="10"/>'
+            '<g><rect id="compact" x="50" y="20" width="100" height="64" rx="5" '
+            'class="control-card" data-layout="control-transition" '
+            'data-layout-variant="single-detail" data-center-with="anchor"/>'
+            '<text x="100" y="35" class="component-id" text-anchor="middle" '
+            'data-layout-slot="identity">A</text>'
+            '<text x="100" y="55" class="component-title" text-anchor="middle" '
+            'data-layout-slot="title">B</text>'
+        )
+        detail = (
+            '<text x="100" y="75" class="component-text" text-anchor="middle" '
+            'data-layout-slot="detail-1">C</text>'
+        )
+        matching = diagram_geometry_lint.check_geometry(
+            prefix + detail + "</g></svg>", reference_transition_layout=reference
+        )
+        shifted = diagram_geometry_lint.check_geometry(
+            prefix + detail.replace('y="75"', 'y="76"') + "</g></svg>",
+            reference_transition_layout=reference,
+        )
+        too_tall = diagram_geometry_lint.check_geometry(
+            prefix.replace('height="64"', 'height="68"') + detail + "</g></svg>",
+            reference_transition_layout=reference,
+        )
+        missing = diagram_geometry_lint.check_geometry(
+            prefix + "</g></svg>", reference_transition_layout=reference
+        )
+        unknown_variant = diagram_geometry_lint.check_geometry(
+            prefix.replace("single-detail", "unknown") + detail + "</g></svg>",
+            reference_transition_layout=reference,
+        )
+        incomplete_reference = diagram_geometry_lint.ControlTransitionLayout(
+            card_id=reference.card_id,
+            width=reference.width,
+            height=reference.height,
+            radius=reference.radius,
+            slots=tuple(slot for slot in reference.slots if slot.name != "detail-2"),
+        )
+        invalid_template = diagram_geometry_lint.check_geometry(
+            prefix + detail + "</g></svg>",
+            reference_transition_layout=incomplete_reference,
+        )
+        detail_2 = next(slot for slot in reference.slots if slot.name == "detail-2")
+        missing_bottom_inset = diagram_geometry_lint.ControlTransitionLayout(
+            card_id=reference.card_id,
+            width=reference.width,
+            height=detail_2.y_offset,
+            radius=reference.radius,
+            slots=reference.slots,
+        )
+        invalid_inset = diagram_geometry_lint.check_geometry(
+            prefix + detail + "</g></svg>",
+            reference_transition_layout=missing_bottom_inset,
+        )
+        self.assertEqual(matching.errors, [])
+        self.assertTrue(
+            any("эталона architecture_diagram_template.svg" in e for e in shifted.errors)
+        )
+        self.assertTrue(
+            any("эталона architecture_diagram_template.svg" in e for e in too_tall.errors)
+        )
+        self.assertTrue(any("ровно слоты identity, title и detail-1" in e for e in missing.errors))
+        self.assertTrue(any("неизвестный data-layout-variant" in e for e in unknown_variant.errors))
+        self.assertTrue(
+            any(
+                "эталон переходной карточки не содержит обязательные слоты" in e
+                for e in invalid_template.errors
+            )
+        )
+        self.assertTrue(
+            any(
+                "эталон переходной карточки задаёт неверный нижний отступ" in e
+                for e in invalid_inset.errors
+            )
+        )
+
     def test_legend_must_list_every_declared_identifier_family(self) -> None:
         root_el = diagram_lint.ElementTree.fromstring(
             '<svg xmlns="http://www.w3.org/2000/svg"><text class="legend-id">ARC_CMP_*</text></svg>'

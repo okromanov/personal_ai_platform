@@ -185,6 +185,7 @@ class ControlTransitionLayout:
     height: float
     radius: float
     slots: tuple[LayoutSlot, ...]
+    variant: str = "standard"
 
     def signature(self) -> tuple[float, float, float, tuple[LayoutSlot, ...]]:
         """Geometry shared by the template and every transition card."""
@@ -588,6 +589,12 @@ def _check_control_transition_layouts(
         if card.get("data-layout") != "control-transition":
             continue
         card_id = card.get("id", "<без id>")
+        variant = card.get("data-layout-variant", "standard")
+        if variant not in {"standard", "single-detail"}:
+            errors.append(
+                f"переходная карточка {card_id!r}: неизвестный data-layout-variant={variant!r}"
+            )
+            continue
         if _local_tag(card.tag) != "rect":
             errors.append('data-layout="control-transition" разрешён только для <rect>')
             continue
@@ -690,19 +697,27 @@ def _check_control_transition_layouts(
         if not slots:
             errors.append(f"переходная карточка {card_id!r} не содержит ни одного data-layout-slot")
             continue
+        if variant == "single-detail" and seen_slots != {"identity", "title", "detail-1"}:
+            errors.append(
+                f"переходная карточка {card_id!r} с single-detail обязана содержать "
+                "ровно слоты identity, title и detail-1"
+            )
+            continue
         layout = ControlTransitionLayout(
             card_id=card_id,
             width=box[2] - box[0],
             height=box[3] - box[1],
             radius=radius,
             slots=tuple(sorted(slots, key=lambda item: item.name)),
+            variant=variant,
         )
         layouts.append(layout)
 
     if not layouts:
         return layouts
-    peer_reference = layouts[0]
-    for layout in layouts[1:]:
+    peers_by_variant: dict[str, ControlTransitionLayout] = {}
+    for layout in layouts:
+        peer_reference = peers_by_variant.setdefault(layout.variant, layout)
         if layout.signature() != peer_reference.signature():
             errors.append(
                 f"геометрия переходной карточки {layout.card_id!r} отличается от "
@@ -710,8 +725,30 @@ def _check_control_transition_layouts(
                 "однотипных контрольных переходов должны совпадать"
             )
     if reference_layout is not None:
-        reference_signature = reference_layout.signature()
         for layout in layouts:
+            reference_slots = reference_layout.slots
+            if layout.variant == "single-detail":
+                # Preserve the template's bottom inset below the last visible row;
+                # all other slot coordinates and the width remain template-derived.
+                required = {"identity", "title", "detail-1", "detail-2"}
+                by_name = {slot.name: slot for slot in reference_slots}
+                if not required <= by_name.keys():
+                    errors.append("эталон переходной карточки не содержит обязательные слоты")
+                    continue
+                bottom_inset = reference_layout.height - by_name["detail-2"].y_offset
+                if bottom_inset <= 0:
+                    errors.append("эталон переходной карточки задаёт неверный нижний отступ")
+                    continue
+                expected_height = by_name["detail-1"].y_offset + bottom_inset
+                reference_slots = tuple(slot for slot in reference_slots if slot.name != "detail-2")
+            else:
+                expected_height = reference_layout.height
+            reference_signature = (
+                reference_layout.width,
+                expected_height,
+                reference_layout.radius,
+                reference_slots,
+            )
             if layout.signature() != reference_signature:
                 errors.append(
                     f"геометрия переходной карточки {layout.card_id!r} отличается от "
