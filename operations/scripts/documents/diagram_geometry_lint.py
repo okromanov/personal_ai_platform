@@ -591,7 +591,9 @@ def _check_control_transition_layouts(
         card_id = card.get("id", "<без id>")
         variant = card.get("data-layout-variant", "standard")
         if variant not in {"standard", "single-detail"}:
-            errors.append(f"переходная карточка {card_id!r}: неизвестный data-layout-variant={variant!r}")
+            errors.append(
+                f"переходная карточка {card_id!r}: неизвестный data-layout-variant={variant!r}"
+            )
             continue
         if _local_tag(card.tag) != "rect":
             errors.append('data-layout="control-transition" разрешён только для <rect>')
@@ -733,16 +735,12 @@ def _check_control_transition_layouts(
                 if not required <= by_name.keys():
                     errors.append("эталон переходной карточки не содержит обязательные слоты")
                     continue
-                bottom_inset = (
-                    reference_layout.height - by_name["detail-2"].y_offset
-                )
+                bottom_inset = reference_layout.height - by_name["detail-2"].y_offset
                 if bottom_inset <= 0:
                     errors.append("эталон переходной карточки задаёт неверный нижний отступ")
                     continue
                 expected_height = by_name["detail-1"].y_offset + bottom_inset
-                reference_slots = tuple(
-                    slot for slot in reference_slots if slot.name != "detail-2"
-                )
+                reference_slots = tuple(slot for slot in reference_slots if slot.name != "detail-2")
             else:
                 expected_height = reference_layout.height
             reference_signature = (

@@ -894,18 +894,18 @@ class DiagramLintTests(unittest.TestCase):
             'data-layout-slot="detail-1">C</text>'
         )
         matching = diagram_geometry_lint.check_geometry(
-            prefix + detail + '</g></svg>', reference_transition_layout=reference
+            prefix + detail + "</g></svg>", reference_transition_layout=reference
         )
         shifted = diagram_geometry_lint.check_geometry(
-            prefix + detail.replace('y="75"', 'y="76"') + '</g></svg>',
+            prefix + detail.replace('y="75"', 'y="76"') + "</g></svg>",
             reference_transition_layout=reference,
         )
         too_tall = diagram_geometry_lint.check_geometry(
-            prefix.replace('height="64"', 'height="68"') + detail + '</g></svg>',
+            prefix.replace('height="64"', 'height="68"') + detail + "</g></svg>",
             reference_transition_layout=reference,
         )
         missing = diagram_geometry_lint.check_geometry(
-            prefix + '</g></svg>', reference_transition_layout=reference
+            prefix + "</g></svg>", reference_transition_layout=reference
         )
         self.assertEqual(matching.errors, [])
         self.assertTrue(
