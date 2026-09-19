@@ -739,8 +739,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="first" x="60" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="first-anchor"/>'
-            '<text x="110" y="35" class="eyebrow" text-anchor="middle" '
-            'data-layout-slot="identity">A</text>'
+            '<text x="70" y="35" class="eyebrow" textLength="80" lengthAdjust="spacing" '
+            'data-width-anchor="true" data-layout-slot="identity">A</text>'
             '<text x="110" y="55" class="title" text-anchor="middle" '
             'data-layout-slot="title">B</text></g>'
             '<g transform="translate(20 100)">'
@@ -748,14 +748,50 @@ class DiagramLintTests(unittest.TestCase):
             '<rect id="second" x="60" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="second-anchor"/>'
-            '<text x="110" y="35" class="eyebrow" text-anchor="middle" '
-            'data-layout-slot="identity">C</text>'
+            '<text x="70" y="35" class="eyebrow" textLength="80" lengthAdjust="spacing" '
+            'data-width-anchor="true" data-layout-slot="identity">C</text>'
             '<text x="110" y="55" class="title" text-anchor="middle" '
             'data-layout-slot="title">D</text></g>'
             "</svg>"
         )
 
         self.assertEqual(matching.errors, [])
+
+    def test_control_transition_rejects_invalid_width_anchor_contract(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g><rect id="invalid" x="0" y="0" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="10" y="15" data-layout-slot="identity" '
+            'data-width-anchor="false" textLength="80">A</text>'
+            '<text x="50" y="35" text-anchor="middle" data-layout-slot="title" '
+            'data-width-anchor="true" textLength="bad" lengthAdjust="spacingAndGlyphs">'
+            '<tspan>B</tspan></text></g>'
+            '<g><rect id="wrong-length" x="0" y="80" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="10" y="95" data-layout-slot="identity" '
+            'data-width-anchor="true" textLength="79" lengthAdjust="spacing">C</text></g>'
+            '<g><rect id="duplicate" x="0" y="160" width="100" height="60" rx="5" '
+            'class="control-card" data-layout="control-transition"/>'
+            '<text x="10" y="175" data-layout-slot="identity" '
+            'data-width-anchor="true" textLength="80" lengthAdjust="spacing">D</text>'
+            '<text x="10" y="195" data-layout-slot="title" '
+            'data-width-anchor="true" textLength="80" lengthAdjust="spacing">E</text></g>'
+            '</svg>'
+        )
+
+        expected_fragments = (
+            "data-width-anchor принимает только значение 'true'",
+            "без data-width-anchor='true' не должен задавать textLength/lengthAdjust",
+            "обязан быть выровнен слева",
+            "не должен содержать <tspan>",
+            "обязан задать числовой textLength",
+            "обязан задать lengthAdjust='spacing'",
+            "width - 2 × left-inset = 80 px",
+            "обязана иметь ровно один data-width-anchor='true'",
+        )
+        for fragment in expected_fragments:
+            self.assertTrue(any(fragment in error for error in result.errors), result.errors)
 
     def test_control_transition_layout_rejects_drift(self) -> None:
         result = diagram_geometry_lint.check_geometry(
@@ -875,7 +911,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="template" x="50" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
-            '<text x="100" y="35" class="component-id" text-anchor="middle" '
+            '<text x="60" y="35" class="component-id" textLength="80" '
+            'lengthAdjust="spacing" data-width-anchor="true" '
             'data-layout-slot="identity">A</text></g>'
             "</svg>"
         )
@@ -886,7 +923,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="actual" x="70" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
-            '<text x="120" y="35" class="component-id" text-anchor="middle" '
+            '<text x="80" y="35" class="component-id" textLength="80" '
+            'lengthAdjust="spacing" data-width-anchor="true" '
             'data-layout-slot="identity">B</text></g>'
             "</svg>",
             reference_transition_layout=reference,
@@ -897,7 +935,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="actual" x="70" y="20" width="100" height="64" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
-            '<text x="120" y="36" class="component-id" text-anchor="middle" '
+            '<text x="80" y="36" class="component-id" textLength="80" '
+            'lengthAdjust="spacing" data-width-anchor="true" '
             'data-layout-slot="identity">B</text></g>'
             "</svg>",
             reference_transition_layout=reference,
@@ -917,7 +956,8 @@ class DiagramLintTests(unittest.TestCase):
             'data-center-with="anchor"/>'
             '<text x="100" y="35" class="component-id" text-anchor="middle" '
             'data-layout-slot="identity">A</text>'
-            '<text x="100" y="55" class="component-title" text-anchor="middle" '
+            '<text x="60" y="55" class="component-title" textLength="80" '
+            'lengthAdjust="spacing" data-width-anchor="true" '
             'data-layout-slot="title">B</text>'
             '<text x="100" y="75" class="component-text" text-anchor="middle" '
             'data-layout-slot="detail-1">C</text>'
@@ -934,7 +974,8 @@ class DiagramLintTests(unittest.TestCase):
             'data-layout-variant="single-detail" data-center-with="anchor"/>'
             '<text x="100" y="35" class="component-id" text-anchor="middle" '
             'data-layout-slot="identity">A</text>'
-            '<text x="100" y="55" class="component-title" text-anchor="middle" '
+            '<text x="60" y="55" class="component-title" textLength="80" '
+            'lengthAdjust="spacing" data-width-anchor="true" '
             'data-layout-slot="title">B</text>'
         )
         detail = (
@@ -1531,7 +1572,8 @@ class DiagramLintTests(unittest.TestCase):
                 '<g><rect id="transition" x="50" y="20" width="100" height="60" rx="5" '
                 'class="control-card" data-layout="control-transition" '
                 'data-center-with="anchor"/>'
-                '<text x="100" y="35" class="component-id" text-anchor="middle" '
+                '<text x="60" y="35" class="component-id" textLength="80" '
+                'lengthAdjust="spacing" data-width-anchor="true" '
                 'data-layout-slot="identity">A</text></g>'
                 "</svg>",
                 encoding="utf-8",
@@ -1690,7 +1732,8 @@ class DiagramLintTests(unittest.TestCase):
                 '<g><rect id="template-transition" x="60" y="20" width="100" height="60" '
                 'rx="5" class="control-card" data-layout="control-transition" '
                 'data-center-with="template-anchor"/>'
-                '<text x="110" y="35" class="component-id" text-anchor="middle" '
+                '<text x="70" y="35" class="component-id" textLength="80" '
+                'lengthAdjust="spacing" data-width-anchor="true" '
                 'data-layout-slot="identity">A</text></g>'
                 "</svg>",
                 encoding="utf-8",
@@ -1705,7 +1748,8 @@ class DiagramLintTests(unittest.TestCase):
                 '<rect id="transition" x="60" y="20" width="100" height="60" rx="5" '
                 'class="control-card" data-layout="control-transition" '
                 'data-center-with="anchor"/>'
-                '<text x="110" y="35" class="component-id" text-anchor="middle" '
+                '<text x="70" y="35" class="component-id" textLength="80" '
+                'lengthAdjust="spacing" data-width-anchor="true" '
                 'data-layout-slot="identity">A</text></g>'
             )
             svg = root / "diagram.svg"
@@ -2068,6 +2112,48 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertTrue(any("не должна содержать <tspan>" in error for error in result.errors))
 
+    def test_multiline_caption_rejects_invalid_width_anchor_contract(self) -> None:
+        result = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g><rect id="invalid" x="0" y="0" width="160" height="44" rx="4" '
+            'class="flow-label-blue" data-layout="flow-label-multiline" '
+            'data-padding-profile="flow-caption"/>'
+            '<text x="80" y="17" text-anchor="middle" data-label-for="invalid" '
+            'data-width-anchor="false" textLength="136">First</text>'
+            '<text x="80" y="33" text-anchor="middle" data-label-for="invalid" '
+            'data-width-anchor="true" textLength="bad" lengthAdjust="spacingAndGlyphs">'
+            '<tspan>Second</tspan></text></g>'
+            '<g><rect id="wrong-length" x="0" y="60" width="160" height="44" rx="4" '
+            'class="flow-label-red" data-layout="flow-label-multiline" '
+            'data-padding-profile="flow-caption"/>'
+            '<text x="80" y="77" text-anchor="middle" '
+            'data-label-for="wrong-length">First</text>'
+            '<text x="80" y="93" text-anchor="middle" data-label-for="wrong-length" '
+            'data-width-anchor="true" textLength="135" '
+            'lengthAdjust="spacing">Second</text></g>'
+            '<g><rect id="duplicate" x="0" y="120" width="160" height="44" rx="4" '
+            'class="flow-label-green" data-layout="flow-label-multiline" '
+            'data-padding-profile="flow-caption"/>'
+            '<text x="80" y="137" text-anchor="middle" data-label-for="duplicate" '
+            'data-width-anchor="true" textLength="136" lengthAdjust="spacing">First</text>'
+            '<text x="80" y="153" text-anchor="middle" data-label-for="duplicate" '
+            'data-width-anchor="true" textLength="136" lengthAdjust="spacing">Second</text></g>'
+            '</svg>',
+            reference_flow_caption_padding=12.0,
+        )
+
+        expected_fragments = (
+            "data-width-anchor принимает только значение 'true'",
+            "без data-width-anchor='true' не должна задавать textLength/lengthAdjust",
+            "не должен содержать <tspan>",
+            "обязан задать числовой textLength",
+            "обязан задать lengthAdjust='spacing'",
+            "width - 2 × space-m = 136 px",
+            "обязана иметь ровно один data-width-anchor='true'",
+        )
+        for fragment in expected_fragments:
+            self.assertTrue(any(fragment in error for error in result.errors), result.errors)
+
     def test_multiline_flow_labels_use_template_rows_and_validate_optional_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -2173,7 +2259,8 @@ class DiagramLintTests(unittest.TestCase):
                 'class="flow-label-red" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
                 '<text x="80" y="197" text-anchor="middle" '
                 'data-label-for="multiline-label">First</text>'
-                '<text x="80" y="213" text-anchor="middle" '
+                '<text x="80" y="213" text-anchor="middle" textLength="136" '
+                'lengthAdjust="spacing" data-width-anchor="true" '
                 'data-label-for="multiline-label">Second</text></defs>'
                 "</svg>",
                 encoding="utf-8",

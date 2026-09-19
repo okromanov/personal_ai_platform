@@ -3,10 +3,10 @@
   <desc id="desc">Минимальный структурно-полный скелет архитектурного профиля: карточка компонента с вложенным объектом, коннектор с плашкой подписи, узел результата и легенда. Скопируйте и замените плейсхолдеры реальными ID и содержимым.</desc>
   <!-- diagram-metadata
   diagram_id: architecture_diagram_template
-  diagram_version: 1.16
+  diagram_version: 1.17
   generated_at: 2026-09-19
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.24
+  source: operations/architecture/diagram_geometry_foundations.md@1.25
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -39,7 +39,7 @@
       <path id="template-multiline-flow" class="main-line" d="M100 -20V0" data-shared-route="true" data-route="direct"/>
       <rect id="template-flow-label-multiline" x="20" y="0" width="160" height="44" rx="4" class="flow-label-blue" data-connector-ref="template-multiline-flow" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>
       <text x="100" y="17" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Первая строка подписи</text>
-      <text x="100" y="33" class="template-note" text-anchor="middle" data-label-for="template-flow-label-multiline">Вторая строка подписи</text>
+      <text x="100" y="33" class="template-note" text-anchor="middle" textLength="136" lengthAdjust="spacing" data-width-anchor="true" data-label-for="template-flow-label-multiline">Вторая строка подписи</text>
     </g>
   </defs>
   <rect width="991" height="644" fill="#FFFFFF"/>
@@ -97,7 +97,7 @@
   <g>
     <rect id="template-control-transition" x="104.5" y="500" width="431" height="96" rx="7" class="control-card" data-gap-from="template-result" data-gap-kind="transition" data-layout="control-transition" data-center-with="template-component"/>
     <text x="132.5" y="520" class="component-id" data-layout-slot="identity">ARC_CMP_XXX · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
-    <text x="132.5" y="545" class="component-title" data-layout-slot="title">Название контрольного перехода</text>
+    <text x="132.5" y="545" class="component-title" textLength="375" lengthAdjust="spacing" data-width-anchor="true" data-layout-slot="title">Название контрольного перехода</text>
     <text x="132.5" y="568" class="component-text" data-layout-slot="detail-1">Первое пояснение решения или ограничения</text>
     <text x="132.5" y="584" class="component-text" data-layout-slot="detail-2">Второе пояснение решения или ограничения</text>
   </g>

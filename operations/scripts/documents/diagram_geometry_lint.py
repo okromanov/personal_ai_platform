@@ -717,6 +717,7 @@ def _check_control_transition_layouts(
         parent = parents.get(card)
         slots: list[LayoutSlot] = []
         seen_slots: set[str] = set()
+        width_anchors: list = []
         for text_element in list(parent) if parent is not None else []:
             slot = text_element.get("data-layout-slot")
             if slot is None:
@@ -745,6 +746,21 @@ def _check_control_transition_layouts(
             absolute_x = text_x + offset[0]
             absolute_y = text_y + offset[1]
             text_anchor = text_element.get("text-anchor", "start")
+            width_anchor = text_element.get("data-width-anchor")
+            if width_anchor is not None and width_anchor != "true":
+                errors.append(
+                    f"слот {slot!r} карточки {card_id!r}: data-width-anchor "
+                    "принимает только значение 'true'"
+                )
+            if width_anchor == "true":
+                width_anchors.append((text_element, absolute_x))
+            elif text_element.get("textLength") is not None or text_element.get(
+                "lengthAdjust"
+            ) is not None:
+                errors.append(
+                    f"слот {slot!r} карточки {card_id!r} без data-width-anchor='true' "
+                    "не должен задавать textLength/lengthAdjust"
+                )
             slots.append(
                 LayoutSlot(
                     name=slot,
@@ -757,6 +773,42 @@ def _check_control_transition_layouts(
         if not slots:
             errors.append(f"переходная карточка {card_id!r} не содержит ни одного data-layout-slot")
             continue
+        if len(width_anchors) != 1:
+            errors.append(
+                f"переходная карточка {card_id!r} обязана иметь ровно один "
+                "data-width-anchor='true'"
+            )
+        else:
+            anchor_element, absolute_x = width_anchors[0]
+            if anchor_element.get("text-anchor", "start") != "start":
+                errors.append(
+                    f"якорь ширины переходной карточки {card_id!r} обязан быть выровнен слева"
+                )
+            if any(_local_tag(child.tag) == "tspan" for child in anchor_element):
+                errors.append(
+                    f"якорь ширины переходной карточки {card_id!r} не должен содержать <tspan>"
+                )
+            try:
+                text_length = float(anchor_element.get("textLength"))
+            except (TypeError, ValueError):
+                errors.append(
+                    f"якорь ширины переходной карточки {card_id!r} обязан задать "
+                    "числовой textLength"
+                )
+            else:
+                leading_inset = absolute_x - box[0]
+                expected_text_length = (box[2] - box[0]) - 2 * leading_inset
+                if abs(text_length - expected_text_length) > 1e-9:
+                    errors.append(
+                        f"textLength якоря ширины карточки {card_id!r}: ожидается "
+                        f"width - 2 × left-inset = {expected_text_length:g} px, "
+                        f"фактически {text_length:g} px"
+                    )
+            if anchor_element.get("lengthAdjust") != "spacing":
+                errors.append(
+                    f"якорь ширины переходной карточки {card_id!r} обязан задать "
+                    "lengthAdjust='spacing'"
+                )
         if variant == "single-detail" and seen_slots != {"identity", "title", "detail-1"}:
             errors.append(
                 f"переходная карточка {card_id!r} с single-detail обязана содержать "
@@ -1096,6 +1148,7 @@ def _check_flow_label_layouts(
             continue
         rows: list[tuple[float, str]] = []
         valid_rows = True
+        width_anchors: list = []
         for text_element in labels:
             if _local_tag(text_element.tag) != "text":
                 errors.append(f"data-label-for={plaque_id!r} обязан стоять на <text>")
@@ -1121,6 +1174,14 @@ def _check_flow_label_layouts(
                 errors.append(f"подпись плашки {plaque_id!r} обязана быть центрирована по ячейке")
             text_length = text_element.get("textLength")
             length_adjust = text_element.get("lengthAdjust")
+            width_anchor = text_element.get("data-width-anchor")
+            if width_anchor is not None and width_anchor != "true":
+                errors.append(
+                    f"подпись плашки {plaque_id!r}: data-width-anchor принимает "
+                    "только значение 'true'"
+                )
+            if width_anchor == "true":
+                width_anchors.append(text_element)
             if padding_profile == "flow-caption" and kind == "flow-label":
                 has_inline_segments = any(
                     _local_tag(child.tag) == "tspan" for child in text_element
@@ -1159,6 +1220,14 @@ def _check_flow_label_layouts(
                         f"однострочная flow-caption {plaque_id!r} обязана задать "
                         "lengthAdjust='spacing'"
                     )
+            elif padding_profile == "flow-caption" and kind == "flow-label-multiline":
+                if width_anchor != "true" and (
+                    text_length is not None or length_adjust is not None
+                ):
+                    errors.append(
+                        f"строка двухстрочной плашки {plaque_id!r} без "
+                        "data-width-anchor='true' не должна задавать textLength/lengthAdjust"
+                    )
             elif padding_profile == "flow-port" and (
                 text_length is not None or length_adjust is not None
             ):
@@ -1169,6 +1238,40 @@ def _check_flow_label_layouts(
             rows.append((text_y - plaque_y, text_anchor))
         if not valid_rows:
             continue
+        if padding_profile == "flow-caption" and kind == "flow-label-multiline":
+            if len(width_anchors) != 1:
+                errors.append(
+                    f"двухстрочная плашка {plaque_id!r} обязана иметь ровно один "
+                    "data-width-anchor='true'"
+                )
+            else:
+                anchor_element = width_anchors[0]
+                if any(_local_tag(child.tag) == "tspan" for child in anchor_element):
+                    errors.append(
+                        f"якорь ширины двухстрочной плашки {plaque_id!r} "
+                        "не должен содержать <tspan>"
+                    )
+                try:
+                    actual_text_length = float(anchor_element.get("textLength"))
+                except (TypeError, ValueError):
+                    errors.append(
+                        f"якорь ширины двухстрочной плашки {plaque_id!r} обязан "
+                        "задать числовой textLength"
+                    )
+                else:
+                    if reference_flow_caption_padding is not None:
+                        expected_text_length = width - 2 * reference_flow_caption_padding
+                        if abs(actual_text_length - expected_text_length) > 1e-9:
+                            errors.append(
+                                f"textLength якоря ширины плашки {plaque_id!r}: ожидается "
+                                f"width - 2 × space-m = {expected_text_length:g} px, "
+                                f"фактически {actual_text_length:g} px"
+                            )
+                if anchor_element.get("lengthAdjust") != "spacing":
+                    errors.append(
+                        f"якорь ширины двухстрочной плашки {plaque_id!r} обязан "
+                        "задать lengthAdjust='spacing'"
+                    )
         rows.sort(key=lambda row: row[0])
         layouts.append(
             FlowLabelLayout(
