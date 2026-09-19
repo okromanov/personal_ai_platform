@@ -754,9 +754,10 @@ def _check_control_transition_layouts(
                 )
             if width_anchor == "true":
                 width_anchors.append((text_element, absolute_x))
-            elif text_element.get("textLength") is not None or text_element.get(
-                "lengthAdjust"
-            ) is not None:
+            elif (
+                text_element.get("textLength") is not None
+                or text_element.get("lengthAdjust") is not None
+            ):
                 errors.append(
                     f"слот {slot!r} карточки {card_id!r} без data-width-anchor='true' "
                     "не должен задавать textLength/lengthAdjust"
@@ -775,8 +776,7 @@ def _check_control_transition_layouts(
             continue
         if len(width_anchors) != 1:
             errors.append(
-                f"переходная карточка {card_id!r} обязана иметь ровно один "
-                "data-width-anchor='true'"
+                f"переходная карточка {card_id!r} обязана иметь ровно один data-width-anchor='true'"
             )
         else:
             anchor_element, absolute_x = width_anchors[0]

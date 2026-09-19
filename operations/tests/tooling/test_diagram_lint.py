@@ -766,7 +766,7 @@ class DiagramLintTests(unittest.TestCase):
             'data-width-anchor="false" textLength="80">A</text>'
             '<text x="50" y="35" text-anchor="middle" data-layout-slot="title" '
             'data-width-anchor="true" textLength="bad" lengthAdjust="spacingAndGlyphs">'
-            '<tspan>B</tspan></text></g>'
+            "<tspan>B</tspan></text></g>"
             '<g><rect id="wrong-length" x="0" y="80" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition"/>'
             '<text x="10" y="95" data-layout-slot="identity" '
@@ -777,7 +777,7 @@ class DiagramLintTests(unittest.TestCase):
             'data-width-anchor="true" textLength="80" lengthAdjust="spacing">D</text>'
             '<text x="10" y="195" data-layout-slot="title" '
             'data-width-anchor="true" textLength="80" lengthAdjust="spacing">E</text></g>'
-            '</svg>'
+            "</svg>"
         )
 
         expected_fragments = (
@@ -2122,7 +2122,7 @@ class DiagramLintTests(unittest.TestCase):
             'data-width-anchor="false" textLength="136">First</text>'
             '<text x="80" y="33" text-anchor="middle" data-label-for="invalid" '
             'data-width-anchor="true" textLength="bad" lengthAdjust="spacingAndGlyphs">'
-            '<tspan>Second</tspan></text></g>'
+            "<tspan>Second</tspan></text></g>"
             '<g><rect id="wrong-length" x="0" y="60" width="160" height="44" rx="4" '
             'class="flow-label-red" data-layout="flow-label-multiline" '
             'data-padding-profile="flow-caption"/>'
@@ -2138,7 +2138,7 @@ class DiagramLintTests(unittest.TestCase):
             'data-width-anchor="true" textLength="136" lengthAdjust="spacing">First</text>'
             '<text x="80" y="153" text-anchor="middle" data-label-for="duplicate" '
             'data-width-anchor="true" textLength="136" lengthAdjust="spacing">Second</text></g>'
-            '</svg>',
+            "</svg>",
             reference_flow_caption_padding=12.0,
         )
 
