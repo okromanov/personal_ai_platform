@@ -28,6 +28,11 @@ What it checks, precisely
    itself is measured from the architecture template's own captions
    (`_reference_padding_profiles`), the same value diagram_geometry_lint.py
    derives for the static textLength check -- not a literal kept here.
+4. **Compact control transitions** (`find_transition_padding_violations`):
+   every `control-transition` keeps equal visible fields to the left and
+   right of its widest leading text row. The left inset remains
+   template-derived; the right edge follows rendered content instead of a
+   copied width.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -55,8 +60,9 @@ Testability
 -----------
 `measure_svg_elements` is the one function in this module that launches a
 browser. Every other function -- `find_overflow`,
-`find_asymmetric_anchors`, `find_padding_violations`, `lint_file`, `main` --
-takes or defaults to a `measurer` callable, so
+`find_asymmetric_anchors`, `find_padding_violations`,
+`find_transition_padding_violations`, `lint_file`, `main` -- takes or
+defaults to a `measurer` callable, so
 test_diagram_render_lint.py exercises the real checking logic and the real
 CLI against a fake, in-process measurer with canned `ElementBox` lists,
 with zero external dependencies. Run this module directly against real
@@ -138,6 +144,7 @@ _MEASURE_JS = """() => {
       label_for: el.getAttribute('data-label-for') || '',
       padding_profile: el.getAttribute('data-padding-profile') || '',
       equal_width_group: el.getAttribute('data-equal-width-group') || '',
+      layout: el.getAttribute('data-layout') || '',
       x: b.x,
       y: b.y,
       w: b.width,
@@ -168,6 +175,7 @@ class ElementBox:
     label_for: str = ""
     padding_profile: str = ""
     equal_width_group: str = ""
+    layout: str = ""
 
     @property
     def x1(self) -> float:
@@ -481,6 +489,44 @@ def find_padding_violations(
     return errors
 
 
+def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
+    """Require content-sized width for left-aligned control transitions."""
+
+    transitions = [
+        element
+        for element in elements
+        if element.kind == "shape" and element.layout == "control-transition"
+    ]
+    leading_classes = {"component-id", "component-title", "component-text"}
+    errors: list[str] = []
+    for card in transitions:
+        rows = [
+            text
+            for text in elements
+            if text.kind == "text"
+            and set(text.cls.split()).intersection(leading_classes)
+            and card.x <= text.x
+            and text.x1 <= card.x1
+            and card.y <= text.y
+            and text.y1 <= card.y1
+        ]
+        if not rows:
+            errors.append(
+                f"переходная карточка {card.id or '<без id>'!r} "
+                "не имеет измеряемых ведущих строк"
+            )
+            continue
+        left = min(row.x - card.x for row in rows)
+        right = card.x1 - max(row.x1 for row in rows)
+        if abs(left - right) > _ANCHOR_TOLERANCE_PX:
+            errors.append(
+                f"переходная карточка {card.id or '<без id>'!r} имеет неравные "
+                f"поля относительно самой широкой строки: слева {left:.1f}px, "
+                f"справа {right:.1f}px"
+            )
+    return errors
+
+
 def _display_name(path: Path, root: Path) -> str:
     try:
         return relative_posix(path, root)
@@ -495,6 +541,7 @@ def lint_file(path: Path, root: Path, *, measurer: Measurer = measure_svg_elemen
     canvas = _canvas_box(text)
     result.errors.extend(find_overflow(elements, canvas))
     result.errors.extend(find_asymmetric_anchors(elements, canvas))
+    result.errors.extend(find_transition_padding_violations(elements))
     if any(element.kind == "shape" and element.padding_profile for element in elements):
         padding_profiles, padding_errors = _reference_padding_profiles(root)
         if padding_errors:

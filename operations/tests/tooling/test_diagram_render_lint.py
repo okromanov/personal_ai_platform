@@ -34,6 +34,7 @@ def _box(
     label_for: str = "",
     padding_profile: str = "",
     equal_width_group: str = "",
+    layout: str = "",
 ) -> ElementBox:
     return ElementBox(
         kind=kind,
@@ -49,6 +50,7 @@ def _box(
         label_for=label_for,
         padding_profile=padding_profile,
         equal_width_group=equal_width_group,
+        layout=layout,
     )
 
 
@@ -562,6 +564,60 @@ class FindPaddingViolationsTests(unittest.TestCase):
         self.assertTrue(any("неизвестный" in error for error in errors))
         self.assertTrue(any("неподдерживаемому" in error for error in errors))
         self.assertTrue(any("не имеет измеряемой строки" in error for error in errors))
+
+
+class FindTransitionPaddingViolationsTests(unittest.TestCase):
+    def test_accepts_content_sized_transition_and_rejects_extra_right_space(self) -> None:
+        compact = _box(
+            "shape",
+            "control-card",
+            100.0,
+            50.0,
+            376.0,
+            80.0,
+            element_id="compact",
+            layout="control-transition",
+        )
+        widest = _box(
+            "text",
+            "component-text",
+            128.0,
+            90.0,
+            320.0,
+            16.0,
+            content="Widest row",
+        )
+        self.assertEqual(
+            render_lint.find_transition_padding_violations([compact, widest]),
+            [],
+        )
+
+        oversized = _box(
+            "shape",
+            "control-card",
+            100.0,
+            50.0,
+            440.0,
+            80.0,
+            element_id="oversized",
+            layout="control-transition",
+        )
+        errors = render_lint.find_transition_padding_violations([oversized, widest])
+        self.assertTrue(any("неравные поля" in error for error in errors))
+
+    def test_reports_transition_without_measurable_rows(self) -> None:
+        transition = _box(
+            "shape",
+            "control-card",
+            0.0,
+            0.0,
+            100.0,
+            60.0,
+            element_id="empty",
+            layout="control-transition",
+        )
+        errors = render_lint.find_transition_padding_violations([transition])
+        self.assertTrue(any("не имеет измеряемых" in error for error in errors))
 
 
 class ReferencePaddingProfilesTests(unittest.TestCase):
