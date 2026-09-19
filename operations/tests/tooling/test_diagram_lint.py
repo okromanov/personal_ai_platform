@@ -2324,6 +2324,50 @@ class DiagramLintTests(unittest.TestCase):
 
 
 class ArchitectureCardAlignmentTests(unittest.TestCase):
+    def test_template_card_text_inset_rejects_invalid_reference_geometry(self) -> None:
+        cases = (
+            ("<svg", "не удалось разобрать"),
+            ("<svg/>", "не содержит template-component"),
+            ('<rect id="template-component" x="0"/>', "не имеет контейнера"),
+            (
+                '<svg><g><rect id="template-component" x="0"/></g></svg>',
+                "не содержит строки component-id",
+            ),
+            (
+                '<svg><g><rect id="template-component" x="bad"/>'
+                '<text x="28" class="component-id">ID</text></g></svg>',
+                "нечисловой левый отступ",
+            ),
+            (
+                '<svg><g><rect id="template-component" x="28"/>'
+                '<text x="28" class="component-id">ID</text></g></svg>',
+                "неверный левый отступ",
+            ),
+        )
+        for svg, expected in cases:
+            with self.subTest(expected=expected):
+                inset, errors = diagram_geometry_lint.measure_reference_card_text_inset(svg)
+                self.assertIsNone(inset)
+                self.assertTrue(any(expected in error for error in errors), errors)
+
+    def test_card_text_alignment_reports_invalid_geometry_and_ignores_nested_rows(self) -> None:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<g><rect id="bad-card" x="bad" y="0" width="100" height="60" '
+            'class="execution-card"/><text x="28" class="component-id">ID</text></g>'
+            '<g><rect id="card" x="0" y="80" width="100" height="60" '
+            'class="execution-card"/>'
+            '<path d="M0 0H4"/>'
+            '<text class="component-id">ID</text>'
+            '<rect x="28" y="110" width="44" height="20"/>'
+            '<text x="50" y="125" class="component-title" text-anchor="middle">Nested</text>'
+            "</g></svg>"
+        )
+        result = diagram_geometry_lint.check_geometry(svg, reference_card_text_inset=28)
+        self.assertTrue(any("требует числовые" in error for error in result.errors))
+        self.assertTrue(any("текст без числового x" in error for error in result.errors))
+        self.assertFalse(any("Nested" in error for error in result.errors))
+
     def test_component_and_transition_rows_use_template_left_inset(self) -> None:
         root = Path(__file__).resolve().parents[3]
         template = (root / diagram_lint.ARCHITECTURE_TEMPLATE_RELATIVE).read_text(encoding="utf-8")
@@ -2344,6 +2388,11 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
             ).errors
 
         self.assertEqual(check(svg), [])
+        lint_result = diagram_lint.lint_file(
+            root / "work/artefacts/architecture/personal_ai_platform_architecture.svg",
+            root,
+        )
+        self.assertEqual(lint_result.errors, [])
         for card_id in (
             "pre-model-control-card",
             "owner-choice-card",
