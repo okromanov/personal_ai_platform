@@ -623,7 +623,9 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("только для <rect>" in error for error in wrong_element.errors))
         self.assertTrue(any("отсутствующий элемент" in error for error in missing_target.errors))
         self.assertTrue(any("указывать на <rect>" in error for error in non_rect_target.errors))
-        self.assertTrue(any("выравнивание нижних границ" in error for error in invalid_geometry.errors))
+        self.assertTrue(
+            any("выравнивание нижних границ" in error for error in invalid_geometry.errors)
+        )
 
     def test_declared_direct_route_rejects_invalid_metadata(self) -> None:
         result = diagram_geometry_lint.check_geometry(
