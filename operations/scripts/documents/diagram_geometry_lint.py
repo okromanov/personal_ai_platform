@@ -110,6 +110,7 @@ import re
 from dataclasses import dataclass, field
 
 from defusedxml import ElementTree  # type: ignore[import-untyped]  # no PEP 561 marker
+from defusedxml.common import DefusedXmlException  # type: ignore[import-untyped]  # same package
 
 _SVG_NS = "{http://www.w3.org/2000/svg}"
 
