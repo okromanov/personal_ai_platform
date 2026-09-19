@@ -948,7 +948,6 @@ def lint_file(path: Path, root: Path) -> LintResult:
     reference_transition_layout = None
     reference_port_gap = None
     reference_flow_label_layouts = None
-    reference_flow_caption_padding = None
     reference_card_text_inset = None
     if root_el is not None and _is_architecture_diagram(root_el, declared_ids):
         template_path = root / ARCHITECTURE_TEMPLATE_RELATIVE
@@ -1005,24 +1004,12 @@ def lint_file(path: Path, root: Path) -> LintResult:
     ):
         reference_flow_label_layouts = _architecture_reference_flow_label_layouts(root, result)
 
-    # Unlike the three reference_* checks above, flow-caption padding
-    # (space-m) is not architecture-specific: process diagrams use the same
-    # token, so this is measured from the architecture template for every
-    # file, not gated behind _is_architecture_diagram.
-    if (
-        root_el is not None
-        and has_flow_labels
-        and path.resolve() != architecture_template.resolve()
-    ):
-        reference_flow_caption_padding = _architecture_reference_flow_caption_padding(root, result)
-
     geometry = check_geometry(
         text,
         reference_gaps=reference_gaps,
         reference_transition_layout=reference_transition_layout,
         reference_port_gap=reference_port_gap,
         reference_flow_label_layouts=reference_flow_label_layouts,
-        reference_flow_caption_padding=reference_flow_caption_padding,
         reference_card_text_inset=reference_card_text_inset,
     )
     result.errors.extend(geometry.errors)
