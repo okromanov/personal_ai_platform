@@ -512,8 +512,7 @@ def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
         ]
         if not rows:
             errors.append(
-                f"переходная карточка {card.id or '<без id>'!r} "
-                "не имеет измеряемых ведущих строк"
+                f"переходная карточка {card.id or '<без id>'!r} не имеет измеряемых ведущих строк"
             )
             continue
         left = min(row.x - card.x for row in rows)

@@ -433,13 +433,10 @@ def _check_declared_bottom_alignments(root_el, errors: list[str]) -> None:
             continue
         if _local_tag(target.tag) != "rect":
             errors.append(
-                f"data-align-bottom-with={target_id!r} у {element_id!r} "
-                "обязан указывать на <rect>"
+                f"data-align-bottom-with={target_id!r} у {element_id!r} обязан указывать на <rect>"
             )
             continue
-        box = _absolute_rect_box(
-            element, parents, errors, contract="выравнивание нижних границ"
-        )
+        box = _absolute_rect_box(element, parents, errors, contract="выравнивание нижних границ")
         target_box = _absolute_rect_box(
             target, parents, errors, contract="выравнивание нижних границ"
         )
