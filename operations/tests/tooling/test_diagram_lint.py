@@ -2453,8 +2453,8 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
                 self.assertTrue(
                     any(card_id in error and "выровнены слева" in error for error in check(shifted))
                 )
-        original = '<text x="620.5" y="1245" class="component-title"'
-        centred = '<text x="620.5" y="1245" class="component-title" text-anchor="middle"'
+        original = '<text x="621" y="1245" class="component-title"'
+        centred = '<text x="621" y="1245" class="component-title" text-anchor="middle"'
         self.assertIn(original, svg)
         self.assertTrue(
             any(
