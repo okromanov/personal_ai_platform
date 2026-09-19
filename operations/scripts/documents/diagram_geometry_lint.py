@@ -68,6 +68,12 @@ from raw XML attributes without rendering the SVG:
    `textLength`, `lengthAdjust`, and width-anchor stretching are rejected.
    The shared `space-m` token is declared once on the registered architecture
    template and the rendered-padding gate applies it to real ink boxes.
+13. **Declared centre-line alignment.** A rectangle may name another
+   rectangle through `data-align-center-with`; their absolute vertical
+   centres (the midpoint between the top and bottom edge) must match after
+   translation-only transforms are resolved. This lets a side flow-label
+   plaque align to a control-transition card's vertical middle instead of
+   the shared-row bottom line used by `data-align-bottom-with`.
 
 What this deliberately does not check, and why
 ------------------------------------------------
@@ -433,6 +439,52 @@ def _check_declared_bottom_alignments(root_el, errors: list[str]) -> None:
             errors.append(
                 f"нижняя граница {element_id!r} не выровнена с {target_id!r}: "
                 f"{box[3]:g} px вместо {target_box[3]:g} px"
+            )
+
+
+def _check_declared_center_alignments(root_el, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    for element in root_el.iter():
+        target_id = element.get("data-align-center-with")
+        if target_id is None:
+            continue
+        element_id = element.get("id", "<без id>")
+        if element.get("data-align-bottom-with") is not None:
+            errors.append(
+                f"{element_id!r} не может одновременно задавать "
+                "data-align-bottom-with и data-align-center-with"
+            )
+            continue
+        if _local_tag(element.tag) != "rect":
+            errors.append("data-align-center-with разрешён только для <rect>")
+            continue
+        target = by_id.get(target_id)
+        if target is None:
+            errors.append(
+                f"data-align-center-with={target_id!r} у {element_id!r} "
+                "указывает на отсутствующий элемент"
+            )
+            continue
+        if _local_tag(target.tag) != "rect":
+            errors.append(
+                f"data-align-center-with={target_id!r} у {element_id!r} обязан указывать на <rect>"
+            )
+            continue
+        box = _absolute_rect_box(
+            element, parents, errors, contract="выравнивание вертикальных центров"
+        )
+        target_box = _absolute_rect_box(
+            target, parents, errors, contract="выравнивание вертикальных центров"
+        )
+        if box is None or target_box is None:
+            continue
+        center = (box[1] + box[3]) / 2
+        target_center = (target_box[1] + target_box[3]) / 2
+        if abs(center - target_center) > 1e-9:
+            errors.append(
+                f"вертикальный центр {element_id!r} не совпадает с {target_id!r}: "
+                f"{center:g} px вместо {target_center:g} px"
             )
 
 
@@ -1293,6 +1345,7 @@ def check_geometry(
     vertical_gaps = _measure_referenced_vertical_gaps(root_el, errors)
     _check_reference_gaps(vertical_gaps, reference_gaps, errors)
     _check_declared_bottom_alignments(root_el, errors)
+    _check_declared_center_alignments(root_el, errors)
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
     _check_connector_source_attachment(root_el, errors)
