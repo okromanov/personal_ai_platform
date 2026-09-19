@@ -902,7 +902,7 @@ class DiagramLintTests(unittest.TestCase):
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
             '<text x="80" y="35" class="component-id" '
-            ''
+            ""
             'data-layout-slot="identity">B</text></g>'
             "</svg>",
             reference_transition_layout=reference,
@@ -914,7 +914,7 @@ class DiagramLintTests(unittest.TestCase):
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
             '<text x="80" y="36" class="component-id" '
-            ''
+            ""
             'data-layout-slot="identity">B</text></g>'
             "</svg>",
             reference_transition_layout=reference,
@@ -935,7 +935,7 @@ class DiagramLintTests(unittest.TestCase):
             '<text x="100" y="35" class="component-id" text-anchor="middle" '
             'data-layout-slot="identity">A</text>'
             '<text x="60" y="55" class="component-title" '
-            ''
+            ""
             'data-layout-slot="title">B</text>'
             '<text x="100" y="75" class="component-text" text-anchor="middle" '
             'data-layout-slot="detail-1">C</text>'
@@ -953,7 +953,7 @@ class DiagramLintTests(unittest.TestCase):
             '<text x="100" y="35" class="component-id" text-anchor="middle" '
             'data-layout-slot="identity">A</text>'
             '<text x="60" y="55" class="component-title" '
-            ''
+            ""
             'data-layout-slot="title">B</text>'
         )
         detail = (
@@ -1551,7 +1551,7 @@ class DiagramLintTests(unittest.TestCase):
                 'class="control-card" data-layout="control-transition" '
                 'data-center-with="anchor"/>'
                 '<text x="60" y="35" class="component-id" '
-                ''
+                ""
                 'data-layout-slot="identity">A</text></g>'
                 "</svg>",
                 encoding="utf-8",
@@ -1711,7 +1711,7 @@ class DiagramLintTests(unittest.TestCase):
                 'rx="5" class="control-card" data-layout="control-transition" '
                 'data-center-with="template-anchor"/>'
                 '<text x="70" y="35" class="component-id" '
-                ''
+                ""
                 'data-layout-slot="identity">A</text></g>'
                 "</svg>",
                 encoding="utf-8",
@@ -1727,7 +1727,7 @@ class DiagramLintTests(unittest.TestCase):
                 'class="control-card" data-layout="control-transition" '
                 'data-center-with="anchor"/>'
                 '<text x="70" y="35" class="component-id" '
-                ''
+                ""
                 'data-layout-slot="identity">A</text></g>'
             )
             svg = root / "diagram.svg"
@@ -2057,7 +2057,7 @@ class DiagramLintTests(unittest.TestCase):
             '<text x="80" y="17" text-anchor="middle" data-label-for="invalid" '
             'data-width-anchor="true" textLength="136" lengthAdjust="spacing">First</text>'
             '<text x="80" y="33" text-anchor="middle" data-label-for="invalid" '
-            '>'
+            ">"
             "<tspan>Second</tspan></text></g>"
             '<g><rect id="wrong-length" x="0" y="60" width="160" height="44" rx="4" '
             'class="flow-label-red" data-layout="flow-label-multiline" '
@@ -2070,9 +2070,9 @@ class DiagramLintTests(unittest.TestCase):
             'class="flow-label-green" data-layout="flow-label-multiline" '
             'data-padding-profile="flow-caption"/>'
             '<text x="80" y="137" text-anchor="middle" data-label-for="duplicate" '
-            '>First</text>'
+            ">First</text>"
             '<text x="80" y="153" text-anchor="middle" data-label-for="duplicate" '
-            '>Second</text></g>'
+            ">Second</text></g>"
             "</svg>",
         )
 
@@ -2183,14 +2183,14 @@ class DiagramLintTests(unittest.TestCase):
                 '<rect id="label" x="0" y="140" width="120" height="28" rx="4" '
                 'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
                 '<text x="60" y="159" text-anchor="middle" '
-                ''
+                ""
                 'data-label-for="label">Flow</text>'
                 '<defs><rect id="multiline-label" x="0" y="180" width="160" height="44" rx="4" '
                 'class="flow-label-red" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
                 '<text x="80" y="197" text-anchor="middle" '
                 'data-label-for="multiline-label">First</text>'
                 '<text x="80" y="213" text-anchor="middle" '
-                ''
+                ""
                 'data-label-for="multiline-label">Second</text></defs>'
                 "</svg>",
                 encoding="utf-8",
