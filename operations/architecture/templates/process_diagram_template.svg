@@ -3,7 +3,7 @@
   <desc id="desc">Минимальный структурно-полный скелет процессного профиля: действие, решение с двумя взаимоисключающими ветвями, результат/состояние, контролируемый исход и легенда. Скопируйте и замените плейсхолдеры реальным процессом.</desc>
   <!-- diagram-metadata
   diagram_id: process_diagram_template
-  diagram_version: 1.4
+  diagram_version: 1.6
   generated_at: 2026-09-17
   status: current
   source: operations/architecture/process_diagram_style_guide.md@1.0
@@ -64,7 +64,7 @@
 
   <!-- «Да»: plaque centred on its connector, width = text + 2*space-m -->
   <rect id="process-yes-label" x="456.5" y="206" width="40" height="28" rx="4" class="flow-label" data-connector-ref="process-yes-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
-  <text x="476.5" y="225" class="flow-text" text-anchor="middle" textLength="16" lengthAdjust="spacing" data-label-for="process-yes-label">Да</text>
+  <text x="476.5" y="225" class="flow-text" text-anchor="middle" data-label-for="process-yes-label">Да</text>
 
   <g>
     <rect x="516" y="186" width="230" height="68" rx="7" class="execution-card"/>
@@ -79,8 +79,8 @@
   </g>
 
   <!-- «Нет»: exclusive alternative with its own controlled outcome -->
-  <rect id="process-no-label" x="343" y="284" width="48" height="28" rx="4" class="flow-label-red" data-connector-ref="process-no-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
-  <text x="367" y="303" class="control-flow-text" text-anchor="middle" textLength="24" lengthAdjust="spacing" data-label-for="process-no-label">Нет</text>
+  <rect id="process-no-label" x="342.5" y="284" width="49" height="28" rx="4" class="flow-label-red" data-connector-ref="process-no-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
+  <text x="367" y="303" class="control-flow-text" text-anchor="middle" data-label-for="process-no-label">Нет</text>
 
   <g>
     <rect x="516" y="296" width="280" height="68" rx="7" class="control-card"/>

@@ -739,8 +739,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="first" x="60" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="first-anchor"/>'
-            '<text x="70" y="35" class="eyebrow" textLength="80" lengthAdjust="spacing" '
-            'data-width-anchor="true" data-layout-slot="identity">A</text>'
+            '<text x="70" y="35" class="eyebrow" '
+            'data-layout-slot="identity">A</text>'
             '<text x="110" y="55" class="title" text-anchor="middle" '
             'data-layout-slot="title">B</text></g>'
             '<g transform="translate(20 100)">'
@@ -748,8 +748,8 @@ class DiagramLintTests(unittest.TestCase):
             '<rect id="second" x="60" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="second-anchor"/>'
-            '<text x="70" y="35" class="eyebrow" textLength="80" lengthAdjust="spacing" '
-            'data-width-anchor="true" data-layout-slot="identity">C</text>'
+            '<text x="70" y="35" class="eyebrow" '
+            'data-layout-slot="identity">C</text>'
             '<text x="110" y="55" class="title" text-anchor="middle" '
             'data-layout-slot="title">D</text></g>'
             "</svg>"
@@ -757,39 +757,18 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertEqual(matching.errors, [])
 
-    def test_control_transition_rejects_invalid_width_anchor_contract(self) -> None:
+    def test_control_transition_rejects_text_width_manipulation(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g><rect id="invalid" x="0" y="0" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition"/>'
             '<text x="10" y="15" data-layout-slot="identity" '
-            'data-width-anchor="false" textLength="80">A</text>'
-            '<text x="50" y="35" text-anchor="middle" data-layout-slot="title" '
-            'data-width-anchor="true" textLength="bad" lengthAdjust="spacingAndGlyphs">'
-            "<tspan>B</tspan></text></g>"
-            '<g><rect id="wrong-length" x="0" y="80" width="100" height="60" rx="5" '
-            'class="control-card" data-layout="control-transition"/>'
-            '<text x="10" y="95" data-layout-slot="identity" '
-            'data-width-anchor="true" textLength="79" lengthAdjust="spacing">C</text></g>'
-            '<g><rect id="duplicate" x="0" y="160" width="100" height="60" rx="5" '
-            'class="control-card" data-layout="control-transition"/>'
-            '<text x="10" y="175" data-layout-slot="identity" '
-            'data-width-anchor="true" textLength="80" lengthAdjust="spacing">D</text>'
-            '<text x="10" y="195" data-layout-slot="title" '
-            'data-width-anchor="true" textLength="80" lengthAdjust="spacing">E</text></g>'
+            'data-width-anchor="true" textLength="80" '
+            'lengthAdjust="spacing">A</text></g>'
             "</svg>"
         )
 
-        expected_fragments = (
-            "data-width-anchor принимает только значение 'true'",
-            "без data-width-anchor='true' не должен задавать textLength/lengthAdjust",
-            "обязан быть выровнен слева",
-            "не должен содержать <tspan>",
-            "обязан задать числовой textLength",
-            "обязан задать lengthAdjust='spacing'",
-            "width - 2 × left-inset = 80 px",
-            "обязана иметь ровно один data-width-anchor='true'",
-        )
+        expected_fragments = ("не должен задавать data-width-anchor", "межбуквенный интервал")
         for fragment in expected_fragments:
             self.assertTrue(any(fragment in error for error in result.errors), result.errors)
 
@@ -911,8 +890,7 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="template" x="50" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
-            '<text x="60" y="35" class="component-id" textLength="80" '
-            'lengthAdjust="spacing" data-width-anchor="true" '
+            '<text x="60" y="35" class="component-id" '
             'data-layout-slot="identity">A</text></g>'
             "</svg>"
         )
@@ -923,8 +901,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="actual" x="70" y="20" width="100" height="60" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
-            '<text x="80" y="35" class="component-id" textLength="80" '
-            'lengthAdjust="spacing" data-width-anchor="true" '
+            '<text x="80" y="35" class="component-id" '
+            ""
             'data-layout-slot="identity">B</text></g>'
             "</svg>",
             reference_transition_layout=reference,
@@ -935,8 +913,8 @@ class DiagramLintTests(unittest.TestCase):
             '<g><rect id="actual" x="70" y="20" width="100" height="64" rx="5" '
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
-            '<text x="80" y="36" class="component-id" textLength="80" '
-            'lengthAdjust="spacing" data-width-anchor="true" '
+            '<text x="80" y="36" class="component-id" '
+            ""
             'data-layout-slot="identity">B</text></g>'
             "</svg>",
             reference_transition_layout=reference,
@@ -956,8 +934,8 @@ class DiagramLintTests(unittest.TestCase):
             'data-center-with="anchor"/>'
             '<text x="100" y="35" class="component-id" text-anchor="middle" '
             'data-layout-slot="identity">A</text>'
-            '<text x="60" y="55" class="component-title" textLength="80" '
-            'lengthAdjust="spacing" data-width-anchor="true" '
+            '<text x="60" y="55" class="component-title" '
+            ""
             'data-layout-slot="title">B</text>'
             '<text x="100" y="75" class="component-text" text-anchor="middle" '
             'data-layout-slot="detail-1">C</text>'
@@ -974,8 +952,8 @@ class DiagramLintTests(unittest.TestCase):
             'data-layout-variant="single-detail" data-center-with="anchor"/>'
             '<text x="100" y="35" class="component-id" text-anchor="middle" '
             'data-layout-slot="identity">A</text>'
-            '<text x="60" y="55" class="component-title" textLength="80" '
-            'lengthAdjust="spacing" data-width-anchor="true" '
+            '<text x="60" y="55" class="component-title" '
+            ""
             'data-layout-slot="title">B</text>'
         )
         detail = (
@@ -1496,7 +1474,7 @@ class DiagramLintTests(unittest.TestCase):
             )
             template.parent.mkdir(parents=True)
             template.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<svg xmlns="http://www.w3.org/2000/svg" data-space-m="12">'
                 '<rect id="component" y="10" height="20"/>'
                 '<rect id="transition" y="50" height="10" data-gap-from="component" '
                 'data-gap-kind="transition"/>'
@@ -1572,8 +1550,8 @@ class DiagramLintTests(unittest.TestCase):
                 '<g><rect id="transition" x="50" y="20" width="100" height="60" rx="5" '
                 'class="control-card" data-layout="control-transition" '
                 'data-center-with="anchor"/>'
-                '<text x="60" y="35" class="component-id" textLength="80" '
-                'lengthAdjust="spacing" data-width-anchor="true" '
+                '<text x="60" y="35" class="component-id" '
+                ""
                 'data-layout-slot="identity">A</text></g>'
                 "</svg>",
                 encoding="utf-8",
@@ -1732,8 +1710,8 @@ class DiagramLintTests(unittest.TestCase):
                 '<g><rect id="template-transition" x="60" y="20" width="100" height="60" '
                 'rx="5" class="control-card" data-layout="control-transition" '
                 'data-center-with="template-anchor"/>'
-                '<text x="70" y="35" class="component-id" textLength="80" '
-                'lengthAdjust="spacing" data-width-anchor="true" '
+                '<text x="70" y="35" class="component-id" '
+                ""
                 'data-layout-slot="identity">A</text></g>'
                 "</svg>",
                 encoding="utf-8",
@@ -1748,8 +1726,8 @@ class DiagramLintTests(unittest.TestCase):
                 '<rect id="transition" x="60" y="20" width="100" height="60" rx="5" '
                 'class="control-card" data-layout="control-transition" '
                 'data-center-with="anchor"/>'
-                '<text x="70" y="35" class="component-id" textLength="80" '
-                'lengthAdjust="spacing" data-width-anchor="true" '
+                '<text x="70" y="35" class="component-id" '
+                ""
                 'data-layout-slot="identity">A</text></g>'
             )
             svg = root / "diagram.svg"
@@ -1763,47 +1741,6 @@ class DiagramLintTests(unittest.TestCase):
             result = diagram_lint.lint_file(svg, root)
 
         self.assertEqual(result.errors, [])
-
-    def test_lint_file_rejects_a_caption_padding_mismatched_with_the_template(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            template = (
-                root
-                / "operations"
-                / "architecture"
-                / "templates"
-                / "architecture_diagram_template.svg"
-            )
-            template.parent.mkdir(parents=True)
-            template.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
-                '<rect id="template-label" x="0" y="0" width="120" height="28" rx="4" '
-                'class="flow-label-blue" data-layout="flow-label" '
-                'data-padding-profile="flow-caption"/>'
-                '<text x="60" y="19" text-anchor="middle" textLength="96" '
-                'lengthAdjust="spacing" data-label-for="template-label">Flow</text>'
-                "</svg>",
-                encoding="utf-8",
-            )
-            body = (
-                "<style>.flow-label-blue { fill: #eef; }</style>"
-                '<rect id="label" x="0" y="0" width="120" height="28" rx="4" '
-                'class="flow-label-blue" data-layout="flow-label" '
-                'data-padding-profile="flow-caption"/>'
-                '<text x="60" y="19" text-anchor="middle" textLength="104" '
-                'lengthAdjust="spacing" data-label-for="label">Flow</text>'
-            )
-            svg = root / "diagram.svg"
-            svg.write_text(_svg_text().replace("<g ></g>", body), encoding="utf-8")
-
-            result = diagram_lint.lint_file(svg, root)
-
-        self.assertTrue(
-            any(
-                "textLength плашки 'label'" in error and "эталона шаблона" in error
-                for error in result.errors
-            )
-        )
 
     def _dead_definition_svg(self, *, style: str, defs: str = "", body: str) -> str:
         return (
@@ -1960,7 +1897,7 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="template-label" x="0" y="0" width="120" height="28" rx="4" '
             'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-            '<text x="60" y="19" text-anchor="middle" textLength="96" lengthAdjust="spacing" '
+            '<text x="60" y="19" text-anchor="middle" '
             'data-label-for="template-label">Flow</text>'
             "</svg>"
         )
@@ -1969,7 +1906,7 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg"><g transform="translate(10 20)">'
             '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
             'class="flow-label-red" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-            '<text x="100" y="19" text-anchor="middle" textLength="176" lengthAdjust="spacing" '
+            '<text x="100" y="19" text-anchor="middle" '
             'data-label-for="actual-label">Longer flow</text>'
             "</g></svg>",
             reference_flow_label_layouts={"flow-label": reference},
@@ -1978,7 +1915,7 @@ class DiagramLintTests(unittest.TestCase):
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="actual-label" x="0" y="0" width="200" height="28" rx="4" '
             'class="flow-label-green" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-            '<text x="100" y="18" text-anchor="middle" textLength="176" lengthAdjust="spacing" '
+            '<text x="100" y="18" text-anchor="middle" '
             'data-label-for="actual-label">Longer flow</text>'
             "</svg>",
             reference_flow_label_layouts={"flow-label": reference},
@@ -2071,7 +2008,7 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("поддерживает только" in error for error in result.errors))
         self.assertFalse(any("плашка потока 'port'" in error for error in result.errors))
 
-    def test_single_line_caption_requires_normalized_inner_text_slot(self) -> None:
+    def test_flow_labels_reject_text_width_manipulation(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<rect id="missing" x="0" y="0" width="120" height="28" rx="4" '
@@ -2082,21 +2019,20 @@ class DiagramLintTests(unittest.TestCase):
             '<rect id="wrong" x="0" y="40" width="120" height="28" rx="4" '
             'class="flow-label-red" data-layout="flow-label" '
             'data-padding-profile="flow-caption"/>'
-            '<text x="60" y="59" text-anchor="middle" textLength="100" '
-            'lengthAdjust="spacingAndGlyphs" data-label-for="wrong">Flow</text>'
+            '<text x="60" y="59" text-anchor="middle" textLength="96" '
+            'lengthAdjust="spacing" data-width-anchor="true" '
+            'data-label-for="wrong">Flow</text>'
             '<rect id="port" x="0" y="80" width="300" height="28" rx="4" '
             'class="flow-label-green" data-layout="flow-label" '
             'data-padding-profile="flow-port"/>'
             '<text x="150" y="99" text-anchor="middle" textLength="276" '
-            'lengthAdjust="spacing" data-label-for="port">Port</text>'
+            'data-label-for="port">Port</text>'
             "</svg>",
-            reference_flow_caption_padding=12.0,
         )
 
-        self.assertTrue(any("числовой textLength" in error for error in result.errors))
-        self.assertTrue(any("width - 2 × space-m = 96 px" in error for error in result.errors))
-        self.assertTrue(any("lengthAdjust='spacing'" in error for error in result.errors))
-        self.assertTrue(any("не должен растягивать текст" in error for error in result.errors))
+        self.assertTrue(any("не должна задавать data-width-anchor" in e for e in result.errors))
+        self.assertTrue(any("межбуквенный интервал" in e for e in result.errors))
+        self.assertTrue(any("не должен растягивать текст" in e for e in result.errors))
 
     def test_single_line_caption_rejects_inline_segments(self) -> None:
         result = diagram_geometry_lint.check_geometry(
@@ -2104,24 +2040,24 @@ class DiagramLintTests(unittest.TestCase):
             '<rect id="segmented" x="0" y="0" width="120" height="28" rx="4" '
             'class="flow-label-gray" data-layout="flow-label" '
             'data-padding-profile="flow-caption"/>'
-            '<text x="60" y="19" text-anchor="middle" textLength="96" '
-            'lengthAdjust="spacing" data-label-for="segmented">'
+            '<text x="60" y="19" text-anchor="middle" '
+            'data-label-for="segmented">'
             "<tspan>ARC_FLOW_004</tspan><tspan> · SEC_CTL_017</tspan></text>"
             "</svg>"
         )
 
         self.assertTrue(any("не должна содержать <tspan>" in error for error in result.errors))
 
-    def test_multiline_caption_rejects_invalid_width_anchor_contract(self) -> None:
+    def test_multiline_caption_rejects_text_width_manipulation(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             '<g><rect id="invalid" x="0" y="0" width="160" height="44" rx="4" '
             'class="flow-label-blue" data-layout="flow-label-multiline" '
             'data-padding-profile="flow-caption"/>'
             '<text x="80" y="17" text-anchor="middle" data-label-for="invalid" '
-            'data-width-anchor="false" textLength="136">First</text>'
+            'data-width-anchor="true" textLength="136" lengthAdjust="spacing">First</text>'
             '<text x="80" y="33" text-anchor="middle" data-label-for="invalid" '
-            'data-width-anchor="true" textLength="bad" lengthAdjust="spacingAndGlyphs">'
+            ">"
             "<tspan>Second</tspan></text></g>"
             '<g><rect id="wrong-length" x="0" y="60" width="160" height="44" rx="4" '
             'class="flow-label-red" data-layout="flow-label-multiline" '
@@ -2129,27 +2065,21 @@ class DiagramLintTests(unittest.TestCase):
             '<text x="80" y="77" text-anchor="middle" '
             'data-label-for="wrong-length">First</text>'
             '<text x="80" y="93" text-anchor="middle" data-label-for="wrong-length" '
-            'data-width-anchor="true" textLength="135" '
-            'lengthAdjust="spacing">Second</text></g>'
+            'textLength="136" lengthAdjust="spacing">Second</text></g>'
             '<g><rect id="duplicate" x="0" y="120" width="160" height="44" rx="4" '
             'class="flow-label-green" data-layout="flow-label-multiline" '
             'data-padding-profile="flow-caption"/>'
             '<text x="80" y="137" text-anchor="middle" data-label-for="duplicate" '
-            'data-width-anchor="true" textLength="136" lengthAdjust="spacing">First</text>'
+            ">First</text>"
             '<text x="80" y="153" text-anchor="middle" data-label-for="duplicate" '
-            'data-width-anchor="true" textLength="136" lengthAdjust="spacing">Second</text></g>'
+            ">Second</text></g>"
             "</svg>",
-            reference_flow_caption_padding=12.0,
         )
 
         expected_fragments = (
-            "data-width-anchor принимает только значение 'true'",
-            "без data-width-anchor='true' не должна задавать textLength/lengthAdjust",
-            "не должен содержать <tspan>",
-            "обязан задать числовой textLength",
-            "обязан задать lengthAdjust='spacing'",
-            "width - 2 × space-m = 136 px",
-            "обязана иметь ровно один data-width-anchor='true'",
+            "не должна задавать data-width-anchor",
+            "межбуквенный интервал",
+            "не должна содержать <tspan>",
         )
         for fragment in expected_fragments:
             self.assertTrue(any(fragment in error for error in result.errors), result.errors)
@@ -2244,7 +2174,7 @@ class DiagramLintTests(unittest.TestCase):
             )
             template.parent.mkdir(parents=True)
             template.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<svg xmlns="http://www.w3.org/2000/svg" data-space-m="12">'
                 '<rect id="target" x="100" y="20" width="100" height="100"/>'
                 '<path d="M240 40H200" data-port-group="right-inputs" '
                 'data-port-target="target" data-port-side="right"/>'
@@ -2252,15 +2182,15 @@ class DiagramLintTests(unittest.TestCase):
                 'data-port-target="target" data-port-side="right"/>'
                 '<rect id="label" x="0" y="140" width="120" height="28" rx="4" '
                 'class="flow-label-blue" data-layout="flow-label" data-padding-profile="flow-caption"/>'
-                '<text x="60" y="159" text-anchor="middle" textLength="96" '
-                'lengthAdjust="spacing" '
+                '<text x="60" y="159" text-anchor="middle" '
+                ""
                 'data-label-for="label">Flow</text>'
                 '<defs><rect id="multiline-label" x="0" y="180" width="160" height="44" rx="4" '
                 'class="flow-label-red" data-layout="flow-label-multiline" data-padding-profile="flow-caption"/>'
                 '<text x="80" y="197" text-anchor="middle" '
                 'data-label-for="multiline-label">First</text>'
-                '<text x="80" y="213" text-anchor="middle" textLength="136" '
-                'lengthAdjust="spacing" data-width-anchor="true" '
+                '<text x="80" y="213" text-anchor="middle" '
+                ""
                 'data-label-for="multiline-label">Second</text></defs>'
                 "</svg>",
                 encoding="utf-8",
@@ -2343,12 +2273,12 @@ class DiagramLintTests(unittest.TestCase):
         self.assertTrue(any("не найден" in error for error in missing_padding.errors))
         self.assertTrue(any("не позволяет" in error for error in invalid_port.errors))
         self.assertTrue(any("не позволяет" in error for error in invalid_label.errors))
-        self.assertTrue(any("не позволяет" in error for error in invalid_padding.errors))
+        self.assertTrue(any("data-space-m" in error for error in invalid_padding.errors))
         self.assertTrue(any("ровно один" in error for error in empty_port.errors))
         self.assertTrue(any("ровно по одной" in error for error in empty_label.errors))
-        self.assertTrue(any("ровно одно значение" in error for error in empty_padding.errors))
+        self.assertTrue(any("data-space-m" in error for error in empty_padding.errors))
 
-    def test_architecture_reference_flow_caption_padding_reports_ambiguous_template(self) -> None:
+    def test_architecture_reference_flow_caption_padding_rejects_nonpositive_token(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             template = (
@@ -2360,27 +2290,16 @@ class DiagramLintTests(unittest.TestCase):
             )
             template.parent.mkdir(parents=True)
             template.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
-                '<rect id="twelve" x="0" y="0" width="120" height="28" rx="4" '
-                'class="flow-label-blue" data-layout="flow-label" '
-                'data-padding-profile="flow-caption"/>'
-                '<text x="60" y="19" text-anchor="middle" textLength="96" '
-                'lengthAdjust="spacing" data-label-for="twelve">Flow</text>'
-                '<rect id="eight" x="0" y="40" width="120" height="28" rx="4" '
-                'class="flow-label-blue" data-layout="flow-label" '
-                'data-padding-profile="flow-caption"/>'
-                '<text x="60" y="59" text-anchor="middle" textLength="104" '
-                'lengthAdjust="spacing" data-label-for="eight">Flow</text>'
-                "</svg>",
+                '<svg xmlns="http://www.w3.org/2000/svg" data-space-m="0"/>',
                 encoding="utf-8",
             )
-            ambiguous_result = diagram_lint.LintResult(file="diagram.svg")
-            ambiguous_padding = diagram_lint._architecture_reference_flow_caption_padding(
-                root, ambiguous_result
+            invalid_result = diagram_lint.LintResult(file="diagram.svg")
+            invalid_padding = diagram_lint._architecture_reference_flow_caption_padding(
+                root, invalid_result
             )
 
-        self.assertIsNone(ambiguous_padding)
-        self.assertTrue(any("ровно одно значение" in error for error in ambiguous_result.errors))
+        self.assertIsNone(invalid_padding)
+        self.assertTrue(any("положительным" in error for error in invalid_result.errors))
 
     def test_default_targets_empty_without_artefacts_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

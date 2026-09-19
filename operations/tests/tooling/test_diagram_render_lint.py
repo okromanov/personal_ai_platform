@@ -35,7 +35,6 @@ def _box(
     padding_profile: str = "",
     equal_width_group: str = "",
     layout: str = "",
-    width_anchor: str = "",
 ) -> ElementBox:
     return ElementBox(
         kind=kind,
@@ -52,7 +51,6 @@ def _box(
         padding_profile=padding_profile,
         equal_width_group=equal_width_group,
         layout=layout,
-        width_anchor=width_anchor,
     )
 
 
@@ -420,7 +418,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             content="ARC_FLOW_004 · SEC_CTL_017",
             label_for="scheduled",
         )
-        normalized = _box(
+        natural = _box(
             "text",
             "neutral-flow-text",
             108.0,
@@ -436,7 +434,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
 
         self.assertTrue(any("ожидается 12.0±1.0px" in error for error in errors))
         self.assertEqual(
-            render_lint.find_padding_violations([plaque, normalized], _PADDING_PROFILES), []
+            render_lint.find_padding_violations([plaque, natural], _PADDING_PROFILES), []
         )
 
     def test_each_multiline_caption_is_sized_by_its_own_widest_row(self) -> None:
@@ -574,7 +572,6 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             320.0,
             16.0,
             content="Widest row",
-            width_anchor="true",
         )
         self.assertEqual(
             render_lint.find_transition_padding_violations([compact, widest]),
@@ -621,7 +618,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
         errors = render_lint.find_transition_padding_violations([transition])
         self.assertTrue(any("не имеет измеряемых" in error for error in errors))
 
-    def test_reports_transition_without_exactly_one_width_anchor(self) -> None:
+    def test_uses_naturally_widest_transition_row(self) -> None:
         transition = _box(
             "shape",
             "control-card",
@@ -632,7 +629,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             element_id="transition",
             layout="control-transition",
         )
-        row = _box(
+        widest = _box(
             "text",
             "component-title",
             10.0,
@@ -641,8 +638,18 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             20.0,
             content="Title",
         )
-        errors = render_lint.find_transition_padding_violations([transition, row])
-        self.assertTrue(any("data-width-anchor" in error for error in errors))
+        shorter = _box(
+            "text",
+            "component-text",
+            10.0,
+            35.0,
+            40.0,
+            12.0,
+            content="Shorter",
+        )
+        self.assertEqual(
+            render_lint.find_transition_padding_violations([transition, shorter, widest]), []
+        )
 
 
 class ReferencePaddingProfilesTests(unittest.TestCase):
@@ -658,7 +665,7 @@ class ReferencePaddingProfilesTests(unittest.TestCase):
         self.assertIsNone(profiles)
         self.assertTrue(any("не найден" in error for error in errors))
 
-    def test_reports_a_template_without_a_consistent_caption_padding(self) -> None:
+    def test_reports_a_template_without_space_m(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             template = self._template_path(root)
@@ -668,21 +675,15 @@ class ReferencePaddingProfilesTests(unittest.TestCase):
             profiles, errors = render_lint._reference_padding_profiles(root)
 
         self.assertIsNone(profiles)
-        self.assertTrue(any("ровно одно значение" in error for error in errors))
+        self.assertTrue(any("data-space-m" in error for error in errors))
 
-    def test_derives_space_m_from_the_template_own_caption(self) -> None:
+    def test_reads_space_m_from_the_template_token(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             template = self._template_path(root)
             template.parent.mkdir(parents=True)
             template.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
-                '<rect id="label" x="0" y="0" width="120" height="28" rx="4" '
-                'class="flow-label-blue" data-layout="flow-label" '
-                'data-padding-profile="flow-caption"/>'
-                '<text x="60" y="19" text-anchor="middle" textLength="96" '
-                'lengthAdjust="spacing" data-label-for="label">Flow</text>'
-                "</svg>",
+                '<svg xmlns="http://www.w3.org/2000/svg" data-space-m="12"/>',
                 encoding="utf-8",
             )
 
@@ -785,12 +786,12 @@ class LintFileTests(unittest.TestCase):
             )
             template.parent.mkdir(parents=True)
             template.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
+                '<svg xmlns="http://www.w3.org/2000/svg" data-space-m="12">'
                 '<rect id="label" x="0" y="0" width="120" height="28" rx="4" '
                 'class="flow-label-blue" data-layout="flow-label" '
                 'data-padding-profile="flow-caption"/>'
-                '<text x="60" y="19" text-anchor="middle" textLength="96" '
-                'lengthAdjust="spacing" data-label-for="label">Flow</text>'
+                '<text x="60" y="19" text-anchor="middle" '
+                'data-label-for="label">Flow</text>'
                 "</svg>",
                 encoding="utf-8",
             )

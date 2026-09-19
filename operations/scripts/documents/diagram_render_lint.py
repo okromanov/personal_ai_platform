@@ -21,18 +21,15 @@ What it checks, precisely
    текст имеют общий геометрический центр").
 3. **Programmed padding profiles** (`find_padding_violations`): every shape
    with `data-padding-profile` is checked against the profile selected by
-   its object type. A one-line `flow-caption` fixes its text advance to the
-   inner slot, so every renderer preserves `space-m` padding; multiline
-   captions use the widest row. `flow-port` keeps a fixed cell but still
-   requires at least `space-m` and symmetric visible fields. `space-m`
-   itself is measured from the architecture template's own captions
-   (`_reference_padding_profiles`), the same value diagram_geometry_lint.py
-   derives for the static textLength check -- not a literal kept here.
+   its object type. Every `flow-caption` keeps natural glyph spacing and its
+   rectangle is sized from the widest rendered row plus `2 × space-m`.
+   `flow-port` keeps a fixed cell but still requires at least `space-m` and
+   symmetric visible fields. `space-m` is read from the architecture
+   template (`_reference_padding_profiles`), not duplicated in Python.
 4. **Compact control transitions** (`find_transition_padding_violations`):
-   every `control-transition` declares one width-anchor row whose normalized
-   SVG text advance keeps equal visible fields in every renderer. The left
-   inset remains template-derived; the right edge follows that declared row
-   instead of renderer-specific fallback-font metrics.
+   every `control-transition` is measured against its naturally widest row.
+   The box must end at the same visual inset on the right that its left-aligned
+   rows use on the left; text stretching cannot make the check pass.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -109,16 +106,13 @@ PaddingProfiles = dict[str, tuple[float, float | None]]
 
 def _reference_padding_profiles(root: Path) -> tuple[PaddingProfiles | None, list[str]]:
     """Build the padding-profile table from the architecture template's own
-    measured `space-m`, via the same `measure_reference_flow_caption_padding`
-    diagram_geometry_lint.py uses for its static textLength check -- this
+    declared `space-m`, via `measure_reference_flow_caption_padding` -- this
     module holds no `space-m` literal of its own.
 
-    `flow-caption` is content-sized: a one-line caption normalizes its SVG
-    text advance to width - 2*space-m, so both the minimum and the maximum
-    equal the measured space-m; the 1 px tolerance applied where this is used
-    covers ink side bearings and sub-pixel rounding, not a wider
-    object-specific gap. `flow-port` is a fixed-width cell, so only the
-    minimum is normative.
+    `flow-caption` is content-sized from its natural rendered ink box, so both
+    the minimum and maximum equal `space-m`; the 1 px tolerance covers
+    half-pixel geometry and sub-pixel rounding. `flow-port` is a fixed-width
+    cell, so only the minimum is normative.
     """
 
     template = root / ARCHITECTURE_TEMPLATE_RELATIVE
@@ -146,7 +140,6 @@ _MEASURE_JS = """() => {
       padding_profile: el.getAttribute('data-padding-profile') || '',
       equal_width_group: el.getAttribute('data-equal-width-group') || '',
       layout: el.getAttribute('data-layout') || '',
-      width_anchor: el.getAttribute('data-width-anchor') || '',
       x: b.x,
       y: b.y,
       w: b.width,
@@ -178,7 +171,6 @@ class ElementBox:
     padding_profile: str = ""
     equal_width_group: str = ""
     layout: str = ""
-    width_anchor: str = ""
 
     @property
     def x1(self) -> float:
@@ -398,10 +390,10 @@ def find_padding_violations(
 ) -> list[str]:
     """Check rendered ink padding selected by each object's padding profile.
 
-    Flow captions are content-sized. A one-line caption has a normalized SVG
-    text advance and must leave `space-m` on each side; every multiline
-    caption is checked independently against its own widest row. Port cells are
-    fixed by their parent grid and therefore only enforce the minimum field.
+    Flow captions are content-sized from natural rendered text and must leave
+    `space-m` around their widest row; every multiline caption is checked
+    independently. Port cells are fixed by their parent grid and therefore
+    only enforce the minimum field.
     Every row is checked for visible leading/trailing symmetry after transforms.
 
     `padding_profiles` carries the measured `space-m` value (see
@@ -475,7 +467,7 @@ def find_padding_violations(
 
 
 def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
-    """Require a renderer-independent width anchor for each transition."""
+    """Require symmetric box width around the naturally widest row."""
 
     transitions = [
         element
@@ -500,16 +492,9 @@ def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
                 f"переходная карточка {card.id or '<без id>'!r} не имеет измеряемых ведущих строк"
             )
             continue
-        anchors = [row for row in rows if row.width_anchor == "true"]
-        if len(anchors) != 1:
-            errors.append(
-                f"переходная карточка {card.id or '<без id>'!r} должна иметь ровно "
-                "одну измеряемую строку data-width-anchor='true'"
-            )
-            continue
-        anchor = anchors[0]
-        left = anchor.x - card.x
-        right = card.x1 - anchor.x1
+        widest = max(rows, key=lambda row: row.w)
+        left = widest.x - card.x
+        right = card.x1 - widest.x1
         if abs(left - right) > _TRANSITION_SYMMETRY_TOLERANCE_PX:
             errors.append(
                 f"переходная карточка {card.id or '<без id>'!r} имеет неравные "
