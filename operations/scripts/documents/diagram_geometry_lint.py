@@ -732,6 +732,18 @@ def _check_control_transition_layouts(
             absolute_x = text_x + offset[0]
             absolute_y = text_y + offset[1]
             text_anchor = text_element.get("text-anchor", "start")
+            # A centered slot's meaningful invariant is its distance from the
+            # card's own centre (which stays 0 regardless of content-derived
+            # card width); a left-aligned slot's invariant is its distance
+            # from the left edge. Measuring both the same way (from the left
+            # edge) would make a centered slot's offset vary with card width
+            # and falsely flag same-rhythm cards of different widths as
+            # drifted.
+            if text_anchor == "middle":
+                card_center = (box[0] + box[2]) / 2
+                x_offset = absolute_x - card_center
+            else:
+                x_offset = absolute_x - box[0]
             if text_element.get("data-width-anchor") is not None:
                 errors.append(
                     f"слот {slot!r} карточки {card_id!r} не должен задавать "
@@ -749,7 +761,7 @@ def _check_control_transition_layouts(
                 LayoutSlot(
                     name=slot,
                     class_name=text_element.get("class", ""),
-                    x_offset=absolute_x - box[0],
+                    x_offset=x_offset,
                     y_offset=absolute_y - box[1],
                     text_anchor=text_anchor,
                 )
@@ -859,6 +871,14 @@ def _check_coloured_card_text_alignment(root_el, inset: float, errors: list[str]
             if _local_tag(card.tag) != "rect" or not (
                 set((card.get("class") or "").split()) & _COLOURED_COMPONENT_CLASSES
             ):
+                continue
+            if card.get("data-layout") == "control-transition":
+                # Control-transition rows are centred on the card's own
+                # centre (_check_control_transition_layouts enforces that
+                # separately), not left-aligned to the shared component
+                # inset: their width is content-derived per card, so a
+                # shared left inset would leave shorter rows with unequal
+                # left/right padding.
                 continue
             box = _absolute_rect_box(card, parents, errors, contract="выравнивание текста карточки")
             if box is None:
