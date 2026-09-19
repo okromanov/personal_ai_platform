@@ -437,7 +437,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
             render_lint.find_padding_violations([plaque, normalized], _PADDING_PROFILES), []
         )
 
-    def test_equal_width_caption_group_is_sized_by_its_widest_member(self) -> None:
+    def test_each_multiline_caption_is_sized_by_its_own_widest_row(self) -> None:
         left = _box(
             "shape",
             "flow-label-red",
@@ -447,18 +447,16 @@ class FindPaddingViolationsTests(unittest.TestCase):
             44.0,
             element_id="left",
             padding_profile="flow-caption",
-            equal_width_group="pair",
         )
         right = _box(
             "shape",
             "flow-label-red",
             200.0,
             0.0,
-            176.0,
+            150.0,
             44.0,
             element_id="right",
             padding_profile="flow-caption",
-            equal_width_group="pair",
         )
         longest = _box(
             "text",
@@ -474,7 +472,7 @@ class FindPaddingViolationsTests(unittest.TestCase):
         shorter = _box(
             "text",
             "control-flow-text",
-            225.0,
+            212.0,
             8.0,
             126.0,
             11.0,
@@ -488,32 +486,20 @@ class FindPaddingViolationsTests(unittest.TestCase):
             [],
         )
 
-        too_wide_left = _box(
+        shared_width_right = _box(
             "shape",
             "flow-label-red",
-            0.0,
-            0.0,
             200.0,
-            44.0,
-            element_id="left",
-            padding_profile="flow-caption",
-            equal_width_group="pair",
-        )
-        too_wide_right = _box(
-            "shape",
-            "flow-label-red",
-            224.0,
             0.0,
-            200.0,
+            176.0,
             44.0,
             element_id="right",
             padding_profile="flow-caption",
-            equal_width_group="pair",
         )
         shifted_shorter = _box(
             "text",
             "control-flow-text",
-            261.0,
+            225.0,
             8.0,
             126.0,
             11.0,
@@ -522,9 +508,9 @@ class FindPaddingViolationsTests(unittest.TestCase):
             label_for="right",
         )
         errors = render_lint.find_padding_violations(
-            [too_wide_left, too_wide_right, longest, shifted_shorter], _PADDING_PROFILES
+            [left, shared_width_right, longest, shifted_shorter], _PADDING_PROFILES
         )
-        self.assertTrue(any("группа равной ширины" in error for error in errors))
+        self.assertTrue(any("'right'" in error and "некомпактна" in error for error in errors))
 
     def test_rejects_unknown_profile_wrong_object_and_missing_rows(self) -> None:
         unknown = _box(
@@ -603,6 +589,19 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             layout="control-transition",
         )
         errors = render_lint.find_transition_padding_violations([oversized, widest])
+        self.assertTrue(any("неравные поля" in error for error in errors))
+
+        one_pixel_drift = _box(
+            "shape",
+            "control-card",
+            100.0,
+            50.0,
+            377.0,
+            80.0,
+            element_id="one-pixel-drift",
+            layout="control-transition",
+        )
+        errors = render_lint.find_transition_padding_violations([one_pixel_drift, widest])
         self.assertTrue(any("неравные поля" in error for error in errors))
 
     def test_reports_transition_without_measurable_rows(self) -> None:

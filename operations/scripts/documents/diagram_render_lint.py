@@ -95,6 +95,7 @@ _ANCHOR_TOLERANCE_PX = 3.0
 _CONTAINMENT_TOLERANCE_PX = 0.5  # sub-pixel rounding slack for "fully inside"
 _PADDING_TOLERANCE_PX = 1.0
 _PADDING_SYMMETRY_TOLERANCE_PX = 1.5
+_TRANSITION_SYMMETRY_TOLERANCE_PX = 0.5
 _FLOW_LABEL_CLASSES = {
     "flow-label",
     "flow-label-blue",
@@ -396,9 +397,9 @@ def find_padding_violations(
     """Check rendered ink padding selected by each object's padding profile.
 
     Flow captions are content-sized. A one-line caption has a normalized SVG
-    text advance and must leave `space-m` on each side; the widest row of a
-    multiline/equal-width group is checked against the same target. Port cells
-    are fixed by their parent grid and therefore only enforce the minimum field.
+    text advance and must leave `space-m` on each side; every multiline
+    caption is checked independently against its own widest row. Port cells are
+    fixed by their parent grid and therefore only enforce the minimum field.
     Every row is checked for visible leading/trailing symmetry after transforms.
 
     `padding_profiles` carries the measured `space-m` value (see
@@ -413,7 +414,6 @@ def find_padding_violations(
             texts_by_label.setdefault(element.label_for, []).append(element)
 
     errors: list[str] = []
-    grouped_captions: dict[str, list[tuple[str, float, float]]] = {}
     for plaque in (
         element for element in elements if element.kind == "shape" and element.padding_profile
     ):
@@ -463,28 +463,11 @@ def find_padding_violations(
                 f"{plaque.padding_profile!r}: {smallest_side:.1f}px < {minimum:.1f}px"
             )
         average_widest_padding = (plaque_inline - widest_inline) / 2
-        if maximum is not None and plaque.equal_width_group:
-            grouped_captions.setdefault(plaque.equal_width_group, []).append(
-                (plaque.id, plaque_inline, widest_inline)
-            )
-        elif maximum is not None and average_widest_padding > maximum + _PADDING_TOLERANCE_PX:
+        if maximum is not None and average_widest_padding > maximum + _PADDING_TOLERANCE_PX:
             errors.append(
                 f"плашка {plaque.id!r} некомпактна для профиля "
                 f"{plaque.padding_profile!r}: поле {average_widest_padding:.1f}px, "
                 f"ожидается {maximum:.1f}±{_PADDING_TOLERANCE_PX:.1f}px"
-            )
-    for group, members in grouped_captions.items():
-        group_inline = min(member[1] for member in members)
-        group_widest = max(member[2] for member in members)
-        group_padding = (group_inline - group_widest) / 2
-        maximum = padding_profiles["flow-caption"][1]
-        assert maximum is not None
-        if group_padding > maximum + _PADDING_TOLERANCE_PX:
-            errors.append(
-                f"группа равной ширины {group!r} некомпактна для профиля "
-                f"'flow-caption': поле по самой широкой строке группы "
-                f"{group_padding:.1f}px, ожидается "
-                f"{maximum:.1f}±{_PADDING_TOLERANCE_PX:.1f}px"
             )
     return errors
 
@@ -517,7 +500,7 @@ def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
             continue
         left = min(row.x - card.x for row in rows)
         right = card.x1 - max(row.x1 for row in rows)
-        if abs(left - right) > _ANCHOR_TOLERANCE_PX:
+        if abs(left - right) > _TRANSITION_SYMMETRY_TOLERANCE_PX:
             errors.append(
                 f"переходная карточка {card.id or '<без id>'!r} имеет неравные "
                 f"поля относительно самой широкой строки: слева {left:.1f}px, "
