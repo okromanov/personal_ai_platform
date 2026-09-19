@@ -2441,7 +2441,13 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
             ).errors
 
         self.assertEqual(check(svg), [])
-        for card_id in ("context-card", "model-gateway-card", "tool-gateway-card"):
+        for card_id in (
+            "pre-model-control-card",
+            "owner-choice-card",
+            "context-card",
+            "model-gateway-card",
+            "tool-gateway-card",
+        ):
             with self.subTest(card_id=card_id):
                 start = svg.index(f'<rect id="{card_id}"')
                 first_text = re.search(r'<text x="([^"]+)"', svg[start:])
@@ -2453,58 +2459,14 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
                 self.assertTrue(
                     any(card_id in error and "выровнены слева" in error for error in check(shifted))
                 )
-
-    def test_control_transition_rows_stay_centred_on_their_own_card(self) -> None:
-        """Control-transition rows are excluded from the shared left-inset
-        check (unlike regular component cards) and centred instead — a shift
-        away from the card's own centre is still caught, just by the
-        dedicated control-transition rhythm comparison."""
-
-        root = Path(__file__).resolve().parents[3]
-        template = (root / diagram_lint.ARCHITECTURE_TEMPLATE_RELATIVE).read_text(encoding="utf-8")
-        svg = (
-            root / "work/artefacts/architecture/personal_ai_platform_architecture.svg"
-        ).read_text(encoding="utf-8")
-        inset, errors = diagram_geometry_lint.measure_reference_card_text_inset(template)
-        self.assertEqual(errors, [])
-        reference = diagram_geometry_lint.check_geometry(template).control_transition_layouts[0]
-
-        def check(text: str) -> list[str]:
-            return diagram_geometry_lint.check_geometry(
-                text,
-                reference_card_text_inset=inset,
-                reference_transition_layout=reference,
-            ).errors
-
-        for card_id in ("pre-model-control-card", "owner-choice-card"):
-            with self.subTest(card_id=card_id):
-                start = svg.index(f'<rect id="{card_id}"')
-                first_text = re.search(r'<text x="([^"]+)"', svg[start:])
-                self.assertIsNotNone(first_text)
-                assert first_text is not None
-                x_start = start + first_text.start(1)
-                x_end = start + first_text.end(1)
-                shifted = svg[:x_start] + str(float(first_text.group(1)) + 4) + svg[x_end:]
-                shifted_errors = check(shifted)
-                self.assertTrue(
-                    any(
-                        card_id in error and "отличается от эталона" in error
-                        for error in shifted_errors
-                    ),
-                    shifted_errors,
-                )
-                self.assertFalse(any("выровнены слева" in error for error in shifted_errors))
-
-        original = '<text x="810" y="1245" class="component-title" text-anchor="middle"'
-        left_aligned = '<text x="621" y="1245" class="component-title"'
+        original = '<text x="621" y="1245" class="component-title"'
+        centred = '<text x="621" y="1245" class="component-title" text-anchor="middle"'
         self.assertIn(original, svg)
-        left_aligned_errors = check(svg.replace(original, left_aligned, 1))
         self.assertTrue(
             any(
-                "pre-model-control-card" in error and "отличается от эталона" in error
-                for error in left_aligned_errors
-            ),
-            left_aligned_errors,
+                "pre-model-control-card" in error and "выровнены слева" in error
+                for error in check(svg.replace(original, centred, 1))
+            )
         )
 
 

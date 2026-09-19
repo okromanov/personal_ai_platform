@@ -27,12 +27,9 @@ What it checks, precisely
    symmetric visible fields. `space-m` is read from the architecture
    template (`_reference_padding_profiles`), not duplicated in Python.
 4. **Compact control transitions** (`find_transition_padding_violations`):
-   every row inside a `control-transition` card is centred (foundations §2:
-   "с центрированием строк"), so its own left and right visual gap to the
-   card boundary must match, independent of how long that particular row
-   is. The card's own compactness is checked against its naturally widest
-   row: the box must end at the same visual inset on the right that side
-   uses on the left; text stretching cannot make either check pass.
+   every `control-transition` is measured against its naturally widest row.
+   The box must end at the same visual inset on the right that its left-aligned
+   rows use on the left; text stretching cannot make the check pass.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -470,8 +467,7 @@ def find_padding_violations(
 
 
 def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
-    """Require every row of a control-transition card to be centred, and the
-    card itself to be no wider than its naturally widest row needs."""
+    """Require symmetric box width around the naturally widest row."""
 
     transitions = [
         element
@@ -496,15 +492,15 @@ def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
                 f"переходная карточка {card.id or '<без id>'!r} не имеет измеряемых ведущих строк"
             )
             continue
-        for row in rows:
-            left = row.x - card.x
-            right = card.x1 - row.x1
-            if abs(left - right) > _TRANSITION_SYMMETRY_TOLERANCE_PX:
-                errors.append(
-                    f"переходная карточка {card.id or '<без id>'!r}: строка "
-                    f'"{row.content[:40]}" не центрирована — поля слева '
-                    f"{left:.1f}px, справа {right:.1f}px"
-                )
+        widest = max(rows, key=lambda row: row.w)
+        left = widest.x - card.x
+        right = card.x1 - widest.x1
+        if abs(left - right) > _TRANSITION_SYMMETRY_TOLERANCE_PX:
+            errors.append(
+                f"переходная карточка {card.id or '<без id>'!r} имеет неравные "
+                f"поля относительно самой широкой строки: слева {left:.1f}px, "
+                f"справа {right:.1f}px"
+            )
     return errors
 
 

@@ -589,7 +589,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             layout="control-transition",
         )
         errors = render_lint.find_transition_padding_violations([oversized, widest])
-        self.assertTrue(any("не центрирована" in error for error in errors))
+        self.assertTrue(any("неравные поля" in error for error in errors))
 
         one_pixel_drift = _box(
             "shape",
@@ -602,7 +602,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             layout="control-transition",
         )
         errors = render_lint.find_transition_padding_violations([one_pixel_drift, widest])
-        self.assertTrue(any("не центрирована" in error for error in errors))
+        self.assertTrue(any("неравные поля" in error for error in errors))
 
     def test_reports_transition_without_measurable_rows(self) -> None:
         transition = _box(
@@ -618,7 +618,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
         errors = render_lint.find_transition_padding_violations([transition])
         self.assertTrue(any("не имеет измеряемых" in error for error in errors))
 
-    def test_every_row_is_checked_not_only_the_widest(self) -> None:
+    def test_uses_naturally_widest_transition_row(self) -> None:
         transition = _box(
             "shape",
             "control-card",
@@ -638,21 +638,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             20.0,
             content="Title",
         )
-        centred_shorter = _box(
-            "text",
-            "component-text",
-            30.0,
-            35.0,
-            40.0,
-            12.0,
-            content="Centred",
-        )
-        self.assertEqual(
-            render_lint.find_transition_padding_violations([transition, centred_shorter, widest]),
-            [],
-        )
-
-        off_centre_shorter = _box(
+        shorter = _box(
             "text",
             "component-text",
             10.0,
@@ -661,10 +647,9 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             12.0,
             content="Shorter",
         )
-        errors = render_lint.find_transition_padding_violations(
-            [transition, off_centre_shorter, widest]
+        self.assertEqual(
+            render_lint.find_transition_padding_violations([transition, shorter, widest]), []
         )
-        self.assertTrue(any("Shorter" in error and "не центрирована" in error for error in errors))
 
 
 class ReferencePaddingProfilesTests(unittest.TestCase):

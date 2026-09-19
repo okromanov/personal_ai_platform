@@ -269,10 +269,10 @@
   <text x="468.5" y="1269" class="control-flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_003" data-label-for="pre-model-context-flow">ARC_FLOW_003</text>
   <text x="468.5" y="1285" class="control-flow-text" text-anchor="middle" data-label-for="pre-model-context-flow">Минимальный контекст</text>
   <rect id="pre-model-control-card" x="593" y="1200" width="434" height="96" rx="7" class="control-card" data-layout="control-transition" data-center-with="orchestration-card" data-gap-from="orchestration-card" data-gap-kind="transition"/>
-  <text x="810" y="1220" class="component-id" text-anchor="middle" data-layout-slot="identity">ARC_FLOW_001 · SEC_CTL_004 / 006 / 007–009 / 015</text>
-  <text x="810" y="1245" class="component-title" text-anchor="middle" data-layout-slot="title">Контроль данных перед моделью</text>
-  <text x="810" y="1268" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Недоверенный контент · Область данных</text>
-  <text x="810" y="1284" class="component-text" text-anchor="middle" data-layout-slot="detail-2">Допуск модели и поставщика · Авторизация</text>
+  <text x="621" y="1220" class="component-id" data-layout-slot="identity">ARC_FLOW_001 · SEC_CTL_004 / 006 / 007–009 / 015</text>
+  <text x="621" y="1245" class="component-title" data-layout-slot="title">Контроль данных перед моделью</text>
+  <text x="621" y="1268" class="component-text" data-layout-slot="detail-1">Недоверенный контент · Область данных</text>
+  <text x="621" y="1284" class="component-text" data-layout-slot="detail-2">Допуск модели и поставщика · Авторизация</text>
   <rect id="pre-model-tool-flow" x="1065" y="1252" width="172" height="44" rx="4" class="flow-label-red" data-connector-ref="flow-pre-model-tool" data-layout="flow-label-multiline" data-padding-profile="flow-caption" data-align-bottom-with="pre-model-control-card"/>
   <text x="1151" y="1269" class="control-flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_002" data-label-for="pre-model-tool-flow">ARC_FLOW_002</text>
   <text x="1151" y="1285" class="control-flow-text" text-anchor="middle" data-label-for="pre-model-tool-flow">Разрешённое действие</text>
@@ -348,9 +348,9 @@
   <path id="flow-owner-revision" class="revision-line" d="M996.5 1868H1390V1148H1310" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card" data-port-group="orchestration-right-inputs" data-port-target="orchestration-card" data-port-side="right"/>
   <g data-spec-id="ARC_CMP_008">
     <rect id="owner-choice-card" x="623.5" y="1828" width="373" height="80" rx="7" class="control-card" data-gap-from="quality-card" data-gap-kind="transition" data-layout="control-transition" data-layout-variant="single-detail" data-center-with="quality-card"/>
-    <text x="810" y="1848" class="component-id" text-anchor="middle" data-layout-slot="identity">ARC_CMP_008 · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
-    <text x="810" y="1873" class="component-title" text-anchor="middle" data-layout-slot="title">Выбор владельца</text>
-    <text x="810" y="1896" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Подтвердить · Скорректировать · Остановить</text>
+    <text x="651.5" y="1848" class="component-id" data-layout-slot="identity">ARC_CMP_008 · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
+    <text x="651.5" y="1873" class="component-title" data-layout-slot="title">Выбор владельца</text>
+    <text x="651.5" y="1896" class="component-text" data-layout-slot="detail-1">Подтвердить · Скорректировать · Остановить</text>
   </g>
   <g transform="translate(1390 1511) rotate(90)" data-spec-id="ARC_FLOW_001"><rect id="flow-owner-revision-label" x="-140.5" y="-14" width="281" height="28" rx="4" class="flow-label-red" data-connector-ref="flow-owner-revision" data-layout="flow-label" data-padding-profile="flow-caption"/><text x="0" y="5" class="control-flow-text" text-anchor="middle" data-label-for="flow-owner-revision-label">ARC_FLOW_001 · Коррекция · Новый Run</text></g>
 
