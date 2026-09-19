@@ -3,7 +3,7 @@
   <desc id="desc">Минимальный структурно-полный скелет процессного профиля: действие, решение с двумя взаимоисключающими ветвями, результат/состояние, контролируемый исход и легенда. Скопируйте и замените плейсхолдеры реальным процессом.</desc>
   <!-- diagram-metadata
   diagram_id: process_diagram_template
-  diagram_version: 1.5
+  diagram_version: 1.6
   generated_at: 2026-09-17
   status: current
   source: operations/architecture/process_diagram_style_guide.md@1.0
@@ -79,7 +79,7 @@
   </g>
 
   <!-- «Нет»: exclusive alternative with its own controlled outcome -->
-  <rect id="process-no-label" x="344" y="284" width="46" height="28" rx="4" class="flow-label-red" data-connector-ref="process-no-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
+  <rect id="process-no-label" x="342.5" y="284" width="49" height="28" rx="4" class="flow-label-red" data-connector-ref="process-no-flow" data-layout="flow-label" data-padding-profile="flow-caption"/>
   <text x="367" y="303" class="control-flow-text" text-anchor="middle" data-label-for="process-no-label">Нет</text>
 
   <g>
