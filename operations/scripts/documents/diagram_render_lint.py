@@ -29,10 +29,10 @@ What it checks, precisely
    (`_reference_padding_profiles`), the same value diagram_geometry_lint.py
    derives for the static textLength check -- not a literal kept here.
 4. **Compact control transitions** (`find_transition_padding_violations`):
-   every `control-transition` keeps equal visible fields to the left and
-   right of its widest leading text row. The left inset remains
-   template-derived; the right edge follows rendered content instead of a
-   copied width.
+   every `control-transition` declares one width-anchor row whose normalized
+   SVG text advance keeps equal visible fields in every renderer. The left
+   inset remains template-derived; the right edge follows that declared row
+   instead of renderer-specific fallback-font metrics.
 
 What it deliberately does not check: contrast, readability at scaled-down
 preview size, line-to-line crossings, exact geometric containment inside a
@@ -146,6 +146,7 @@ _MEASURE_JS = """() => {
       padding_profile: el.getAttribute('data-padding-profile') || '',
       equal_width_group: el.getAttribute('data-equal-width-group') || '',
       layout: el.getAttribute('data-layout') || '',
+      width_anchor: el.getAttribute('data-width-anchor') || '',
       x: b.x,
       y: b.y,
       w: b.width,
@@ -177,6 +178,7 @@ class ElementBox:
     padding_profile: str = ""
     equal_width_group: str = ""
     layout: str = ""
+    width_anchor: str = ""
 
     @property
     def x1(self) -> float:
@@ -473,7 +475,7 @@ def find_padding_violations(
 
 
 def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
-    """Require content-sized width for left-aligned control transitions."""
+    """Require a renderer-independent width anchor for each transition."""
 
     transitions = [
         element
@@ -498,8 +500,16 @@ def find_transition_padding_violations(elements: list[ElementBox]) -> list[str]:
                 f"переходная карточка {card.id or '<без id>'!r} не имеет измеряемых ведущих строк"
             )
             continue
-        left = min(row.x - card.x for row in rows)
-        right = card.x1 - max(row.x1 for row in rows)
+        anchors = [row for row in rows if row.width_anchor == "true"]
+        if len(anchors) != 1:
+            errors.append(
+                f"переходная карточка {card.id or '<без id>'!r} должна иметь ровно "
+                "одну измеряемую строку data-width-anchor='true'"
+            )
+            continue
+        anchor = anchors[0]
+        left = anchor.x - card.x
+        right = card.x1 - anchor.x1
         if abs(left - right) > _TRANSITION_SYMMETRY_TOLERANCE_PX:
             errors.append(
                 f"переходная карточка {card.id or '<без id>'!r} имеет неравные "

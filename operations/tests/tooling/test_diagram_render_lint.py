@@ -35,6 +35,7 @@ def _box(
     padding_profile: str = "",
     equal_width_group: str = "",
     layout: str = "",
+    width_anchor: str = "",
 ) -> ElementBox:
     return ElementBox(
         kind=kind,
@@ -51,6 +52,7 @@ def _box(
         padding_profile=padding_profile,
         equal_width_group=equal_width_group,
         layout=layout,
+        width_anchor=width_anchor,
     )
 
 
@@ -572,6 +574,7 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
             320.0,
             16.0,
             content="Widest row",
+            width_anchor="true",
         )
         self.assertEqual(
             render_lint.find_transition_padding_violations([compact, widest]),
@@ -617,6 +620,29 @@ class FindTransitionPaddingViolationsTests(unittest.TestCase):
         )
         errors = render_lint.find_transition_padding_violations([transition])
         self.assertTrue(any("не имеет измеряемых" in error for error in errors))
+
+    def test_reports_transition_without_exactly_one_width_anchor(self) -> None:
+        transition = _box(
+            "shape",
+            "control-card",
+            0.0,
+            0.0,
+            100.0,
+            60.0,
+            element_id="transition",
+            layout="control-transition",
+        )
+        row = _box(
+            "text",
+            "component-title",
+            10.0,
+            10.0,
+            80.0,
+            20.0,
+            content="Title",
+        )
+        errors = render_lint.find_transition_padding_violations([transition, row])
+        self.assertTrue(any("data-width-anchor" in error for error in errors))
 
 
 class ReferencePaddingProfilesTests(unittest.TestCase):
