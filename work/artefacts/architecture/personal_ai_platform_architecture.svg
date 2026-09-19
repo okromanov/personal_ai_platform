@@ -3,8 +3,8 @@
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.21
-  generated_at: 2026-09-18T21:18:00+00:00
+  diagram_version: 1.22
+  generated_at: 2026-09-18T22:12:00+00:00
   status: current
   source: specifications/architecture_baseline.md@1.7
   source: specifications/system_specification.md@1.5
@@ -112,7 +112,7 @@
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.21 · Обновлено 2026-09-18 21:18 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.22 · Обновлено 2026-09-18 22:12 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->
@@ -269,10 +269,10 @@
   <text x="468.5" y="1243" class="control-flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_003" data-label-for="pre-model-context-flow">ARC_FLOW_003</text>
   <text x="468.5" y="1259" class="control-flow-text" text-anchor="middle" data-label-for="pre-model-context-flow">Минимальный контекст</text>
   <rect id="pre-model-control-card" x="590" y="1200" width="440" height="96" rx="7" class="control-card" data-layout="control-transition" data-center-with="orchestration-card" data-gap-from="orchestration-card" data-gap-kind="transition"/>
-  <text x="810" y="1220" class="component-id" text-anchor="middle" data-layout-slot="identity">ARC_FLOW_001 · SEC_CTL_004 / 006 / 007–009 / 015</text>
-  <text x="810" y="1245" class="component-title" text-anchor="middle" data-layout-slot="title">Контроль данных перед моделью</text>
-  <text x="810" y="1268" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Недоверенный контент · Область данных</text>
-  <text x="810" y="1284" class="component-text" text-anchor="middle" data-layout-slot="detail-2">Допуск модели и поставщика · Авторизация</text>
+  <text x="618" y="1220" class="component-id" data-layout-slot="identity">ARC_FLOW_001 · SEC_CTL_004 / 006 / 007–009 / 015</text>
+  <text x="618" y="1245" class="component-title" data-layout-slot="title">Контроль данных перед моделью</text>
+  <text x="618" y="1268" class="component-text" data-layout-slot="detail-1">Недоверенный контент · Область данных</text>
+  <text x="618" y="1284" class="component-text" data-layout-slot="detail-2">Допуск модели и поставщика · Авторизация</text>
   <rect id="pre-model-tool-flow" x="1063" y="1226" width="176" height="44" rx="4" class="flow-label-red" data-connector-ref="flow-pre-model-tool" data-layout="flow-label-multiline" data-padding-profile="flow-caption" data-equal-width-group="pre-model-side-labels"/>
   <text x="1151" y="1243" class="control-flow-text" text-anchor="middle" data-spec-id="ARC_FLOW_002" data-label-for="pre-model-tool-flow">ARC_FLOW_002</text>
   <text x="1151" y="1259" class="control-flow-text" text-anchor="middle" data-label-for="pre-model-tool-flow">Разрешённое действие</text>
@@ -281,30 +281,30 @@
   <!-- 06 Capabilities -->
   <g transform="translate(0 28)" data-spec-id="ARC_CMP_006">
     <rect id="context-card" x="310" y="1288" width="317" height="172" rx="7" class="data-card" data-gap-from="pre-model-control-card" data-gap-kind="transition"/>
-    <text x="468.5" y="1316" class="component-id" text-anchor="middle">ARC_CMP_006</text>
-    <text x="468.5" y="1343" class="component-title" text-anchor="middle">Контекст, память</text><text x="468.5" y="1367" class="component-title" text-anchor="middle">и доказательства</text>
-    <text x="468.5" y="1391" class="component-text" text-anchor="middle">Формирование минимального контекста</text>
-    <text x="468.5" y="1405" class="component-text" text-anchor="middle">и доказательной базы</text>
-    <text x="468.5" y="1429" class="small-text" text-anchor="middle">Память · Граф знаний · Доказательства</text>
-    <text x="468.5" y="1443" class="small-text" text-anchor="middle">Профиль · Проект · Доверие · Минимизация</text>
+    <text x="338" y="1316" class="component-id">ARC_CMP_006</text>
+    <text x="338" y="1343" class="component-title">Контекст, память</text><text x="338" y="1367" class="component-title">и доказательства</text>
+    <text x="338" y="1391" class="component-text">Минимальный контекст и</text>
+    <text x="338" y="1405" class="component-text">доказательная база</text>
+    <text x="338" y="1429" class="small-text">Память · Граф знаний · Доказательства</text>
+    <text x="338" y="1443" class="small-text">Профиль · Проект · Доверие · Отбор</text>
   </g>
   <g transform="translate(0 28)" data-spec-id="ARC_CMP_004">
     <rect id="model-gateway-card" x="651" y="1288" width="317" height="172" rx="7" class="execution-card" data-gap-from="pre-model-control-card" data-gap-kind="transition"/>
-    <text x="809.5" y="1316" class="component-id" text-anchor="middle">ARC_CMP_004</text>
-    <text x="809.5" y="1355" class="component-title" text-anchor="middle">Шлюз моделей</text>
-    <text x="809.5" y="1391" class="component-text" text-anchor="middle">Выбор модели и управление</text>
-    <text x="809.5" y="1405" class="component-text" text-anchor="middle">параметрами выполнения</text>
-    <text x="809.5" y="1429" class="small-text" text-anchor="middle">Run · Сессия · Бюджет · Timeout</text>
-    <text x="809.5" y="1443" class="small-text" text-anchor="middle">Качество · Скорость · Стоимость · Fallback</text>
+    <text x="679" y="1316" class="component-id">ARC_CMP_004</text>
+    <text x="679" y="1355" class="component-title">Шлюз моделей</text>
+    <text x="679" y="1391" class="component-text">Выбор модели и управление</text>
+    <text x="679" y="1405" class="component-text">параметрами выполнения</text>
+    <text x="679" y="1429" class="small-text">Run · Сессия · Бюджет · Timeout</text>
+    <text x="679" y="1443" class="small-text">Качество · Скорость · Цена · Fallback</text>
   </g>
   <g transform="translate(0 28)" data-spec-id="ARC_CMP_005">
     <rect id="tool-gateway-card" x="992" y="1288" width="318" height="172" rx="7" class="execution-card" data-gap-from="pre-model-control-card" data-gap-kind="transition"/>
-    <text x="1151" y="1316" class="component-id" text-anchor="middle">ARC_CMP_005</text>
-    <text x="1151" y="1355" class="component-title" text-anchor="middle">Шлюз инструментов</text>
-    <text x="1151" y="1391" class="component-text" text-anchor="middle">Предоставление разрешённых действий</text>
-    <text x="1151" y="1405" class="component-text" text-anchor="middle">через изолированные адаптеры</text>
-    <text x="1151" y="1429" class="small-text" text-anchor="middle">Tools · MCP · API · Адаптеры</text>
-    <text x="1151" y="1443" class="small-text" text-anchor="middle">Изоляция · Сеть · Секреты · Подтверждение</text>
+    <text x="1020" y="1316" class="component-id">ARC_CMP_005</text>
+    <text x="1020" y="1355" class="component-title">Шлюз инструментов</text>
+    <text x="1020" y="1391" class="component-text">Доступ к разрешённым действиям</text>
+    <text x="1020" y="1405" class="component-text">через изолированные адаптеры</text>
+    <text x="1020" y="1429" class="small-text">Tools · MCP · API · Адаптеры · Сеть</text>
+    <text x="1020" y="1443" class="small-text">Изоляция · Секреты · Подтверждение</text>
   </g>
 
   <g transform="translate(0 -48)">
@@ -348,9 +348,9 @@
   <path id="flow-owner-revision" class="revision-line" d="M1030 1868H1390V1148H1310" data-spec-id="ARC_FLOW_001" data-source-ref="owner-choice-card" data-port-group="orchestration-right-inputs" data-port-target="orchestration-card" data-port-side="right"/>
   <g data-spec-id="ARC_CMP_008">
     <rect id="owner-choice-card" x="590" y="1828" width="440" height="80" rx="7" class="control-card" data-gap-from="quality-card" data-gap-kind="transition" data-layout="control-transition" data-layout-variant="single-detail" data-center-with="quality-card"/>
-    <text x="810" y="1848" class="component-id" text-anchor="middle" data-layout-slot="identity">ARC_CMP_008 · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
-    <text x="810" y="1873" class="component-title" text-anchor="middle" data-layout-slot="title">Выбор владельца</text>
-    <text x="810" y="1896" class="component-text" text-anchor="middle" data-layout-slot="detail-1">Подтвердить · Скорректировать · Остановить</text>
+    <text x="618" y="1848" class="component-id" data-layout-slot="identity">ARC_CMP_008 · КОНТРОЛЬНЫЙ ПЕРЕХОД</text>
+    <text x="618" y="1873" class="component-title" data-layout-slot="title">Выбор владельца</text>
+    <text x="618" y="1896" class="component-text" data-layout-slot="detail-1">Подтвердить · Скорректировать · Остановить</text>
   </g>
   <g transform="translate(1390 1511) rotate(90)" data-spec-id="ARC_FLOW_001"><rect id="flow-owner-revision-label" x="-140" y="-14" width="280" height="28" rx="4" class="flow-label-red" data-connector-ref="flow-owner-revision" data-layout="flow-label" data-padding-profile="flow-caption"/><text x="0" y="5" class="control-flow-text" text-anchor="middle" textLength="256" lengthAdjust="spacing" data-label-for="flow-owner-revision-label">ARC_FLOW_001 · Коррекция · Новый Run</text></g>
 

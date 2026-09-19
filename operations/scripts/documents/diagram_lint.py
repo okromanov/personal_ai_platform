@@ -50,6 +50,7 @@ from operations.scripts.documents.diagram_geometry_lint import (
     ControlTransitionLayout,
     FlowLabelLayout,
     check_geometry,
+    measure_reference_card_text_inset,
     measure_reference_flow_caption_padding,
 )
 from operations.scripts.documents.metadata import load_document
@@ -948,6 +949,16 @@ def lint_file(path: Path, root: Path) -> LintResult:
     reference_port_gap = None
     reference_flow_label_layouts = None
     reference_flow_caption_padding = None
+    reference_card_text_inset = None
+    if root_el is not None and _is_architecture_diagram(root_el, declared_ids):
+        template_path = root / ARCHITECTURE_TEMPLATE_RELATIVE
+        if template_path.is_file():
+            template_text = read_text(template_path)
+            if 'id="template-component"' in template_text:
+                reference_card_text_inset, inset_errors = measure_reference_card_text_inset(
+                    template_text
+                )
+                result.errors.extend(inset_errors)
     if (
         root_el is not None
         and has_referenced_gap
@@ -1012,6 +1023,7 @@ def lint_file(path: Path, root: Path) -> LintResult:
         reference_port_gap=reference_port_gap,
         reference_flow_label_layouts=reference_flow_label_layouts,
         reference_flow_caption_padding=reference_flow_caption_padding,
+        reference_card_text_inset=reference_card_text_inset,
     )
     result.errors.extend(geometry.errors)
     result.warnings.extend(geometry.warnings)
