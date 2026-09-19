@@ -24,37 +24,40 @@ from raw XML attributes without rendering the SVG:
    reference geometry calculated from the registered architecture template.
    A numeric expected value in `data-gap` is forbidden: geometry remains the
    only source of the measurement.
-4. **Centred section dividers.** A horizontal `.section-divider` is placed at
+4. **Declared bottom-edge alignment.** A rectangle may name another rectangle
+   through `data-align-bottom-with`; their absolute bottom edges must match
+   after translation-only transforms are resolved.
+5. **Centred section dividers.** A horizontal `.section-divider` is placed at
    the exact midpoint between the nearest rectangle row above it and the
    nearest rectangle row below it; the spacing is calculated from geometry,
    never copied into metadata.
-5. **Declared direct routes.** A path marked `data-route="direct"` contains
+6. **Declared direct routes.** A path marked `data-route="direct"` contains
    exactly one horizontal or vertical segment. This lets diagrams state the
    local no-bend contract without pretending the linter can infer obstacles.
-6. **Shared routes stay outside cards.** A path marked
+7. **Shared routes stay outside cards.** A path marked
    `data-shared-route="true"` is one direct horizontal or vertical segment
    and may touch a card boundary, but may not enter or cross the interior of
    an independently coloured card. At the boundary the route must be split;
    the outgoing segment then uses `data-source-ref`, so source-colour
    validation applies.
-7. **Card text alignment.** The leading text rows of coloured component
+8. **Card text alignment.** The leading text rows of coloured component
    cards align to the same left inset, measured from the registered template
    component. This includes capability cards and standalone transitions,
    but excludes nested cards and flow labels.
-8. **Transition-card geometry.** Rectangles marked
+9. **Transition-card geometry.** Rectangles marked
    `data-layout="control-transition"` align their centre with the rectangle
-   named by `data-center-with`, share dimensions and text-slot geometry, and
-   match the registered architecture template. Slot coordinates are calculated
-   relative to each card, so no copied pixel constants become a second source
-   of truth.
-9. **Connector source attachment.** Every path with `data-source-ref` begins
+   named by `data-center-with`, share height, radius and text-slot geometry,
+   and match those properties in the registered architecture template. Width
+   is content-derived and checked from rendered ink instead of copied from the
+   template.
+10. **Connector source attachment.** Every path with `data-source-ref` begins
    on the referenced rectangle's boundary after translation-only transforms
    are resolved. This prevents a visually plausible arrow from hanging in the
    gap below or beside its declared source.
-10. **Grouped side-port spacing.** Paths marked with the same `data-port-group`
+11. **Grouped side-port spacing.** Paths marked with the same `data-port-group`
    end on the declared side of one `data-port-target`; the distance between
    their endpoints matches the port-gap geometry registered in the template.
-11. **Flow-label geometry.** Every rectangle whose class is `flow-label-*`
+12. **Flow-label geometry.** Every rectangle whose class is `flow-label-*`
    must declare a supported one- or two-line layout and bind every text row
    through `data-label-for`. Height, radius, centred baselines and text anchors
    are compared with template geometry. Every plaque selects a programmed
@@ -202,6 +205,11 @@ class ControlTransitionLayout:
         """Geometry shared by the template and every transition card."""
 
         return self.width, self.height, self.radius, self.slots
+
+    def rhythm_signature(self) -> tuple[float, float, tuple[LayoutSlot, ...]]:
+        """Template-derived geometry excluding the content-derived width."""
+
+        return self.height, self.radius, self.slots
 
 
 @dataclass(frozen=True)
@@ -402,6 +410,42 @@ def _check_reference_gaps(
                 f"геометрический просвет {gap.source_id!r} → {gap.target_id!r}: "
                 f"{reference_name} {reference_gap:g} px, фактически {gap.value:g} px "
                 "(diagram_geometry_foundations.md §6)"
+            )
+
+
+def _check_declared_bottom_alignments(root_el, errors: list[str]) -> None:
+    parents = {child: parent for parent in root_el.iter() for child in parent}
+    by_id = {element.get("id"): element for element in root_el.iter() if element.get("id")}
+    for element in root_el.iter():
+        target_id = element.get("data-align-bottom-with")
+        if target_id is None:
+            continue
+        element_id = element.get("id", "<без id>")
+        if _local_tag(element.tag) != "rect":
+            errors.append("data-align-bottom-with разрешён только для <rect>")
+            continue
+        target = by_id.get(target_id)
+        if target is None:
+            errors.append(
+                f"data-align-bottom-with={target_id!r} у {element_id!r} "
+                "указывает на отсутствующий элемент"
+            )
+            continue
+        if _local_tag(target.tag) != "rect":
+            errors.append(
+                f"data-align-bottom-with={target_id!r} у {element_id!r} обязан указывать на <rect>"
+            )
+            continue
+        box = _absolute_rect_box(element, parents, errors, contract="выравнивание нижних границ")
+        target_box = _absolute_rect_box(
+            target, parents, errors, contract="выравнивание нижних границ"
+        )
+        if box is None or target_box is None:
+            continue
+        if abs(box[3] - target_box[3]) > 1e-9:
+            errors.append(
+                f"нижняя граница {element_id!r} не выровнена с {target_id!r}: "
+                f"{box[3]:g} px вместо {target_box[3]:g} px"
             )
 
 
@@ -734,10 +778,10 @@ def _check_control_transition_layouts(
     peers_by_variant: dict[str, ControlTransitionLayout] = {}
     for layout in layouts:
         peer_reference = peers_by_variant.setdefault(layout.variant, layout)
-        if layout.signature() != peer_reference.signature():
+        if layout.rhythm_signature() != peer_reference.rhythm_signature():
             errors.append(
                 f"геометрия переходной карточки {layout.card_id!r} отличается от "
-                f"{peer_reference.card_id!r}: размеры, выравнивание и внутренние интервалы "
+                f"{peer_reference.card_id!r}: высота, выравнивание и внутренние интервалы "
                 "однотипных контрольных переходов должны совпадать"
             )
     if reference_layout is not None:
@@ -745,7 +789,7 @@ def _check_control_transition_layouts(
             reference_slots = reference_layout.slots
             if layout.variant == "single-detail":
                 # Preserve the template's bottom inset below the last visible row;
-                # all other slot coordinates and the width remain template-derived.
+                # all other slot coordinates remain template-derived.
                 required = {"identity", "title", "detail-1", "detail-2"}
                 by_name = {slot.name: slot for slot in reference_slots}
                 if not required <= by_name.keys():
@@ -760,15 +804,14 @@ def _check_control_transition_layouts(
             else:
                 expected_height = reference_layout.height
             reference_signature = (
-                reference_layout.width,
                 expected_height,
                 reference_layout.radius,
                 reference_slots,
             )
-            if layout.signature() != reference_signature:
+            if layout.rhythm_signature() != reference_signature:
                 errors.append(
                     f"геометрия переходной карточки {layout.card_id!r} отличается от "
-                    "эталона architecture_diagram_template.svg: размеры, радиус и "
+                    "эталона architecture_diagram_template.svg: высота, радиус и "
                     "внутренние интервалы вычисляются по шаблону"
                 )
     return layouts
@@ -1279,6 +1322,7 @@ def check_geometry(
     _check_arrow_marker_size(root_el, errors)
     vertical_gaps = _measure_referenced_vertical_gaps(root_el, errors)
     _check_reference_gaps(vertical_gaps, reference_gaps, errors)
+    _check_declared_bottom_alignments(root_el, errors)
     _check_centered_section_dividers(root_el, errors)
     _check_direct_routes(root_el, errors)
     _check_connector_source_attachment(root_el, errors)

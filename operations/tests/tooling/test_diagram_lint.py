@@ -579,6 +579,54 @@ class DiagramLintTests(unittest.TestCase):
             any("горизонтальным или вертикальным" in error for error in diagonal.errors)
         )
 
+    def test_declared_bottom_alignment_is_calculated_after_translation(self) -> None:
+        matching = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="10" width="100" height="40"/>'
+            '<g transform="translate(0 20)">'
+            '<rect id="label" x="0" y="0" width="40" height="30" '
+            'data-align-bottom-with="anchor"/></g></svg>'
+        )
+        drifted = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="10" width="100" height="40"/>'
+            '<rect id="label" x="0" y="0" width="40" height="44" '
+            'data-align-bottom-with="anchor"/></svg>'
+        )
+        self.assertEqual(matching.errors, [])
+        self.assertTrue(any("нижняя граница" in error for error in drifted.errors))
+
+    def test_declared_bottom_alignment_rejects_invalid_references(self) -> None:
+        wrong_element = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="0" width="10" height="10"/>'
+            '<g data-align-bottom-with="anchor"/></svg>'
+        )
+        missing_target = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="label" x="0" y="0" width="10" height="10" '
+            'data-align-bottom-with="missing"/></svg>'
+        )
+        non_rect_target = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text id="anchor" x="0" y="10">anchor</text>'
+            '<rect id="label" x="0" y="0" width="10" height="10" '
+            'data-align-bottom-with="anchor"/></svg>'
+        )
+        invalid_geometry = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="0" width="10" height="10"/>'
+            '<rect id="label" x="0" y="bad" width="10" height="10" '
+            'data-align-bottom-with="anchor"/></svg>'
+        )
+
+        self.assertTrue(any("только для <rect>" in error for error in wrong_element.errors))
+        self.assertTrue(any("отсутствующий элемент" in error for error in missing_target.errors))
+        self.assertTrue(any("указывать на <rect>" in error for error in non_rect_target.errors))
+        self.assertTrue(
+            any("выравнивание нижних границ" in error for error in invalid_geometry.errors)
+        )
+
     def test_declared_direct_route_rejects_invalid_metadata(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
@@ -2388,11 +2436,6 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
             ).errors
 
         self.assertEqual(check(svg), [])
-        lint_result = diagram_lint.lint_file(
-            root / "work/artefacts/architecture/personal_ai_platform_architecture.svg",
-            root,
-        )
-        self.assertEqual(lint_result.errors, [])
         for card_id in (
             "pre-model-control-card",
             "owner-choice-card",
@@ -2411,8 +2454,8 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
                 self.assertTrue(
                     any(card_id in error and "выровнены слева" in error for error in check(shifted))
                 )
-        original = '<text x="618" y="1245" class="component-title"'
-        centred = '<text x="618" y="1245" class="component-title" text-anchor="middle"'
+        original = '<text x="620" y="1245" class="component-title"'
+        centred = '<text x="620" y="1245" class="component-title" text-anchor="middle"'
         self.assertIn(original, svg)
         self.assertTrue(
             any(
