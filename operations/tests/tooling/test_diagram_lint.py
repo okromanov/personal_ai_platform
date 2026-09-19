@@ -891,7 +891,6 @@ class DiagramLintTests(unittest.TestCase):
             'class="control-card" data-layout="control-transition" '
             'data-center-with="anchor"/>'
             '<text x="60" y="35" class="component-id" '
-            ''
             'data-layout-slot="identity">A</text></g>'
             "</svg>"
         )
