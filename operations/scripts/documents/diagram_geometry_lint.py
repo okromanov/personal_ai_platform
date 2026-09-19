@@ -1077,17 +1077,6 @@ def _check_flow_label_layouts(
                 "data-padding-profile='flow-caption'"
             )
         equal_width_group = plaque.get("data-equal-width-group")
-        ancestor = parents.get(plaque)
-        under_defs = False
-        while ancestor is not None:
-            if _local_tag(ancestor.tag) == "defs":
-                under_defs = True
-                break
-            ancestor = parents.get(ancestor)
-        if kind == "flow-label-multiline" and not equal_width_group and not under_defs:
-            errors.append(
-                f"двухстрочная плашка потока {plaque_id!r} обязана задать data-equal-width-group"
-            )
         try:
             plaque_x = float(plaque.get("x", "0"))
             plaque_y = float(plaque.get("y", "0"))

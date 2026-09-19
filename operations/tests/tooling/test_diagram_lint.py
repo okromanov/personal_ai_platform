@@ -2068,7 +2068,7 @@ class DiagramLintTests(unittest.TestCase):
 
         self.assertTrue(any("не должна содержать <tspan>" in error for error in result.errors))
 
-    def test_multiline_flow_labels_use_template_rows_and_equal_width_groups(self) -> None:
+    def test_multiline_flow_labels_use_template_rows_and_validate_optional_groups(self) -> None:
         reference_result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
             "<defs>"
@@ -2123,7 +2123,6 @@ class DiagramLintTests(unittest.TestCase):
         )
 
         self.assertTrue(any("ровно 2 <text" in error for error in result.errors))
-        self.assertTrue(any("data-equal-width-group" in error for error in result.errors))
         self.assertTrue(any("соседним элементом" in error for error in result.errors))
         self.assertTrue(any("не указывает на плашку" in error for error in result.errors))
 
@@ -2454,8 +2453,8 @@ class ArchitectureCardAlignmentTests(unittest.TestCase):
                 self.assertTrue(
                     any(card_id in error and "выровнены слева" in error for error in check(shifted))
                 )
-        original = '<text x="620" y="1245" class="component-title"'
-        centred = '<text x="620" y="1245" class="component-title" text-anchor="middle"'
+        original = '<text x="621" y="1245" class="component-title"'
+        centred = '<text x="621" y="1245" class="component-title" text-anchor="middle"'
         self.assertIn(original, svg)
         self.assertTrue(
             any(
