@@ -596,6 +596,35 @@ class DiagramLintTests(unittest.TestCase):
         self.assertEqual(matching.errors, [])
         self.assertTrue(any("нижняя граница" in error for error in drifted.errors))
 
+    def test_declared_bottom_alignment_rejects_invalid_references(self) -> None:
+        wrong_element = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="0" width="10" height="10"/>'
+            '<g data-align-bottom-with="anchor"/></svg>'
+        )
+        missing_target = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="label" x="0" y="0" width="10" height="10" '
+            'data-align-bottom-with="missing"/></svg>'
+        )
+        non_rect_target = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<text id="anchor" x="0" y="10">anchor</text>'
+            '<rect id="label" x="0" y="0" width="10" height="10" '
+            'data-align-bottom-with="anchor"/></svg>'
+        )
+        invalid_geometry = diagram_geometry_lint.check_geometry(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+            '<rect id="anchor" x="0" y="0" width="10" height="10"/>'
+            '<rect id="label" x="0" y="bad" width="10" height="10" '
+            'data-align-bottom-with="anchor"/></svg>'
+        )
+
+        self.assertTrue(any("только для <rect>" in error for error in wrong_element.errors))
+        self.assertTrue(any("отсутствующий элемент" in error for error in missing_target.errors))
+        self.assertTrue(any("указывать на <rect>" in error for error in non_rect_target.errors))
+        self.assertTrue(any("выравнивание нижних границ" in error for error in invalid_geometry.errors))
+
     def test_declared_direct_route_rejects_invalid_metadata(self) -> None:
         result = diagram_geometry_lint.check_geometry(
             '<svg xmlns="http://www.w3.org/2000/svg">'
