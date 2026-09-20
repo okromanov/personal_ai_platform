@@ -6,7 +6,7 @@
   diagram_version: 1.18
   generated_at: 2026-09-19
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@1.26
+  source: operations/architecture/diagram_geometry_foundations.md@2.0
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
@@ -75,7 +75,7 @@
     <text x="68" y="174" class="component-id">ARC_CMP_XXX</text>
     <text x="68" y="199" class="component-title">Название компонента (плейсхолдер)</text>
     <text x="68" y="223" class="component-text">Краткое функциональное описание компонента</text>
-    <rect x="68" y="246" width="193" height="58" rx="4" class="inner-card"/>
+    <rect x="68" y="246" width="218" height="58" rx="4" class="inner-card"/>
     <text x="80" y="271" class="nested-title">Внутренний узел</text>
     <text x="80" y="289" class="nested-text">Пример вложенного элемента</text>
   </g>
