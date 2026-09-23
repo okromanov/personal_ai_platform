@@ -3,7 +3,9 @@
 Auto-increment file version when content changes.
 
 Triggered by pre-commit hook when file metadata (updated field) changes.
-Increments version: 1.0 → 1.1 → 1.2 → 2.0 → 2.1, etc.
+Increments the minor version only: 1.0 → 1.1 → … → 1.9 → 1.10. A new major
+version is an explicit owner decision (operations/change_process.md §3),
+so this hook never creates one.
 
 Usage: python3.12 operations/scripts/versioning/increment_file_version.py <file_path>
 """
@@ -14,17 +16,14 @@ from pathlib import Path
 
 
 def increment_version(version_str: str) -> str:
-    """Increment semantic version: 1.0 → 1.1, 1.9 → 2.0"""
+    """Increment the minor version: 1.0 → 1.1, 1.9 → 1.10."""
     match = re.match(r"(\d+)\.(\d+)", version_str)
     if not match:
         return version_str
 
     major, minor = int(match.group(1)), int(match.group(2))
 
-    if minor < 9:
-        return f"{major}.{minor + 1}"
-    else:
-        return f"{major + 1}.0"
+    return f"{major}.{minor + 1}"
 
 
 def update_file_version(file_path: str) -> bool:

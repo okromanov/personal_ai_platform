@@ -15,11 +15,6 @@ class IncrementVersionTests(unittest.TestCase):
         self.assertEqual(increment_version("1.0"), "1.1")
         self.assertEqual(increment_version("1.8"), "1.9")
 
-    def test_rolls_over_to_next_major_at_minor_nine(self) -> None:
-        self.assertEqual(increment_version("1.9"), "2.0")
-        self.assertEqual(increment_version("4.9"), "5.0")
-
-    @unittest.expectedFailure
     def test_minor_number_keeps_growing_past_nine(self) -> None:
         self.assertEqual(increment_version("1.9"), "1.10")
         self.assertEqual(increment_version("2.13"), "2.14")
@@ -58,7 +53,7 @@ class UpdateFileVersionTests(unittest.TestCase):
             self.assertIn("id: DOC_002", content)
             self.assertIn("other: value", content)
             self.assertIn("# Body text", content)
-            self.assertIn("version: 3.0", content)
+            self.assertIn("version: 2.10", content)
 
     def test_returns_false_when_file_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
