@@ -1,0 +1,246 @@
+{
+  "head_sha": "fa707b3fd6efa238a62f3bade91636e8458ad266",
+  "minimum": {
+    "total": 23,
+    "done": 22,
+    "unmet": 1,
+    "items": [
+      {
+        "id": "13.1.1",
+        "requirement": "каждый существенный вывод имеет evidence state",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.2",
+        "requirement": "все runtime claims относятся к указанному SHA",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.3",
+        "requirement": "generated-файлы не названы актуальными без generation и drift-check",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.4",
+        "requirement": "отсутствие инструмента не превращено в ноль проблем",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.5",
+        "requirement": "структурная трассировка не выдана за поведенческое доказательство",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.6",
+        "requirement": "`allowed_paths` не выдан за реализацию",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.7",
+        "requirement": "coverage сравнивается с фактической policy, а в `CHANGESET` проверен diff самой policy между base и head",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.8",
+        "requirement": "gate-скрипты прочитаны и верифицированы до запуска; неверифицируемый gate не выдан за `CONFIRMED`",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.9",
+        "requirement": "все запуски кода репозитория выполнялись в изолированной среде, политика среды зафиксирована",
+        "status": "done",
+        "evidence_or_reason": "Only exact-source synthetic probe ran in isolated env -i; no canonical suite locally."
+      },
+      {
+        "id": "13.1.10",
+        "requirement": "локальные результаты не выданы за CI-результаты и наоборот; среда указана для каждого runtime claim",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.11",
+        "requirement": "секреты отредактированы; проверены рабочее дерево, git-история и gitignored-файлы",
+        "status": "unmet",
+        "evidence_or_reason": "No exact-SHA local working tree or ignored-file set; CI gitleaks covers tracked directory and full Git history only."
+      },
+      {
+        "id": "13.1.12",
+        "requirement": "findings не основаны только на grep/имени/количестве строк или assertions",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.13",
+        "requirement": "каждой находке проставлен baseline-статус; находки сверены с risk register",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.14",
+        "requirement": "результаты предыдущих аудитов оценены по разделу 4.4, а не только прочитаны: заявленные исправления проверены на проверяемом SHA, ложные «исправлено» оформлены находкой, регрессии помечены `REGRESSION`, просроченные сроки пересмотра перечислены, а недостижимость закрытия записей зафиксирована как ограничение и учтена в потолке вердикта (раздел 10)",
+        "status": "done",
+        "evidence_or_reason": "Risk-based + seeded sample 22/44 rechecked; remaining 22 marked NOT_CHECKED; no accepted or overdue open entries."
+      },
+      {
+        "id": "13.1.15",
+        "requirement": "severity согласована с impact и reachability",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.16",
+        "requirement": "flaky не объявлен только по одному случайному падению; повторов не больше двух, с фиксацией условий",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.17",
+        "requirement": "stop-условия раздела 3.5 не проигнорированы",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.18",
+        "requirement": "ограничения, исключения и сэмплирование видны в Executive Summary",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.19",
+        "requirement": "каждая условная проверка (7.4.1, 7.4.2, 7.4.3, UI, feature flags) либо выполнена, либо помечена `NOT_CHECKED` с причиной",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.20",
+        "requirement": "глубина относительно предыдущего аудита зафиксирована в manifest; при сокращённом методе отсутствие новых находок не заявлено как улучшение (раздел 12)",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.21",
+        "requirement": "readiness соответствует правилам раздела 10, включая потолок при структурной блокировке реестра",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.22",
+        "requirement": "рекомендации не представлены как уже выполненные изменения",
+        "status": "done",
+        "evidence_or_reason": "Addressed with exact SHA source, CI artifact, or explicit UNAVAILABLE/NOT_CHECKED in report."
+      },
+      {
+        "id": "13.1.23",
+        "requirement": "findings выгружены в machine-readable формате, путь и SHA-256 — в manifest.",
+        "status": "done",
+        "evidence_or_reason": "findings.json checksum recorded in final manifest."
+      }
+    ]
+  },
+  "extended": {
+    "total": 15,
+    "done": 5,
+    "skipped": 9,
+    "not_applicable": 1,
+    "items": [
+      {
+        "id": "13.2.1",
+        "requirement": "способность проверок провалиться проверена по разделу 4.5, а не выведена из зелёного прогона: реестр gate перечислен из кода, исход мутации зафиксирован по каждой проверке, `caught` подтверждён падением поведенческого теста, а не структурного детектора, дерево после прохода сверено с исходным состоянием, невошедшее при сэмплировании помечено `NOT_CHECKED`",
+        "status": "skipped",
+        "reason": "Complete isolated Git checkout/history unavailable; no valid full mutation sweep and no source-body negative probes for all checks."
+      },
+      {
+        "id": "13.2.2",
+        "requirement": "храповики проверены (4.2.7): у каждого baseline, budget и allowlist в конфигурации gate назван механизм, мешающий его расширить, либо зафиксировано его отсутствие",
+        "status": "skipped",
+        "reason": "Coverage ratchet and selected budgets inspected; not all controls independently mutated."
+      },
+      {
+        "id": "13.2.3",
+        "requirement": "построена матрица «проверка × уровень контроля» (6.1); проверки, отсутствующие на самом часто исполняемом уровне, и шаги с разными аргументами на разных уровнях перечислены; мутирующие шаги, выполняемые после собственной проверки уровня, названы",
+        "status": "done",
+        "reason": "Current source/CI evidence summarized in report with limits."
+      },
+      {
+        "id": "13.2.4",
+        "requirement": "нефальсифицируемые тесты выявлены пробой заведомым дефектом (7.5.1), а не признаны покрытием по факту наличия; тесты, повторяющие блокирующий шаг gate, отличены от тех, что дают собственную гарантию",
+        "status": "skipped",
+        "reason": "Complete isolated Git checkout/history unavailable; no valid full mutation sweep and no source-body negative probes for all checks."
+      },
+      {
+        "id": "13.2.5",
+        "requirement": "собран инвентарь непокрытого (7.5.2): модули с нулевым покрытием классифицированы как недостижимые либо как находка; названы security- и gate-модули без поимённого порога",
+        "status": "done",
+        "reason": "Current source/CI evidence summarized in report with limits."
+      },
+      {
+        "id": "13.2.6",
+        "requirement": "дублирование классифицировано по способности разойтись (7.3); устранение неспособного разойтись не предложено без измеренной стоимости",
+        "status": "skipped",
+        "reason": "No measured divergence/cost inventory for all duplication."
+      },
+      {
+        "id": "13.2.7",
+        "requirement": "supply chain: lockfile сверен с manifest, лицензии и vendored provenance проверены либо помечены `UNAVAILABLE`",
+        "status": "skipped",
+        "reason": "Lock hashes and SBOM present; complete license/vendored provenance not established."
+      },
+      {
+        "id": "13.2.8",
+        "requirement": "file-role inventory покрывает каждый tracked-файл; ценность, корректность размещения, навигация, управляемость для владельца и единообразие шаблонов проверены по разделу 7.1.1",
+        "status": "skipped",
+        "reason": "335 files classified; 26 changed/new paths lack current semantic content inspection, exact incoming link graph unavailable."
+      },
+      {
+        "id": "13.2.9",
+        "requirement": "требования, TASK, harness и delivery system проверены по разделу 7.2.1 как замкнутый и исполняемый путь до поведенческого evidence",
+        "status": "done",
+        "reason": "Current source/CI evidence summarized in report with limits."
+      },
+      {
+        "id": "13.2.10",
+        "requirement": "фактическая архитектура восстановлена и проверена по разделу 7.2.2 на эффективность, безопасность, простоту, runtime-масштабируемость, заменяемость и системные компромиссы",
+        "status": "done",
+        "reason": "Current source/CI evidence summarized in report with limits."
+      },
+      {
+        "id": "13.2.11",
+        "requirement": "observability и recovery оценены по критериям 7.2.2; restore drill отличён от факта создания backup",
+        "status": "skipped",
+        "reason": "Backup/restore drill could not be verified on exact SHA."
+      },
+      {
+        "id": "13.2.12",
+        "requirement": "данные и приватность проверены по 7.4.2: карта данных восстановлена из кода и конфигурации, egress к внешним провайдерам перечислен, retention и удаление проверены по факту, PII в fixtures исключена или зафиксирована",
+        "status": "skipped",
+        "reason": "Runtime data path inspected; ignored fixtures, actual provider contracts, retention/deletion not fully observed."
+      },
+      {
+        "id": "13.2.13",
+        "requirement": "персистентная память агента проверена на запись из untrusted-контента (7.4.1)",
+        "status": "not_applicable",
+        "reason": "Persistent agent memory not implemented on current SHA."
+      },
+      {
+      "id": "13.2.14",
+      "requirement": "подлинность каналов и webhook'ов и фактические полномочия интеграций проверены, а не выведены из наличия authentication",
+      "status": "skipped",
+        "reason": "Telegram is in-memory stub; real webhook/polling future TASK_016, so actual deployed authenticity unavailable."
+      },
+      {
+        "id": "13.2.15",
+        "requirement": "отсутствие модели угроз при наличии внешних входов, агентного цикла или чувствительных данных зафиксировано находкой.",
+        "status": "done",
+        "reason": "Threat model exists at specifications/threat_model.md."
+      }
+    ]
+  }
+}
