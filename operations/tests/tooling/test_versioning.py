@@ -19,6 +19,11 @@ class IncrementVersionTests(unittest.TestCase):
         self.assertEqual(increment_version("1.9"), "2.0")
         self.assertEqual(increment_version("4.9"), "5.0")
 
+    @unittest.expectedFailure
+    def test_minor_number_keeps_growing_past_nine(self) -> None:
+        self.assertEqual(increment_version("1.9"), "1.10")
+        self.assertEqual(increment_version("2.13"), "2.14")
+
     def test_returns_input_unchanged_when_not_semantic_version(self) -> None:
         self.assertEqual(increment_version("not-a-version"), "not-a-version")
         self.assertEqual(increment_version(""), "")
