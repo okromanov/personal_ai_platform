@@ -55,7 +55,11 @@ class ToolGatewayImpl(ToolGateway):
         event_sink: TaskEventSink | None = None,
     ) -> None:
         self._owner_control = owner_control
-        self._capabilities = {capability.name: capability for capability in capabilities}
+        self._capabilities: dict[str, Capability] = {}
+        for capability in capabilities:
+            if capability.name in self._capabilities:
+                raise ValueError(f"duplicate capability name: {capability.name}")
+            self._capabilities[capability.name] = capability
         self._event_sink = event_sink
 
     def _emit(

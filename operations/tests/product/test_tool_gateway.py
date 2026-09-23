@@ -86,7 +86,6 @@ class CapabilityPolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             _capability(handler=RecordingHandler(), resources=frozenset())
 
-    @unittest.expectedFailure
     def test_duplicate_capability_names_are_rejected(self) -> None:
         gate, tmp = _gate()
         self.addCleanup(tmp.cleanup)
