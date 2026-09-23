@@ -82,6 +82,11 @@ class CapabilityPolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             _capability(handler=RecordingHandler(), subjects=frozenset())
 
+    @unittest.expectedFailure
+    def test_read_capability_requires_explicit_resources(self) -> None:
+        with self.assertRaises(ValueError):
+            _capability(handler=RecordingHandler(), resources=frozenset())
+
     def test_sensitive_capability_requires_explicit_resources(self) -> None:
         with self.assertRaises(ValueError):
             _capability(
