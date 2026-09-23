@@ -56,6 +56,7 @@ class RuntimeTaskEventTests(unittest.IsolatedAsyncioTestCase):
                     effect_class=ActionClass.READ,
                     handler=handler,
                     allowed_subjects=frozenset({"owner_1"}),
+                    allowed_resources=frozenset({sentinel}),
                     allowed_param_names=frozenset({"secret"}),
                 )
             ],

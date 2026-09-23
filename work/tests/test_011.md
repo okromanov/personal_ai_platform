@@ -5,8 +5,8 @@ title: "ARC_CMP_005 — Шлюз инструментов: техническа�
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 1.2
-updated: 2026-09-04
+version: 1.3
+updated: 2026-09-23
 accepts:
   - m02
 traces_to:
@@ -36,6 +36,8 @@ depends_on:
 - Третий вызов с тем же `action_id` после авторизации отклоняется как дубликат, в том числе после перезапуска ([`SEC_CTL_008`](../../specifications/system_specification.md#sec_ctl_008)).
 - Аварийный выключатель проверяется до авторизации и непосредственно перед handler; включение в любом из этих окон не допускает внешний эффект ([`SEC_CTL_002`](../../specifications/system_specification.md#sec_ctl_002)).
 - Неизвестная возможность и ресурс вне списка разрешённых для возможности отклоняются без вызова обработчика.
+- Каждая возможность, включая класс `READ`, явно перечисляет разрешённые ресурсы: пустой список отклоняется при регистрации и не работает как неявное разрешение любого ресурса ([`SEC_CTL_003`](../../specifications/system_specification.md#sec_ctl_003), [`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007)).
+- Повторное имя возможности отклоняется при сборке шлюза: одна привязка не может молча заменить проверенную политику и обработчик другой.
 - Класс воздействия, заявленный в параметрах вызова, не может подменить зарегистрированный класс возможности — авторизация управляется только тем, что было зарегистрировано технической стороной, а не тем, что утверждает вызывающая сторона или обнаруженные метаданные инструмента ([`SEC_CTL_007`](../../specifications/system_specification.md#sec_ctl_007)).
 - Сбой самого обработчика инструмента поднимает отдельное, отличимое от отказа авторизации исключение `ToolGatewayError`.
 
@@ -55,7 +57,7 @@ python3.12 -m unittest operations.tests.product.test_tool_gateway -v
 
 ## 4. Критерий успеха
 
-Все 17 тестов проходят, включая сценарии:
+Проходят все 21 тест, включая сценарии:
 
 - ✓ read_capability_authorized_immediately_without_confirmation — класс `READ` не требует подтверждения
 - ✓ sensitive_capability_requires_confirmation_first — первый вызов чувствительной возможности отклонён, обработчик не вызван
@@ -65,10 +67,12 @@ python3.12 -m unittest operations.tests.product.test_tool_gateway -v
 - ✓ duplicate after restart — повторное использование `action_id` после перезапуска отклонено
 - ✓ unknown_capability_returns_failed_result — неизвестная возможность отклонена
 - ✓ resource_outside_allowlist_is_denied — ресурс вне списка разрешённых отклонён, обработчик не вызван
+- ✓ read_capability_requires_explicit_resources — возможность `READ` без списка ресурсов отклонена при регистрации
+- ✓ duplicate_capability_names_are_rejected — повторное имя возможности отклонено при сборке шлюза
 - ✓ capability_effect_class_cannot_be_overridden_by_call_params — параметры вызова не подменяют зарегистрированный класс воздействия
 - ✓ handler_exception_raises_tool_gateway_error — сбой обработчика поднимает `ToolGatewayError`
 - ✓ tool_gateway_error_is_a_distinct_type — тип исключения различим
 
 ## 5. Состав доказательства
 
-`automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 17 тестов на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
+`automated_evidence: quality_suite`. Каждый запуск канонического набора юнит-тестов создаёт доказательство выполнения всех 21 теста на текущем Git SHA. Результат успеха фиксируется в evidence записи с временем выполнения и версией платформы.
