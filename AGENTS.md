@@ -3,8 +3,8 @@ id: coding_agent_instruction
 type: agent_instruction
 document_state: current
 applicability: normative
-version: 4.7
-updated: 2026-09-10
+version: 4.8
+updated: 2026-09-23
 depends_on:
   - project_rules
   - project_milestones
@@ -91,6 +91,7 @@ depends_on:
 - Владелец не запускает Git, PowerShell и внутренние скрипты; агент выполняет технические действия сам.
 - Evidence фиксирует результат запуска на точном Git SHA. Карточка аудита хранится отдельно и не дублируется в поле Evidence реестра.
 - Проверка не считается доказательством, если физически не может завершиться ошибкой при нарушении контракта. Способ убедиться — не чтение кода проверки, а проба: обезвредить её и увидеть, что тест краснеет (протокол и типовые ложные «поймал» — [`repository_audit_system_prompt.md`](operations/repository_audit_system_prompt.md) раздел 4.5).
+- Исправление дефекта сначала воспроизводится падающим регрессионным тестом в отдельном коммите ([`unit_tests.md`](operations/quality/playbooks/unit_tests.md), раздел «Исправление дефекта»).
 
 ## 6. Безопасность и честность
 
