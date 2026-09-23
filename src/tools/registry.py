@@ -41,8 +41,8 @@ class Capability:
     def __post_init__(self) -> None:
         if not self.allowed_subjects:
             raise ValueError("capability must name at least one allowed subject")
-        if self.effect_class is not ActionClass.READ and not self.allowed_resources:
-            raise ValueError("sensitive capability must explicitly allow resources")
+        if not self.allowed_resources:
+            raise ValueError("capability must explicitly allow resources")
 
 
 class ToolGatewayImpl(ToolGateway):
@@ -115,7 +115,7 @@ class ToolGatewayImpl(ToolGateway):
                 TaskEventResult.DENIED,
             )
             return self._denied("subject not authorized for capability")
-        if capability.allowed_resources and tool_call.resource not in capability.allowed_resources:
+        if tool_call.resource not in capability.allowed_resources:
             self._emit(
                 tool_call,
                 TaskEventType.POLICY_DECISION,

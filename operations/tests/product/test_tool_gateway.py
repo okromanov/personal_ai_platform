@@ -59,7 +59,7 @@ def _capability(
     name: str = "read_file",
     effect_class: ActionClass = ActionClass.READ,
     handler: RecordingHandler | object,
-    resources: frozenset[str] = frozenset(),
+    resources: frozenset[str] = frozenset({"notes.txt"}),
     params: frozenset[str] = frozenset(),
     subjects: frozenset[str] = frozenset({"owner_1"}),
     secret_refs: frozenset[str] = frozenset(),
@@ -82,7 +82,6 @@ class CapabilityPolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             _capability(handler=RecordingHandler(), subjects=frozenset())
 
-    @unittest.expectedFailure
     def test_read_capability_requires_explicit_resources(self) -> None:
         with self.assertRaises(ValueError):
             _capability(handler=RecordingHandler(), resources=frozenset())
@@ -93,6 +92,7 @@ class CapabilityPolicyTests(unittest.TestCase):
                 name="send_email",
                 effect_class=ActionClass.WRITE_EXTERNAL,
                 handler=RecordingHandler(),
+                resources=frozenset(),
             )
 
 
