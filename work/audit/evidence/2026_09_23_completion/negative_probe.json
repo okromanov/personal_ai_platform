@@ -1,0 +1,26 @@
+{
+  "head_sha": "fa707b3fd6efa238a62f3bade91636e8458ad266",
+  "source_git_blobs_verified": {
+    "src/tools/registry.py": "17a36437c8036a685fed4a200edaa190e5245136",
+    "src/owner_control/control.py": "d869269a50f60ff7879eba8af17d49b5f90ecb94",
+    "src/tools/base.py": "c16c49d5129f447c45a11d27f299295093e5b7c0"
+  },
+  "environment": "isolated scratch copy of exact source; /usr/bin/python3.12 with env -i, no package installs, no credentials, temporary owner state, no network calls",
+  "result": {
+    "empty_read_resource_allowlist": {
+      "capability": "READ with allowed_resources=frozenset()",
+      "requested_resource": "secret.txt",
+      "authorized": true,
+      "handler_called": true
+    },
+    "duplicate_capability_name": {
+      "first": "same: read allowed.txt only",
+      "second": "same: read any resource",
+      "requested_resource": "secret.txt",
+      "authorized": true,
+      "second_handler_called": true
+    }
+  },
+  "exit_code": 0,
+  "scope_limit": "synthetic handlers; no live external tool or sensitive data was accessed"
+}

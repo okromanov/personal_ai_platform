@@ -1,0 +1,253 @@
+{
+  "prompt": "operations/repository_audit_system_prompt.md@5.0",
+  "mode": "FULL_REPOSITORY",
+  "repository": "okromanov/personal_ai_platform",
+  "branch": "main",
+  "head_sha": "fa707b3fd6efa238a62f3bade91636e8458ad266",
+  "started_at_utc": "2026-09-23T18:29:43Z",
+  "scope": "All 335 tracked blobs returned by the complete, untruncated recursive Git tree at the head SHA; seven audit pillars. No requested exclusions.",
+  "source_state": {
+    "remote_ref_confirmed": true,
+    "remote_tree_truncated": false,
+    "local_directory": "/workspace/scratch/803ad54e785f/personal_ai_platform",
+    "local_directory_is_full_checkout": false,
+    "local_git_metadata_available": false,
+    "local_working_tree_cleanliness": "unavailable; disconnected partial snapshot, not used as SHA-bound evidence",
+    "complete_git_history_available_locally": false,
+    "ignored_files_check": "unavailable in the remote Git tree",
+    "runtime_evidence": "GitHub Actions push run 35504462050 exact SHA; 3 successful jobs; full quality artifact downloaded and inspected; local gate unavailable",
+    "previous_tree_truncated": false,
+    "previous_head_sha": "3006ad603e57d9acc3bb3cd50455c04223904d14"
+  },
+  "environment": {
+    "os": "Linux 6.18.44",
+    "arch": "x86_64",
+    "python": "3.12.14",
+    "git": "2.51.1",
+    "locale": "C.UTF-8",
+    "timezone": "Etc/UTC",
+    "network": "Restricted; GitHub repository accessed through GitHub connector; local Git clone unauthenticated"
+  },
+  "planned_checks": [
+    {
+      "command": "GitHub API git tree and exact-ref fetch",
+      "status": "applicable",
+      "expected_artifact": "tracked-file inventory and SHA"
+    },
+    {
+      "command": "Review AGENTS, contracts, specifications and operations Markdown",
+      "status": "applicable",
+      "expected_artifact": "authority and semantic evidence"
+    },
+    {
+      "command": "Review canonical quality gate and CI workflow from exact SHA",
+      "status": "applicable",
+      "expected_artifact": "control-level matrix"
+    },
+    {
+      "command": "Inspect GitHub Actions run 35504462050, jobs, logs and artifacts",
+      "status": "applicable",
+      "expected_artifact": "SHA-bound CI evidence"
+    },
+    {
+      "command": "python3.12 operations/scripts/quality/run_suite.py full",
+      "status": "unavailable",
+      "reason": "No full authenticated local checkout or full Git history; do not execute stale partial directory",
+      "timeout_seconds_per_step": 300
+    },
+    {
+      "command": "Git history and ignored-file secret scan",
+      "status": "unavailable",
+      "reason": "Remote tree omits ignored files; complete local Git history unavailable; compare CI gitleaks evidence"
+    },
+    {
+      "command": "Generation and drift check",
+      "status": "unavailable",
+      "reason": "No full isolated checkout; inspect CI generation/drift steps as environment-specific evidence"
+    },
+    {
+      "command": "Gate mutation tests",
+      "status": "unavailable",
+      "reason": "No complete isolated Git checkout with verified baseline; inspect prior mutation evidence without treating it as current proof"
+    },
+    {
+      "command": "Repository branch protection/CI secrets",
+      "status": "unavailable",
+      "reason": "Server settings are outside available read-only repository evidence"
+    }
+  ],
+  "conditionals": {
+    "agent_loop": "partial: stub and API boundary reviewed; real agent cycle NOT_CHECKED",
+    "personal_data": "partial: task/event/SQLite source reviewed; ignored fixtures and retention/deletion UNAVAILABLE",
+    "external_data_providers": "NOT_CHECKED: real provider absent, egress current stub only",
+    "channel_authenticity": "NOT_CHECKED: Telegram in-memory stub; TASK_016 planned",
+    "persistent_agent_memory": "not_applicable: not implemented",
+    "ui_accessibility": "not_applicable: no implemented UI",
+    "feature_flags": "not_applicable: no implemented feature flags",
+    "threat_model": "present; specifications/threat_model.md"
+  },
+  "outputs": [
+    "work/audit/audit_baseline_2026_09_23.md",
+    "work/audit/audit_register.md",
+    "project_status.md",
+    "work/audit/evidence/2026_09_23_completion/findings.json",
+    "work/audit/evidence/2026_09_23_completion/negative_probe.json",
+    "work/audit/evidence/2026_09_23_completion/file_role_inventory.json",
+    "work/audit/evidence/2026_09_23_completion/self_check.json",
+    "work/audit/evidence/2026_09_23_completion/manifest.json",
+    "work/audit/evidence/2026_09_23_completion/sha256sums.txt"
+  ],
+  "read_only_policy": "No repository edits, commits, branches or PRs: prompt section 3.2 for an audit-only request.",
+  "sampling": {
+    "previous_aud_ids_checked": [
+      "AUD-001",
+      "AUD-002",
+      "AUD-003",
+      "AUD-004",
+      "AUD-007",
+      "AUD-008",
+      "AUD-009",
+      "AUD-018",
+      "AUD-021",
+      "AUD-022",
+      "AUD-023",
+      "AUD-024",
+      "AUD-031",
+      "AUD-032",
+      "AUD-034",
+      "AUD-035",
+      "AUD-038",
+      "AUD-039",
+      "AUD-041",
+      "AUD-042",
+      "AUD-043",
+      "AUD-044"
+    ],
+    "previous_aud_ids_not_checked": [
+      "AUD-005",
+      "AUD-006",
+      "AUD-010",
+      "AUD-011",
+      "AUD-012",
+      "AUD-013",
+      "AUD-014",
+      "AUD-015",
+      "AUD-016",
+      "AUD-017",
+      "AUD-019",
+      "AUD-020",
+      "AUD-025",
+      "AUD-026",
+      "AUD-027",
+      "AUD-028",
+      "AUD-029",
+      "AUD-030",
+      "AUD-033",
+      "AUD-036",
+      "AUD-037",
+      "AUD-040"
+    ],
+    "method": "all critical/high + 8 security/gate/evidence + 4 xorshift32-shuffled remaining with seed 20260923; 22/44",
+    "file_roles": "335/335 classified; 274 unchanged Git blobs inherited prior review, 35 changed/new content currently read, 26 changed/new role only NOT_CHECKED",
+    "gate_mutation": "not run; prior focused evidence is not exact-current-SHA full sweep"
+  },
+  "previous_audit": "44 AUD IDs resolved in register; verify status sampling and any regressions before new IDs",
+  "ended_at_utc": "2026-09-23T18:46:19.289416Z",
+  "readiness": "NOT READY",
+  "verdict_basis": [
+    "AUD-045 MEDIUM CONFIRMED",
+    "AUD-046 MEDIUM CONFIRMED"
+  ],
+  "executed_checks": [
+    {
+      "check": "GitHub REST complete recursive trees current and previous",
+      "outcome": "passed",
+      "exit_code": 0,
+      "current_blobs": 335,
+      "previous_blobs": 319
+    },
+    {
+      "check": "Exact-SHA GitHub Actions quality/windows/project check",
+      "outcome": "passed in CI",
+      "run_id": 35504462050,
+      "tests_passed": 820,
+      "branch_coverage_percent_approx": 88.6
+    },
+    {
+      "check": "Isolated exact-source ToolGateway negative probes",
+      "outcome": "two defects reproduced",
+      "exit_code": 0,
+      "evidence": "negative_probe.json"
+    },
+    {
+      "check": "Risk-based + seeded audit register revalidation",
+      "outcome": "22 rechecked, 22 NOT_CHECKED",
+      "sample_share": 0.5,
+      "seed": 20260923
+    },
+    {
+      "check": "53 operations/specification Markdown files and 36 src Python files",
+      "outcome": "retrieved by exact ref; detailed semantic inspection sampled"
+    },
+    {
+      "check": "Full local suite, full gate mutations, local ignored-file scan",
+      "outcome": "UNAVAILABLE",
+      "reason": "No complete local checkout/history at exact SHA"
+    }
+  ],
+  "depth_vs_previous_audit": {
+    "baseline": "work/audit/audit_baseline_2026_09_09.md",
+    "classification": "narrowed on gate mutation and per-file current semantic review, expanded on live exact-SHA CI artifact and new tool gateway negative probes",
+    "previous_files_reviewed": 319,
+    "current_file_roles": 335,
+    "gate_mutation_sweep": "not run",
+    "conditional_sections": "runtime stub, personal data path, threat model considered; UI and agent memory not implemented; live channel/provider unavailable"
+  },
+  "self_check_status": {
+    "mandatory_done": 22,
+    "mandatory_unmet": 1,
+    "extended_done": 5,
+    "extended_skipped": 9,
+    "extended_not_applicable": 1
+  },
+  "artifacts": {
+    "findings.json": {
+      "sha256": "0a143bad4691abe04116131034a0e8442665bfcdc2f24ae019c435b811d00685",
+      "size_bytes": 5359
+    },
+    "negative_probe.json": {
+      "sha256": "dc782a60338522d7e6037bc6ab806e8310f4021964fbdd99abc8adfc2f53d696",
+      "size_bytes": 1059
+    },
+    "file_role_inventory.json": {
+      "sha256": "8089498588bffe0e2f5f5f3dafb612186d52858de5c9e028b5a4d800f0bb9a1d",
+      "size_bytes": 264558
+    },
+    "self_check.json": {
+      "sha256": "7ca175599a0b8e2c16fc43017ff3740a46d8951b80e0d3922d368fefdcdf5f50",
+      "size_bytes": 15987
+    },
+    "audit_baseline_2026_09_23.md": {
+      "sha256": "9a63bf8f66c2965c6a890de132b3b87a0ed958883f8966f114526d032bf2be24",
+      "size_bytes": 31191
+    }
+  },
+  "machine_readable_findings": {
+    "path": "work/audit/evidence/2026_09_23_completion/findings.json",
+    "sha256": "0a143bad4691abe04116131034a0e8442665bfcdc2f24ae019c435b811d00685"
+  },
+  "publication": {
+    "requested_after_read_only_audit": true,
+    "route": "dated baseline and mutable register via branch/PR",
+    "original_audit_head_sha": "fa707b3fd6efa238a62f3bade91636e8458ad266",
+    "new_ids": [
+      "AUD-045",
+      "AUD-046"
+    ]
+  },
+  "ci_quality_archive": {
+    "run_url": "https://github.com/okromanov/personal_ai_platform/actions/runs/35504462050",
+    "archive_sha256": "79940dab89b5ef596298a23fb7e538d0a48db5f6adab2974867fd594db8db108",
+    "included_in_repository": false
+  }
+}
