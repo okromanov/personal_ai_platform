@@ -86,6 +86,21 @@ class CapabilityPolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             _capability(handler=RecordingHandler(), resources=frozenset())
 
+    @unittest.expectedFailure
+    def test_duplicate_capability_names_are_rejected(self) -> None:
+        gate, tmp = _gate()
+        self.addCleanup(tmp.cleanup)
+        strict = _capability(
+            name="same", handler=RecordingHandler(), resources=frozenset({"allowed.txt"})
+        )
+        broader = _capability(
+            name="same",
+            handler=RecordingHandler(),
+            resources=frozenset({"allowed.txt", "secret.txt"}),
+        )
+        with self.assertRaises(ValueError):
+            ToolGatewayImpl(gate, [strict, broader])
+
     def test_sensitive_capability_requires_explicit_resources(self) -> None:
         with self.assertRaises(ValueError):
             _capability(
