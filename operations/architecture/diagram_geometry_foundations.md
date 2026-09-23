@@ -3,8 +3,8 @@ id: operations_diagram_geometry_foundations
 type: guide
 document_state: current
 applicability: reference
-version: 2.0
-updated: 2026-09-19
+version: 1.27
+updated: 2026-09-23
 depends_on:
   - project_rules
   - operations_change_process

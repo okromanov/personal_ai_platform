@@ -6,7 +6,7 @@
   diagram_version: 1.18
   generated_at: 2026-09-19
   status: current
-  source: operations/architecture/diagram_geometry_foundations.md@2.0
+  source: operations/architecture/diagram_geometry_foundations.md@1.27
   end-diagram-metadata -->
   <defs>
     <marker id="arrow-main" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#315C88"/></marker>
