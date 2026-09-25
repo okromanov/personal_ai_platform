@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.9
-updated: 2026-09-04
+version: 2.10
+updated: 2026-09-26
 next_actor: agent
 owner_action: none
 owner_followups:
@@ -14,6 +14,7 @@ depends_on:
   - TASK_012
 allowed_paths:
   - work/tasks/task_013_inf_008.md
+  - work/artefacts/task_013_four_providers_ipad_windows_runbook.md
   - adr/adr_007_cloud_provider_selection.md
   - adr/adr_009_secret_management_strategy.md
 traces_to:
@@ -33,29 +34,30 @@ implements:
 
 ## 2. Результат
 
-Выбранная площадка размещения, зафиксированная в [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), согласованная с ней стратегия runtime-секретов из [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) и механизм развёртывания с явной привязкой к версии (Git SHA или тег), контрольной проверкой после развёртывания и управляемым откатом. Замыкает цепочку инфраструктурных компонентов: среда ([`TASK_008`](task_008_inf_001.md)) → сеть ([`TASK_009`](task_009_inf_002.md)) → секреты
-([`TASK_010`](task_010_inf_003.md)) → хранилище ([`TASK_011`](task_011_inf_005.md)) → наблюдаемость ([`TASK_012`](task_012_inf_007.md)) → развёртывание (эта TASK).
+Выбранная площадка размещения, зафиксированная в [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), согласованная с ней стратегия runtime-секретов из [`ADR_009`](../../adr/adr_009_secret_management_strategy.md) и механизм развёртывания с явной привязкой к версии (Git SHA или тег), контрольной проверкой после развёртывания и управляемым откатом. Замыкает цепочку инфраструктурных компонентов: среда ([`TASK_008`](task_008_inf_001.md)) → сеть ([`TASK_009`](task_009_inf_002.md)) → секреты ([`TASK_010`](task_010_inf_003.md)) → хранилище ([`TASK_011`](task_011_inf_005.md)) → наблюдаемость ([`TASK_012`](task_012_inf_007.md)) → развёртывание (эта TASK).
 
 ## 3. Где мы сейчас
 
-[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются Hetzner и DigitalOcean (сценарий A) для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), Selectel оценивается отдельно как резервный сценарий B, и совместимая стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: окончательное решение по сценарию A будет принято после единой scorecard, проверки доступной
-владельцу оплаты и практического deployment победителя; сценарий B остаётся в бэклоге до завершения сценария A и создания резервной копии. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
+[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. В `ADR_007` рассматриваются Hetzner, DigitalOcean и OVHcloud как кандидаты сценария A, а Selectel — как резервный сценарий B. Для практической проверки владельца добавлен [`task_013_four_providers_ipad_windows_runbook.md`](../artefacts/task_013_four_providers_ipad_windows_runbook.md), который покрывает все четыре площадки с iPad и Windows и формирует сопоставимое redacted evidence. Текущий обязательный owner evidence остаётся: Hetzner, одна альтернатива сценария A (DigitalOcean или OVHcloud) и Selectel. Оба ADR остаются `proposed` до предусмотренной ими практической проверки и явного решения владельца.
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. На одной scorecard сравнить Hetzner и DigitalOcean (сценарий A), отдельно оценить Selectel (сценарий B), вместе с совместимыми способами хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
-2. После решения владельца зафиксировать выбранные варианты и обоснование в обоих ADR
-3. Дополнить `allowed_paths` фактическими путями реализации
-4. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
-5. Написать TEST с реальным evidence и проверить развёрнутый контур
+1. На одной scorecard сравнить Hetzner, DigitalOcean и OVHcloud (сценарий A), отдельно оценить Selectel (сценарий B), вместе с совместимыми способами хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+2. Поддерживать практический runbook четырёх провайдеров в актуальном состоянии и принимать redacted evidence владельца
+3. После решения владельца зафиксировать выбранные варианты и обоснование в обоих ADR
+4. Дополнить `allowed_paths` фактическими путями реализации
+5. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
+6. Написать TEST с реальным evidence и проверить развёрнутый контур
 
 ## 5. План выполнения
 
-- [ ] Сравнить Hetzner/DigitalOcean (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+- [ ] Сравнить Hetzner/DigitalOcean/OVHcloud (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+- [x] Подготовить подробный owner runbook для практической проверки четырёх провайдеров с iPad и Windows
+- [ ] Получить практическое redacted evidence владельца: Hetzner + одна альтернатива сценария A + Selectel
 - [ ] Получить решение владельца и обновить оба ADR
-- [ ] Дополнить allowed_paths реальными путями
+- [ ] Дополнить allowed_paths реальными путями реализации
 - [ ] Реализовать развёртывание, контрольную проверку и откат
 - [ ] Написать TEST, связанный с TASK и требованиями компонента
 - [ ] Проверить развёрнутый контур и покрытие путей
@@ -64,20 +66,25 @@ implements:
 
 **В начале работы агент** определит фактические файлы реализации (предположительно в каталоге `infrastructure/deploy/` или конфигурации существующего CI), добавит их в `allowed_paths` и создаст связанную карточку TEST.
 
-**Ожидаемые файлы:**
+**Текущий owner artefact:**
+- `work/artefacts/task_013_four_providers_ipad_windows_runbook.md` — подробная практическая инструкция Hetzner / DigitalOcean / OVHcloud / Selectel с iPad и Windows.
+
+**Ожидаемые файлы реализации:**
 - `infrastructure/deploy/` или расширение существующего CI workflow — механизм версионирования и развёртывания
 - `work/tests/test_00X.md` — описание проверок
 
 ## 7. Проверки и доказательства
 
 **Автоматические:**
-1. Все файлы в `allowed_paths` (CI проверяет)
-2. Развёртывание тестового окружения проходит с контрольной проверкой
+1. Все изменяемые файлы входят в `allowed_paths` (CI проверяет)
+2. Развёртывание тестового окружения проходит с контрольной проверкой после появления persistent deploy contract
 3. Существующий CI (Windows + Ubuntu) продолжает проходить
 
-**Ручные (code review):**
-1. Каждое развёртывание однозначно связано с версией кода (SHA/тег)
-2. Откат к предыдущей версии не требует ручного вмешательства в данные
+**Ручные:**
+1. Практическое provider evidence не содержит IP, токены, private keys, пароли или платёжные данные
+2. Каждое проверенное развёртывание однозначно связано с версией кода (SHA/тег)
+3. Текущий one-shot runtime не выдаётся за persistent service: неподдерживаемые restart/recreate/rollback получают `not_run_with_reason`
+4. После временной проверки платные VM и связанные ресурсы удалены либо их сохранение явно обосновано
 
 ## 8. Готово когда
 
@@ -85,7 +92,7 @@ implements:
 - ✅ Все шаги плана выполнены
 - ✅ Локальные проверки успешны
 - ✅ CI успешен
-- ✅ Код review завершен
+- ✅ Code review завершён
 
 ## 9. Что будет дальше
 
@@ -93,7 +100,7 @@ implements:
 
 ## 10. Что это даёт владельцу
 
-Функционал появится после завершения этой TASK.
+Подробный runbook позволяет выполнить практическую проверку площадок одинаковым способом с iPad и Windows и передать агенту безопасное сопоставимое evidence. Полный функционал deployment/recovery появится после завершения этой TASK.
 
 ## Незакрытые действия владельца
 
