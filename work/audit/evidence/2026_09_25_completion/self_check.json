@@ -1,0 +1,229 @@
+{
+  "prompt_version": "5.4",
+  "head_sha": "5713a82f440a318ee89a77cff825430b13adfdf2",
+  "minimum": {
+    "total": 23,
+    "done": 23,
+    "unmet": [],
+    "items": [
+      {
+        "section": "13.1",
+        "item": "каждый существенный вывод имеет evidence state",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "все runtime claims относятся к указанному SHA",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "generated-файлы не названы актуальными без generation и drift-check",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "отсутствие инструмента не превращено в ноль проблем",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "структурная трассировка не выдана за поведенческое доказательство",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "allowed_paths не выдан за реализацию",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "coverage сравнивается с фактической policy",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "gate-скрипты прочитаны и верифицированы до запуска",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "все запуски кода в изолированной среде, политика зафиксирована",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "локальные результаты не выданы за CI и наоборот",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "секреты: проверены дерево, история, gitignored",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "findings не основаны только на grep/имени/LOC",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "baseline-статус каждой находке; сверка с risk register",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "результаты предыдущих аудитов оценены по 4.4",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "severity согласована с impact и reachability",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "flaky не объявлен по одному падению",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "stop-условия 3.5 не проигнорированы",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "ограничения видны в Executive Summary",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "условные проверки выполнены или NOT_CHECKED с причиной",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "глубина относительно предыдущего аудита в manifest",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "readiness по разделу 10",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "рекомендации не представлены как выполненные",
+        "status": "done"
+      },
+      {
+        "section": "13.1",
+        "item": "findings в machine-readable формате, SHA-256 в manifest",
+        "status": "done"
+      }
+    ]
+  },
+  "extended": {
+    "total": 15,
+    "done": 12,
+    "skipped": [
+      "инвентарь непокрытого 7.5.2",
+      "file-role inventory каждого tracked-файла"
+    ],
+    "not_applicable": [
+      "персистентная память агента 7.4.1"
+    ],
+    "items": [
+      {
+        "section": "13.2",
+        "item": "mutation sweep по 4.5 сплошной",
+        "status": "done",
+        "note": "45 проверок, 43 caught / 2 UNDETECTED, дерево чисто"
+      },
+      {
+        "section": "13.2",
+        "item": "храповики 4.2.7",
+        "status": "done",
+        "note": "mypy baseline, vulture allowlist, coverage ratchet, gitleaksignore fingerprints — механизмы защиты от расширения проверены"
+      },
+      {
+        "section": "13.2",
+        "item": "матрица проверка x уровень контроля 6.1",
+        "status": "done",
+        "note": "80 проверок, уровни hook fast / hook full / CI; мутирующие шаги названы"
+      },
+      {
+        "section": "13.2",
+        "item": "нефальсифицируемые тесты пробой 7.5.1",
+        "status": "done",
+        "note": "через negative-path тесты и мутационный sweep gate"
+      },
+      {
+        "section": "13.2",
+        "item": "инвентарь непокрытого 7.5.2",
+        "status": "skipped",
+        "note": "модули с нулевым покрытием не классифицированы по одному — NOT_CHECKED"
+      },
+      {
+        "section": "13.2",
+        "item": "дублирование по способности разойтись 7.3",
+        "status": "done",
+        "note": "AUD-061, AUD-062"
+      },
+      {
+        "section": "13.2",
+        "item": "supply chain: lock vs manifest, лицензии",
+        "status": "done",
+        "note": "AUD-048; license_policy.md есть; vendored-кода нет"
+      },
+      {
+        "section": "13.2",
+        "item": "file-role inventory каждого tracked-файла",
+        "status": "skipped",
+        "note": "полный per-file inventory не воспроизводился; сплошное чтение каталогов субагентами + inventory предыдущего аудита — NOT_CHECKED как артефакт"
+      },
+      {
+        "section": "13.2",
+        "item": "requirements/TASK/harness как замкнутый путь 7.2.1",
+        "status": "done",
+        "note": "AUD-052..055, AUD-057"
+      },
+      {
+        "section": "13.2",
+        "item": "архитектура восстановлена 7.2.2",
+        "status": "done",
+        "note": "end-to-end flows, failure domains, заменяемость по ADR"
+      },
+      {
+        "section": "13.2",
+        "item": "observability и recovery",
+        "status": "done",
+        "note": "restore drill не выполнялся — зафиксировано ограничением"
+      },
+      {
+        "section": "13.2",
+        "item": "данные и приватность 7.4.2",
+        "status": "done",
+        "note": "карта данных из кода; retention user_input отнесён к m04 — риск отмечен; PII в fixtures не обнаружена выборочно"
+      },
+      {
+        "section": "13.2",
+        "item": "персистентная память агента 7.4.1",
+        "status": "not_applicable",
+        "note": "агентный цикл/память не реализованы на проверяемом SHA"
+      },
+      {
+        "section": "13.2",
+        "item": "подлинность каналов и webhook'ов",
+        "status": "done",
+        "note": "AUD-039 подтверждён; AUD-060 зафиксировал interim-характер TEST_020"
+      },
+      {
+        "section": "13.2",
+        "item": "модель угроз при внешних входах",
+        "status": "done",
+        "note": "существует; свежесть — AUD-067"
+      }
+    ]
+  }
+}

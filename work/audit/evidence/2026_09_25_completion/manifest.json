@@ -1,0 +1,83 @@
+{
+  "prompt": "operations/repository_audit_system_prompt.md@5.4",
+  "mode": "FULL_REPOSITORY",
+  "repository": "okromanov/personal_ai_platform",
+  "branch": "main",
+  "head_sha": "5713a82f440a318ee89a77cff825430b13adfdf2",
+  "audit_date_utc": "2026-09-25",
+  "scope": "Весь tracked-tree (342 файла) на точном SHA; семь столпов. Без исключений.",
+  "source_state": {
+    "local_directory": "C:/Users/okrom/AppData/Local/Temp/pap_audit_wt (git worktree, detached HEAD, удалён после аудита)",
+    "local_directory_is_full_checkout": true,
+    "complete_git_history_available_locally": true,
+    "ignored_files_check": "git status --ignored в основной копии: 0 игнорируемых файлов; секретов по именам нет",
+    "main_checkout_untouched": true,
+    "runtime_evidence": "Локальный full gate на worktree (FAIL по 5 механизмам Windows, AUD-047); серверный CI exact SHA: run 35919250552, все job success, включая gitleaks dir+git",
+    "previous_head_sha": "fa707b3fd6efa238a62f3bade91636e8458ad266"
+  },
+  "environment": {
+    "os": "Windows 11",
+    "arch": "x86_64",
+    "python": "3.14.7 (локально единственный; CI использует 3.12)",
+    "shell": "Git Bash",
+    "locale": "cp1251 console; PYTHONUTF8=1 обязателен",
+    "network": "только GitHub API (gh CLI); credentials не использовались",
+    "isolation": "отдельный worktree + отдельный venv с pinned-инструментами"
+  },
+  "commands": [
+    {
+      "command": "python operations/scripts/quality/run_suite.py full",
+      "exit": 1,
+      "log": "gate_full.log sha256:e75d8656c74e063b…",
+      "note": "fail-fast на diagram_render_lint (пиксельные пороги, шрифты Windows)"
+    },
+    {
+      "command": "остаток шагов gate вручную теми же командами",
+      "exit": "смешанный",
+      "log": "gate_remaining.log sha256:112ef55424f34abe…",
+      "note": "bandit/vulture/ruff check/mypy/coverage report/template registry/generated drift/health PASS; ruff format FAIL (CRLF, нет .gitattributes); unit tests FAIL (2 errors: жёсткие пути Git Bash); check_coverage FAIL (обратные слэши в ключах coverage.json)"
+    },
+    {
+      "command": "mutation sweep 45 проверок gate",
+      "exit": 0,
+      "artifact": "work/audit/evidence/2026_09_25_completion/gate_mutation_sweep.json",
+      "note": "43 caught, 2 UNDETECTED (AUD-049, AUD-050), дерево чисто после каждой мутации"
+    },
+    {
+      "command": "pip-audit",
+      "exit": 0,
+      "note": "No known vulnerabilities found"
+    },
+    {
+      "command": "gh run view 35919250552 (CI exact SHA)",
+      "exit": 0,
+      "note": "3 job success"
+    },
+    {
+      "command": "gitleaks",
+      "exit": "unavailable-locally",
+      "note": "опора на CI-лог того же SHA: dir+git scan чисто"
+    }
+  ],
+  "conditional_checks": {
+    "7.4.1_agent_memory": "not_applicable: агентный цикл/память не реализованы на проверяемом SHA",
+    "7.4.2_data": "applicable: выполнена",
+    "7.4.3_web_api": "applicable: выполнена по коду каналов",
+    "ui_accessibility": "not_applicable: нет UI",
+    "feature_flags": "not_applicable: нет feature flags"
+  },
+  "limitations": [
+    "gitleaks локально недоступен — UNAVAILABLE, опора на CI exact SHA",
+    "локальный Python 3.14 вместо CI 3.12",
+    "file-role inventory как артефакт не воспроизводился — NOT_CHECKED (13.2 skipped)",
+    "инвентарь непокрытого 7.5.2 не построен — NOT_CHECKED (13.2 skipped)",
+    "restore drill не выполнялся",
+    "NOT_CHECKED-выборка реестра: AUD-002,004,007-009,011,013,014,018,021,022,024,025,027-030,033,038,041-043"
+  ],
+  "depth_vs_previous_audit": {
+    "previous_baseline": "work/audit/audit_baseline_2026_09_23.md (без локального checkout, без mutation sweep, без ignored-scan)",
+    "verdict": "widened",
+    "changes": "полный изолированный checkout, реальный локальный gate, сплошной mutation sweep 45 проверок, ignored-file scan, сплошное чтение всех каталогов"
+  },
+  "artifacts": {}
+}

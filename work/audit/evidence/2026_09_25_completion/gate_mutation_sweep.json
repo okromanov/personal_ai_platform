@@ -1,0 +1,555 @@
+{
+  "schema_version": 1,
+  "head_sha": "5713a82f440a318ee89a77cff825430b13adfdf2",
+  "method": "AST-замена тела каждой проверки gate на возврат пустого результата; прогон run_unittests.py в чистом subprocess; verdict caught при новых падающих тестах сверх baseline (2 pre-existing Git Bash errors); git checkout после каждой мутации, дерево сверено.",
+  "baseline_exit": 1,
+  "baseline_failing": [
+    "Check",
+    "Expecting",
+    "bad",
+    "coverage",
+    "first",
+    "git_sha",
+    "second",
+    "test_dashboard_regeneration_only_bumps_an_unchanged_staged_version",
+    "test_dashboard_regeneration_propagates_generator_failure"
+  ],
+  "summary": {
+    "total": 45,
+    "caught": 43,
+    "undetected": [
+      "operations/scripts/documents/check.py::check_owner_interface",
+      "operations/scripts/tasks/check_change_scope.py::validate_document_metadata"
+    ]
+  },
+  "results": [
+    {
+      "target": "operations/scripts/documents/check.py::check_structure",
+      "exit": 1,
+      "new_failures": [
+        "test_project_status_is_the_only_owner_entrypoint"
+      ],
+      "outcome": "caught",
+      "seconds": 22.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_markdown_section_order",
+      "exit": 1,
+      "new_failures": [
+        "test_markdown_section_order_rejects_gap_and_ignores_examples"
+      ],
+      "outcome": "caught",
+      "seconds": 22.7,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_metadata",
+      "exit": 1,
+      "new_failures": [
+        "test_metadata_rejects_invalid_applicability_and_active_superseded_doc",
+        "test_metadata_rejects_status_and_duplicate_identifiers"
+      ],
+      "outcome": "caught",
+      "seconds": 23.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_frontmatter_standard",
+      "exit": 1,
+      "new_failures": [
+        "test_automated_test_without_evidence_is_reported",
+        "test_blank_evidence_counts_as_missing",
+        "test_empty_allowed_paths_is_reported",
+        "test_manual_test_without_evidence_is_reported",
+        "test_missing_owner_action_is_treated_as_none",
+        "test_missing_required_field_for_a_known_type_is_reported",
+        "test_owner_next_actor_cannot_have_owner_action_none",
+        "test_yaml_bare_none_is_recognised_as_no_owner_action"
+      ],
+      "outcome": "caught",
+      "seconds": 22.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_instruction_consistency",
+      "exit": 1,
+      "new_failures": [
+        "test_instruction_consistency_covers_inactive_playbook_and_registry_drift",
+        "test_instruction_consistency_rejects_known_drift_and_launchers",
+        "test_instruction_consistency_requires_branch_cleanup_after_merge"
+      ],
+      "outcome": "caught",
+      "seconds": 23.5,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_document_readability",
+      "exit": 1,
+      "new_failures": [
+        "test_readability_and_discoverability_only_apply_to_active_instructions"
+      ],
+      "outcome": "caught",
+      "seconds": 23.5,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_document_discoverability",
+      "exit": 1,
+      "new_failures": [
+        "test_readability_and_discoverability_only_apply_to_active_instructions"
+      ],
+      "outcome": "caught",
+      "seconds": 23.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_traceability",
+      "exit": 1,
+      "new_failures": [
+        "test_traceability_rejects_gaps_unknown_edges_and_incomplete_records"
+      ],
+      "outcome": "caught",
+      "seconds": 23.1,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_adr_decision_tasks",
+      "exit": 1,
+      "new_failures": [
+        "test_each_delegating_check_surfaces_the_validator_result"
+      ],
+      "outcome": "caught",
+      "seconds": 24.1,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_full_traceability",
+      "exit": 1,
+      "new_failures": [
+        "test_each_delegating_check_surfaces_the_validator_result"
+      ],
+      "outcome": "caught",
+      "seconds": 23.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_semantic_consistency",
+      "exit": 1,
+      "new_failures": [
+        "test_each_delegating_check_surfaces_the_validator_result"
+      ],
+      "outcome": "caught",
+      "seconds": 23.7,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_authority_graph",
+      "exit": 1,
+      "new_failures": [
+        "test_authority_graph_rejects_lower_layer_dependency_and_m01_scope"
+      ],
+      "outcome": "caught",
+      "seconds": 23.0,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_document_policy",
+      "exit": 1,
+      "new_failures": [
+        "test_document_and_requirement_policies_fail_closed"
+      ],
+      "outcome": "caught",
+      "seconds": 23.0,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_milestones",
+      "exit": 1,
+      "new_failures": [
+        "test_milestone_state_machine_rejects_multiple_active_and_skipped_completion"
+      ],
+      "outcome": "caught",
+      "seconds": 23.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_terminal_outcome_delivery_role",
+      "exit": 1,
+      "new_failures": [
+        "test_terminal_outcome_delivery_role_ignores_prerequisite_mentions",
+        "test_terminal_outcome_delivery_role_rejects_mismatched_queue_task"
+      ],
+      "outcome": "caught",
+      "seconds": 24.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_business_requirements_coverage",
+      "exit": 1,
+      "new_failures": [
+        "test_business_requirements_coverage_rejects_core_requirement_deferred_past_v1",
+        "test_business_requirements_coverage_rejects_missing_and_overlapping_br",
+        "test_business_requirements_coverage_rejects_non_core_inside_v1",
+        "test_document_and_requirement_policies_fail_closed"
+      ],
+      "outcome": "caught",
+      "seconds": 24.5,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_tasks",
+      "exit": 1,
+      "new_failures": [
+        "test_completed_task_rejects_unfilled_auto_generated_result_placeholder",
+        "test_completed_task_requires_real_owner_capability_section",
+        "test_task_policy_reports_conflicting_lifecycle_fields",
+        "test_task_section_contract_rejects_extra_and_reordered_h2"
+      ],
+      "outcome": "caught",
+      "seconds": 23.6,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_test_specs",
+      "exit": 1,
+      "new_failures": [
+        "test_check_test_specs_no_longer_swallows_a_real_bug",
+        "test_test_spec_policy_rejects_unsafe_and_unlinked_tests"
+      ],
+      "outcome": "caught",
+      "seconds": 23.3,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_quality_registry",
+      "exit": 1,
+      "new_failures": [
+        "test_quality_registry_delegates_with_the_milestone_ids",
+        "test_unresolvable_milestones_fail_quality_registry_closed"
+      ],
+      "outcome": "caught",
+      "seconds": 21.6,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_acceptance_model",
+      "exit": 1,
+      "new_failures": [
+        "test_acceptance_policy_covers_planned_warning_and_missing_links"
+      ],
+      "outcome": "caught",
+      "seconds": 22.3,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_acceptance_adr_transitions",
+      "exit": 1,
+      "new_failures": [
+        "test_acceptance_adr_transitions_rejects_unknown_adr_id",
+        "test_acceptance_adr_transitions_rejects_unmatched_claim"
+      ],
+      "outcome": "caught",
+      "seconds": 22.1,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_automation_policy",
+      "exit": 1,
+      "new_failures": [
+        "test_automation_policy_rejects_broadened_branch_cleanup",
+        "test_automation_policy_rejects_bypasses_and_mutating_workflows",
+        "test_automation_policy_rejects_non_read_workflow_permission",
+        "test_automation_policy_rejects_path_filtered_push_trigger",
+        "test_automation_policy_requires_push_trigger_on_main"
+      ],
+      "outcome": "caught",
+      "seconds": 21.4,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_audit_register_cards",
+      "exit": 1,
+      "new_failures": [
+        "test_archival_card_without_register_row_is_rejected",
+        "test_bare_register_id_is_rejected",
+        "test_card_link_in_evidence_is_rejected",
+        "test_compatibility_index_is_rejected",
+        "test_duplicate_archival_card_is_rejected",
+        "test_missing_archival_card_is_rejected",
+        "test_missing_observed_behavior_is_rejected",
+        "test_reordered_required_fields_are_rejected",
+        "test_unknown_field_name_is_rejected",
+        "test_wrong_register_id_target_is_rejected"
+      ],
+      "outcome": "caught",
+      "seconds": 22.1,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_architecture_diagrams",
+      "exit": 1,
+      "new_failures": [
+        "test_aggregates_lint_errors_and_warnings_across_targets"
+      ],
+      "outcome": "caught",
+      "seconds": 21.8,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_generated",
+      "exit": 1,
+      "new_failures": [
+        "test_content_that_does_not_match_the_generator_is_reported",
+        "test_missing_derived_file_is_reported",
+        "test_missing_generated_marker_is_reported",
+        "test_template_registry_errors_are_surfaced_by_this_check"
+      ],
+      "outcome": "caught",
+      "seconds": 22.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_owner_interface",
+      "exit": 1,
+      "new_failures": [],
+      "outcome": "UNDETECTED",
+      "seconds": 21.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_secrets",
+      "exit": 1,
+      "new_failures": [
+        "test_each_secret_pattern_is_detected_in_a_scanned_text_file",
+        "test_forbidden_file_names_are_reported_regardless_of_content",
+        "test_private_key_suffixes_are_reported_regardless_of_content"
+      ],
+      "outcome": "caught",
+      "seconds": 21.6,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_test_coverage_quality",
+      "exit": 1,
+      "new_failures": [
+        "test_each_delegating_check_surfaces_the_validator_result",
+        "test_raising_validator_becomes_an_error_result"
+      ],
+      "outcome": "caught",
+      "seconds": 22.1,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_owner_action_quality",
+      "exit": 1,
+      "new_failures": [
+        "test_each_delegating_check_surfaces_the_validator_result",
+        "test_raising_validator_becomes_an_error_result"
+      ],
+      "outcome": "caught",
+      "seconds": 21.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/check.py::check_allowed_paths_quality",
+      "exit": 1,
+      "new_failures": [
+        "test_each_delegating_check_surfaces_the_validator_result",
+        "test_raising_validator_becomes_an_error_result"
+      ],
+      "outcome": "caught",
+      "seconds": 22.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/links.py::check_markdown_links",
+      "exit": 1,
+      "new_failures": [
+        "test_filename_existence_is_case_sensitive_on_every_platform",
+        "test_fixes_backtick_wrapped_bare_mention",
+        "test_fixes_bare_mention_once_target_exists",
+        "test_fixes_clickable_document_reference",
+        "test_fixes_range_shorthand_dropped_prefix",
+        "test_fixes_range_shorthand_sharing_one_code_span",
+        "test_register_table_id_is_checked_and_auto_linked",
+        "test_rejects_bare_identifier_mention_in_prose",
+        "test_rejects_link_from_document_to_itself",
+        "test_rejects_nonexistent_markdown_reference_but_allows_template_placeholder",
+        "test_rejects_range_shorthand_sharing_one_code_span",
+        "test_rejects_range_shorthand_that_drops_second_endpoint_prefix",
+        "test_rejects_unlinked_existing_markdown_reference",
+        "test_rejects_unlinked_known_directory_reference"
+      ],
+      "outcome": "caught",
+      "seconds": 20.6,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/documents/template_contracts.py::validate_template_registry",
+      "exit": 1,
+      "new_failures": [
+        "test_registry_rejects_unprotected_or_bypassing_generator"
+      ],
+      "outcome": "caught",
+      "seconds": 21.7,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/run_suite.py::validate_json_files",
+      "exit": 1,
+      "new_failures": [
+        "test_configuration_and_permission_checks_fail_closed"
+      ],
+      "outcome": "caught",
+      "seconds": 22.0,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/run_suite.py::validate_toml_files",
+      "exit": 1,
+      "new_failures": [
+        "test_configuration_and_permission_checks_fail_closed"
+      ],
+      "outcome": "caught",
+      "seconds": 23.6,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/run_suite.py::validate_development_requirements",
+      "exit": 1,
+      "new_failures": [
+        "test_configuration_and_permission_checks_fail_closed",
+        "test_development_lock_rejects_missing_hash_and_stale_direct_pin"
+      ],
+      "outcome": "caught",
+      "seconds": 23.0,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/run_suite.py::validate_audit_baseline",
+      "exit": 1,
+      "new_failures": [
+        "test_audit_baseline_blocks_an_overdue_unresolved_review",
+        "test_audit_baseline_rejects_duplicate_and_unowned_open_findings",
+        "test_audit_baseline_rejects_resolved_while_critical_finding_open"
+      ],
+      "outcome": "caught",
+      "seconds": 22.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/tasks/check_change_scope.py::validate_change_scope",
+      "exit": 1,
+      "new_failures": [
+        "test_active_task_covers_only_declared_paths",
+        "test_authority_documents_never_require_task_coverage",
+        "test_completed_task_is_eligible_only_when_its_card_changes",
+        "test_m01_accept_m02_start_premature_reject_and_m02_accept"
+      ],
+      "outcome": "caught",
+      "seconds": 21.8,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/tasks/check_change_scope.py::validate_document_metadata",
+      "exit": 1,
+      "new_failures": [],
+      "outcome": "UNDETECTED",
+      "seconds": 21.8,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/tasks/check_change_scope.py::validate_audit_history",
+      "exit": 1,
+      "new_failures": [
+        "test_dated_audit_history_is_append_only"
+      ],
+      "outcome": "caught",
+      "seconds": 22.2,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/tasks/check_change_scope.py::validate_gate_machinery_isolation",
+      "exit": 1,
+      "new_failures": [
+        "test_machinery_mixed_with_product_delivery_is_rejected"
+      ],
+      "outcome": "caught",
+      "seconds": 21.8,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/tasks/check_change_scope.py::validate_coverage_policy_ratchet",
+      "exit": 1,
+      "new_failures": [
+        "test_diff_floor_cannot_decrease",
+        "test_fail_under_cannot_decrease",
+        "test_incomplete_policy_fails_closed",
+        "test_named_module_floor_cannot_decrease",
+        "test_non_numeric_floor_fails_closed",
+        "test_overall_floor_cannot_decrease",
+        "test_protected_module_cannot_be_removed"
+      ],
+      "outcome": "caught",
+      "seconds": 21.9,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/tasks/check_architecture_visualization.py::review_task_architecture_visualization",
+      "exit": 1,
+      "new_failures": [
+        "test_changed_visual_section_requires_real_svg_redraw",
+        "test_completed_task_without_architecture_change_needs_no_redraw",
+        "test_metadata_only_update_is_not_a_redraw"
+      ],
+      "outcome": "caught",
+      "seconds": 21.4,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/code_analyzer.py::analyze_file",
+      "exit": 1,
+      "new_failures": [
+        "test_async_stub_is_detected_the_same_as_a_sync_one",
+        "test_bare_not_implemented_exception_is_a_high_severity_stub",
+        "test_cli_fails_for_previously_missed_stub_forms",
+        "test_docstring_does_not_hide_not_implemented_stub",
+        "test_docstring_does_not_hide_pass_only_stub",
+        "test_empty_with_block_is_medium_not_high",
+        "test_not_implemented_function_is_a_high_severity_stub",
+        "test_pass_only_function_is_a_high_severity_stub",
+        "test_todo_in_a_docstring_is_reported_without_being_a_stub",
+        "test_unparseable_file_reports_an_error_instead_of_raising"
+      ],
+      "outcome": "caught",
+      "seconds": 21.5,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/run_mypy_baseline.py::main",
+      "exit": 1,
+      "new_failures": [
+        "test_blocks_error_count_increase",
+        "test_blocks_new_error_code_even_when_total_is_unchanged",
+        "test_blocks_tool_failure_without_countable_errors"
+      ],
+      "outcome": "caught",
+      "seconds": 21.8,
+      "tree_clean_after": true
+    },
+    {
+      "target": "operations/scripts/quality/check_coverage.py::evaluate_coverage",
+      "exit": 1,
+      "new_failures": [
+        "test_evaluate_fails_missing_schema_modules_and_uncovered_diff",
+        "test_evaluate_passes_aggregate_module_and_diff_thresholds",
+        "test_fails_when_a_critical_module_is_below_its_own_higher_floor",
+        "test_passes_when_overall_coverage_meets_the_configured_floor"
+      ],
+      "outcome": "caught",
+      "seconds": 21.5,
+      "tree_clean_after": true
+    }
+  ]
+}

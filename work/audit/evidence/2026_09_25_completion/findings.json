@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "audit_date_utc": "2026-09-25",
+  "repository": "okromanov/personal_ai_platform",
+  "head_sha": "5713a82f440a318ee89a77cff825430b13adfdf2",
+  "readiness": "NOT READY",
+  "findings": [
+    {
+      "id": "AUD-047",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/scripts/quality/run_suite.py; operations/scripts/documents/diagram_lint.py; operations/scripts/quality/check_coverage.py; operations/tests/test_quality_integration.py; .gitattributes (отсутствует); .git/hooks (отсутствуют)",
+      "summary": "Канонический локальный full gate непроходим на Windows-среде владельца: (1) run_suite.py падает с UnicodeEncodeError без PYTHONUTF8=1 (команда из AGENTS.md §3.7 не включает его); (2) diagram_render_lint даёт 10 пиксельных ошибок 10.4-10.9px из-за метрик шрифтов Windows; (3) ruff format считает 157/178 файлов неотформатированными из-за CRLF при core.autocrlf=true и отсутствии .gitattributes; (4) 2 теста test_quality_integration требуют Git Bash по жёстко прошитым путям C:\\Program Files\\Git; (5) check_coverage.py не находит критические модули в coverage.json из-за обратных слэшей в ключах. На том же SHA CI (ubuntu+windows) зелёный — расхождение сред делает локальное evidence недостижимым. Hooks pre-commit/pre-push на машине не установлены.",
+      "impact": "Канонический локальный full gate непроходим на Windows-среде владельца: (1) run_suite.py падает с UnicodeEncodeError без PYTHONUTF8=1 (команда из AGENTS.md §3.7 не включает его); (2) diagram_render_lint даёт 10 пиксельных ошибок 10.4-10.9px из-за метрик шрифтов Windows; (3) ruff format считает 157/178 файлов неотформатированными из-за CRLF при core.autocrlf=true и отсутствии .gitattributes; (4) 2 теста test_quality_integration требуют Git Bash по жёстко прошитым путям C:\\Program Files\\Git; (5) check_coverage.py не находит критические модули в coverage.json из-за обратных слэшей в ключах. На том же SHA CI (ubuntu+windows) зелёный — расхождение сред делает локальное evidence недостижимым. Hooks pre-commit/pre-push на машине не установлены.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Канонический локальный full gate непроходим на Windows-среде владельца: (1) run_suite.py падает с UnicodeEncodeError без PYTHONUTF8=1 (команда из AGENTS.md §3.7 не включает его); (2) diagram_render_lint даёт 10 пиксельных ошибок 10.4-10.9px из-за метрик шрифтов Windows; (3) ruff format считает 157/178 файлов неотформатированными из-за CRLF при core.autocrlf=true и отсутствии .gitattributes; (4) 2 теста test_quality_integration требуют Git Bash по жёстко прошитым путям C:\\Program Files\\Git; (5) check_coverage.py не находит критические модули в coverage.json из-за обратных слэшей в ключах. На том же SHA CI (ubuntu+windows) зелёный — расхождение сред делает локальное evidence недостижимым. Hooks pre-commit/pre-push на машине не установлены.",
+      "reproduction": "Канонический локальный full gate непроходим на Windows-среде владельца: (1) run_suite.py падает с UnicodeEncodeError без PYTHONUTF8=1 (команда из AGENTS.md §3.7 не включает его); (2) diagram_render_lint даёт 10 пиксельных ошибок 10.4-10.9px из-за метрик шрифтов Windows; (3) ruff format считает 157/178 файлов неотформатированными из-за CRLF при core.autocrlf=true и отсутствии .gitattributes; (4) 2 теста test_quality_integration требуют Git Bash по жёстко прошитым путям C:\\Program Files\\Git; (5) check_coverage.py не находит критические модули в coverage.json из-за обратных слэшей в ключах. На том же SHA CI (ubuntu+windows) зелёный — расхождение сред делает локальное evidence недостижимым. Hooks pre-commit/pre-push на машине не установлены.",
+      "remediation": "Добавить .gitattributes с нормализацией eol; нормализовать пути в check_coverage.py; искать Git Bash через shutil.which/реестр, а не по фиксированным путям; смягчить пиксельные пороги diagram_lint или рендерить эталон кроссплатформенно; задокументировать PYTHONUTF8=1 в AGENTS.md §3.7 либо выставлять его в run_suite.py; установить hooks.",
+      "verification": "python operations/scripts/quality/run_suite.py full зелёный на Windows без переменных-обходов.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/scripts/quality/run_suite.py; operations/scripts/documents/diagram_lint.py; operations/scripts/quality/check_coverage.py; operations/tests/test_quality_integration.py; .gitattributes (отсутствует); .git/hooks (отсутствуют)"
+      ]
+    },
+    {
+      "id": "AUD-048",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/quality/requirements_dev.txt",
+      "summary": "Lock не пинит транзитивный colorama (bandit, marker platform_system==Windows): pip install --require-hashes падает на чистой Windows-установке. CI Windows проходит только потому, что colorama 0.4.6 предустановлен в образе runner'а (лог job Windows validation, run 35504462050).",
+      "impact": "Lock не пинит транзитивный colorama (bandit, marker platform_system==Windows): pip install --require-hashes падает на чистой Windows-установке. CI Windows проходит только потому, что colorama 0.4.6 предустановлен в образе runner'а (лог job Windows validation, run 35504462050).",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Lock не пинит транзитивный colorama (bandit, marker platform_system==Windows): pip install --require-hashes падает на чистой Windows-установке. CI Windows проходит только потому, что colorama 0.4.6 предустановлен в образе runner'а (лог job Windows validation, run 35504462050).",
+      "reproduction": "Lock не пинит транзитивный colorama (bandit, marker platform_system==Windows): pip install --require-hashes падает на чистой Windows-установке. CI Windows проходит только потому, что colorama 0.4.6 предустановлен в образе runner'а (лог job Windows validation, run 35504462050).",
+      "remediation": "Перегенерировать lock на Windows или добавить colorama с хэшем явно.",
+      "verification": "pip install --require-hashes -r requirements_dev.txt в чистом venv на Windows завершается успешно.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/quality/requirements_dev.txt"
+      ]
+    },
+    {
+      "id": "AUD-049",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/scripts/documents/check.py::check_owner_interface",
+      "summary": "Мутационная проба (тело функции заменено на возврат пустого результата) не вызывает падения ни одного теста: проверка owner-interface может быть обезврежена незаметно.",
+      "impact": "Мутационная проба (тело функции заменено на возврат пустого результата) не вызывает падения ни одного теста: проверка owner-interface может быть обезврежена незаметно.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Мутационная проба (тело функции заменено на возврат пустого результата) не вызывает падения ни одного теста: проверка owner-interface может быть обезврежена незаметно.",
+      "reproduction": "Мутационная проба (тело функции заменено на возврат пустого результата) не вызывает падения ни одного теста: проверка owner-interface может быть обезврежена незаметно.",
+      "remediation": "Добавить negative-path тест, подающий документ с нарушением owner-interface и ожидающий отказ.",
+      "verification": "Повторная мутация check_owner_interface даёт caught.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/scripts/documents/check.py::check_owner_interface"
+      ]
+    },
+    {
+      "id": "AUD-050",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/scripts/tasks/check_change_scope.py::validate_document_metadata",
+      "summary": "Мутационная проба validate_document_metadata (контроль честности даты updated и версий при изменении документов) не вызывает падения ни одного теста.",
+      "impact": "Мутационная проба validate_document_metadata (контроль честности даты updated и версий при изменении документов) не вызывает падения ни одного теста.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Мутационная проба validate_document_metadata (контроль честности даты updated и версий при изменении документов) не вызывает падения ни одного теста.",
+      "reproduction": "Мутационная проба validate_document_metadata (контроль честности даты updated и версий при изменении документов) не вызывает падения ни одного теста.",
+      "remediation": "Добавить negative-path тест с поддельной датой/версией.",
+      "verification": "Повторная мутация даёт caught.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/scripts/tasks/check_change_scope.py::validate_document_metadata"
+      ]
+    },
+    {
+      "id": "AUD-051",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "src/owner_control/control.py:216-225",
+      "summary": "_process_is_alive использует os.kill(pid, 0); на Windows os.kill с ненулевым pid вызывает TerminateProcess — runbook восстановления sensitive-action lock убьёт живой процесс вместо проверки.",
+      "impact": "_process_is_alive использует os.kill(pid, 0); на Windows os.kill с ненулевым pid вызывает TerminateProcess — runbook восстановления sensitive-action lock убьёт живой процесс вместо проверки.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "_process_is_alive использует os.kill(pid, 0); на Windows os.kill с ненулевым pid вызывает TerminateProcess — runbook восстановления sensitive-action lock убьёт живой процесс вместо проверки.",
+      "reproduction": "_process_is_alive использует os.kill(pid, 0); на Windows os.kill с ненулевым pid вызывает TerminateProcess — runbook восстановления sensitive-action lock убьёт живой процесс вместо проверки.",
+      "remediation": "Платформенная проверка живости (OpenProcess на Windows / signal 0 на POSIX).",
+      "verification": "Unit-тест с живым процессом на Windows: процесс переживает проверку.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "src/owner_control/control.py:216-225"
+      ]
+    },
+    {
+      "id": "AUD-052",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "milestones.md:83,89,116",
+      "summary": "Результат m02 (подэтап 6) требует работающий VPN/обязательный сетевой путь, но SEC_CTL_010 и INF_REQ_004/005 отнесены к этапу m03 — зависимость результата m02 от контролей m03.",
+      "impact": "Результат m02 (подэтап 6) требует работающий VPN/обязательный сетевой путь, но SEC_CTL_010 и INF_REQ_004/005 отнесены к этапу m03 — зависимость результата m02 от контролей m03.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Результат m02 (подэтап 6) требует работающий VPN/обязательный сетевой путь, но SEC_CTL_010 и INF_REQ_004/005 отнесены к этапу m03 — зависимость результата m02 от контролей m03.",
+      "reproduction": "Результат m02 (подэтап 6) требует работающий VPN/обязательный сетевой путь, но SEC_CTL_010 и INF_REQ_004/005 отнесены к этапу m03 — зависимость результата m02 от контролей m03.",
+      "remediation": "Перенести соответствующие контроли в состав m02 либо переформулировать результат m02.",
+      "verification": "check_full_traceability и ручная сверка: каждый результат этапа покрыт контролями того же или более раннего этапа.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "milestones.md:83,89,116"
+      ]
+    },
+    {
+      "id": "AUD-053",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/procedures/file_update_dependencies.md:24,32,69; operations/acceptance.md",
+      "summary": "file_update_dependencies.md требует от владельца вручную менять work_state этапа — противоречит acceptance.md (только через apply.py) и AGENTS.md §5 («владелец не запускает внутренние скрипты»); строка 69 называет скрипт acceptance.py вместо apply.py.",
+      "impact": "file_update_dependencies.md требует от владельца вручную менять work_state этапа — противоречит acceptance.md (только через apply.py) и AGENTS.md §5 («владелец не запускает внутренние скрипты»); строка 69 называет скрипт acceptance.py вместо apply.py.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "file_update_dependencies.md требует от владельца вручную менять work_state этапа — противоречит acceptance.md (только через apply.py) и AGENTS.md §5 («владелец не запускает внутренние скрипты»); строка 69 называет скрипт acceptance.py вместо apply.py.",
+      "reproduction": "file_update_dependencies.md требует от владельца вручную менять work_state этапа — противоречит acceptance.md (только через apply.py) и AGENTS.md §5 («владелец не запускает внутренние скрипты»); строка 69 называет скрипт acceptance.py вместо apply.py.",
+      "remediation": "Привести процедуру к acceptance.md: переходы состояния только через apply.py, исправить имя скрипта.",
+      "verification": "Текст процедуры не содержит ручных переходов состояния; ссылка на apply.py корректна.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/procedures/file_update_dependencies.md:24,32,69; operations/acceptance.md"
+      ]
+    },
+    {
+      "id": "AUD-054",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/procedures/file_update_dependencies.md; operations/acceptance.md; work/acceptance/",
+      "summary": "Процедуры описывают автоматическое создание m0X_final_report при старте этапа, но автоматики нет: m02 in-progress, а work/acceptance/m02_final_report.md отсутствует. Шаг существует только в документации.",
+      "impact": "Процедуры описывают автоматическое создание m0X_final_report при старте этапа, но автоматики нет: m02 in-progress, а work/acceptance/m02_final_report.md отсутствует. Шаг существует только в документации.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Процедуры описывают автоматическое создание m0X_final_report при старте этапа, но автоматики нет: m02 in-progress, а work/acceptance/m02_final_report.md отсутствует. Шаг существует только в документации.",
+      "reproduction": "Процедуры описывают автоматическое создание m0X_final_report при старте этапа, но автоматики нет: m02 in-progress, а work/acceptance/m02_final_report.md отсутствует. Шаг существует только в документации.",
+      "remediation": "Либо реализовать создание final_report в apply.py, либо убрать утверждение об автоматике из процедур.",
+      "verification": "Старт этапа создаёт final_report, либо документация не обещает автоматику.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/procedures/file_update_dependencies.md; operations/acceptance.md; work/acceptance/"
+      ]
+    },
+    {
+      "id": "AUD-055",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "work/tasks/task_018_runtime_task_events.md; src/observability/task_events.py",
+      "summary": "TASK_018 имеет work_state=planned, но все шаги отмечены [x], а реализация (task_events.py) и тесты существуют — рассинхрон карточки и фактического состояния искажает покрытие путей и статус-дашборд.",
+      "impact": "TASK_018 имеет work_state=planned, но все шаги отмечены [x], а реализация (task_events.py) и тесты существуют — рассинхрон карточки и фактического состояния искажает покрытие путей и статус-дашборд.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "TASK_018 имеет work_state=planned, но все шаги отмечены [x], а реализация (task_events.py) и тесты существуют — рассинхрон карточки и фактического состояния искажает покрытие путей и статус-дашборд.",
+      "reproduction": "TASK_018 имеет work_state=planned, но все шаги отмечены [x], а реализация (task_events.py) и тесты существуют — рассинхрон карточки и фактического состояния искажает покрытие путей и статус-дашборд.",
+      "remediation": "Привести work_state TASK_018 к фактическому состоянию по процедуре завершения TASK.",
+      "verification": "Карточка отражает фактическое состояние; gate подтверждает.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "work/tasks/task_018_runtime_task_events.md; src/observability/task_events.py"
+      ]
+    },
+    {
+      "id": "AUD-056",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "adr/adr_009_secret_management_strategy.md:45",
+      "summary": "Текст говорит о «трёх реальных кандидатах ADR_007», в ADR_007 уже четыре кандидата (добавлен OVHcloud).",
+      "impact": "Текст говорит о «трёх реальных кандидатах ADR_007», в ADR_007 уже четыре кандидата (добавлен OVHcloud).",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Текст говорит о «трёх реальных кандидатах ADR_007», в ADR_007 уже четыре кандидата (добавлен OVHcloud).",
+      "reproduction": "Текст говорит о «трёх реальных кандидатах ADR_007», в ADR_007 уже четыре кандидата (добавлен OVHcloud).",
+      "remediation": "Обновить число/формулировку.",
+      "verification": "Число совпадает с ADR_007.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "adr/adr_009_secret_management_strategy.md:45"
+      ]
+    },
+    {
+      "id": "AUD-057",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "work/tasks/task_015_real_model_provider.md:14-16",
+      "summary": "TASK_015 имеет decides: ADR_005, но adr/adr_005 не входит в allowed_paths — при старте работы актуализировать ADR будет нельзя без правки карточки.",
+      "impact": "TASK_015 имеет decides: ADR_005, но adr/adr_005 не входит в allowed_paths — при старте работы актуализировать ADR будет нельзя без правки карточки.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "TASK_015 имеет decides: ADR_005, но adr/adr_005 не входит в allowed_paths — при старте работы актуализировать ADR будет нельзя без правки карточки.",
+      "reproduction": "TASK_015 имеет decides: ADR_005, но adr/adr_005 не входит в allowed_paths — при старте работы актуализировать ADR будет нельзя без правки карточки.",
+      "remediation": "Добавить ADR_005 в allowed_paths при старте TASK_015.",
+      "verification": "allowed_paths покрывает все файлы, которые TASK обязана изменить.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "work/tasks/task_015_real_model_provider.md:14-16"
+      ]
+    },
+    {
+      "id": "AUD-058",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/setup_precommit.md",
+      "summary": "Документ описывает «three top-level steps» при фактических пяти шагах hook'а, заявляет «0.5-1 second» без основания и даёт bash-команды без указания исполнителя на Windows.",
+      "impact": "Документ описывает «three top-level steps» при фактических пяти шагах hook'а, заявляет «0.5-1 second» без основания и даёт bash-команды без указания исполнителя на Windows.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Документ описывает «three top-level steps» при фактических пяти шагах hook'а, заявляет «0.5-1 second» без основания и даёт bash-команды без указания исполнителя на Windows.",
+      "reproduction": "Документ описывает «three top-level steps» при фактических пяти шагах hook'а, заявляет «0.5-1 second» без основания и даёт bash-команды без указания исполнителя на Windows.",
+      "remediation": "Сверить число шагов с pre_commit_hook.sh, убрать недостоверную оценку времени, указать Git Bash.",
+      "verification": "Описание совпадает с фактическим hook.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/setup_precommit.md"
+      ]
+    },
+    {
+      "id": "AUD-059",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/examples/sample_task_lifecycle.md",
+      "summary": "Мёртвые ссылки: на раздел procedure_map, которого нет, и на каталог work/evidence/, отсутствующий в репозитории.",
+      "impact": "Мёртвые ссылки: на раздел procedure_map, которого нет, и на каталог work/evidence/, отсутствующий в репозитории.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Мёртвые ссылки: на раздел procedure_map, которого нет, и на каталог work/evidence/, отсутствующий в репозитории.",
+      "reproduction": "Мёртвые ссылки: на раздел procedure_map, которого нет, и на каталог work/evidence/, отсутствующий в репозитории.",
+      "remediation": "Исправить или удалить ссылки.",
+      "verification": "links-проверка не находит мёртвых ссылок в файле.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/examples/sample_task_lifecycle.md"
+      ]
+    },
+    {
+      "id": "AUD-060",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/tests/test_security_extended.py:210-220; work/tests/test_020.md",
+      "summary": "TEST_020 проверяет наличие фраз в тексте карточки TASK_016 (assertIn по markdown) как «security-контракт» webhook-аутентификации — структурная, а не поведенческая гарантия (в карточке честно оговорено как interim до реализации TASK_016).",
+      "impact": "TEST_020 проверяет наличие фраз в тексте карточки TASK_016 (assertIn по markdown) как «security-контракт» webhook-аутентификации — структурная, а не поведенческая гарантия (в карточке честно оговорено как interim до реализации TASK_016).",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "TEST_020 проверяет наличие фраз в тексте карточки TASK_016 (assertIn по markdown) как «security-контракт» webhook-аутентификации — структурная, а не поведенческая гарантия (в карточке честно оговорено как interim до реализации TASK_016).",
+      "reproduction": "TEST_020 проверяет наличие фраз в тексте карточки TASK_016 (assertIn по markdown) как «security-контракт» webhook-аутентификации — структурная, а не поведенческая гарантия (в карточке честно оговорено как interim до реализации TASK_016).",
+      "remediation": "При реализации TASK_016 заменить проверкой поведения (spoofed-owner-id на живом ingress/polling).",
+      "verification": "Поведенческий тест отклоняет поддельный update.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/tests/test_security_extended.py:210-220; work/tests/test_020.md"
+      ]
+    },
+    {
+      "id": "AUD-061",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "specifications/threat_model.md:234; specifications/system_specification.md:574",
+      "summary": "Факт о защите ветки main (SEC_CTL_018) продублирован в двух authority-документах — может разойтись.",
+      "impact": "Факт о защите ветки main (SEC_CTL_018) продублирован в двух authority-документах — может разойтись.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Факт о защите ветки main (SEC_CTL_018) продублирован в двух authority-документах — может разойтись.",
+      "reproduction": "Факт о защите ветки main (SEC_CTL_018) продублирован в двух authority-документах — может разойтись.",
+      "remediation": "Оставить факт в одном документе, из второго ссылаться.",
+      "verification": "Единственное каноническое место для SEC_CTL_018.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "specifications/threat_model.md:234; specifications/system_specification.md:574"
+      ]
+    },
+    {
+      "id": "AUD-062",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "src/task_state/",
+      "summary": "has_executed/mark_executed нигде не вызываются: реальная защита от дубликатов — OwnerControlGate; параллельный мёртвый механизм вводит в заблуждение.",
+      "impact": "has_executed/mark_executed нигде не вызываются: реальная защита от дубликатов — OwnerControlGate; параллельный мёртвый механизм вводит в заблуждение.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "has_executed/mark_executed нигде не вызываются: реальная защита от дубликатов — OwnerControlGate; параллельный мёртвый механизм вводит в заблуждение.",
+      "reproduction": "has_executed/mark_executed нигде не вызываются: реальная защита от дубликатов — OwnerControlGate; параллельный мёртвый механизм вводит в заблуждение.",
+      "remediation": "Удалить мёртвый API либо задокументировать его роль.",
+      "verification": "Vulture/поиск вызовов подтверждает отсутствие мёртвого кода.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "src/task_state/"
+      ]
+    },
+    {
+      "id": "AUD-063",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "src/operations/health.py:77",
+      "summary": "health JSON кладёт str(exc) в detail — раскрывает внутренние сообщения исключений наружу.",
+      "impact": "health JSON кладёт str(exc) в detail — раскрывает внутренние сообщения исключений наружу.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "health JSON кладёт str(exc) в detail — раскрывает внутренние сообщения исключений наружу.",
+      "reproduction": "health JSON кладёт str(exc) в detail — раскрывает внутренние сообщения исключений наружу.",
+      "remediation": "Возвращать класс ошибки без текста исключения.",
+      "verification": "Тест: detail не содержит str(exc).",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "src/operations/health.py:77"
+      ]
+    },
+    {
+      "id": "AUD-064",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "operations/local_development_windows.md:31; operations/lifecycle/adr_lifecycle.md §9; work/tasks/task_001,task_002,task_005,task_012; work/tests/test_007.md",
+      "summary": "Устаревшие статусные упоминания: local_development_windows.md считает m01 незавершённым (он completed), adr_lifecycle §9 частично устарел, счётчики тестов в TASK_001/002/005/012 не совпадают с фактическими, TEST_007 имеет нестандартный H1.",
+      "impact": "Устаревшие статусные упоминания: local_development_windows.md считает m01 незавершённым (он completed), adr_lifecycle §9 частично устарел, счётчики тестов в TASK_001/002/005/012 не совпадают с фактическими, TEST_007 имеет нестандартный H1.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Устаревшие статусные упоминания: local_development_windows.md считает m01 незавершённым (он completed), adr_lifecycle §9 частично устарел, счётчики тестов в TASK_001/002/005/012 не совпадают с фактическими, TEST_007 имеет нестандартный H1.",
+      "reproduction": "Устаревшие статусные упоминания: local_development_windows.md считает m01 незавершённым (он completed), adr_lifecycle §9 частично устарел, счётчики тестов в TASK_001/002/005/012 не совпадают с фактическими, TEST_007 имеет нестандартный H1.",
+      "remediation": "Обновить статусные упоминания и счётчики; привести TEST_007 к шаблону.",
+      "verification": "Упоминания совпадают с project_status.md и фактическим числом тестов.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "operations/local_development_windows.md:31; operations/lifecycle/adr_lifecycle.md §9; work/tasks/task_001,task_002,task_005,task_012; work/tests/test_007.md"
+      ]
+    },
+    {
+      "id": "AUD-065",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "specifications/system_specification.md (SEC_CTL_018, SYS_036); specifications/business_requirements.md (BR_025, BR_029)",
+      "summary": "SEC_CTL_018 и SYS_036 не назначены ни одному этапу; BR_025 и BR_029 не имеют traces_to — дыры планирования трассируемости.",
+      "impact": "SEC_CTL_018 и SYS_036 не назначены ни одному этапу; BR_025 и BR_029 не имеют traces_to — дыры планирования трассируемости.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "SEC_CTL_018 и SYS_036 не назначены ни одному этапу; BR_025 и BR_029 не имеют traces_to — дыры планирования трассируемости.",
+      "reproduction": "SEC_CTL_018 и SYS_036 не назначены ни одному этапу; BR_025 и BR_029 не имеют traces_to — дыры планирования трассируемости.",
+      "remediation": "Назначить этап либо явно зафиксировать отложенность; добавить traces_to.",
+      "verification": "check_full_traceability покрывает все ID.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "specifications/system_specification.md (SEC_CTL_018, SYS_036); specifications/business_requirements.md (BR_025, BR_029)"
+      ]
+    },
+    {
+      "id": "AUD-066",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "src/observability/; src/operations/; src/task_state/",
+      "summary": "Циклический импорт observability -> operations -> task_state держится на порядке импортов; хрупко при рефакторинге.",
+      "impact": "Циклический импорт observability -> operations -> task_state держится на порядке импортов; хрупко при рефакторинге.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Циклический импорт observability -> operations -> task_state держится на порядке импортов; хрупко при рефакторинге.",
+      "reproduction": "Циклический импорт observability -> operations -> task_state держится на порядке импортов; хрупко при рефакторинге.",
+      "remediation": "Разорвать цикл (перенести общий контракт в отдельный модуль).",
+      "verification": "Граф импортов ацикличен.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "src/observability/; src/operations/; src/task_state/"
+      ]
+    },
+    {
+      "id": "AUD-067",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "evidence_state": "CONFIRMED",
+      "baseline": "PRE_EXISTING_FIRST_SEEN",
+      "risk_register_match": "No matching AUD-001..AUD-046; distinct root cause.",
+      "location": "specifications/threat_model.md; operations/policy/threat_review_triggers.md",
+      "summary": "Модель угроз датирована 2026-08-24 и старше всех спецификаций; триггеры пересмотра существуют в отдельном policy, но по факту изменения спецификаций (TASK_018 events, owner control) не привели к обновлению модели.",
+      "impact": "Модель угроз датирована 2026-08-24 и старше всех спецификаций; триггеры пересмотра существуют в отдельном policy, но по факту изменения спецификаций (TASK_018 events, owner control) не привели к обновлению модели.",
+      "reachability": "Воспроизведено на изолированном checkout точного SHA 5713a82f440a318ee89a77cff825430b13adfdf2 либо подтверждено чтением закоммиченного содержимого этого SHA.",
+      "expected": "См. remediation.",
+      "actual": "Модель угроз датирована 2026-08-24 и старше всех спецификаций; триггеры пересмотра существуют в отдельном policy, но по факту изменения спецификаций (TASK_018 events, owner control) не привели к обновлению модели.",
+      "reproduction": "Модель угроз датирована 2026-08-24 и старше всех спецификаций; триггеры пересмотра существуют в отдельном policy, но по факту изменения спецификаций (TASK_018 events, owner control) не привели к обновлению модели.",
+      "remediation": "Пересмотреть threat_model по threat_review_triggers и обновить дату.",
+      "verification": "threat_model updated не старше последнего изменения спецификаций, затрагивающих угрозы.",
+      "evidence": [
+        "work/audit/evidence/2026_09_25_completion/manifest.json",
+        "specifications/threat_model.md; operations/policy/threat_review_triggers.md"
+      ]
+    }
+  ]
+}
