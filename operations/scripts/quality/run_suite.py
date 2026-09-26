@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import os
 import re
@@ -9,6 +10,7 @@ import sys
 import tomllib
 from datetime import date
 from pathlib import Path
+from typing import cast
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -526,6 +528,15 @@ def run_full(
 
 
 def main() -> int:
+    # Windows consoles default to a legacy code page unless the interpreter is
+    # started with PYTHONUTF8=1. Reconfigure the current stdout/stderr so the
+    # suite itself can print non-ASCII tool output, and set the environment
+    # variable so every child Python process (ruff, coverage, mypy, etc.)
+    # also treats stdin/stdout/stderr as UTF-8.
+    cast("io.TextIOWrapper", sys.stdout).reconfigure(encoding="utf-8", errors="replace")
+    cast("io.TextIOWrapper", sys.stderr).reconfigure(encoding="utf-8", errors="replace")
+    os.environ["PYTHONUTF8"] = "1"
+
     parser = argparse.ArgumentParser(description="Canonical repository quality suite")
     parser.add_argument("profile", choices=("fast", "full"))
     parser.add_argument("--coverage-base", help="Git revision used for changed-line coverage")

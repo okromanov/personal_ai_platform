@@ -2,80 +2,89 @@
 id: setup_precommit
 type: guide
 document_state: current
-version: 1.5
-updated: 2026-09-04
+applicability: normative
+version: 1.6
+updated: 2026-09-26
 depends_on:
   - operations_change_process
   - coding_agent_instruction
 ---
 
-# Pre-commit Hook Setup
+# Git Hook Setup
 
 ## Overview
 
-The repository includes one canonical pre-commit hook in `operations/hooks/pre_commit_hook.sh`.
+The repository includes two canonical Git hooks in `operations/hooks/`:
+
+- `pre_commit_hook.sh` — runs the `fast` quality profile before each commit.
+- `pre_push_hook.sh` — runs the `full` quality profile before each push.
+
+Both hooks are bash scripts. On Windows execute them with **Git Bash** (shipped
+with [Git for Windows](https://git-scm.com/download/win)), not with the WSL
+launcher stub `C:\Windows\System32\bash.exe`.
 
 ## Installation
 
 ### Automatic Installation
 
-Run the following command in the repository root:
+Run the following commands in the repository root with Git Bash:
 
 ```bash
 cp operations/hooks/pre_commit_hook.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+cp operations/hooks/pre_push_hook.sh .git/hooks/pre-push && chmod +x .git/hooks/pre-push
 ```
 
 ### Manual Verification
 
-Verify the hook is installed:
+Verify the hooks are installed and executable:
 
 ```bash
-ls -la .git/hooks/pre-commit
+ls -la .git/hooks/pre-commit .git/hooks/pre-push
 ```
 
-You should see an executable file.
+## What the Pre-commit Hook Checks
 
-## What the Hook Checks
+The pre-commit hook runs five top-level steps:
 
-The pre-commit hook runs three top-level steps. Its canonical `fast` runner performs the detailed technical checks.
+1. **Auto-fix cross-references** — links cross-references in staged Markdown
+   files and re-stages them.
+2. **Authority document version bumps** — validates that authority documents
+   with semantic changes bump their versions. Authority documents include:
+   - [project_rules.md](../project_rules.md)
+   - [AGENTS.md](../AGENTS.md)
+   - [operations/change_process.md](../operations/change_process.md)
+   - [specifications/business_requirements.md](../specifications/business_requirements.md)
+   - [specifications/threat_model.md](../specifications/threat_model.md)
+   - [specifications/system_specification.md](../specifications/system_specification.md)
+   - [specifications/architecture_baseline.md](../specifications/architecture_baseline.md)
+   - [specifications/infrastructure_baseline.md](../specifications/infrastructure_baseline.md)
+3. **Development tools** — fails when pinned development tools are not
+   installed.
+4. **Canonical fast quality suite** — Python syntax and JSON validity, fast
+   documentation/governance checks, Ruff lint, all unit tests, deterministic
+   generation and drift, executable-bit rejection for Python source files.
+5. **Dashboard regeneration** — runs after the suite passes
+   (`operations/hooks/pre_commit_regenerate_dashboards.sh`) and fails closed.
+   Validates [`operations/template_registry.json`](template_registry.json)
+   before regeneration. Triggers on any staged Markdown file, bumps only
+   documents whose staged version still equals the version in `HEAD`, then
+   regenerates [`project_status.md`](../project_status.md) from its registered
+   template and re-stages it if changed. TASK cards, acceptance reports, audit
+   history and runtime reports are created only by their separate explicit
+   commands; the dashboard hook has no such side effects.
 
-### 1. Authority Document Version Bumps
-- Validates that authority documents with semantic changes bump their versions
-- Authority documents include:
-  - [project_rules.md](../project_rules.md)
-  - [AGENTS.md](../AGENTS.md)
-  - [operations/change_process.md](../operations/change_process.md)
-  - [specifications/business_requirements.md](../specifications/business_requirements.md)
-  - [specifications/threat_model.md](../specifications/threat_model.md)
-  - [specifications/system_specification.md](../specifications/system_specification.md)
-  - [specifications/architecture_baseline.md](../specifications/architecture_baseline.md)
-  - [specifications/infrastructure_baseline.md](../specifications/infrastructure_baseline.md)
+The server `full` profile (run by the pre-push hook and CI) adds formatting,
+mypy, aggregate/per-module/diff coverage and security tooling.
 
-### 2. Development Tools
+## What the Pre-push Hook Checks
 
-- Fails when pinned development tools are not installed.
-
-### 3. Canonical Fast Suite
-
-- Python syntax and JSON validity;
-- fast documentation/governance checks;
-- Ruff lint;
-- all unit tests;
-- deterministic generation and drift;
-- executable-bit rejection for Python source files.
-
-The server `full` profile adds formatting, mypy, aggregate/per-module/diff coverage and security tooling.
-
-### 4. Dashboard Regeneration
-
-- Runs after the suite passes (`operations/hooks/pre_commit_regenerate_dashboards.sh`) and fails closed.
-- Validates [`operations/template_registry.json`](template_registry.json) before regeneration.
-- Triggers on any staged Markdown file. It bumps only documents whose staged version still equals the version in `HEAD`, then regenerates [`project_status.md`](../project_status.md) from its registered template and re-stages it if changed.
-- TASK cards, acceptance reports, audit history and runtime reports are created only by their separate explicit commands; the dashboard hook has no such side effects.
+The pre-push hook runs the canonical `full` quality profile. It is an optional
+local safety net; the mandatory checks remain pre-commit, the full local gate,
+and the server-side Project check.
 
 ## Python Version Requirements
 
-The hook requires Python 3.12 or newer and will automatically detect:
+The hooks require Python 3.12 or newer and will automatically detect:
 
 1. Python 3.14, 3.13, or 3.12 (in that order)
 2. Generic `python3` command, but only when it resolves to Python 3.12+
@@ -128,7 +137,8 @@ To skip the hook for a specific commit:
 git commit --no-verify
 ```
 
-**Warning:** This should only be used for emergency fixes. The hook validates important constraints.
+**Warning:** This should only be used for emergency fixes. The hook validates
+important constraints.
 
 ## Development Workflow
 
@@ -140,11 +150,3 @@ git commit --no-verify
    - Stage the corrected files
    - Commit again
 5. Push to the repository
-
-## Hook Performance
-
-- Typical execution time: 0.5-1 second
-- Fast documentation check: < 0.5 seconds
-- Full documentation check: < 1.2 seconds
-
-The pre-commit hook uses the fast documentation check mode to keep commit operations responsive.

@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -14,21 +15,56 @@ ROOT = Path(__file__).resolve().parents[2]
 def _bash_executable() -> str:
     """Resolve the real Git-for-Windows bash, not the plain "bash" name.
 
-    On GitHub's windows-latest runners, bare "bash" on PATH resolves to
-    Windows' own WSL launcher stub (C:\\Windows\\System32\\bash.exe), which
-    ships even when no WSL distribution is installed and just prints an
-    error and exits -- it is not Git Bash. Git for Windows is installed at
-    a fixed, documented location on these runners; every other platform
-    just uses "bash" from PATH as before.
+    On Windows a bare ``bash`` on PATH may resolve to the WSL launcher stub
+    (``C:\\Windows\\System32\\bash.exe``), which prints an error and exits
+    when no WSL distribution is installed. This function prefers Git Bash,
+    looks it up from the Git for Windows install location, and only falls
+    back to ``bash`` on POSIX or when Git Bash cannot be located.
     """
     if os.name != "nt":
         return "bash"
+
+    # 1. Respect an explicit install-root hint from the environment.
+    git_root = os.environ.get("GIT_INSTALL_ROOT", "")
+    if git_root:
+        candidate = Path(git_root) / "bin" / "bash.exe"
+        if candidate.is_file():
+            return str(candidate)
+
+    # 2. Query the Git for Windows install path from the registry, if available.
+    try:
+        import winreg
+
+        with winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SOFTWARE\GitForWindows",
+            0,
+            winreg.KEY_READ | winreg.KEY_WOW64_64KEY,
+        ) as key:
+            install_path, _ = winreg.QueryValueEx(key, "InstallPath")
+            candidate = Path(install_path) / "bin" / "bash.exe"
+            if candidate.is_file():
+                return str(candidate)
+    except (OSError, ImportError):
+        pass
+
+    # 3. Check standard per-user and machine-wide install locations.
     for candidate in (
-        r"C:\Program Files\Git\bin\bash.exe",
-        r"C:\Program Files\Git\usr\bin\bash.exe",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Git" / "bin" / "bash.exe",
+        Path(os.environ.get("PROGRAMFILES", "")) / "Git" / "bin" / "bash.exe",
+        Path(os.environ.get("PROGRAMFILES(X86)", "")) / "Git" / "bin" / "bash.exe",
+        Path(r"C:\Program Files\Git\bin\bash.exe"),
+        Path(r"C:\Program Files\Git\usr\bin\bash.exe"),
+        Path(r"C:\Program Files (x86)\Git\bin\bash.exe"),
     ):
-        if Path(candidate).is_file():
-            return candidate
+        if candidate.is_file():
+            return str(candidate)
+
+    # 4. Fall back to PATH, but reject the known WSL stub.
+    found = shutil.which("bash")
+    if found and "System32\\bash.exe" not in found:
+        return found
+
     raise RuntimeError("Git Bash not found at any expected Windows install location")
 
 

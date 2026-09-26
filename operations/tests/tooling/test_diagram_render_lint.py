@@ -432,7 +432,12 @@ class FindPaddingViolationsTests(unittest.TestCase):
 
         errors = render_lint.find_padding_violations([plaque, drifted], _PADDING_PROFILES)
 
-        self.assertTrue(any("ожидается 12.0±1.0px" in error for error in errors))
+        self.assertTrue(
+            any(
+                f"ожидается 12.0±{render_lint._PADDING_TOLERANCE_PX:.1f}px" in error
+                for error in errors
+            )
+        )
         self.assertEqual(
             render_lint.find_padding_violations([plaque, natural], _PADDING_PROFILES), []
         )

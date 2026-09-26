@@ -6,6 +6,7 @@ mypy==2.3.1
 pip-audit==2.10.1
 ruff==0.16.3
 bandit==1.7.5
+colorama==0.4.6
 pbr==7.0.3
 vulture==2.11
 pytest-benchmark==4.0.0
