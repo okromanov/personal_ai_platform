@@ -420,6 +420,25 @@ class LinksInternalHelpersTests(unittest.TestCase):
             changed = _fix_clickable_document_references(root, errors, None)
             self.assertEqual(changed, set())
 
+    def test_fix_clickable_document_references_skips_already_linked_span(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "target.md").write_text("# Target\n", encoding="utf-8")
+            path = root / "source.md"
+            path.write_text(
+                "[`target.md`](target.md) and `target.md`.\n",
+                encoding="utf-8",
+            )
+            errors = check_markdown_links(root)
+            self.assertEqual(len(errors), 1)
+            changed = _fix_clickable_document_references(root, errors, None)
+            self.assertEqual(changed, {"source.md"})
+            text = path.read_text(encoding="utf-8")
+            self.assertEqual(
+                text,
+                "[`target.md`](target.md) and [`target.md`](target.md).\n",
+            )
+
 
 class AuditRegisterLinkTests(unittest.TestCase):
     def test_register_table_id_is_checked_and_auto_linked(self) -> None:

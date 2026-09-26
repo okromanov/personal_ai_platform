@@ -814,7 +814,19 @@ def _fix_clickable_document_references(
                 rel = Path(os.path.relpath(resolved, path.parent)).as_posix()
                 href = f"{rel}#{anchor}" if anchor else rel
                 target = f"`{reference}`"
-                found = line.find(target)
+                search_start = 0
+                found = -1
+                while True:
+                    pos = line.find(target, search_start)
+                    if pos == -1:
+                        break
+                    before = line[:pos]
+                    after = line[pos + len(target) :]
+                    if before.endswith("[") and after.startswith("]("):
+                        search_start = pos + len(target)
+                        continue
+                    found = pos
+                    break
                 if found == -1:
                     continue
                 replacement = f"[`{reference}`]({href})"
