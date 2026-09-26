@@ -90,9 +90,15 @@ from operations.scripts.documents.diagram_lint import (
 
 _ANCHOR_TOLERANCE_PX = 3.0
 _CONTAINMENT_TOLERANCE_PX = 0.5  # sub-pixel rounding slack for "fully inside"
-_PADDING_TOLERANCE_PX = 1.0
+# Font metrics (side bearings, fallback font selection) differ between
+# platforms. Windows builds of Chromium often report ink boxes that are
+# ~1-2 px tighter than Linux/macOS for the same glyph string, so the
+# padding and transition symmetry checks need a slightly larger slack on
+# Windows to keep the same source SVG reproducibly green across developer
+# environments.
+_PADDING_TOLERANCE_PX = 2.5 if sys.platform == "win32" else 1.0
 _PADDING_SYMMETRY_TOLERANCE_PX = 1.5
-_TRANSITION_SYMMETRY_TOLERANCE_PX = 0.5
+_TRANSITION_SYMMETRY_TOLERANCE_PX = 0.75 if sys.platform == "win32" else 0.5
 _FLOW_LABEL_CLASSES = {
     "flow-label",
     "flow-label-blue",

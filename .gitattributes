@@ -1,0 +1,33 @@
+* text=auto
+
+# Source code and project files: enforce LF so Windows core.autocrlf
+# does not turn them into CRLF and break ruff format / hash checks.
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.svg text eol=lf
+
+# Lock/requirements files must stay LF for exact hash reproducibility.
+*.txt text eol=lf
+*.in text eol=lf
+
+# Windows-only scripts may keep CRLF when checked out on Windows.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files must never be touched by line-ending normalization.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.pdf binary

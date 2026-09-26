@@ -83,6 +83,13 @@ def evaluate_coverage(
     ):
         return ["Coverage JSON не содержит totals/files"], rows
 
+    # Coverage.py writes file keys using native path separators; on Windows
+    # that is backslash, while the policy and git diff use POSIX paths. Build a
+    # normalized lookup table once so every lookup is platform-independent.
+    normalized_files = {
+        str(Path(key).as_posix()): value for key, value in files.items() if isinstance(value, dict)
+    }
+
     overall = float(cast(float | int | str, totals.get("percent_covered", 0)))
     overall_floor = float(cast(float | int | str, policy.get("overall", 75)))
     rows.append(f"overall: {overall:.2f}% (minimum {overall_floor:.2f}%)")
@@ -94,8 +101,9 @@ def evaluate_coverage(
         errors.append("Coverage policy modules должна быть TOML table")
         modules = {}
     for path, raw_floor in sorted(modules.items()):
-        file_data = files.get(str(path))
-        if not isinstance(file_data, dict) or not isinstance(file_data.get("summary"), dict):
+        posix_path = str(Path(str(path)).as_posix())
+        file_data = normalized_files.get(posix_path)
+        if file_data is None or not isinstance(file_data.get("summary"), dict):
             errors.append(f"Критический модуль отсутствует в coverage JSON: {path}")
             continue
         actual = float(cast(float | int | str, file_data["summary"].get("percent_covered", 0)))
@@ -108,8 +116,9 @@ def evaluate_coverage(
         executable = 0
         covered = 0
         for path, lines in additions.items():
-            file_data = files.get(path)
-            if not isinstance(file_data, dict):
+            posix_path = str(Path(path).as_posix())
+            file_data = normalized_files.get(posix_path)
+            if file_data is None:
                 if lines:
                     errors.append(f"Изменённый Python-модуль отсутствует в coverage JSON: {path}")
                 continue
