@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,21 +33,22 @@ def _bash_executable() -> str:
             return str(candidate)
 
     # 2. Query the Git for Windows install path from the registry, if available.
-    try:
-        import winreg
+    if sys.platform == "win32":
+        try:
+            import winreg
 
-        with winreg.OpenKey(
-            winreg.HKEY_LOCAL_MACHINE,
-            r"SOFTWARE\GitForWindows",
-            0,
-            winreg.KEY_READ | winreg.KEY_WOW64_64KEY,
-        ) as key:
-            install_path, _ = winreg.QueryValueEx(key, "InstallPath")
-            candidate = Path(install_path) / "bin" / "bash.exe"
-            if candidate.is_file():
-                return str(candidate)
-    except (OSError, ImportError):
-        pass
+            with winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"SOFTWARE\GitForWindows",
+                0,
+                winreg.KEY_READ | winreg.KEY_WOW64_64KEY,
+            ) as key:
+                install_path, _ = winreg.QueryValueEx(key, "InstallPath")
+                candidate = Path(install_path) / "bin" / "bash.exe"
+                if candidate.is_file():
+                    return str(candidate)
+        except (OSError, ImportError):
+            pass
 
     # 3. Check standard per-user and machine-wide install locations.
     for candidate in (
