@@ -3,8 +3,8 @@ id: operations_procedure_map
 type: operations
 document_state: current
 applicability: normative
-version: 2.7
-updated: 2026-09-09
+version: 2.8
+updated: 2026-09-28
 depends_on:
   - operations_change_process
   - coding_agent_instruction
@@ -37,7 +37,7 @@ depends_on:
 | Полный quality gate | [`readme.md`](quality/playbooks/readme.md) | Выбран канонический профиль и evidence |
 | Детальные правила документации | [`documentation_rules_detailed.md`](quality/playbooks/documentation_rules_detailed.md) | Однозначная структура и ссылки |
 | Диагностика health report | [`module_guide.md`](scripts/health_check/module_guide.md) | Воспроизводимый health snapshot |
-| Полный аудит репозитория | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) | Report, findings и self-check |
+| Полный аудит репозитория | [`repository_audit_system_prompt.md`](repository_audit_system_prompt.md) | Засвидетельствованная среда, затем полный report, findings и self-check; частичный результат не публикуется |
 | Архитектурная SVG-схема | [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md) → [`architecture_diagram_style_guide.md`](architecture/architecture_diagram_style_guide.md) | Проверенная схема |
 | Процессная SVG/PPTX-схема | [`diagram_geometry_foundations.md`](architecture/diagram_geometry_foundations.md) → [`process_diagram_style_guide.md`](architecture/process_diagram_style_guide.md) | Проверенная схема |
 | Threat review | [`threat_review_triggers.md`](policy/threat_review_triggers.md) | Решение об инциденте и дальнейшее действие |
@@ -83,6 +83,7 @@ depends_on:
 | Проверить только быстрые инварианты | `python3.12 operations/scripts/documents/check.py --fast` |
 | Добавить требование | requirement wizard → apply requirements → generate → full gate |
 | Принять этап | semantic review → acceptance → отдельный PR |
+| Подготовить среду аудита | `python3.12 operations/scripts/audit/prepare_environment.py prepare --source <git-url> --sha <sha> --workdir <каталог>` |
 
 ## 5. Частые ошибки
 
