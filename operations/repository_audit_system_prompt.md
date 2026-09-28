@@ -3,7 +3,7 @@ id: repository_audit_system_prompt
 type: audit_prompt
 document_state: current
 applicability: reference
-version: 5.2
+version: 5.3
 updated: 2026-09-28
 depends_on:
   - project_rules
@@ -59,6 +59,15 @@ depends_on:
 | Нужны полномочия владельца | Один конкретный вопрос и пауза |
 
 Публикация результатов аудита является частью завершения аудита, а не отдельным опциональным шагом. После выдачи итогового отчёта владельцу аудитор обязан создать dated baseline (или обновить запись в [`audit_register.md`](../work/audit/audit_register.md) при отсутствии новых находок), evidence-пакет и открыть запрос на слияние, если владелец явно не отказался от публикации. Read-only режим §3.2 запрещает изменения во время выполнения проверок, но не отменяет публикацию по их результатам. Публикуется только полный результат: внутри scope не осталось `NOT_CHECKED` и не применялась выборка (раздел 11).
+
+Evidence-пакет `work/audit/evidence/YYYY_MM_DD_completion/` датированного аудита обязан содержать четыре файла:
+
+- `YYYY_MM_DD_completion/manifest.json` — с полями `mode` и `head_sha`;
+- `YYYY_MM_DD_completion/environment_attestation.json` — выход `audit_environment` (3.4);
+- `YYYY_MM_DD_completion/file_role_inventory.json` — объект со списком `files`, где у каждой записи есть `path` (или `paths` для однородной группы) и `evidence_state`;
+- `YYYY_MM_DD_completion/previous_findings.json` — объект со списком `records`, где у каждой записи есть `id` и `evaluation` (`CONFIRMED`, `REFUTED` или `REGRESSION`).
+
+При публикации gate (`operations/scripts/tasks/check_change_scope.py`) сверяет пакет с git-историей: среда была готова, а её дерево совпадает с деревом проверенного коммита; `head_sha` в manifest равен проверенному SHA; инвентарь в режиме `FULL_REPOSITORY` покрывает каждый tracked-файл этого коммита, и ни одна запись не `NOT_CHECKED`; перепроверена каждая запись реестра, существовавшая на этом коммите. Пакет, не прошедший сверку, не публикуется.
 
 Версия и дата этого документа — во front matter выше; здесь они не повторяются.
 

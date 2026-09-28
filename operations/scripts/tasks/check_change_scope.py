@@ -12,6 +12,7 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from operations.scripts.audit.publication import validate_published_audit
 from operations.scripts.common.project import (
     find_project_root,
     require_supported_python,
@@ -79,6 +80,7 @@ MAINTENANCE_PATH_PATTERNS = [
 # проверки уезжает внутрь продуктового PR, где на него не смотрят.
 GATE_MACHINERY_PATTERNS = [
     ".github/workflows/**",
+    "operations/scripts/audit/**",
     "operations/hooks/**",
     "operations/scripts/documents/**",
     "operations/scripts/quality/**",
@@ -515,6 +517,24 @@ def validate_audit_history(root: Path, base: str, head: str) -> list[str]:
     return errors
 
 
+def validate_audit_publication(root: Path, base: str, head: str) -> list[str]:
+    """A newly published audit baseline must prove the audit was complete."""
+    result = run_command(
+        ["git", "diff", "--name-only", "--diff-filter=A", base, head, "--", "work/audit"],
+        cwd=root,
+        timeout=60,
+    )
+    if not result.ok:
+        detail = result.stderr.strip() or result.stdout.strip() or "неизвестная ошибка Git"
+        return [f"Не удалось найти новые результаты аудита: {detail}"]
+    errors: list[str] = []
+    for line in result.stdout.splitlines():
+        path = _normalize(line.strip())
+        if AUDIT_HISTORY_PATH.fullmatch(path):
+            errors.extend(validate_published_audit(root, head, path))
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Проверка покрытия путей поставки проекта карточками TASK"
@@ -528,6 +548,7 @@ def main() -> int:
     errors = validate_change_scope(root, changed, base=args.base, head=args.head)
     errors.extend(validate_document_metadata(root, args.base, args.head, changed))
     errors.extend(validate_audit_history(root, args.base, args.head))
+    errors.extend(validate_audit_publication(root, args.base, args.head))
     errors.extend(validate_gate_machinery_isolation(changed))
     errors.extend(validate_coverage_policy_ratchet(root, args.base, args.head))
     architecture_review = review_task_architecture_visualization(
