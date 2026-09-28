@@ -254,10 +254,10 @@ class ProvisioningTests(unittest.TestCase):
         payload = _tarball("actionlint", b"binary")
         key = ("linux", "x64")
         binary = _test_binary("actionlint", payload, key)
-        with tempfile.TemporaryDirectory() as tmp, patch.object(env.os, "name", "posix"):
+        with tempfile.TemporaryDirectory() as tmp:
             tools = Path(tmp) / "tools"
             self.assertEqual(len(env.ensure_binary(binary, tools, lambda _url: payload, key)), 1)
-            self.assertEqual((tools / "actionlint").read_bytes(), b"binary")
+            self.assertEqual(env.binary_path(tools, "actionlint").read_bytes(), b"binary")
             self.assertEqual(env.ensure_binary(binary, tools, lambda _url: b"", key), [])
 
     def test_tampered_archive_is_refused(self) -> None:
