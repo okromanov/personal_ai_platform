@@ -229,7 +229,7 @@ def _process_is_alive(pid: int) -> bool:
     return True
 
 
-def _process_is_alive_windows(pid: int) -> bool:
+def _process_is_alive_windows(pid: int) -> bool:  # pragma: no cover
     """Windows implementation using OpenProcess/GetExitCodeProcess.
 
     `os.kill(pid, 0)` on Windows may call TerminateProcess depending on the

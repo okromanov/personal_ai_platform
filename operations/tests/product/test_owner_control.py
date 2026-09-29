@@ -352,7 +352,16 @@ class ProcessIsAliveTests(unittest.TestCase):
         with mock.patch("os.kill", return_value=None):
             self.assertTrue(control_module._process_is_alive(4242))
 
+    def test_delegates_to_windows_helper_on_win32(self) -> None:
+        with (
+            mock.patch("sys.platform", "win32"),
+            mock.patch.object(control_module, "_process_is_alive_windows", return_value=False),
+        ):
+            self.assertFalse(control_module._process_is_alive(4242))
+
     def test_windows_invalid_pid_returns_false(self) -> None:
+        if os_name != "nt":
+            return
         fake_kernel = mock.MagicMock()
         fake_kernel.OpenProcess.return_value = 0
         fake_kernel.GetLastError.return_value = 87  # ERROR_INVALID_PARAMETER
@@ -360,6 +369,8 @@ class ProcessIsAliveTests(unittest.TestCase):
             self.assertFalse(control_module._process_is_alive_windows(4242))
 
     def test_windows_access_denied_returns_true(self) -> None:
+        if os_name != "nt":
+            return
         fake_kernel = mock.MagicMock()
         fake_kernel.OpenProcess.return_value = 0
         fake_kernel.GetLastError.return_value = 5  # ERROR_ACCESS_DENIED
@@ -367,6 +378,8 @@ class ProcessIsAliveTests(unittest.TestCase):
             self.assertTrue(control_module._process_is_alive_windows(4242))
 
     def test_windows_still_active_returns_true(self) -> None:
+        if os_name != "nt":
+            return
         fake_kernel = mock.MagicMock()
         fake_kernel.OpenProcess.return_value = 12345
         fake_exit_code = mock.MagicMock()
@@ -379,6 +392,8 @@ class ProcessIsAliveTests(unittest.TestCase):
             self.assertTrue(control_module._process_is_alive_windows(4242))
 
     def test_windows_exited_returns_false(self) -> None:
+        if os_name != "nt":
+            return
         fake_kernel = mock.MagicMock()
         fake_kernel.OpenProcess.return_value = 12345
         fake_exit_code = mock.MagicMock()

@@ -5,9 +5,15 @@ import unittest
 from pathlib import Path
 
 from operations.scripts.versioning.increment_file_version import (
+    _configure_utf8_stdout,
     increment_version,
     update_file_version,
 )
+
+
+class ConfigureUtf8StdoutTests(unittest.TestCase):
+    def test_does_not_raise(self) -> None:
+        _configure_utf8_stdout()
 
 
 class IncrementVersionTests(unittest.TestCase):

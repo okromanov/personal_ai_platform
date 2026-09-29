@@ -134,6 +134,24 @@ class MilestoneStartAndTaskSemanticsTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "ожидается"):
                 _transition(text, "m02", "2026-08-21")
 
+    def test_apply_reports_init_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._fixture(root)
+            branch = CommandResult(("git",), 0, "feature\n", "")
+            with (
+                patch("operations.scripts.milestones.start.run_command", return_value=branch),
+                patch("operations.scripts.milestones.start.today_iso", return_value="2026-08-21"),
+                patch(
+                    "operations.scripts.milestones.start.init_milestone.init_milestone",
+                    return_value=False,
+                ),
+            ):
+                self.assertEqual(
+                    start_milestone(root, "m02", dry_run=False),
+                    ["m02: не удалось создать начальный final_report"],
+                )
+
     def test_delivery_closure_ignores_unknown_identifiers(self) -> None:
         self.assertEqual(delivery_closure({}, {"UNKNOWN"}), {"UNKNOWN"})
 
