@@ -235,6 +235,8 @@ def _process_is_alive_windows(pid: int) -> bool:
     `os.kill(pid, 0)` on Windows may call TerminateProcess depending on the
     runtime; this avoids that risk and still fails closed on access-denied.
     """
+    if sys.platform != "win32":
+        raise OSError("_process_is_alive_windows is only available on Windows")
     import ctypes
 
     kernel32 = ctypes.windll.kernel32
