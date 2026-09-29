@@ -5,7 +5,7 @@ title: Реализация ARC_CMP_002
 component: ARC_CMP_002
 work_state: completed
 version: 2.0
-updated: 2026-09-26
+updated: 2026-09-29
 next_actor: none
 owner_action: none
 depends_on:

@@ -3,7 +3,7 @@ id: operations_sample_task_lifecycle
 type: guide
 document_state: current
 version: 1.4
-updated: 2026-09-26
+updated: 2026-09-29
 depends_on:
   - operations_change_process
   - operations_procedure_map

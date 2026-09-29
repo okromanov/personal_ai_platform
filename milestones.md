@@ -3,7 +3,7 @@ id: project_milestones
 type: roadmap
 document_state: current
 version: 2.6
-updated: 2026-09-26
+updated: 2026-09-29
 depends_on:
   - business_requirements
   - architecture_baseline

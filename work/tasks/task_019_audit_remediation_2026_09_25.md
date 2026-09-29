@@ -6,7 +6,7 @@ component: AUDIT
 delivery_role: component
 work_state: planned
 version: 1.1
-updated: 2026-09-27
+updated: 2026-09-29
 next_actor: agent
 owner_action: none
 depends_on:
@@ -32,7 +32,7 @@ allowed_paths:
   - src/observability/
   - src/operations/health.py
   - src/owner_control/control.py
-  - src/task_state/
+  - src/task_state/**
   - adr/adr_009_secret_management_strategy.md
   - specifications/business_requirements.md
   - specifications/system_specification.md

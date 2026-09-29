@@ -4,7 +4,7 @@ type: test
 spec_state: current
 execution: automated
 version: 1.0
-updated: 2026-09-27
+updated: 2026-09-29
 traces_to:
   - TASK_019
 verifies:

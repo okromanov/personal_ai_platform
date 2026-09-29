@@ -6,7 +6,7 @@ spec_state: current
 execution: automated
 automated_evidence: quality_suite
 version: 2.2
-updated: 2026-09-26
+updated: 2026-09-29
 accepts:
   - m02
 traces_to:

@@ -3,7 +3,7 @@ id: threat_model
 type: threat_model
 document_state: current
 version: 1.3
-updated: 2026-09-27
+updated: 2026-09-29
 depends_on:
   - project_rules
   - business_requirements

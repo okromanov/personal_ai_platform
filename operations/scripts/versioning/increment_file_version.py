@@ -10,9 +10,18 @@ so this hook never creates one.
 Usage: python3.12 operations/scripts/versioning/increment_file_version.py <file_path>
 """
 
+import io
 import re
 import sys
 from pathlib import Path
+from typing import cast
+
+
+def _configure_utf8_stdout() -> None:
+    try:
+        cast("io.TextIOWrapper", sys.stdout).reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 
 def increment_version(version_str: str) -> str:
@@ -74,6 +83,7 @@ def update_file_version(file_path: str) -> bool:
 
 
 if __name__ == "__main__":
+    _configure_utf8_stdout()
     if len(sys.argv) < 2:
         print(
             "Usage: python3 "

@@ -4,7 +4,7 @@ type: procedure_reference
 document_state: current
 version: 1.8
 created: 2026-08-23
-updated: 2026-09-10
+updated: 2026-09-29
 ---
 
 # Матрица зависимостей обновления файлов

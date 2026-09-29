@@ -3,7 +3,7 @@ id: operations_local_development_windows
 type: operations_guide
 document_state: current
 version: 1.3
-updated: 2026-09-26
+updated: 2026-09-29
 traces_to:
   - ADR_001
 ---
