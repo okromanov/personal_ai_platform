@@ -7,7 +7,7 @@ orchestrator, channel, or owner-control code above the boundary (SYS_003).
 """
 
 from src.channels.base import TaskMessage
-from src.observability import (
+from src.observability.task_events import (
     TaskEventResult,
     TaskEventSink,
     TaskEventType,

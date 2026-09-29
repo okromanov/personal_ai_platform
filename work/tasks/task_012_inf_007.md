@@ -4,8 +4,8 @@ type: task
 title: Реализация INF_CMP_007
 component: INF_CMP_007
 work_state: completed
-version: 2.0
-updated: 2026-09-03
+version: 2.1
+updated: 2026-09-29
 next_actor: none
 owner_action: none
 depends_on:
@@ -61,7 +61,7 @@ tests:
 ## 7. Проверки и доказательства
 
 **Автоматические:**
-1. [`test_observability.py`](../../operations/tests/product/test_observability.py): 5/5 тестов прошли;
+1. [`test_observability.py`](../../operations/tests/product/test_observability.py): 6/6 тестов прошли;
 2. новый экземпляр SQLite-хранилища восстанавливает resource и external-usage observations;
 3. свободный текст и отрицательные измерения отклоняются;
 4. health failure локализуется по зависимости без сохранения detail.

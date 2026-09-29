@@ -249,6 +249,96 @@ class DocumentMetadataHonestyTests(unittest.TestCase):
         self.assertIsInstance(errors, list)
 
 
+class DocumentMetadataNegativeTests(unittest.TestCase):
+    """Negative paths for validate_document_metadata.
+
+    Found UNDETECTED by the 2026-09-25 source-level mutation sweep: emptying the
+    function left the whole suite green. These tests ensure it can catch both
+    backdated `updated` and authority-document edits without a version bump.
+    """
+
+    def _setup_repo(self) -> Path:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+        self.assertTrue(run_command(["git", "init", "-q"], cwd=root).ok)
+        self.assertTrue(run_command(["git", "config", "user.name", "Test"], cwd=root).ok)
+        self.assertTrue(
+            run_command(["git", "config", "user.email", "test@example.invalid"], cwd=root).ok
+        )
+        return root
+
+    def _commit_doc(self, root: Path, path: str, text: str, message: str) -> str:
+        full = root / path
+        full.parent.mkdir(parents=True, exist_ok=True)
+        full.write_text(text, encoding="utf-8")
+        self.assertTrue(run_command(["git", "add", path], cwd=root).ok)
+        self.assertTrue(run_command(["git", "commit", "-qm", message], cwd=root).ok)
+        return run_command(["git", "rev-parse", "HEAD"], cwd=root).stdout.strip()
+
+    def test_backdated_updated_is_caught(self) -> None:
+        root = self._setup_repo()
+        base = self._commit_doc(
+            root,
+            "work/tasks/task_001.md",
+            "---\nid: TASK_001\ntype: task\nversion: 1.0\nupdated: 2026-09-25\n---\n# Task\n",
+            "base",
+        )
+        head = self._commit_doc(
+            root,
+            "work/tasks/task_001.md",
+            "---\nid: TASK_001\ntype: task\nversion: 1.0\nupdated: 2026-09-20\n---\n# Task edited\n",
+            "edit",
+        )
+        errors = validate_document_metadata(root, base, head, ["work/tasks/task_001.md"])
+        self.assertTrue(
+            any(
+                "updated=2026-09-20" in error and "фактически менялся" in error for error in errors
+            ),
+            errors,
+        )
+
+    def test_authority_document_without_version_bump_is_caught(self) -> None:
+        root = self._setup_repo()
+        base = self._commit_doc(
+            root,
+            "AGENTS.md",
+            "---\nid: coding_agent_instruction\ntype: agent_instruction\nversion: 4.8\nupdated: 2026-09-25\n---\n# Old\n",
+            "base",
+        )
+        head = self._commit_doc(
+            root,
+            "AGENTS.md",
+            "---\nid: coding_agent_instruction\ntype: agent_instruction\nversion: 4.8\nupdated: 2026-09-26\n---\n# New\n",
+            "edit",
+        )
+        errors = validate_document_metadata(root, base, head, ["AGENTS.md"])
+        self.assertTrue(
+            any("не может меняться без новой версии" in error for error in errors),
+            errors,
+        )
+
+    def test_honest_metadata_passes(self) -> None:
+        from datetime import date
+
+        root = self._setup_repo()
+        today = date.today().isoformat()
+        base = self._commit_doc(
+            root,
+            "work/tasks/task_001.md",
+            f"---\nid: TASK_001\ntype: task\nversion: 1.0\nupdated: {today}\n---\n# Task\n",
+            "base",
+        )
+        head = self._commit_doc(
+            root,
+            "work/tasks/task_001.md",
+            f"---\nid: TASK_001\ntype: task\nversion: 1.0\nupdated: {today}\n---\n# Task edited\n",
+            "edit",
+        )
+        errors = validate_document_metadata(root, base, head, ["work/tasks/task_001.md"])
+        self.assertEqual(errors, [])
+
+
 class GateMachineryIsolationTests(unittest.TestCase):
     """Код, который обеспечивает соблюдение правил, не правится заодно.
 

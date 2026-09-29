@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_005
 component: ARC_CMP_005
 work_state: completed
-version: 2.3
-updated: 2026-09-03
+version: 2.4
+updated: 2026-09-29
 next_actor: none
 owner_action: none
 depends_on:
@@ -68,7 +68,7 @@ tests:
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны ([`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py): 17/17 тестов прошли, часть CI gate)
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_tool_gateway.py`](../../operations/tests/product/test_tool_gateway.py): 21/21 тестов прошли, часть CI gate)
 - ✅ Pre-commit валидация успешна
 - ✅ CI успешен
 - ✅ Код review (смысловая проверка) пройден

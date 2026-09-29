@@ -106,21 +106,6 @@ class RetryAndCancelTests(unittest.TestCase):
 
 
 class DuplicateProtectionTests(unittest.TestCase):
-    def test_has_executed_is_false_until_marked(self) -> None:
-        store = InMemoryTaskLifecycleStore()
-
-        self.assertFalse(store.has_executed("send-email-1"))
-        store.mark_executed("send-email-1")
-        self.assertTrue(store.has_executed("send-email-1"))
-
-    def test_marking_the_same_action_twice_does_not_error(self) -> None:
-        store = InMemoryTaskLifecycleStore()
-
-        store.mark_executed("send-email-1")
-        store.mark_executed("send-email-1")
-
-        self.assertTrue(store.has_executed("send-email-1"))
-
     def test_distinct_tasks_have_independent_state(self) -> None:
         store = InMemoryTaskLifecycleStore()
 

@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import io
 import sys
 from pathlib import Path
+from typing import cast
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -23,6 +25,8 @@ from operations.scripts.health_check.reporter import generate_report, print_summ
 
 def main() -> int:
     """Generate repository health check report."""
+    cast("io.TextIOWrapper", sys.stdout).reconfigure(encoding="utf-8", errors="replace")
+    cast("io.TextIOWrapper", sys.stderr).reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(
         description="Generate repository health check report",
     )
@@ -119,7 +123,7 @@ def main() -> int:
                 "overall_status": health.overall_status,
             }
             json_path.parent.mkdir(parents=True, exist_ok=True)
-            json_path.write_text(json.dumps(metrics_dict, indent=2))
+            json_path.write_text(json.dumps(metrics_dict, indent=2), encoding="utf-8")
             print(f"✅ Metrics saved to {json_path.relative_to(root)}", file=sys.stderr)
 
         output_path = args.output or root / "runtime" / "health_check_report.md"

@@ -84,11 +84,3 @@ class TaskLifecycleStore(ABC):
     @abstractmethod
     def cancel(self, task_id: str) -> None:
         """Mark task_id cancelled. Idempotent: cancelling twice is not an error."""
-
-    @abstractmethod
-    def has_executed(self, action_id: str) -> bool:
-        """Whether action_id was already recorded as executed (duplicate protection)."""
-
-    @abstractmethod
-    def mark_executed(self, action_id: str) -> None:
-        """Record action_id as executed, so a retry does not repeat its effect."""

@@ -2,8 +2,8 @@
 id: operations_sample_task_lifecycle
 type: guide
 document_state: current
-version: 1.3
-updated: 2026-08-28
+version: 1.4
+updated: 2026-09-29
 depends_on:
   - operations_change_process
   - operations_procedure_map
@@ -98,7 +98,7 @@ TASK переводится в `completed` только когда:
 ## 6. Что происходит дальше
 
 После завершения TASK:
-- Результат добавляется в базу доказательств (work/evidence/)
+- Результат добавляется в базу доказательств (`work/audit/evidence/`)
 - project_status.md автоматически обновляется
 - Владелец видит новый результат и может принять решение
 
@@ -108,7 +108,7 @@ TASK переводится в `completed` только когда:
 |---|---|
 | Изменены файлы вне allowed_paths | Перечитать allowed_paths перед началом |
 | Забыли запустить generate.py | Всегда: generate.py → check.py → unittest |
-| CI красный, не знаем почему | Запустить локально (check.py), затем обратиться к procedure_map.md § C |
+| CI красный, не знаем почему | Запустить локально (check.py), затем обратиться к [`operations/procedure_map.md`](../procedure_map.md) § 3 |
 | Коммит содержит > 1 независимых изменения | Разделить на несколько коммитов или PR |
 | Изменили authority document без версии | Всегда обновлять version на authority docs |
 

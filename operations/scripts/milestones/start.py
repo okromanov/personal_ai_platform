@@ -18,6 +18,7 @@ from operations.scripts.common.project import (
     run_command,
     today_iso,
 )
+from operations.scripts.milestones import init_milestone
 from operations.scripts.quality.registry import load_quality_registry, profiles_for_milestone
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.tasks.semantics import (
@@ -100,6 +101,8 @@ def start_milestone(root: Path, milestone_id: str, *, dry_run: bool = True) -> l
         return ["Старт milestone запрещён на default branch"]
     path = root / "milestones.md"
     atomic_write(path, _transition(read_text(path), milestone_id.lower(), today_iso()))
+    if not init_milestone.init_milestone(milestone_id, root):
+        return [f"{milestone_id}: не удалось создать начальный final_report"]
     return []
 
 

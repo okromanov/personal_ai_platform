@@ -2,8 +2,8 @@
 id: operations_adr_lifecycle
 type: operations
 document_state: current
-version: 1.7
-updated: 2026-09-05
+version: 1.8
+updated: 2026-09-29
 depends_on:
   - operations_change_process
 ---
@@ -262,11 +262,11 @@ rejected          superseded
 
 ## 9. Проверки на соответствие жизненному циклу
 
-`check.py --all` автоматически проверяет назначение каждого proposed ADR через `TASK.decides`, единственность незавершённой TASK-владельца, общий milestone и запрет завершать её при `decision_state: proposed`. Дополнительно при review проверяются:
+`check.py --all` автоматически проверяет назначение каждого proposed ADR через `TASK.decides`, единственность незавершённой TASK-владельца, общий milestone и запрет завершать её при `decision_state: proposed`. Дополнительно `check.py` проверяет:
 
 - Все ADR имеют `traces_to`?
 - Если `superseded` → указан `superseded_by`?
 - Если `superseded_by: ADR_YYY` → ADR_YYY существует?
 - `updated` соответствует дате последнего изменения?
 
-Эти проверки станут частью future проекта ([`m03`](../../milestones.md#m03)+).
+Ручные review-проверки остаются вне gate.

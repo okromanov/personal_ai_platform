@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 
-from src.observability import (
+from src.observability.task_events import (
     TaskEventResult,
     TaskEventSink,
     TaskEventType,

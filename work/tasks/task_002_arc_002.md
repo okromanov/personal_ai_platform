@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_002
 component: ARC_CMP_002
 work_state: completed
-version: 1.9
-updated: 2026-09-03
+version: 2.0
+updated: 2026-09-29
 next_actor: none
 owner_action: none
 depends_on:
@@ -74,7 +74,7 @@ tests:
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны ([`operations/tests/product/test_owner_control.py`](../../operations/tests/product/test_owner_control.py): 27/27 тестов прошли, часть CI gate)
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_owner_control.py`](../../operations/tests/product/test_owner_control.py): 35/35 тестов прошли, часть CI gate)
 - ✅ Pre-commit валидация успешна
 - ✅ CI успешен
 - ✅ Код review (смысловая проверка) пройден

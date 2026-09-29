@@ -74,5 +74,7 @@ class HealthAggregator:
             try:
                 statuses.append(check())
             except Exception as exc:
-                statuses.append(DependencyStatus(name=name, healthy=False, detail=str(exc)))
+                statuses.append(
+                    DependencyStatus(name=name, healthy=False, detail=type(exc).__name__)
+                )
         return HealthReport(dependencies=tuple(statuses))

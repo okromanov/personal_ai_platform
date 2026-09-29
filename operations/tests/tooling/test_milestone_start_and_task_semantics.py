@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from operations.scripts.common.project import CommandResult
+from operations.scripts.common.project import CommandResult, find_project_root
 from operations.scripts.milestones import start as milestone_start
 from operations.scripts.milestones.start import (
     _transition,
@@ -22,8 +23,24 @@ from operations.scripts.tasks.semantics import (
 
 
 class MilestoneStartAndTaskSemanticsTests(unittest.TestCase):
+    @staticmethod
+    def _copy_template_contracts(root: Path) -> None:
+        """Copy real template registry and the milestone completion report template
+        into the isolated test root so init_milestone can render a real report."""
+        repo_root = find_project_root(Path(__file__))
+        (root / "operations" / "templates").mkdir(parents=True, exist_ok=True)
+        shutil.copy(
+            repo_root / "operations" / "template_registry.json",
+            root / "operations" / "template_registry.json",
+        )
+        shutil.copy(
+            repo_root / "operations" / "templates" / "milestone_completion_report_template.md",
+            root / "operations" / "templates" / "milestone_completion_report_template.md",
+        )
+
     def _fixture(self, root: Path, *, unrelated: bool = False, with_test: bool = True) -> None:
         (root / "operations").mkdir()
+        self._copy_template_contracts(root)
         (root / "work/tasks").mkdir(parents=True)
         (root / "work/tests").mkdir(parents=True)
         (root / "specifications").mkdir()
@@ -116,6 +133,24 @@ class MilestoneStartAndTaskSemanticsTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "ожидается"):
                 _transition(text, "m02", "2026-08-21")
+
+    def test_apply_reports_init_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._fixture(root)
+            branch = CommandResult(("git",), 0, "feature\n", "")
+            with (
+                patch("operations.scripts.milestones.start.run_command", return_value=branch),
+                patch("operations.scripts.milestones.start.today_iso", return_value="2026-08-21"),
+                patch(
+                    "operations.scripts.milestones.start.init_milestone.init_milestone",
+                    return_value=False,
+                ),
+            ):
+                self.assertEqual(
+                    start_milestone(root, "m02", dry_run=False),
+                    ["m02: не удалось создать начальный final_report"],
+                )
 
     def test_delivery_closure_ignores_unknown_identifiers(self) -> None:
         self.assertEqual(delivery_closure({}, {"UNKNOWN"}), {"UNKNOWN"})

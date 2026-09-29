@@ -2,9 +2,9 @@
 id: file_update_dependencies
 type: procedure_reference
 document_state: current
-version: 1.7
+version: 1.8
 created: 2026-08-23
-updated: 2026-09-10
+updated: 2026-09-29
 ---
 
 # Матрица зависимостей обновления файлов
@@ -21,7 +21,7 @@ updated: 2026-09-10
 | Файл | Поле | Действие | Кто/Как | Проверка |
 |---|---|---|---|---|
 | work/acceptance/m0X_final_report.md | - | Создаётся init_milestone.py из зарегистрированного шаблона | автомат (событие) | реестр шаблонов и git |
-| milestones.md | work_state | Меняется на `in-progress` | владелец вручную | check.py: milestones |
+| milestones.md | work_state | Меняется на `in-progress` | `apply.py` выполняет transition | check.py: milestones |
 | project_status.md | текущий этап, файлы задач | Обновляется | автомат (generate.py) | check.py: generated |
 
 ## Когда milestone переходит из in-progress → completed
@@ -29,7 +29,7 @@ updated: 2026-09-10
 | Файл | Поле | Действие | Кто/Как | Проверка |
 |---|---|---|---|---|
 | work/acceptance/m0X_final_report.md | весь файл | Перегенерируется из состояния репозитория и зарегистрированного шаблона; разделы 6-7 сохраняются из ранее записанного файла | update_completion_report.py, запускается **после** коммита с `work_state: completed` | template registry и check.py: metadata |
-| milestones.md | work_state | Меняется на `completed` | владелец вручную | check.py: milestones |
+| milestones.md | work_state | Меняется на `completed` | `apply.py` выполняет transition | check.py: milestones |
 | project_status.md | Прогресс | Обновляется | автомат (generate.py) | check.py: generated |
 
 ## Когда TASK переходит в completed
@@ -66,8 +66,8 @@ updated: 2026-09-10
 ## Процедура обновления при завершении milestone
 
 1. **Владелец:** даёт команду `ПРИНИМАЮ m0X` в диалоге
-2. **acceptance.py:** 
-   - Меняет work_state в milestones.md на `completed`
+2. **apply.py:** 
+   - Выполняет transition `work_state` в [`milestones.md`](../../milestones.md) на `completed`
 3. **Агент (после коммита принятия, до открытия запроса на слияние — см. [`operations/acceptance.md`](../acceptance.md#4-после-выполнения)):**
    - update_completion_report.py: пересобирает work/acceptance/m0X_final_report.md из состояния репозитория на этот момент
    - generate.py: перегенерирует project_status.md

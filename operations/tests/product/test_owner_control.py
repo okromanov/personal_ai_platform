@@ -23,6 +23,7 @@ from src.owner_control import (
     StaleLockRecoveryError,
     recover_stale_sensitive_action_lock,
 )
+from src.owner_control import control as control_module
 from src.owner_control.state_io import atomic_write_json
 
 
@@ -328,6 +329,81 @@ class StaleLockRecoveryTests(unittest.TestCase):
             self.state_dir, confirmation=RECOVERY_CONFIRMATION_PHRASE
         )
         self.assertFalse(self.lock_path.exists())
+
+
+class ProcessIsAliveTests(unittest.TestCase):
+    """AUD-051: _process_is_alive must be platform-safe and fail-closed."""
+
+    def test_posix_dead_process_returns_false(self) -> None:
+        if os_name == "nt":
+            return
+        with mock.patch("os.kill", side_effect=ProcessLookupError):
+            self.assertFalse(control_module._process_is_alive(4242))
+
+    def test_posix_permission_denied_returns_true(self) -> None:
+        if os_name == "nt":
+            return
+        with mock.patch("os.kill", side_effect=PermissionError):
+            self.assertTrue(control_module._process_is_alive(4242))
+
+    def test_posix_no_exception_returns_true(self) -> None:
+        if os_name == "nt":
+            return
+        with mock.patch("os.kill", return_value=None):
+            self.assertTrue(control_module._process_is_alive(4242))
+
+    def test_delegates_to_windows_helper_on_win32(self) -> None:
+        with (
+            mock.patch("sys.platform", "win32"),
+            mock.patch.object(control_module, "_process_is_alive_windows", return_value=False),
+        ):
+            self.assertFalse(control_module._process_is_alive(4242))
+
+    def test_windows_invalid_pid_returns_false(self) -> None:
+        if os_name != "nt":
+            return
+        fake_kernel = mock.MagicMock()
+        fake_kernel.OpenProcess.return_value = 0
+        fake_kernel.GetLastError.return_value = 87  # ERROR_INVALID_PARAMETER
+        with mock.patch("ctypes.windll.kernel32", fake_kernel):
+            self.assertFalse(control_module._process_is_alive_windows(4242))
+
+    def test_windows_access_denied_returns_true(self) -> None:
+        if os_name != "nt":
+            return
+        fake_kernel = mock.MagicMock()
+        fake_kernel.OpenProcess.return_value = 0
+        fake_kernel.GetLastError.return_value = 5  # ERROR_ACCESS_DENIED
+        with mock.patch("ctypes.windll.kernel32", fake_kernel):
+            self.assertTrue(control_module._process_is_alive_windows(4242))
+
+    def test_windows_still_active_returns_true(self) -> None:
+        if os_name != "nt":
+            return
+        fake_kernel = mock.MagicMock()
+        fake_kernel.OpenProcess.return_value = 12345
+        fake_exit_code = mock.MagicMock()
+        fake_exit_code.value = 259  # STILL_ACTIVE
+        with (
+            mock.patch("ctypes.windll.kernel32", fake_kernel),
+            mock.patch("ctypes.c_ulong", return_value=fake_exit_code),
+            mock.patch("ctypes.byref", return_value=fake_exit_code),
+        ):
+            self.assertTrue(control_module._process_is_alive_windows(4242))
+
+    def test_windows_exited_returns_false(self) -> None:
+        if os_name != "nt":
+            return
+        fake_kernel = mock.MagicMock()
+        fake_kernel.OpenProcess.return_value = 12345
+        fake_exit_code = mock.MagicMock()
+        fake_exit_code.value = 0
+        with (
+            mock.patch("ctypes.windll.kernel32", fake_kernel),
+            mock.patch("ctypes.c_ulong", return_value=fake_exit_code),
+            mock.patch("ctypes.byref", return_value=fake_exit_code),
+        ):
+            self.assertFalse(control_module._process_is_alive_windows(4242))
 
 
 if __name__ == "__main__":
