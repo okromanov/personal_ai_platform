@@ -10,7 +10,7 @@ contract without changing it.
 from typing import Any
 
 from src.channels.base import TaskMessage
-from src.observability import (
+from src.observability.task_events import (
     TaskEventResult,
     TaskEventSink,
     TaskEventType,
@@ -26,7 +26,6 @@ class InMemoryTaskLifecycleStore(TaskLifecycleStore):
     def __init__(self, event_sink: TaskEventSink | None = None) -> None:
         self._tasks: dict[str, TaskMessage] = {}
         self._states: dict[str, TaskLifecycleState] = {}
-        self._executed_actions: set[str] = set()
         self._event_sink = event_sink
 
     def _runtime_task_id(self, task_id: str) -> str:
@@ -93,9 +92,3 @@ class InMemoryTaskLifecycleStore(TaskLifecycleStore):
             cancelled=True,
         )
         self._emit(task_id, TaskEventType.STATE_TRANSITION, "cancel_task")
-
-    def has_executed(self, action_id: str) -> bool:
-        return action_id in self._executed_actions
-
-    def mark_executed(self, action_id: str) -> None:
-        self._executed_actions.add(action_id)

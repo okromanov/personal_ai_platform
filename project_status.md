@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-09-26T23:39:00+03:00
+generated_at: 2026-09-29T20:37:00+03:00
 version: 1.0
 ---
 
@@ -26,7 +26,7 @@ version: 1.0
 | Текущий этап | `m02` — Выбор ключевых технологий и первый живой помощник |
 | Этапы V1 | ✅ **1** выполнено / ❌ **6** осталось |
 | Текущая проектная задача | [`TASK_013` — Реализация INF_CMP_008](work/tasks/task_013_inf_008.md) |
-| Место в очереди проекта | **13 из 18** |
+| Место в очереди проекта | **13 из 19** |
 | Шаги текущей задачи | **0** из **6** |
 | Следующий исполнитель | **агент** |
 
@@ -62,6 +62,7 @@ version: 1.0
 | [`TASK_016`](work/tasks/task_016_real_telegram.md) | [`ARC_CMP_001`](specifications/architecture_baseline.md#arc_cmp_001) | [`TEST_020`](work/tests/test_020.md) | запланирована — закрывает результат этапа |
 | [`TASK_017`](work/tasks/task_017_m02_live_e2e.md) | [`ARC_FLOW_001`](specifications/architecture_baseline.md#arc_flow_001) | — | запланирована — закрывает результат этапа |
 | [`TASK_018`](work/tasks/task_018_runtime_task_events.md) | [`ARC_CMP_007`](specifications/architecture_baseline.md#arc_cmp_007) | [`TEST_019`](work/tests/test_019.md) | запланирована |
+| [`TASK_019`](work/tasks/task_019_audit_remediation_2026_09_25.md) | `AUDIT` | [`TEST_021`](work/tests/test_021.md) | запланирована |
 
 ## Шаги текущей работы
 
@@ -82,9 +83,9 @@ version: 1.0
 |---|---|
 | Всего замечаний | **67** |
 | Исправлены, ожидают проверки | **0** |
-| Открыты | **18** |
+| Открыты | **1** |
 | Риски приняты владельцем | **0** |
-| Закрыты | **49** |
+| Закрыты | **66** |
 | Критичность | critical: **1**, high: **10**, medium: **33**, low: **23** |
 | Состояние критических замечаний | критических незакрытых замечаний нет |
 | Последний подтверждённый Project check | для текущей редакции не подтверждён в репозитории — проверьте Project check в GitHub Actions |

@@ -65,7 +65,7 @@ class HealthAggregatorTests(unittest.TestCase):
         self.assertEqual(len(report.dependencies), 2)
         crashing = next(d for d in report.dependencies if d.name == "crashing")
         self.assertFalse(crashing.healthy)
-        self.assertIn("dependency crashed", crashing.detail)
+        self.assertEqual(crashing.detail, "RuntimeError")
 
     def test_registering_the_same_name_twice_replaces_the_check(self) -> None:
         aggregator = HealthAggregator()

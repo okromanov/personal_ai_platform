@@ -2,8 +2,8 @@
 id: system_specification
 type: system_specification
 document_state: current
-version: 1.5
-updated: 2026-09-15
+version: 1.6
+updated: 2026-09-26
 depends_on:
   - business_requirements
   - threat_model

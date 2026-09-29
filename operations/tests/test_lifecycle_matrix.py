@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -8,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from operations.scripts.acceptance.apply import apply_acceptance, validate_evidence_bundle
+from operations.scripts.common.project import find_project_root
 from operations.scripts.milestones.start import start_milestone
 from operations.scripts.status.generate_project_status import collect_milestones
 from operations.scripts.tasks.check_change_scope import (
@@ -22,6 +24,21 @@ class LifecycleMatrixTests(unittest.TestCase):
             ["git", *args], cwd=root, check=True, capture_output=True, text=True
         )
         return completed.stdout.strip()
+
+    @staticmethod
+    def _copy_template_contracts(root: Path) -> None:
+        """Copy real template registry and the milestone completion report template
+        into the isolated test root so init_milestone can render a real report."""
+        repo_root = find_project_root(Path(__file__))
+        (root / "operations" / "templates").mkdir(parents=True, exist_ok=True)
+        shutil.copy(
+            repo_root / "operations" / "template_registry.json",
+            root / "operations" / "template_registry.json",
+        )
+        shutil.copy(
+            repo_root / "operations" / "templates" / "milestone_completion_report_template.md",
+            root / "operations" / "templates" / "milestone_completion_report_template.md",
+        )
 
     @staticmethod
     def _source(sha: str) -> dict[str, object]:
@@ -118,6 +135,7 @@ class LifecycleMatrixTests(unittest.TestCase):
             self._git(root, "commit", "-m", "restore exact acceptance")
 
             (root / "operations").mkdir()
+            self._copy_template_contracts(root)
             (root / "specifications").mkdir()
             (root / "specifications/model.md").write_text(
                 "### BR_001 — Goal\n\n"
@@ -161,7 +179,7 @@ class LifecycleMatrixTests(unittest.TestCase):
             with patch("operations.scripts.milestones.start.today_iso", return_value="2026-08-21"):
                 self.assertEqual(start_milestone(root, "m02", dry_run=True), [])
                 self.assertEqual(start_milestone(root, "m02", dry_run=False), [])
-            self._git(root, "add", "milestones.md")
+            self._git(root, "add", "milestones.md", "work/acceptance/m02_final_report.md")
             self._git(root, "commit", "-m", "start m02")
             m02_started = self._git(root, "rev-parse", "HEAD")
 

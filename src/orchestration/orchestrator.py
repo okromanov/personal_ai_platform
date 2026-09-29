@@ -8,7 +8,7 @@ RuntimePort is the only place a concrete agent environment appears.
 """
 
 from src.channels.base import Channel, TaskMessage
-from src.observability import (
+from src.observability.task_events import (
     TaskEventResult,
     TaskEventSink,
     TaskEventType,

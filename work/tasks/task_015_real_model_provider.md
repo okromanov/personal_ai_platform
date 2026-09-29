@@ -5,14 +5,15 @@ title: Реальный поставщик модели для ARC_CMP_004
 component: ARC_CMP_004
 delivery_role: terminal_outcome
 work_state: planned
-version: 1.4
-updated: 2026-08-30
+version: 1.5
+updated: 2026-09-26
 next_actor: agent
 owner_action: none
 depends_on:
   - TASK_014
 allowed_paths:
   - work/tasks/task_015_real_model_provider.md
+  - adr/adr_005_first_model_provider_selection.md
 traces_to:
   - m02
 decides:

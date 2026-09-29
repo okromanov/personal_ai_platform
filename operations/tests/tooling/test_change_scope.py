@@ -292,7 +292,9 @@ class DocumentMetadataNegativeTests(unittest.TestCase):
         )
         errors = validate_document_metadata(root, base, head, ["work/tasks/task_001.md"])
         self.assertTrue(
-            any("updated=2026-09-20" in error and "фактически менялся" in error for error in errors),
+            any(
+                "updated=2026-09-20" in error and "фактически менялся" in error for error in errors
+            ),
             errors,
         )
 

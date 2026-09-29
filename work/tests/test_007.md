@@ -5,8 +5,8 @@ title: "ARC_CMP_001 — Каналы: нормализация входа для
 spec_state: current
 execution: automated
 automated_evidence: quality_suite
-version: 2.1
-updated: 2026-09-04
+version: 2.2
+updated: 2026-09-26
 accepts:
   - m02
 traces_to:
@@ -18,7 +18,7 @@ traces_to:
 depends_on: []
 ---
 
-# TEST_ARC_CMP_001_IMPLEMENTATION — Каналы: нормализация входа для Telegram
+# TEST_007 — ARC_CMP_001 — Каналы: нормализация входа для Telegram
 
 ## 1. Назначение
 

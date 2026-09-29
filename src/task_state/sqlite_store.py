@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from src.channels.base import TaskMessage, TaskState
-from src.observability import (
+from src.observability.task_events import (
     TaskEventResult,
     TaskEventSink,
     TaskEventType,
@@ -68,9 +68,6 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                     checkpoint_data_json TEXT,
                     retry_count INTEGER NOT NULL DEFAULT 0,
                     cancelled INTEGER NOT NULL DEFAULT 0 CHECK (cancelled IN (0, 1))
-                );
-                CREATE TABLE IF NOT EXISTS executed_actions (
-                    action_id TEXT PRIMARY KEY
                 );
                 """
             )
@@ -251,17 +248,3 @@ class SQLiteTaskLifecycleStore(TaskLifecycleStore):
                 (task_id,),
             )
         self._emit(task_id, TaskEventType.STATE_TRANSITION, "cancel_task")
-
-    def has_executed(self, action_id: str) -> bool:
-        with self._connection() as connection:
-            row = connection.execute(
-                "SELECT 1 FROM executed_actions WHERE action_id = ?", (action_id,)
-            ).fetchone()
-        return row is not None
-
-    def mark_executed(self, action_id: str) -> None:
-        with self._connection() as connection:
-            connection.execute(
-                "INSERT INTO executed_actions (action_id) VALUES (?) ON CONFLICT(action_id) DO NOTHING",
-                (action_id,),
-            )

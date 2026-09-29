@@ -5,8 +5,8 @@ title: Корреляция структурированных событий з
 component: ARC_CMP_007
 delivery_role: component
 work_state: planned
-version: 1.4
-updated: 2026-09-09
+version: 1.6
+updated: 2026-09-27
 depends_on:
   - TASK_017
 next_actor: agent

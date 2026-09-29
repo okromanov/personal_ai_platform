@@ -4,8 +4,8 @@ type: task
 title: Реализация ARC_CMP_001
 component: ARC_CMP_001
 work_state: completed
-version: 2.1
-updated: 2026-08-30
+version: 2.2
+updated: 2026-09-26
 next_actor: none
 owner_action: none
 depends_on:
@@ -71,12 +71,12 @@ polling) нет. Живой бот не настроен и не запущен.
 
 ## 7. Проверки и доказательства
 
-Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_007`](../tests/test_007.md): 16 юнит-тестов [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`.
+Автоматическая проверка подтверждает, что все изменённые пути входят в `allowed_paths`. Требования компонента проверяет [`TEST_007`](../tests/test_007.md): 17 юнит-тестов [`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py), часть обязательного gate `Quality skills`.
 
 ## 8. Готово когда
 
 - ✅ Все шаги плана выполнены
-- ✅ Локальные проверки успешны ([`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py): 16/16 тестов прошли, часть CI gate)
+- ✅ Локальные проверки успешны ([`operations/tests/product/test_channels.py`](../../operations/tests/product/test_channels.py): 17/17 тестов прошли, часть CI gate)
 - ✅ Pre-commit валидация успешна
 - ✅ CI успешен
 - ✅ Код review (смысловая проверка) пройден

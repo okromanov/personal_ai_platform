@@ -2,8 +2,8 @@
 id: operations_local_development_windows
 type: operations_guide
 document_state: current
-version: 1.2
-updated: 2026-09-04
+version: 1.3
+updated: 2026-09-26
 traces_to:
   - ADR_001
 ---
@@ -28,7 +28,7 @@ traces_to:
 Нужны:
 
 - Git for Windows;
-- Python 3.12+, соответствующий зафиксированному кандидату [`ADR_001`](../adr/adr_001_language_and_runtime.md), который станет `accepted` только при принятии [`m01`](../milestones.md#m01);
+- Python 3.12+, соответствующий принятому [`ADR_001`](../adr/adr_001_language_and_runtime.md) (`accepted` при завершении [`m01`](../milestones.md#m01));
 - PowerShell 5.1+ или современный PowerShell;
 - доступ к приватному репозиторию GitHub.
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
@@ -214,6 +215,9 @@ RECOVERY_CONFIRMATION_PHRASE = "REMOVE STALE OWNER CONTROL LOCK"
 
 
 def _process_is_alive(pid: int) -> bool:
+    """Fail-closed check: return True unless we can prove the PID is dead."""
+    if sys.platform == "win32":
+        return _process_is_alive_windows(pid)
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -223,6 +227,35 @@ def _process_is_alive(pid: int) -> bool:
         # than guess it's safe to remove the lock out from under it.
         return True
     return True
+
+
+def _process_is_alive_windows(pid: int) -> bool:
+    """Windows implementation using OpenProcess/GetExitCodeProcess.
+
+    `os.kill(pid, 0)` on Windows may call TerminateProcess depending on the
+    runtime; this avoids that risk and still fails closed on access-denied.
+    """
+    import ctypes
+
+    kernel32 = ctypes.windll.kernel32
+    # PROCESS_QUERY_LIMITED_INFORMATION
+    handle = kernel32.OpenProcess(0x1000, False, pid)
+    if not handle:
+        err = kernel32.GetLastError()
+        # ERROR_INVALID_PARAMETER (87) → PID does not exist.
+        if err == 87:
+            return False
+        # ERROR_ACCESS_DENIED (5) → exists but we cannot query it; fail closed.
+        return True
+    try:
+        exit_code = ctypes.c_ulong()
+        if kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+            # STILL_ACTIVE (259)
+            return exit_code.value == 259
+        # Query failed despite handle; fail closed.
+        return True
+    finally:
+        kernel32.CloseHandle(handle)
 
 
 def recover_stale_sensitive_action_lock(

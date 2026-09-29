@@ -3,11 +3,11 @@
   <desc id="desc">Строгая вертикальная схема логических компонентов, архитектурных потоков и компонентов размещения Personal AI Platform.</desc>
   <!-- diagram-metadata
   diagram_id: personal_ai_platform_architecture
-  diagram_version: 1.29
-  generated_at: 2026-09-19T11:50:28+00:00
+  diagram_version: 1.30
+  generated_at: 2026-09-27T12:00:00+00:00
   status: current
   source: specifications/architecture_baseline.md@1.7
-  source: specifications/system_specification.md@1.5
+  source: specifications/system_specification.md@1.6
   source: specifications/infrastructure_baseline.md@1.3
   id: ARC_CMP_001
   id: ARC_CMP_002
@@ -114,7 +114,7 @@
   <!-- Header -->
   <text x="80" y="44" class="title">Personal AI Platform — общая архитектура</text>
   <text x="80" y="72" class="subtitle">Логические компоненты, потоки и компоненты размещения</text>
-  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.29 · Обновлено 2026-09-19 11:50 UTC</text>
+  <text x="1500" y="90" text-anchor="end" class="gate-note" data-diagram-meta="version">Версия 1.30 · Обновлено 2026-09-27 12:00 UTC</text>
   <line x1="80" y1="100" x2="1500" y2="100" stroke="#D7DCE2"/>
 
   <!-- Vertical legend -->

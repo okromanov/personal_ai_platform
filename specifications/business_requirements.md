@@ -2,8 +2,8 @@
 id: business_requirements
 type: business_requirements
 document_state: current
-version: 1.1
-updated: 2026-09-15
+version: 1.2
+updated: 2026-09-26
 depends_on:
   - project_rules
 ---

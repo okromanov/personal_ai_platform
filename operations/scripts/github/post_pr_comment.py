@@ -111,7 +111,7 @@ def main() -> int:
         output_path = root / output_path
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(comment)
+    output_path.write_text(comment, encoding="utf-8")
     print(f"PR comment written to {output_path.relative_to(root)}")
 
     return 0

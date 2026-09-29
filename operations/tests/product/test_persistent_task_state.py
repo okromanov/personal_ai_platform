@@ -27,7 +27,6 @@ class SQLiteTaskLifecycleStoreTests(unittest.TestCase):
             first.checkpoint("task-1", "tool_called", {"tool": "search"})
             self.assertEqual(first.increment_retry("task-1"), 1)
             first.cancel("task-1")
-            first.mark_executed("send-message:task-1")
 
             restored = SQLiteTaskLifecycleStore(database_path)
             loaded_message = restored.load_task("task-1")
@@ -44,7 +43,6 @@ class SQLiteTaskLifecycleStoreTests(unittest.TestCase):
             self.assertEqual(state.checkpoint.data, {"tool": "search"})
             self.assertEqual(state.retry_count, 1)
             self.assertTrue(state.cancelled)
-            self.assertTrue(restored.has_executed("send-message:task-1"))
 
     def test_unknown_task_keeps_default_state_after_restart(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
