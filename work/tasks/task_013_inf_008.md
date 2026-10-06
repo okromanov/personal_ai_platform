@@ -4,12 +4,12 @@ type: task
 title: Реализация INF_CMP_008
 component: INF_CMP_008
 work_state: in-progress
-version: 2.9
-updated: 2026-09-04
+version: 2.10
+updated: 2026-10-06
 next_actor: agent
 owner_action: none
 owner_followups:
-  - "[open] Предоставить evidence практического развёртывания по Hetzner, одной альтернативе сценария A (DigitalOcean или OVHcloud) и Selectel для выбора площадки размещения."
+  - "[open] Подтвердить у Hetzner, DigitalOcean и OVHcloud (сценарий A) регистрацию, приём доступной карты и необходимость VPN; платная VM создаётся только у победителя, Selectel (сценарий B) — без live-деплоя до завершения сценария A."
 depends_on:
   - TASK_012
 allowed_paths:
@@ -38,14 +38,14 @@ implements:
 
 ## 3. Где мы сейчас
 
-[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются Hetzner и DigitalOcean (сценарий A) для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), Selectel оценивается отдельно как резервный сценарий B, и совместимая стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: окончательное решение по сценарию A будет принято после единой scorecard, проверки доступной
-владельцу оплаты и практического deployment победителя; сценарий B остаётся в бэклоге до завершения сценария A и создания резервной копии. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
+[`TASK_012`](task_012_inf_007.md) завершена, поэтому эта TASK стала текущей. Сейчас сравниваются Hetzner, DigitalOcean и OVHcloud (сценарий A) для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md), Selectel оценивается отдельно как резервный сценарий B, и совместимая стратегия управления runtime-секретами для [`ADR_009`](../../adr/adr_009_secret_management_strategy.md). Оба ADR остаются `proposed`: окончательное решение по сценарию A будет принято после единой scorecard, проверки доступной
+владельцу оплаты практической проверки доступа ко всем трём кандидатам и deployment победителя; сценарий B остаётся в бэклоге до завершения сценария A и создания резервной копии. После решения будут зафиксированы требования к воспроизводимому развёртыванию, health-check и откату по [`INF_REQ_010`](../../specifications/infrastructure_baseline.md#inf_req_010), [`INF_REQ_011`](../../specifications/infrastructure_baseline.md#inf_req_011) и [`INF_REQ_014`](../../specifications/infrastructure_baseline.md#inf_req_014).
 
 ## 4. Что делать сейчас
 
 ### Агенту
 
-1. На одной scorecard сравнить Hetzner и DigitalOcean (сценарий A), отдельно оценить Selectel (сценарий B), вместе с совместимыми способами хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+1. На одной scorecard сравнить Hetzner, DigitalOcean и OVHcloud (сценарий A), отдельно оценить Selectel (сценарий B), вместе с совместимыми способами хранения runtime-секретов; представить владельцу рекомендации для [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
 2. После решения владельца зафиксировать выбранные варианты и обоснование в обоих ADR
 3. Дополнить `allowed_paths` фактическими путями реализации
 4. Реализовать идентифицируемое развёртывание, контрольную проверку и откат
@@ -53,7 +53,7 @@ implements:
 
 ## 5. План выполнения
 
-- [ ] Сравнить Hetzner/DigitalOcean (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
+- [ ] Сравнить Hetzner/DigitalOcean/OVHcloud (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](../../adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](../../adr/adr_009_secret_management_strategy.md)
 - [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
@@ -97,4 +97,4 @@ implements:
 
 ## Незакрытые действия владельца
 
-Предоставить evidence практического развёртывания по Hetzner, одной альтернативе сценария A (DigitalOcean или OVHcloud) и Selectel для выбора площадки размещения.
+Подтвердить у Hetzner, DigitalOcean и OVHcloud (сценарий A) регистрацию, приём доступной карты и необходимость VPN; платная VM создаётся только у победителя, Selectel (сценарий B) — без live-деплоя до завершения сценария A.
