@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-09-29T20:37:00+03:00
+generated_at: 2026-10-06T18:13:00+00:00
 version: 1.0
 ---
 
@@ -66,7 +66,7 @@ version: 1.0
 
 ## Шаги текущей работы
 
-- [ ] Сравнить Hetzner/DigitalOcean (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](adr/adr_009_secret_management_strategy.md)
+- [ ] Сравнить Hetzner/DigitalOcean/OVHcloud (сценарий A) и оценить Selectel (сценарий B) вместе с runtime-secret вариантами; подготовить решения [`ADR_007`](adr/adr_007_cloud_provider_selection.md) и [`ADR_009`](adr/adr_009_secret_management_strategy.md)
 - [ ] Получить решение владельца и обновить оба ADR
 - [ ] Дополнить allowed_paths реальными путями
 - [ ] Реализовать развёртывание, контрольную проверку и откат
@@ -96,7 +96,7 @@ version: 1.0
 
 > Эти пункты не блокируют работу агента и не требуют немедленного ответа — они остаются здесь, пока вы их не закроете, независимо от того, что сама задача уже сдана.
 
-- [`TASK_013`](work/tasks/task_013_inf_008.md): Предоставить evidence практического развёртывания по Hetzner, одной альтернативе сценария A (DigitalOcean или OVHcloud) и Selectel для выбора площадки размещения.
+- [`TASK_013`](work/tasks/task_013_inf_008.md): Подтвердить у Hetzner, DigitalOcean и OVHcloud (сценарий A) регистрацию, приём доступной карты и необходимость VPN; платная VM создаётся только у победителя, Selectel (сценарий B) — без live-деплоя до завершения сценария A.
 
 ## Что будет дальше
 
