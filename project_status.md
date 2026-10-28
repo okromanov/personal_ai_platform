@@ -3,7 +3,7 @@
 id: project_status_current
 type: generated_owner_status
 generation_state: generated
-generated_at: 2026-10-06T18:13:00+00:00
+generated_at: 2026-10-28T22:22:00+00:00
 version: 1.0
 ---
 
@@ -89,7 +89,7 @@ version: 1.0
 | Критичность | critical: **1**, high: **10**, medium: **33**, low: **23** |
 | Состояние критических замечаний | критических незакрытых замечаний нет |
 | Последний подтверждённый Project check | для текущей редакции не подтверждён в репозитории — проверьте Project check в GitHub Actions |
-| Ближайшая дата проверки | **2026-10-25** |
+| Ближайшая дата проверки | **2026-11-27** |
 | Полное описание и доказательства | [`work/audit/audit_register.md`](work/audit/audit_register.md) |
 
 ## Незакрытые действия владельца (необязательные)
