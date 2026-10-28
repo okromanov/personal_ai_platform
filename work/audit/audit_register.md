@@ -2,8 +2,8 @@
 id: audit_register
 type: audit_register
 document_state: current
-version: 2.17
-updated: 2026-09-29
+version: 2.18
+updated: 2026-10-28
 depends_on: []
 ---
 
@@ -85,7 +85,7 @@ depends_on: []
 | [AUD-057](audit_baseline_2026_09_25.md#aud-057) | low | resolved | 2026-09-25 | — | repository_owner | [`task_015_real_model_provider.md`](../tasks/task_015_real_model_provider.md) | [`adr/adr_005_first_model_provider_selection.md`](../../adr/adr_005_first_model_provider_selection.md) добавлен в `allowed_paths` TASK_015. |
 | [AUD-058](audit_baseline_2026_09_25.md#aud-058) | low | resolved | 2026-09-25 | — | repository_owner | [PR #165](https://github.com/okromanov/personal_ai_platform/pull/165), [`setup_precommit.md`](../../operations/setup_precommit.md) | Документ переименован в «Git Hook Setup», описаны пять шагов pre-commit и pre-push hook, удалена недостоверная оценка времени, команды явно привязаны к Git Bash на Windows. |
 | [AUD-059](audit_baseline_2026_09_25.md#aud-059) | low | resolved | 2026-09-25 | — | repository_owner | [`sample_task_lifecycle.md`](../../operations/examples/sample_task_lifecycle.md) | Мёртвые ссылки исправлены: [`procedure_map.md`](../../operations/procedure_map.md) → [`operations/procedure_map.md`](../../operations/procedure_map.md), `work/evidence/` → `work/audit/evidence/`. |
-| [AUD-060](audit_baseline_2026_09_25.md#aud-060) | low | open | 2026-09-25 | 2026-10-25 | repository_owner | [`test_security_extended.py`](../../operations/tests/test_security_extended.py), [`TEST_020`](../tests/test_020.md), [`task_016_real_telegram.md`](../tasks/task_016_real_telegram.md) | Interim-проверка фраз в карточке TASK_016 остаётся interim до реализации TASK_016; поведенческий тест spoofed-owner-id требует реального Telegram-адаптера. Требуется решение владельца: принять риск до TASK_016 или ускорить TASK_016. |
+| [AUD-060](audit_baseline_2026_09_25.md#aud-060) | low | open | 2026-09-25 | 2026-11-27 | repository_owner | [`test_security_extended.py`](../../operations/tests/test_security_extended.py), [`TEST_020`](../tests/test_020.md), [`task_016_real_telegram.md`](../tasks/task_016_real_telegram.md) | Interim-проверка фраз в карточке TASK_016 остаётся interim до реализации TASK_016; поведенческий тест spoofed-owner-id требует реального Telegram-адаптера. Решение владельца 2026-10-28: риск принят до реализации TASK_016 (реального Telegram-адаптера ещё нет); находка закрывается поведенческим тестом в TASK_016. |
 | [AUD-061](audit_baseline_2026_09_25.md#aud-061) | low | resolved | 2026-09-25 | — | repository_owner | [`threat_model.md`](../../specifications/threat_model.md), [`system_specification.md`](../../specifications/system_specification.md) | SEC_CTL_018 оставлен каноническим в [`system_specification.md`](../../specifications/system_specification.md); [`threat_model.md`](../../specifications/threat_model.md) ссылается на него вместо дублирования текста. |
 | [AUD-062](audit_baseline_2026_09_25.md#aud-062) | low | resolved | 2026-09-25 | — | repository_owner | [`src/task_state/base.py`](../../src/task_state/base.py), [`src/task_state/store.py`](../../src/task_state/store.py), [`src/task_state/sqlite_store.py`](../../src/task_state/sqlite_store.py), [`test_task_state.py`](../../operations/tests/product/test_task_state.py), [`test_persistent_task_state.py`](../../operations/tests/product/test_persistent_task_state.py) | Мёртвый API `has_executed`/`mark_executed` удалён из базового класса, in-memory и SQLite-реализаций; связанные тесты убраны. |
 | [AUD-063](audit_baseline_2026_09_25.md#aud-063) | low | resolved | 2026-09-25 | — | repository_owner | [`health.py`](../../src/operations/health.py), [`test_operations_state.py`](../../operations/tests/product/test_operations_state.py) | `HealthAggregator` теперь возвращает `type(exc).__name__` вместо `str(exc)`; тест проверяет отсутствие текста исключения в `detail`. |
